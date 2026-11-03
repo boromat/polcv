@@ -2,6 +2,7 @@
 export const career: Record<string, string> = {
   // components/ui.tsx: komponenty wspólne
   'AI pracuje - zwykle trwa to 15–60 sekund.': 'The AI is working, this usually takes 15-60 seconds.',
+  'Jeszcze pracuję - to może potrwać do ok. 3 minut. Nie zamykaj tej strony.': 'Still working, this can take up to about 3 minutes. Please do not close this page.',
   Zamknij: 'Close',
   'brak oceny': 'not scored',
 

@@ -36,6 +36,13 @@ export function HistoryPage() {
     load();
   };
 
+  // Wiersz otwiera się kliknięciem myszą; z klawiatury i środkowym przyciskiem działa link w tytule.
+  const openRow = (e: React.MouseEvent, id: string) => {
+    if ((e.target as Element).closest('a, button, select, input, textarea, label')) return;
+    if (window.getSelection()?.toString()) return; // zaznaczanie tekstu to nie kliknięcie
+    nav(`/app/${id}`);
+  };
+
   const shown = apps?.filter((a) => !filter || a.status === filter) ?? [];
   const counts = Object.fromEntries(STATUSES.map((s) => [s, apps?.filter((a) => a.status === s).length ?? 0]));
   const total = apps?.reduce((s, a) => s + a.costUsd, 0) ?? 0;
@@ -95,13 +102,15 @@ export function HistoryPage() {
                 </thead>
                 <tbody>
                   {shown.map((a) => (
-                    <tr key={a.id} className="clickable" onClick={() => nav(`/app/${a.id}`)}>
+                    <tr key={a.id} className="clickable" onClick={(e) => openRow(e, a.id)}>
                       <td className="nowrap">{fmtDate(a.createdAt)}</td>
                       <td>
-                        <b>{a.posting?.title ?? '-'}</b>
+                        <Link to={`/app/${a.id}`} className="row-link">
+                          {a.posting?.title ?? '-'}
+                        </Link>
                         {a.url && (
                           <div>
-                            <a href={a.url} target="_blank" rel="noreferrer" className="faint" onClick={(e) => e.stopPropagation()}>
+                            <a href={a.url} target="_blank" rel="noreferrer" className="faint">
                               {t('ogłoszenie')} ↗
                             </a>
                           </div>

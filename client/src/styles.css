@@ -12,6 +12,8 @@
   --accent-hover: #2449c4;
   --accent-soft: #eaf0ff;
   --good: #1f8a4c;
+  /* tekst na --good-soft i białym: --good ma tam tylko 3.9:1 i 4.4:1; --good zostaje dla pasków, pierścienia i ikon */
+  --good-text: #18733f;
   --good-soft: #e6f6ec;
   --warn: #b26b00;
   /* tekst na --warn-soft: --warn ma tam tylko 3.9:1; --warn zostaje dla pasków, pierścienia i obramowań */
@@ -124,11 +126,13 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent-soft
 .callout.info { background: var(--accent-soft); border-color: #c9d6ff; }
 .callout.warn { background: var(--warn-soft); border-color: #f3d99a; }
 .callout.error { background: var(--bad-soft); border-color: #f4c0bd; color: #8d1e1b; }
+.callout.error:focus { outline: none; }
+.callout.error:focus-visible { outline: 2px solid var(--bad); outline-offset: 2px; }
 .callout.good { background: var(--good-soft); border-color: #b9e2c7; }
 .callout b { font-weight: 650; }
 
 .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
-.badge.good { background: var(--good-soft); color: var(--good); border-color: #b9e2c7; }
+.badge.good { background: var(--good-soft); color: var(--good-text); border-color: #b9e2c7; }
 .badge.warn { background: var(--warn-soft); color: var(--warn-text); border-color: #f3d99a; }
 .badge.bad { background: var(--bad-soft); color: var(--bad); border-color: #f4c0bd; }
 .badge.accent { background: var(--accent-soft); color: var(--accent); border-color: #c9d6ff; }
@@ -176,6 +180,8 @@ table.table { width: 100%; border-collapse: collapse; }
 .table tr:last-child td { border-bottom: none; }
 .table tr.clickable { cursor: pointer; }
 .table tr.clickable:hover td { background: var(--surface-2); }
+.table .row-link { color: inherit; font-weight: 700; text-decoration: none; }
+.table tr.clickable:hover .row-link, .table .row-link:focus-visible { text-decoration: underline; }
 
 /* ---------- Zakładki ---------- */
 /* Linia pod zakładkami jako cień wewnętrzny: podkreślenie aktywnej zakładki leży na niej bez ujemnego marginesu,
@@ -224,7 +230,7 @@ table.table { width: 100%; border-collapse: collapse; }
 .bad-ic { color: var(--bad); }
 .fix { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 5px; }
 .fix del { color: var(--bad); text-decoration: line-through; background: var(--bad-soft); padding: 0 3px; border-radius: 3px; }
-.fix ins { color: var(--good); text-decoration: none; background: var(--good-soft); padding: 0 3px; border-radius: 3px; }
+.fix ins { color: var(--good-text); text-decoration: none; background: var(--good-soft); padding: 0 3px; border-radius: 3px; }
 
 /* ---------- Busy ---------- */
 .busy-overlay { position: fixed; inset: 0; background: rgba(244, 245, 248, 0.82); z-index: 100; display: grid; place-items: center; backdrop-filter: blur(2px); }
@@ -242,4 +248,4 @@ details > summary { cursor: pointer; font-weight: 600; }
 .pre { white-space: pre-wrap; }
 .steps { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--faint); }
 .steps .on { color: var(--accent); font-weight: 600; }
-.steps .done { color: var(--good); }
+.steps .done { color: var(--good-text); }

@@ -4,7 +4,7 @@ import type { CvVersion, GapAnswer, TemplateId } from '../../../shared/schemas';
 import { api, type AppDetail, type VersionDetail } from '../api';
 import { useApp } from '../ctx';
 import { translate, useT } from '../i18n';
-import { Busy, ErrorBox, fmtDate, openWhenReady, ScoreBadge, STATUS_LABELS, STATUSES, usd } from '../components/ui';
+import { Busy, downloadFile, ErrorBox, fmtDate, openWhenReady, ScoreBadge, STATUS_LABELS, STATUSES, usd } from '../components/ui';
 import { GapStep } from './app/GapStep';
 import { CvEditor, pendingCount } from './app/CvEditor';
 import { ReportView } from './app/ReportView';
@@ -191,7 +191,7 @@ export function ApplicationPage() {
     run(t('Zapisuję PDF…'), async () => {
       await api.exportPdf(pid, aid);
       await loadDetail();
-      window.location.href = api.downloadUrl(pid, aid);
+      downloadFile(api.downloadUrl(pid, aid));
       setNotice(t('PDF zapisany w historii i pobrany. Status zmieniono na „Wysłane” - zmień go, jeśli CV nie zostało jeszcze wysłane.'));
     });
 

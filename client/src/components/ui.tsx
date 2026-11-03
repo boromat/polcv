@@ -1,5 +1,8 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { getLang, useT } from '../i18n';
+
+/** Po tylu sekundach podpowiedź o zwykłym czasie pracy AI przestaje być prawdą. */
+const LONG_WAIT_S = 60;
 
 export function Busy({ message, hint }: { message: string; hint?: string }) {
   const { t } = useT();
@@ -8,26 +11,65 @@ export function Busy({ message, hint }: { message: string; hint?: string }) {
     const timer = setInterval(() => setSec((s) => s + 1), 1000);
     return () => clearInterval(timer);
   }, []);
+  // Zamknięcie lub odświeżenie karty w trakcie pracy pyta o potwierdzenie (wynik AI by przepadł).
+  useEffect(() => {
+    const leave = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener('beforeunload', leave);
+    return () => window.removeEventListener('beforeunload', leave);
+  }, []);
+  // Kolejne kroki (np. pisanie i ocena CV) liczą się razem, więc po minucie zastępujemy też podpowiedź kroku.
+  const text = sec >= LONG_WAIT_S ? t('Jeszcze pracuję - to może potrwać do ok. 3 minut. Nie zamykaj tej strony.') : (hint ?? t('AI pracuje - zwykle trwa to 15–60 sekund.'));
   return (
     <div className="busy-overlay" role="status" aria-live="polite">
       <div className="busy-box">
         <div className="spinner" />
         <h3>{message}</h3>
-        <p className="muted small">{hint ?? t('AI pracuje - zwykle trwa to 15–60 sekund.')}</p>
+        <p className="muted small">{text}</p>
         <p className="faint">{sec} s</p>
       </div>
     </div>
   );
 }
 
+/** Czy fokus jest w polu, w którym się pisze (tam go nie zabieramy, żeby nie gubić znaków). */
+function typingIn(el: Element | null) {
+  if (el instanceof HTMLTextAreaElement) return true;
+  if (el instanceof HTMLInputElement) return !['button', 'submit', 'reset', 'checkbox', 'radio', 'file', 'range', 'color', 'image'].includes(el.type);
+  return el instanceof HTMLElement && el.isContentEditable;
+}
+
 export function ErrorBox({ error, onClose }: { error: string | null; onClose?: () => void }) {
   const { t } = useT();
+  const ref = useRef<HTMLDivElement>(null);
+  const back = useRef<HTMLElement | null>(null);
+  // Błąd po długiej akcji bywa nad widocznym fragmentem strony: przewijamy do niego i przenosimy fokus.
+  useEffect(() => {
+    const el = ref.current;
+    if (!error || !el) return;
+    const active = document.activeElement;
+    if (!typingIn(active)) {
+      back.current = active instanceof HTMLElement && active !== document.body && !el.contains(active) ? active : null;
+      el.focus({ preventScroll: true });
+    }
+    const top = document.querySelector('.topbar')?.getBoundingClientRect().bottom ?? 0;
+    const r = el.getBoundingClientRect();
+    if (r.top < top || r.bottom > window.innerHeight) {
+      const smooth = !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      el.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'center' });
+    }
+  }, [error]);
   if (!error) return null;
+  // Po zamknięciu fokus wraca tam, skąd go zabraliśmy (np. na przycisk „Napisz CV”).
+  const close = () => {
+    const el = back.current;
+    onClose?.();
+    if (el?.isConnected) el.focus();
+  };
   return (
-    <div className="callout error row between" role="alert">
+    <div ref={ref} tabIndex={-1} className="callout error row between" role="alert">
       <span>{error}</span>
       {onClose && (
-        <button className="icon-btn" onClick={onClose} aria-label={t('Zamknij')}>
+        <button className="icon-btn" onClick={close} aria-label={t('Zamknij')}>
           ✕
         </button>
       )}
@@ -105,6 +147,16 @@ export async function openWhenReady(ready: Promise<unknown>, url: () => string) 
     tab.opener = null;
     tab.location.href = href;
   } else window.open(href, '_blank', 'noopener');
+}
+
+/** Pobiera plik bez opuszczania strony (przejście pod adres pliku wywołałoby pytanie z `Busy` o zamknięcie karty). */
+export function downloadFile(url: string) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '';
+  document.body.append(a);
+  a.click();
+  a.remove();
 }
 
 export const STATUS_LABELS: Record<string, string> = {
