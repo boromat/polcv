@@ -335,11 +335,11 @@ export function ApplicationPage() {
                   {detail.versions.map((v) => (
                     <option key={v.version} value={v.version}>
                       v{v.version} - {v.origin === 'improved' ? t('poprawiona') : t('wygenerowana')}
-                      {v.score != null ? ` (${v.score}/100)` : ''}
+                      {v.score != null ? ` (${v.score}/100)` : v.scoreIncomplete ? ` (${t('ocena niepełna')})` : ''}
                     </option>
                   ))}
                 </select>
-                <ScoreBadge score={vd.report?.total} />
+                <ScoreBadge score={vd.report?.total} incomplete={!!vd.report && vd.report.total == null} />
                 {vd.reportStale && <span className="badge warn">{t('ocena nieaktualna')}</span>}
                 {pages != null && tab === 'cv' && <span className={`badge ${pages > 1 ? 'warn' : ''}`}>{pagesLabel(pages)}</span>}
               </div>
@@ -369,7 +369,7 @@ export function ApplicationPage() {
               {(
                 [
                   ['cv', t('Edytor CV')],
-                  ['report', `${t('Raport ATS/AI')}${vd.report ? ` (${vd.report.total})` : ''}`],
+                  ['report', `${t('Raport ATS/AI')}${vd.report ? ` (${vd.report.total ?? t('ocena niepełna')})` : ''}`],
                   ['posting', t('Ogłoszenie')],
                   ['interview', t('Rozmowa')],
                   ['letter', t('List motywacyjny')],

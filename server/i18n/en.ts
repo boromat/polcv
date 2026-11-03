@@ -15,6 +15,8 @@ export const EN: Record<string, string> = {
   'Nie wybrano zdjęcia.': 'No photo was selected.',
   'Zdjęcie musi być w formacie JPG, PNG lub WEBP.': 'The photo must be a JPG, PNG or WEBP file.',
   'Brak zdjęcia': 'No photo',
+  'Nie udało się odczytać zdjęcia. Zapisz je jako JPG lub PNG i spróbuj ponownie.': 'The photo could not be read. Save it as a JPG or PNG and try again.',
+  'Zdjęcie jest za duże nawet po zmniejszeniu (maks. 1 MB). Wybierz inne zdjęcie.': 'The photo is still too large after shrinking it (max. 1 MB). Choose a different photo.',
   'Nieprawidłowy numer wersji': 'Invalid version number',
   'Nieznany status': 'Unknown status',
   'Niepoprawne odpowiedzi': 'Invalid answers',
@@ -40,6 +42,8 @@ export const EN: Record<string, string> = {
   'Nie znam / nie mam doświadczenia.': "I don't know it / I have no experience with it.",
   'Brak przeanalizowanego ogłoszenia.': 'There is no analysed job posting.',
   'Nie udało się uzyskać oceny AI.': 'Could not get the AI review.',
+  'AI nie oceniło wszystkich kryteriów, więc ta część wyniku została pominięta. Oceń CV ponownie.':
+    'The AI did not rate every criterion, so this part of the score was left out. Score the CV again.',
   'Najpierw wygeneruj CV.': 'Generate the CV first.',
   'Zatwierdź albo odrzuć {n} sugestie (żółte fragmenty), zanim pobierzesz PDF.':
     'Accept or reject the remaining suggestions ({n}, highlighted in yellow) before you download the PDF.',
@@ -127,6 +131,7 @@ export const EN: Record<string, string> = {
   'Brak imienia i nazwiska w profilu - uzupełnij je.': 'Your profile has no full name. Please add it.',
   'Adres e-mail': 'Email address',
   'Odczytany poprawnie.': 'Read correctly.',
+  'Nie znaleziono w tekście odczytanym z PDF.': 'Not found in the text read from the PDF.',
   'Brak e-maila w profilu - ATS nie będzie mógł się z Tobą skontaktować.':
     'Your profile has no email address, so the ATS will have no way to contact you.',
   'Numer telefonu': 'Phone number',

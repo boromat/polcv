@@ -1,4 +1,4 @@
-import type { CvVersion, JobPosting, Profile } from '../shared/schemas';
+import type { AiReview, CvContent, CvVersion, JobPosting, Profile } from '../shared/schemas';
 
 // Fikcyjna osoba i ogłoszenie - tylko do testów.
 
@@ -101,4 +101,36 @@ export const cv: CvVersion = {
     interests: [],
     notes: '',
   },
+};
+
+/** Puste CV po polsku: przypadki testowe dokładają tylko potrzebne pola. */
+export const blankContent: CvContent = {
+  language: 'pl',
+  headline: '',
+  summary: { id: 'sum', text: '', status: 'fact', reason: '', fallbackText: '', sourceIds: [] },
+  sectionOrder: ['summary', 'experience', 'projects', 'education', 'skills', 'certificates', 'languages', 'interests'],
+  experience: [],
+  projects: [],
+  education: [],
+  skills: [],
+  certificates: [],
+  languages: [],
+  interests: [],
+  notes: '',
+};
+
+/** Pełna ocena AI: 7, 5, 7, 8, 8 → 28/40. */
+export const review: AiReview = {
+  criteria: [
+    { key: 'must_have_match', score: 7, comment: '' },
+    { key: 'achievements', score: 5, comment: '' },
+    { key: 'summary_fit', score: 7, comment: '' },
+    { key: 'clarity', score: 8, comment: '' },
+    { key: 'red_flags', score: 8, comment: '' },
+  ],
+  strengths: [],
+  weaknesses: [],
+  fixes: [],
+  wouldInterview: 'raczej tak',
+  verdict: '',
 };

@@ -21,6 +21,20 @@ const verdictLabels = (t: T): Record<string, string> => ({
   nie: t('nie'),
 });
 
+// Sekcje CV, w których znaleziono słowo kluczowe.
+const whereLabels = (t: T): Record<string, string> => ({
+  summary: t('podsumowanie'),
+  experience: t('doświadczenie'),
+  projects: t('projekty'),
+  education: t('wykształcenie'),
+  certificates: t('certyfikaty'),
+  languages: t('języki'),
+  skills: t('umiejętności'),
+  headline: t('nagłówek'),
+  technologies: t('technologie projektu'),
+  interests: t('zainteresowania'),
+});
+
 function Meter({ label, value, max, hint }: { label: string; value: number; max: number; hint: string }) {
   const pct = Math.round((value / max) * 100);
   return (
@@ -70,6 +84,11 @@ export function ReportView({
   const verdictTone = review ? (positive ? 'good' : 'bad') : '';
   const CRITERIA = criteria(t);
   const VERDICTS = verdictLabels(t);
+  const WHERE = whereLabels(t);
+  // Bez części AI nie ma wyniku łącznego; pokazujemy tylko punkty, które da się policzyć.
+  const total = r.total;
+  const partial = r.keywords.score + r.format.score;
+  const partialMax = r.keywords.max + r.format.max;
 
   return (
     <div className="stack lg">
@@ -85,12 +104,17 @@ export function ReportView({
       <div className="card">
         <div className="grid2" style={{ alignItems: 'center' }}>
           <div className="score-big">
-            <div className="score-ring" style={{ ['--v' as any]: r.total, ['--c' as any]: scoreColor(r.total) }}>
-              <div>{r.total}</div>
+            <div className="score-ring" style={{ ['--v' as any]: total ?? 0, ['--c' as any]: total == null ? 'var(--faint)' : scoreColor(total) }}>
+              <div>{total ?? '?'}</div>
             </div>
             <div className="stack" style={{ gap: 6 }}>
               <h2>{t('Ocena łączna')}</h2>
-              {!r.ai && <span className="badge warn" style={{ alignSelf: 'flex-start' }}>{t('niepełna - bez oceny AI')}</span>}
+              {total == null && <span className="badge warn" style={{ alignSelf: 'flex-start' }}>{t('niepełna - bez oceny AI')}</span>}
+              {total == null && (
+                <p className="small muted">
+                  {t('Bez oceny AI nie ma wyniku łącznego. Słowa kluczowe i format: {got}/{max} pkt.', { got: partial, max: partialMax })}
+                </p>
+              )}
               {review && (
                 <span className={`badge ${verdictTone}`} style={{ alignSelf: 'flex-start' }}>
                   {t('AI-rekruter:')} {positive ? t('zaprosiłby na rozmowę') : t('raczej nie zaprosiłby')} ({VERDICTS[review.wouldInterview] ?? review.wouldInterview})
@@ -125,17 +149,29 @@ export function ReportView({
       <div className="card stack">
         <h2>{t('Słowa kluczowe z ogłoszenia')}</h2>
         <p className="muted small">
-          {t('Filtr ATS szuka w CV konkretnych słów z ogłoszenia. Wymagane liczą się 3× mocniej niż mile widziane. Polskie odmiany i skróty są rozpoznawane.')}
+          {t('Filtr ATS szuka w CV konkretnych słów z ogłoszenia. Wymagane liczą się 3× mocniej niż mile widziane, kompetencje miękkie zawsze 1×. Polskie odmiany i skróty są rozpoznawane, a klauzula RODO się nie liczy.')}
         </p>
         <div>
           <b className="small">{t('Znalezione ({n})', { n: r.keywords.matched.length })}</b>
           <div className="chips" style={{ marginTop: 6 }}>
-            {r.keywords.matched.map((k) => (
-              <span key={k.term} className="badge good" title={t('Znalezione jako „{term}”', { term: k.foundAs })}>
-                ✓ {k.term} {k.count > 1 && <span className="faint">×{k.count}</span>}
-              </span>
-            ))}
+            {r.keywords.matched.map((k) => {
+              // Starsze raporty nie mają sekcji ani punktacji częściowej: wtedy pełne punkty.
+              const credit = k.credit ?? 1;
+              const where = (k.where ?? []).map((w) => WHERE[w] ?? w).join(', ');
+              return (
+                <span key={k.term} className={`badge ${credit >= 1 ? 'good' : 'warn'}`} title={t('Znalezione jako „{term}”', { term: k.foundAs })}>
+                  {credit >= 1 ? '✓' : credit > 0 ? '½' : '0'} {k.term} {k.count > 1 && <span className="faint">×{k.count}</span>}
+                  {where && <span className="faint">({where})</span>}
+                </span>
+              );
+            })}
           </div>
+          {r.keywords.matched.some((k) => (k.credit ?? 1) < 1) && (
+            <p className="faint" style={{ marginTop: 6 }}>
+              {t('½ - słowo jest tylko na liście umiejętności, w nagłówku albo w technologiach projektu. Pełne punkty daje użycie w opisie doświadczenia, projektu, wykształcenia lub w podsumowaniu.')}{' '}
+              {r.keywords.matched.some((k) => k.credit === 0) && t('0 - kompetencja miękka bez przykładu w opisie doświadczenia lub projektu.')}
+            </p>
+          )}
         </div>
         {r.keywords.missing.length > 0 && (
           <div>

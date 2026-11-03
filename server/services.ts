@@ -13,7 +13,7 @@ import { evaluateCv } from './llm/prompts/evaluateCv';
 import { coverLetter, interviewPrep } from './llm/prompts/extras';
 import { applyDecisions } from './llm/prompts/common';
 import { decideLanguage, decidePhoto, decideRodo } from './cv/rodo';
-import { photoDataUri, renderCvHtml, renderLetterHtml, type RenderMode } from './cv/render';
+import { photoDataUri, renderCvHtml, renderLetterHtml, withoutPending, type RenderMode } from './cv/render';
 import { htmlToPdf } from './cv/pdf';
 import { buildReport } from './ats/score';
 import { countPhrase, normalize, tokenize } from './ats/keywords';
@@ -221,7 +221,8 @@ export async function evaluate(profileId: string, appId: string, v: number) {
   // Czas sprzed odczytu CV: poprawka zapisana w trakcie oceny oznaczy raport jako nieaktualny.
   const startedAt = nowIso();
   const [profile, cv] = await Promise.all([store.getProfile(profileId), store.getVersion(profileId, appId, v)]);
-  const { text, pages } = await htmlToPdf(await renderCv(profile, cv, 'pdf'));
+  // Oceniamy tylko to, co kandydat potwierdził: oczekujące sugestie w wersji bezpiecznej (tryb 'ats').
+  const { text, pages } = await htmlToPdf(await renderCv(profile, cv, 'ats'));
 
   let review = null;
   let aiError = '';
@@ -232,7 +233,20 @@ export async function evaluate(profileId: string, appId: string, v: number) {
     if (e instanceof HttpError && [400, 401, 402, 503].includes(e.status)) throw e;
     aiError = e.message || tr('Nie udało się uzyskać oceny AI.');
   }
-  const report = { ...buildReport({ version: v, pdfText: text, pages, cv: applyDecisions(cv), profile, posting: app.posting, review, aiError }), createdAt: startedAt };
+  const report = {
+    ...buildReport({
+      version: v,
+      pdfText: text,
+      pages,
+      cv: applyDecisions(withoutPending(cv)),
+      clause: cv.rodo.include ? cv.rodo.text : '',
+      profile,
+      posting: app.posting,
+      review,
+      aiError,
+    }),
+    createdAt: startedAt,
+  };
   await store.saveReport(profileId, appId, report);
   return report;
 }

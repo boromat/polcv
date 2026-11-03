@@ -4,6 +4,7 @@ import { ApplicationStatuses, CoverLetterSchema, CvVersionSchema, GapAnswerSchem
 import * as store from '../storage/store';
 import { HttpError } from '../storage/store';
 import * as svc from '../services';
+import { honestReport } from '../ats/score';
 import { tr } from '../i18n';
 
 export const applicationsRouter = Router();
@@ -27,10 +28,10 @@ applicationsRouter.get(base, async (req, res) => {
   const [apps, usage] = await Promise.all([store.listApplications(pid), store.readUsage()]);
   const out: ApplicationSummary[] = [];
   for (const a of apps) {
-    const report = a.currentVersion ? await store.getReport(pid, a.id, a.currentVersion) : null;
+    const report = honestReport(a.currentVersion ? await store.getReport(pid, a.id, a.currentVersion) : null);
     const costUsd = usage.filter((u) => u.applicationId === a.id).reduce((s, u) => s + u.cost, 0);
     const { rawText, ...rest } = a;
-    out.push({ ...rest, rawText: '', costUsd, score: report?.total ?? null });
+    out.push({ ...rest, rawText: '', costUsd, score: report?.total ?? null, scoreIncomplete: !!report && report.total === null });
   }
   res.json(out);
 });
@@ -44,7 +45,7 @@ applicationsRouter.get(`${base}/:aid`, async (req, res) => {
   const { pid, aid } = req.params;
   const app = await store.getApplication(pid, aid);
   const [versions, usage, profile] = await Promise.all([store.listVersions(pid, aid), store.readUsage(), store.getProfile(pid)]);
-  const reports = await Promise.all(versions.map((v) => store.getReport(pid, aid, v.version)));
+  const reports = (await Promise.all(versions.map((v) => store.getReport(pid, aid, v.version)))).map(honestReport);
   res.json({
     application: app,
     versions: versions.map((v, i) => ({
@@ -52,6 +53,7 @@ applicationsRouter.get(`${base}/:aid`, async (req, res) => {
       createdAt: v.createdAt,
       origin: v.origin,
       score: reports[i]?.total ?? null,
+      scoreIncomplete: !!reports[i] && reports[i]?.total === null,
     })),
     costUsd: usage.filter((u) => u.applicationId === aid).reduce((s, u) => s + u.cost, 0),
     hasPhoto: !!profile.photo,
@@ -116,7 +118,7 @@ applicationsRouter.get(`${base}/:aid/versions/:v`, async (req, res) => {
   const [cv, report, profile] = await Promise.all([store.getVersion(pid, aid, v), store.getReport(pid, aid, v), store.getProfile(pid)]);
   res.json({
     cv,
-    report,
+    report: honestReport(report),
     reportStale: !!report && report.createdAt < cv.updatedAt,
     pending: svc.pendingSuggestions(cv),
     unverifiedSkills: svc.unverifiedSkills(cv, profile),

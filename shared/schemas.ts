@@ -250,14 +250,26 @@ export const AiReviewSchema = z.object({
   verdict: z.string(),
 });
 
+export const KeywordWhereKeys = ['summary', 'experience', 'projects', 'education', 'certificates', 'languages', 'skills', 'headline', 'technologies', 'interests'] as const;
+
 export const AtsReportSchema = z.object({
   createdAt: z.string(),
   version: z.number(),
-  total: z.number(),
+  /** null = ocena niepełna (bez części AI); same słowa kluczowe i format nie dają wyniku łącznego */
+  total: z.number().nullable(),
   keywords: z.object({
     score: z.number(),
     max: z.number(),
-    matched: z.array(z.object({ term: z.string(), importance: z.enum(['must', 'nice']), foundAs: z.string(), count: z.number() })),
+    matched: z.array(z.object({
+      term: z.string(),
+      importance: z.enum(['must', 'nice']),
+      foundAs: z.string(),
+      count: z.number(),
+      /** sekcje CV, w których słowo występuje (brak w starszych raportach) */
+      where: z.array(z.enum(KeywordWhereKeys)).optional(),
+      /** 1 = pełne punkty, 0.5 = tylko na liście, 0 = kompetencja miękka bez przykładu (brak w starszych raportach = 1) */
+      credit: z.number().optional(),
+    })),
     missing: z.array(z.object({ term: z.string(), importance: z.enum(['must', 'nice']) })),
     stuffing: z.array(z.string()),
   }),
@@ -363,7 +375,7 @@ export type Settings = z.infer<typeof SettingsSchema>;
 export type UsageEntry = z.infer<typeof UsageEntrySchema>;
 
 /** Wpis historii z dołączonym kosztem i wynikiem - zwracany przez /api/applications. */
-export type ApplicationSummary = Application & { costUsd: number; score: number | null };
+export type ApplicationSummary = Application & { costUsd: number; score: number | null; scoreIncomplete: boolean };
 
 // ---------- Doradca kariery ----------
 

@@ -39,8 +39,10 @@ export function ErrorBox({ error, onClose }: { error: string | null; onClose?: (
 export const scoreTone = (s: number | null | undefined) => (s == null ? '' : s >= 75 ? 'good' : s >= 55 ? 'warn' : 'bad');
 export const scoreColor = (s: number) => (s >= 75 ? 'var(--good)' : s >= 55 ? 'var(--warn)' : 'var(--bad)');
 
-export function ScoreBadge({ score }: { score: number | null | undefined }) {
+/** Wynik CV; "niepełna" = raport bez części AI, czyli bez wyniku łącznego. */
+export function ScoreBadge({ score, incomplete = false }: { score: number | null | undefined; incomplete?: boolean }) {
   const { t } = useT();
+  if (score == null && incomplete) return <span className="badge warn">{t('ocena niepełna')}</span>;
   if (score == null) return <span className="badge">{t('brak oceny')}</span>;
   return <span className={`badge ${scoreTone(score)}`}>{score}/100</span>;
 }

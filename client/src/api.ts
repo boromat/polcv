@@ -77,7 +77,8 @@ export interface UsageView {
 
 export interface AppDetail {
   application: Application;
-  versions: { version: number; createdAt: string; origin: 'generated' | 'improved'; score: number | null }[];
+  /** scoreIncomplete: raport jest, ale bez części AI (brak wyniku łącznego) */
+  versions: { version: number; createdAt: string; origin: 'generated' | 'improved'; score: number | null; scoreIncomplete: boolean }[];
   costUsd: number;
   hasPhoto: boolean;
 }

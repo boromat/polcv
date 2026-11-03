@@ -2,17 +2,20 @@ import { afterAll, describe, expect, it } from 'vitest';
 import { renderCvHtml } from '../server/cv/render';
 import { htmlToPdf } from '../server/cv/pdf';
 import { closeBrowser } from '../server/cv/browser';
-import { checkFormat } from '../server/ats/formatChecks';
+import { RODO_STANDARD } from '../server/cv/rodo';
+import { checkFormat, withoutClause } from '../server/ats/formatChecks';
 import { applyDecisions } from '../server/llm/prompts/common';
 import { TemplateIds } from '../shared/schemas';
-import { cv, profile } from './fixtures';
+import { blankContent, cv, profile } from './fixtures';
 
 afterAll(() => closeBrowser());
 
+const rodo = { include: true, text: RODO_STANDARD, reason: '' };
+
 describe('PDF w obie strony (render → PDF → tekst jak w ATS)', () => {
   for (const template of TemplateIds) {
-    it(`szablon ${template}: tekst, polskie znaki, 1 strona, komplet kontroli`, async () => {
-      const version = { ...cv, template, decisions: { b2: 'accepted' as const } };
+    it(`szablon ${template}: tekst, polskie znaki, 1 strona, komplet kontroli bez klauzuli`, async () => {
+      const version = { ...cv, template, rodo, decisions: { b2: 'accepted' as const } };
       const { pdf, text: raw, pages } = await htmlToPdf(renderCvHtml(version, profile, null, 'pdf'));
       const text = raw.replace(/\s+/g, ' ');
       expect(pdf.subarray(0, 5).toString()).toBe('%PDF-');
@@ -22,13 +25,40 @@ describe('PDF w obie strony (render → PDF → tekst jak w ATS)', () => {
       expect(text).toContain('zofia.zolkiewska@example.com');
       expect(text).toContain('Doświadczenie zawodowe');
       expect(text).toContain('Zwiększenie zasięgu profilu o ok. 30%');
+      // Klauzula zawinięta w kilka linii PDF i tak jest wycinana w całości.
+      expect(withoutClause(raw, RODO_STANDARD)).not.toMatch(/Rozporządzeniem|RODO/);
 
-      const fmt = checkFormat(raw, pages, applyDecisions(version), profile);
+      // Kontrole liczone na samym CV: treść fixture'a musi je zaliczyć bez pomocy klauzuli.
+      const fmt = checkFormat(raw, pages, applyDecisions(version), profile, version.rodo.text);
       const failed = fmt.checks.filter((c) => !c.ok).map((c) => `${c.name}: ${c.detail}`);
       expect(failed).toEqual([]);
       expect(fmt.score).toBe(fmt.max);
     });
   }
+
+  it('prawie puste CV z długą klauzulą nie dostaje punktów za format', async () => {
+    const empty = { ...cv, rodo, content: { ...blankContent, summary: { ...blankContent.summary, text: 'Student.' }, sectionOrder: cv.content.sectionOrder } };
+    const { text, pages } = await htmlToPdf(renderCvHtml(empty, profile, null, 'pdf'));
+    // Wcześniej sama klauzula zaliczała "Tekst da się odczytać" i "Polskie znaki".
+    expect(checkFormat(text, pages, empty.content, profile).checks.find((c) => c.name === 'Tekst da się odczytać')?.ok).toBe(true);
+    const fmt = checkFormat(text, pages, empty.content, profile, RODO_STANDARD);
+    expect(fmt.checks.find((c) => c.name === 'Tekst da się odczytać')?.ok).toBe(false);
+    expect(fmt.score).toBe(0);
+  });
+
+  it('prawdziwe błędy obniżają wynik formatu', async () => {
+    const mixed = {
+      ...cv,
+      rodo,
+      decisions: { b2: 'accepted' as const },
+      content: { ...cv.content, projects: [{ sourceId: 'p', name: 'Blog', role: '', dates: '03/2025 – 05/2025', technologies: [], link: '', bullets: [] }] },
+    };
+    const noPhone = { ...profile, contact: { ...profile.contact, phone: '' } };
+    const { text, pages } = await htmlToPdf(renderCvHtml(mixed, noPhone, null, 'pdf'));
+    const fmt = checkFormat(text, pages, applyDecisions(mixed), noPhone, RODO_STANDARD);
+    expect(fmt.checks.filter((c) => !c.ok).map((c) => c.name)).toEqual(['Numer telefonu', 'Spójny format dat']);
+    expect(fmt.score).toBe(fmt.max - 3);
+  });
 
   it('podgląd podświetla oczekujące sugestie, PDF nie', () => {
     expect(renderCvHtml(cv, profile, null, 'preview')).toContain('<mark class="suggested" data-id="b2">');
@@ -37,6 +67,13 @@ describe('PDF w obie strony (render → PDF → tekst jak w ATS)', () => {
 
   it('odrzucona sugestia trafia do PDF jako wersja bezpieczna', async () => {
     const { text: raw } = await htmlToPdf(renderCvHtml({ ...cv, decisions: { b2: 'rejected' } }, profile, null, 'pdf'));
+    const text = raw.replace(/\s+/g, ' ');
+    expect(text).toContain('Rozwijanie zasięgu profilu');
+    expect(text).not.toContain('o ok. 30%');
+  });
+
+  it("PDF do oceny (tryb 'ats') nie zawiera niepotwierdzonej sugestii", async () => {
+    const { text: raw } = await htmlToPdf(renderCvHtml(cv, profile, null, 'ats'));
     const text = raw.replace(/\s+/g, ' ');
     expect(text).toContain('Rozwijanie zasięgu profilu');
     expect(text).not.toContain('o ok. 30%');

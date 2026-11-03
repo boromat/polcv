@@ -109,7 +109,7 @@ export function HistoryPage() {
                       </td>
                       <td>{a.posting?.company ?? '-'}</td>
                       <td>
-                        <ScoreBadge score={a.score} />
+                        <ScoreBadge score={a.score} incomplete={a.scoreIncomplete} />
                       </td>
                       <td onClick={(e) => e.stopPropagation()}>
                         <select value={a.status} onChange={(e) => setStatus(a, e.target.value)} className={`badge ${statusTone(a.status)}`} style={{ width: 'auto', padding: '3px 8px' }} aria-label={t('Status')}>

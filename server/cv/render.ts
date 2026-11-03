@@ -77,18 +77,34 @@ export const sectionLabel = (lang: 'pl' | 'en', key: SectionKey) => LABELS[lang]
 const prettyUrl = (u: string) => u.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 const href = (u: string) => (/^https?:\/\//.test(u) ? u : `https://${u}`);
 
-export type RenderMode = 'preview' | 'pdf';
+/** 'ats' = PDF do oceny: oczekujące sugestie w wersji bezpiecznej, bo kandydat może je jeszcze odrzucić. */
+export type RenderMode = 'preview' | 'pdf' | 'ats';
 
 /** Tekst z uwzględnieniem decyzji; w podglądzie oczekujące sugestie są podświetlone. */
 function textOf(t: CvText, decisions: CvVersion['decisions'], mode: RenderMode): string | null {
   if (t.status === 'suggested') {
     const d = decisions[t.id];
-    if (d === 'rejected') return t.fallbackText.trim() ? esc(t.fallbackText) : null;
+    const fallback = t.fallbackText.trim() ? esc(t.fallbackText) : null;
+    if (d === 'rejected') return fallback;
     if (d === 'accepted') return esc(t.text);
+    if (mode === 'ats') return fallback;
     return mode === 'preview' ? `<mark class="suggested" data-id="${esc(t.id)}">${esc(t.text)}</mark>` : esc(t.text);
   }
   return esc(t.text);
 }
+
+/** CV z odrzuconymi oczekującymi sugestiami - ta sama treść, którą pokazuje tryb 'ats'. */
+export function withoutPending(cv: CvVersion): CvVersion {
+  const decisions = { ...cv.decisions };
+  const c = cv.content;
+  for (const t of [c.summary, ...c.experience.flatMap((e) => e.bullets), ...c.projects.flatMap((p) => p.bullets)]) {
+    if (t.status === 'suggested' && !decisions[t.id]) decisions[t.id] = 'rejected';
+  }
+  return { ...cv, decisions };
+}
+
+/** Nagłówek bez oznaczeń płci skopiowanych z tytułu ogłoszenia: "(K/M)", "(k/m/n)", "(m/f/d)". */
+export const cleanHeadline = (s: string) => s.replace(/\s*\(\s*(?:[kmfdnx]\s*\/\s*)+[kmfdnx]\s*\)/gi, '').trim();
 
 function bulletsHtml(items: CvText[], decisions: CvVersion['decisions'], mode: RenderMode): string {
   const lis = items.map((b) => textOf(b, decisions, mode)).filter((x): x is string => !!x && x.trim() !== '');
@@ -167,7 +183,7 @@ const MARGINS: Record<TemplateId, [number, number, number]> = {
   compact: [10, 12, 10],
 };
 
-function docHtml(template: TemplateId, title: string, body: string, mode: RenderMode, extraHead = ''): string {
+function docHtml(template: TemplateId, lang: 'pl' | 'en', title: string, body: string, mode: RenderMode, extraHead = ''): string {
   const [mt, ms, mb] = MARGINS[template];
   const pageCss = `@page { size: A4; margin: ${mt}mm ${ms}mm ${mb}mm; } :root { --m-top: ${mt}mm; --m-side: ${ms}mm; --m-bottom: ${mb}mm; }`;
   const guide =
@@ -194,7 +210,7 @@ function docHtml(template: TemplateId, title: string, body: string, mode: Render
 })();
 </script>`
       : '';
-  return `<!doctype html><html lang="pl"><head><meta charset="utf-8"><title>${esc(title)}</title>
+  return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><title>${esc(title)}</title>
 <style>${fontCss(FONT_PKGS[template].pkg)}${pageCss}${BASE_CSS}${TEMPLATE_CSS[template]}</style>${extraHead}</head>
 <body><div class="sheet">${body}</div>${guide}</body></html>`;
 }
@@ -231,7 +247,7 @@ ${e.location ? `<div class="sub">${esc(e.location)}</div>` : ''}${bulletsHtml(e.
     }
     case 'projects': {
       if (!c.projects.length) return '';
-      const tech = c.language === 'pl' ? 'Technologie' : 'Tech';
+      const tech = c.language === 'pl' ? 'Technologie' : 'Technologies';
       const items = c.projects.map(
         (p) => `<div class="entry"><div class="entry-head"><span class="title">${esc(p.name)}${p.role ? ` – ${esc(p.role)}` : ''}</span><span class="dates">${esc(p.dates)}</span></div>
 ${p.technologies.length || p.link ? `<div class="sub">${p.technologies.length ? `${tech}: ${esc(p.technologies.join(', '))}` : ''}${p.technologies.length && p.link ? ' | ' : ''}${p.link ? `<a href="${esc(href(p.link))}">${esc(prettyUrl(p.link))}</a>` : ''}</div>` : ''}
@@ -285,11 +301,11 @@ export function renderCvHtml(cv: CvVersion, profile: Profile, photo: string | nu
   // Sekcje spoza sectionOrder (np. dodane ręcznie) dokładamy na końcu, żeby nic nie zginęło.
   const order = [...new Set([...c.sectionOrder, ...ALL_SECTIONS])];
   const body = [
-    headerHtml(profile, c.headline, cv.photo ? photo : null),
+    headerHtml(profile, cleanHeadline(c.headline), cv.photo ? photo : null),
     ...order.map((k) => sectionHtml(k, c, cv.decisions, mode)),
     cv.rodo.include && cv.rodo.text ? `<div class="rodo">${esc(cv.rodo.text)}</div>` : '',
   ].join('\n');
-  return docHtml(cv.template, `CV – ${profile.contact.fullName}`, body, mode);
+  return docHtml(cv.template, c.language, `CV – ${profile.contact.fullName}`, body, mode);
 }
 
 export function renderLetterHtml(letter: CoverLetter, profile: Profile, template: TemplateId, posting: { company: string; title: string }, mode: RenderMode): string {
@@ -304,5 +320,5 @@ export function renderLetterHtml(letter: CoverLetter, profile: Profile, template
 ${letter.paragraphs.map((p) => `<p style="margin-top:3.5mm;text-align:justify">${esc(p)}</p>`).join('\n')}
 <div style="margin-top:7mm">${esc(letter.closing)}</div>
 <div style="margin-top:1.5mm;font-weight:600">${esc(profile.contact.fullName)}</div>`;
-  return docHtml(template, `List motywacyjny – ${profile.contact.fullName}`, body, mode);
+  return docHtml(template, letter.language, `List motywacyjny – ${profile.contact.fullName}`, body, mode);
 }

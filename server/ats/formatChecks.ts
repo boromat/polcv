@@ -9,49 +9,82 @@ export interface FormatCheck {
   name: string;
   ok: boolean;
   detail: string;
+  /** ile punktów odejmuje niezaliczona kontrola */
   weight: number;
+  /** część kary, gdy błąd jest mniejszy (np. 2 strony zamiast 1) */
   partial?: number;
 }
 
 const DATE_PATTERNS = [/^\d{2}\.\d{4}$/, /^\d{2}\/\d{4}$/, /^\d{4}$/, /^(obecnie|present|teraz|now)$/i];
 
+const escRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** Tekst PDF bez klauzuli RODO: kontrole dotyczą samego CV, a długa klauzula sama nie może ich zaliczyć. */
+export function withoutClause(pdfText: string, clause: string): string {
+  const words = clause.trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return pdfText;
+  const full = new RegExp(words.map(escRe).join('\\s+'));
+  const m = full.exec(pdfText);
+  if (m) return pdfText.slice(0, m.index) + pdfText.slice(m.index + m[0].length);
+  // Tekst klauzuli odczytany inaczej: jest ostatnia na stronie, więc ucinamy od ostatniego wystąpienia jej początku.
+  const head = new RegExp(words.slice(0, 8).map(escRe).join('\\s+'), 'g');
+  const last = [...pdfText.matchAll(head)].pop();
+  return last?.index !== undefined ? pdfText.slice(0, last.index) : pdfText;
+}
+
 /**
  * Kontrole na tekście odczytanym z GOTOWEGO PDF - tak "widzi" CV system ATS.
+ * Wynik tylko z kar: start od 20, każdy prawdziwy błąd odejmuje punkty.
  */
-export function checkFormat(pdfText: string, pages: number, cv: CvContent, profile: Profile): { score: number; max: number; pages: number; checks: FormatCheck[] } {
+export function checkFormat(
+  rawText: string,
+  pages: number,
+  cv: CvContent,
+  profile: Profile,
+  clause = '',
+): { score: number; max: number; pages: number; checks: FormatCheck[] } {
+  const pdfText = withoutClause(rawText, clause);
   const norm = normalize(pdfText);
   const checks: FormatCheck[] = [];
   const add = (name: string, ok: boolean, detail: string, weight: number, partial?: number) =>
     checks.push({ name, ok, detail, weight, partial });
 
+  // Bez czytelnego tekstu ATS nie widzi niczego - kara obejmuje całą kategorię.
+  const readable = pdfText.replace(/\s/g, '').length > 300;
   add(
     tr('Tekst da się odczytać'),
-    pdfText.replace(/\s/g, '').length > 300,
-    pdfText.length > 300 ? tr('PDF zawiera prawdziwy tekst, nie obrazek.') : tr('W PDF jest bardzo mało tekstu do odczytania.'),
+    readable,
+    readable ? tr('PDF zawiera prawdziwy tekst, nie obrazek.') : tr('W PDF jest bardzo mało tekstu do odczytania.'),
+    FORMAT_MAX,
+  );
+
+  // Dane są w profilu, ale nie w tekście PDF - to inny błąd niż brak w profilu.
+  const notInPdf = () => tr('Nie znaleziono w tekście odczytanym z PDF.');
+
+  const name = profile.contact.fullName.trim();
+  const nameOk = !!name && norm.includes(normalize(name));
+  add(
+    tr('Imię i nazwisko'),
+    nameOk,
+    nameOk ? tr('Odczytane poprawnie.') : name ? notInPdf() : tr('Brak imienia i nazwiska w profilu - uzupełnij je.'),
     4,
   );
 
-  const name = profile.contact.fullName.trim();
-  add(
-    tr('Imię i nazwisko'),
-    !!name && norm.includes(normalize(name)),
-    name ? tr('Odczytane poprawnie.') : tr('Brak imienia i nazwiska w profilu - uzupełnij je.'),
-    2,
-  );
-
   const email = profile.contact.email.trim();
+  const emailOk = !!email && pdfText.toLowerCase().includes(email.toLowerCase());
   add(
     tr('Adres e-mail'),
-    !!email && pdfText.toLowerCase().includes(email.toLowerCase()),
-    email ? tr('Odczytany poprawnie.') : tr('Brak e-maila w profilu - ATS nie będzie mógł się z Tobą skontaktować.'),
-    2,
+    emailOk,
+    emailOk ? tr('Odczytany poprawnie.') : email ? notInPdf() : tr('Brak e-maila w profilu - ATS nie będzie mógł się z Tobą skontaktować.'),
+    4,
   );
 
   const phoneDigits = profile.contact.phone.replace(/\D/g, '');
+  const phoneOk = phoneDigits.length >= 9 && pdfText.replace(/\D/g, '').includes(phoneDigits.slice(-9));
   add(
     tr('Numer telefonu'),
-    phoneDigits.length >= 9 && pdfText.replace(/\D/g, '').includes(phoneDigits.slice(-9)),
-    phoneDigits.length >= 9 ? tr('Odczytany poprawnie.') : tr('Brak telefonu w profilu (albo jest niepełny).'),
+    phoneOk,
+    phoneOk ? tr('Odczytany poprawnie.') : phoneDigits.length >= 9 ? notInPdf() : tr('Brak telefonu w profilu (albo jest niepełny).'),
     2,
   );
 
@@ -71,7 +104,7 @@ export function checkFormat(pdfText: string, pages: number, cv: CvContent, profi
     tr('Standardowe nagłówki sekcji'),
     foundHeadings.length >= Math.min(3, used.length),
     tr('Rozpoznane nagłówki: {list}.', { list: foundHeadings.map((k) => sectionLabel(cv.language, k)).join(', ') || tr('brak') }),
-    2,
+    3,
   );
 
   const garbled = /�|Ã.|Å./.test(pdfText);
@@ -85,14 +118,14 @@ export function checkFormat(pdfText: string, pages: number, cv: CvContent, profi
       : charsOk
         ? tr('Znaki odczytane poprawnie.')
         : tr('Nie wykryto polskich znaków w CV po polsku.'),
-    2,
+    3,
   );
 
   add(
     tr('Długość CV'),
     pages <= 1,
     pages <= 1 ? tr('Jedna strona - idealnie dla studenta/juniora.') : tr('{pages} strony - dla juniora najlepiej skrócić do jednej.', { pages }),
-    3,
+    4,
     pages === 2 ? 0.5 : undefined,
   );
 
@@ -123,8 +156,9 @@ export function checkFormat(pdfText: string, pages: number, cv: CvContent, profi
     1,
   );
 
-  const score = Math.round(checks.reduce((s, c) => s + (c.ok ? c.weight : c.partial ? c.weight * c.partial : 0), 0));
-  return { score, max: FORMAT_MAX, pages, checks: checks.map(({ partial, ...c }) => c) };
+  const penalty = checks.reduce((s, c) => s + (c.ok ? 0 : c.weight * (c.partial ?? 1)), 0);
+  const score = Math.max(0, Math.round(FORMAT_MAX - penalty));
+  return { score, max: FORMAT_MAX, pages, checks: checks.map(({ partial, ...c }) => ({ ...c, weight: c.weight * (partial ?? 1) })) };
 }
 
 function hasContent(cv: CvContent, k: SectionKey): boolean {

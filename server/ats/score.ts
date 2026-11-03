@@ -1,10 +1,11 @@
-import type { AiReview, AtsReport, CvContent, JobPosting, Profile } from '../../shared/schemas';
+import { AiCriterionKeys, type AiReview, type AtsReport, type CvContent, type JobPosting, type Profile } from '../../shared/schemas';
 import { scoreKeywords } from './keywords';
 import { checkFormat } from './formatChecks';
+import { tr } from '../i18n';
 
 export const AI_MAX = 40;
 
-const AI_WEIGHTS: Record<AiReview['criteria'][number]['key'], number> = {
+const AI_WEIGHTS: Record<(typeof AiCriterionKeys)[number], number> = {
   must_have_match: 0.35,
   achievements: 0.2,
   summary_fit: 0.15,
@@ -12,42 +13,62 @@ const AI_WEIGHTS: Record<AiReview['criteria'][number]['key'], number> = {
   red_flags: 0.15,
 };
 
-export function aiScore(review: AiReview): number {
+/** Kryteria w stałej kolejności, bez powtórzeń (liczy się pierwsze); null, gdy któregoś brakuje. */
+export function completeCriteria(review: AiReview): AiReview['criteria'] | null {
+  const out: AiReview['criteria'] = [];
+  for (const key of AiCriterionKeys) {
+    const c = review.criteria.find((x) => x.key === key);
+    if (!c || !Number.isFinite(c.score)) return null;
+    out.push({ ...c, score: Math.min(10, Math.max(0, Math.round(c.score))) });
+  }
+  return out;
+}
+
+/** Punkty AI (0-40) z pięciu kryteriów; null = ocena niepełna, nie wolno jej przeliczać na wynik. */
+export function aiScore(review: AiReview): number | null {
+  const criteria = completeCriteria(review);
+  if (!criteria) return null;
   let sum = 0;
   let wsum = 0;
-  for (const c of review.criteria) {
-    const w = AI_WEIGHTS[c.key] ?? 0;
-    sum += Math.min(10, Math.max(0, c.score)) * w;
-    wsum += w;
+  for (const c of criteria) {
+    sum += c.score * AI_WEIGHTS[c.key];
+    wsum += AI_WEIGHTS[c.key];
   }
-  return wsum ? Math.round((sum / wsum / 10) * AI_MAX) : 0;
+  return Math.round((sum / wsum / 10) * AI_MAX);
 }
 
 export function buildReport(args: {
   version: number;
   pdfText: string;
   pages: number;
+  /** treść CV po decyzjach, z oczekującymi sugestiami w wersji bezpiecznej (jak w trybie 'ats') */
   cv: CvContent;
+  /** klauzula RODO z PDF: nie liczy się do słów kluczowych ani formatu */
+  clause: string;
   profile: Profile;
   posting: JobPosting;
   review: AiReview | null;
   aiError: string;
 }): AtsReport {
-  const keywords = scoreKeywords(args.pdfText, args.posting.keywords);
-  const format = checkFormat(args.pdfText, args.pages, args.cv, args.profile);
-  const review = args.review
-    ? { ...args.review, criteria: args.review.criteria.map((c) => ({ ...c, score: Math.min(10, Math.max(0, Math.round(c.score))) })) }
-    : null;
-  const ai = review ? { score: aiScore(review), max: AI_MAX, review } : null;
-  const got = keywords.score + format.score + (ai?.score ?? 0);
-  const max = keywords.max + format.max + (ai ? ai.max : 0);
+  const keywords = scoreKeywords(args.cv, args.posting.keywords);
+  const format = checkFormat(args.pdfText, args.pages, args.cv, args.profile, args.clause);
+  const criteria = args.review ? completeCriteria(args.review) : null;
+  const review = args.review && criteria ? { ...args.review, criteria } : null;
+  const aiPoints = review ? aiScore(review) : null;
+  const ai = review && aiPoints !== null ? { score: aiPoints, max: AI_MAX, review } : null;
+  const aiError = args.review && !ai ? tr('AI nie oceniło wszystkich kryteriów, więc ta część wyniku została pominięta. Oceń CV ponownie.') : args.aiError;
+  // Bez części AI nie ma wyniku łącznego: 40 + 20 przeliczone na 100 zawyżałoby ocenę.
+  const total = ai ? Math.round(((keywords.score + format.score + ai.score) / (keywords.max + format.max + ai.max)) * 100) : null;
   return {
     createdAt: new Date().toISOString(),
     version: args.version,
-    total: Math.round((got / max) * 100),
+    total,
     keywords,
     format,
     ai,
-    aiError: args.aiError,
+    aiError,
   };
 }
+
+/** Starsze raporty bez oceny AI mają wynik przeskalowany do 100 - pokazujemy je jako niepełne. */
+export const honestReport = (r: AtsReport | null): AtsReport | null => (r && !r.ai && r.total !== null ? { ...r, total: null } : r);
