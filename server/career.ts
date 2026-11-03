@@ -4,6 +4,7 @@ import { HttpError, newId, nowIso } from './storage/store';
 import { careerTurn, proposeRoles, rankOffers } from './llm/prompts/career';
 import { searchRole } from './jobs/search';
 import { normalize } from './ats/keywords';
+import { tr } from './i18n';
 
 const MAX_RANKED = 20;
 const MAX_EXCLUDED = 10;
@@ -34,7 +35,7 @@ export async function chat(profileId: string, message: string): Promise<Career> 
   const fresh = turn.newFacts.filter((f) => f.topic.trim() && f.answer.trim() && !known.has(normalize(f.topic)));
   if (fresh.length) {
     for (const f of fresh) {
-      profile.extraFacts.push({ id: newId(), topic: f.topic.trim(), has: true, answer: f.answer.trim(), source: 'Rozmowa z doradcą kariery', date: nowIso().slice(0, 10) });
+      profile.extraFacts.push({ id: newId(), topic: f.topic.trim(), has: true, answer: f.answer.trim(), source: tr('Rozmowa z doradcą kariery'), date: nowIso().slice(0, 10) });
     }
     await store.saveProfile(profile);
   }
@@ -70,11 +71,11 @@ export async function makeProposals(profileId: string): Promise<Career> {
 /** Oferty dla stanowiska: wyszukiwanie na portalach, filtry z preferencji, ocena dopasowania przez AI. */
 export async function findOffers(profileId: string, roleId: string): Promise<Career> {
   if (!(await store.getSettings()).jobSearch) {
-    throw new HttpError(403, 'Wyszukiwanie ofert jest wyłączone. Możesz je włączyć w Ustawieniach albo otworzyć wyszukiwanie na portalu linkiem przy stanowisku.');
+    throw new HttpError(403, tr('Wyszukiwanie ofert jest wyłączone. Możesz je włączyć w Ustawieniach albo otworzyć wyszukiwanie na portalu linkiem przy stanowisku.'));
   }
   const [profile, career] = await Promise.all([store.getProfile(profileId), store.getCareer(profileId)]);
   const role = career.proposals?.roles.find((r) => r.id === roleId);
-  if (!role) throw new HttpError(404, 'Nie ma takiej propozycji - wygeneruj propozycje ponownie.');
+  if (!role) throw new HttpError(404, tr('Nie ma takiej propozycji - wygeneruj propozycje ponownie.'));
 
   const { kept, excluded, stats, errors, scanned } = await searchRole(role, career.prefs);
   // Najpierw oferty z frazą w tytule, potem najnowsze - do oceny AI trafia ograniczona liczba.
@@ -100,7 +101,7 @@ export async function findOffers(profileId: string, roleId: string): Promise<Car
       }
     } catch (e: any) {
       if (e instanceof HttpError && [400, 401, 402, 503].includes(e.status)) throw e;
-      errors.push('Nie udało się ocenić dopasowania ofert przez AI - pokazuję je bez oceny.');
+      errors.push(tr('Nie udało się ocenić dopasowania ofert przez AI - pokazuję je bez oceny.'));
     }
     const byMatch = (a: (typeof kept)[number], b: (typeof kept)[number]) => (b.match ?? -1) - (a.match ?? -1);
     items.sort(byMatch);

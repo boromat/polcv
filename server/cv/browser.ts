@@ -1,4 +1,5 @@
 import { chromium, type Browser, type Page } from 'playwright';
+import { tr } from '../i18n';
 
 let browserPromise: Promise<Browser> | null = null;
 
@@ -8,7 +9,7 @@ function getBrowser(): Promise<Browser> {
     browserPromise = chromium.launch({ headless: true }).catch((e) => {
       browserPromise = null;
       throw new Error(
-        `Nie udało się uruchomić przeglądarki Chromium (${e.message}). Uruchom w folderze programu: npx playwright install chromium`,
+        tr('Nie udało się uruchomić przeglądarki Chromium ({error}). Uruchom w folderze programu: npx playwright install chromium', { error: e.message }),
       );
     });
     browserPromise.then((b) => b.on('disconnected', () => (browserPromise = null)));

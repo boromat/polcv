@@ -208,7 +208,7 @@ export const CvContentSchema = z.object({
   certificates: z.array(z.object({ name: z.string(), issuer: z.string(), date: z.string() })),
   languages: z.array(z.object({ name: z.string(), level: z.string() })),
   interests: z.array(z.string()),
-  notes: z.string().describe('krótka notatka dla kandydata po polsku: co podkreślono, czego brakuje'),
+  notes: z.string().describe('krótka notatka dla kandydata: co podkreślono, czego brakuje'),
 });
 
 export const TemplateIds = ['classic', 'modern', 'compact'] as const;

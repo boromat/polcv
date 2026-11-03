@@ -4,6 +4,7 @@ import { ApplicationStatuses, CoverLetterSchema, CvVersionSchema, GapAnswerSchem
 import * as store from '../storage/store';
 import { HttpError } from '../storage/store';
 import * as svc from '../services';
+import { tr } from '../i18n';
 
 export const applicationsRouter = Router();
 
@@ -17,7 +18,7 @@ const sendPdf = (res: Response, pdf: Buffer, name: string, download: boolean) =>
 
 const num = (v: string) => {
   const n = Number(v);
-  if (!Number.isInteger(n) || n < 1) throw new HttpError(400, 'Nieprawidłowy numer wersji');
+  if (!Number.isInteger(n) || n < 1) throw new HttpError(400, tr('Nieprawidłowy numer wersji'));
   return n;
 };
 
@@ -62,7 +63,7 @@ applicationsRouter.patch(`${base}/:aid`, async (req, res) => {
   const app = await store.getApplication(pid, aid);
   const { status, notes, currentVersion } = req.body ?? {};
   if (status !== undefined) {
-    if (!ApplicationStatuses.includes(status)) throw new HttpError(400, 'Nieznany status');
+    if (!ApplicationStatuses.includes(status)) throw new HttpError(400, tr('Nieznany status'));
     app.status = status;
   }
   if (typeof notes === 'string') app.notes = notes;
@@ -82,7 +83,7 @@ applicationsRouter.post(`${base}/:aid/gap`, async (req, res) => {
 
 applicationsRouter.post(`${base}/:aid/answers`, async (req, res) => {
   const parsed = GapAnswerSchema.array().safeParse(req.body?.answers ?? []);
-  if (!parsed.success) throw new HttpError(400, 'Niepoprawne odpowiedzi');
+  if (!parsed.success) throw new HttpError(400, tr('Niepoprawne odpowiedzi'));
   res.json(await svc.saveAnswers(req.params.pid, req.params.aid, parsed.data));
 });
 
@@ -118,7 +119,7 @@ applicationsRouter.get(`${base}/:aid/versions/:v`, async (req, res) => {
 
 applicationsRouter.put(`${base}/:aid/versions/:v`, async (req, res) => {
   const parsed = CvVersionSchema.pick({ content: true, decisions: true, template: true, photo: true, rodo: true }).partial().safeParse(req.body ?? {});
-  if (!parsed.success) throw new HttpError(400, `Niepoprawne dane CV: ${parsed.error.issues[0]?.path.join('.')}`);
+  if (!parsed.success) throw new HttpError(400, tr('Niepoprawne dane CV: {field}', { field: parsed.error.issues[0]?.path.join('.') ?? '' }));
   const cv = await svc.updateVersion(req.params.pid, req.params.aid, num(req.params.v), parsed.data);
   res.json({ cv, pending: svc.pendingSuggestions(cv) });
 });
@@ -143,7 +144,7 @@ applicationsRouter.post(`${base}/:aid/export`, async (req, res) => {
 applicationsRouter.get(`${base}/:aid/download`, async (req, res) => {
   const { pid, aid } = req.params;
   const app = await store.getApplication(pid, aid);
-  if (!app.pdfFile) throw new HttpError(404, 'Ten PDF nie został jeszcze zapisany.');
+  if (!app.pdfFile) throw new HttpError(404, tr('Ten PDF nie został jeszcze zapisany.'));
   res.download(path.join(store.appDir(pid, aid), app.pdfFile), app.pdfFile);
 });
 
@@ -165,7 +166,7 @@ applicationsRouter.post(`${base}/:aid/letter`, async (req, res) => {
 
 applicationsRouter.put(`${base}/:aid/letter`, async (req, res) => {
   const parsed = CoverLetterSchema.safeParse(req.body);
-  if (!parsed.success) throw new HttpError(400, 'Niepoprawny list');
+  if (!parsed.success) throw new HttpError(400, tr('Niepoprawny list'));
   await store.saveCoverLetter(req.params.pid, req.params.aid, parsed.data);
   res.json(parsed.data);
 });

@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { useApp } from '../ctx';
+import { useT } from '../i18n';
 import { ErrorBox, fmtDate } from '../components/ui';
 
 export function ProfilesPage() {
   const { profiles, current, select, reloadProfiles } = useApp();
+  const { t } = useT();
   const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const nav = useNavigate();
@@ -23,7 +25,7 @@ export function ProfilesPage() {
   };
 
   const remove = async (id: string, displayName: string) => {
-    if (!confirm(`Usunąć profil „${displayName}” razem z historią aplikacji? Tego nie da się cofnąć.`)) return;
+    if (!confirm(t('Usunąć profil „{name}” razem z historią aplikacji? Tego nie da się cofnąć.', { name: displayName }))) return;
     try {
       await api.deleteProfile(id);
       if (current?.id === id) select(null);
@@ -37,22 +39,22 @@ export function ProfilesPage() {
     <div className="container" style={{ maxWidth: 720 }}>
       <div className="page-head">
         <div>
-          <h1>Profile</h1>
-          <p className="sub">Każda osoba ma swój profil z danymi i historią aplikacji. Profile są zapisane tylko na tym komputerze.</p>
+          <h1>{t('Profile')}</h1>
+          <p className="sub">{t('Każda osoba ma swój profil z danymi i historią aplikacji. Profile są zapisane tylko na tym komputerze.')}</p>
         </div>
       </div>
       <div className="stack lg">
         <ErrorBox error={error} onClose={() => setError(null)} />
         {profiles.length > 0 && (
           <div className="card">
-            <h2>Wybierz profil</h2>
+            <h2>{t('Wybierz profil')}</h2>
             <div className="stack" style={{ marginTop: 12 }}>
               {profiles.map((p) => (
                 <div key={p.id} className="card tight row between" style={{ boxShadow: 'none' }}>
                   <div>
-                    <b>{p.displayName}</b> {current?.id === p.id && <span className="badge accent">aktywny</span>}
+                    <b>{p.displayName}</b> {current?.id === p.id && <span className="badge accent">{t('aktywny')}</span>}
                     <div className="faint">
-                      {p.contact.fullName || 'brak danych'} · utworzony {fmtDate(p.createdAt)}
+                      {p.contact.fullName || t('brak danych')} · {t('utworzony {date}', { date: fmtDate(p.createdAt) })}
                     </div>
                   </div>
                   <div className="row">
@@ -63,10 +65,10 @@ export function ProfilesPage() {
                         nav('/history');
                       }}
                     >
-                      Używaj
+                      {t('Używaj')}
                     </button>
                     <button className="btn ghost sm danger" onClick={() => remove(p.id, p.displayName)}>
-                      Usuń
+                      {t('Usuń')}
                     </button>
                   </div>
                 </div>
@@ -75,9 +77,9 @@ export function ProfilesPage() {
           </div>
         )}
         <div className="card">
-          <h2>{profiles.length ? 'Nowy profil' : 'Zacznij od utworzenia profilu'}</h2>
+          <h2>{profiles.length ? t('Nowy profil') : t('Zacznij od utworzenia profilu')}</h2>
           <p className="muted small" style={{ marginTop: 6 }}>
-            Wpisz nazwę (np. swoje imię albo „Kolega”). W następnym kroku wgrasz swoje obecne CV, a AI wypełni profil za Ciebie.
+            {t('Wpisz nazwę (np. swoje imię albo „Kolega”). W następnym kroku wgrasz swoje obecne CV, a AI wypełni profil za Ciebie.')}
           </p>
           <form
             className="row"
@@ -87,9 +89,9 @@ export function ProfilesPage() {
               if (name.trim()) create();
             }}
           >
-            <input type="text" placeholder="Nazwa profilu" value={name} onChange={(e) => setName(e.target.value)} style={{ flex: 1, minWidth: 200 }} />
+            <input type="text" placeholder={t('Nazwa profilu')} value={name} onChange={(e) => setName(e.target.value)} style={{ flex: 1, minWidth: 200 }} />
             <button className="btn primary" disabled={!name.trim()}>
-              Utwórz profil
+              {t('Utwórz profil')}
             </button>
           </form>
         </div>

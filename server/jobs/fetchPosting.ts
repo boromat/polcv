@@ -3,6 +3,7 @@ import { parseHTML } from 'linkedom';
 import { Readability } from '@mozilla/readability';
 import { HttpError } from '../storage/store';
 import { withPage } from '../cv/browser';
+import { tr } from '../i18n';
 
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36';
@@ -130,9 +131,9 @@ export async function fetchPosting(rawUrl: string): Promise<FetchedPosting> {
   try {
     url = new URL(rawUrl.trim());
   } catch {
-    throw new HttpError(400, 'To nie wygląda na poprawny link (powinien zaczynać się od https://).');
+    throw new HttpError(400, tr('To nie wygląda na poprawny link (powinien zaczynać się od https://).'));
   }
-  if (!/^https?:$/.test(url.protocol)) throw new HttpError(400, 'Obsługiwane są tylko linki http(s).');
+  if (!/^https?:$/.test(url.protocol)) throw new HttpError(400, tr('Obsługiwane są tylko linki http(s).'));
 
   // 1–2. Zwykłe pobranie: JSON-LD + główna treść.
   try {
@@ -167,6 +168,6 @@ export async function fetchPosting(rawUrl: string): Promise<FetchedPosting> {
 
   throw new HttpError(
     422,
-    'Nie udało się pobrać treści ogłoszenia z tego linku (strona mogła zablokować pobieranie). Skopiuj tekst ogłoszenia i wklej go w pole poniżej.',
+    tr('Nie udało się pobrać treści ogłoszenia z tego linku (strona mogła zablokować pobieranie). Skopiuj tekst ogłoszenia i wklej go w pole poniżej.'),
   );
 }

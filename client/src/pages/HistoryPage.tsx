@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import type { ApplicationSummary } from '../../../shared/schemas';
 import { api } from '../api';
 import { useApp } from '../ctx';
+import { useT } from '../i18n';
 import { ErrorBox, fmtDate, ScoreBadge, STATUS_LABELS, STATUSES, statusTone, usd } from '../components/ui';
 
 export function HistoryPage() {
   const { current } = useApp();
+  const { t } = useT();
   const nav = useNavigate();
   const [apps, setApps] = useState<ApplicationSummary[] | null>(null);
   const [filter, setFilter] = useState('');
@@ -29,7 +31,7 @@ export function HistoryPage() {
   };
 
   const remove = async (a: ApplicationSummary) => {
-    if (!confirm(`Usunąć aplikację „${a.posting?.title ?? ''}” z historii?`)) return;
+    if (!confirm(t('Usunąć aplikację „{title}” z historii?', { title: a.posting?.title ?? '' }))) return;
     await api.deleteApplication(current.id, a.id).catch((e) => setError(e.message));
     load();
   };
@@ -42,22 +44,26 @@ export function HistoryPage() {
     <div className="container">
       <div className="page-head">
         <div>
-          <h1>Historia aplikacji</h1>
+          <h1>{t('Historia aplikacji')}</h1>
           <p className="sub">
-            {apps ? `${apps.length} aplikacji · koszt AI łącznie ${usd(total)}` : 'Ładowanie…'}
+            {apps
+              ? apps.length === 1
+                ? t('1 aplikacja · koszt AI łącznie {cost}', { cost: usd(total) })
+                : t('{n} aplikacji · koszt AI łącznie {cost}', { n: apps.length, cost: usd(total) })
+              : t('Ładowanie…')}
           </p>
         </div>
         <Link to="/new" className="btn primary">
-          + Nowe CV pod ogłoszenie
+          + {t('Nowe CV pod ogłoszenie')}
         </Link>
       </div>
       <ErrorBox error={error} onClose={() => setError(null)} />
       {apps && apps.length === 0 && (
         <div className="card empty">
-          <h2>Jeszcze nic tu nie ma</h2>
-          <p>Wklej link do pierwszego ogłoszenia, a program przygotuje CV pod nie.</p>
+          <h2>{t('Jeszcze nic tu nie ma')}</h2>
+          <p>{t('Wklej link do pierwszego ogłoszenia, a program przygotuje CV pod nie.')}</p>
           <Link to="/new" className="btn primary lg">
-            Zrób pierwsze CV
+            {t('Zrób pierwsze CV')}
           </Link>
         </div>
       )}
@@ -65,11 +71,11 @@ export function HistoryPage() {
         <div className="stack">
           <div className="chips">
             <button className={`btn sm ${filter === '' ? 'primary' : ''}`} onClick={() => setFilter('')}>
-              Wszystkie ({apps.length})
+              {t('Wszystkie ({n})', { n: apps.length })}
             </button>
             {STATUSES.filter((s) => counts[s]).map((s) => (
               <button key={s} className={`btn sm ${filter === s ? 'primary' : ''}`} onClick={() => setFilter(s)}>
-                {STATUS_LABELS[s]} ({counts[s]})
+                {t(STATUS_LABELS[s])} ({counts[s]})
               </button>
             ))}
           </div>
@@ -78,12 +84,12 @@ export function HistoryPage() {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Data</th>
-                    <th>Stanowisko</th>
-                    <th>Firma</th>
-                    <th>Wynik</th>
-                    <th>Status</th>
-                    <th>Koszt AI</th>
+                    <th>{t('Data')}</th>
+                    <th>{t('Stanowisko')}</th>
+                    <th>{t('Firma')}</th>
+                    <th>{t('Wynik')}</th>
+                    <th>{t('Status')}</th>
+                    <th>{t('Koszt AI')}</th>
                     <th />
                   </tr>
                 </thead>
@@ -96,7 +102,7 @@ export function HistoryPage() {
                         {a.url && (
                           <div>
                             <a href={a.url} target="_blank" rel="noreferrer" className="faint" onClick={(e) => e.stopPropagation()}>
-                              ogłoszenie ↗
+                              {t('ogłoszenie')} ↗
                             </a>
                           </div>
                         )}
@@ -106,10 +112,10 @@ export function HistoryPage() {
                         <ScoreBadge score={a.score} />
                       </td>
                       <td onClick={(e) => e.stopPropagation()}>
-                        <select value={a.status} onChange={(e) => setStatus(a, e.target.value)} className={`badge ${statusTone(a.status)}`} style={{ width: 'auto', padding: '3px 8px' }} aria-label="Status">
+                        <select value={a.status} onChange={(e) => setStatus(a, e.target.value)} className={`badge ${statusTone(a.status)}`} style={{ width: 'auto', padding: '3px 8px' }} aria-label={t('Status')}>
                           {STATUSES.map((s) => (
                             <option key={s} value={s}>
-                              {STATUS_LABELS[s]}
+                              {t(STATUS_LABELS[s])}
                             </option>
                           ))}
                         </select>
@@ -121,8 +127,8 @@ export function HistoryPage() {
                             PDF
                           </a>
                         )}
-                        <button className="btn ghost sm danger" onClick={() => remove(a)} aria-label="Usuń">
-                          Usuń
+                        <button className="btn ghost sm danger" onClick={() => remove(a)} aria-label={t('Usuń')}>
+                          {t('Usuń')}
                         </button>
                       </td>
                     </tr>

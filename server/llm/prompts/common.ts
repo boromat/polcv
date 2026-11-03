@@ -1,4 +1,8 @@
 import type { CvContent, CvVersion, JobPosting, Profile } from '../../../shared/schemas';
+import { lang } from '../../i18n';
+
+/** Teksty dla użytkownika (notatki, pytania, uzasadnienia) piszemy w języku interfejsu; treść CV idzie za ogłoszeniem. */
+export const forUser = () => (lang() === 'en' ? 'po angielsku' : 'po polsku');
 
 /** Profil bez danych technicznych (klucz API, pliki) - tylko to, co AI ma wiedzieć. */
 export function profileForPrompt(p: Profile) {
@@ -34,14 +38,14 @@ export function applyDecisions(cv: CvVersion): CvContent {
   };
 }
 
-export const WRITING_RULES = `
+export const writingRules = () => `
 ZASADY PRAWDOMÓWNOŚCI (najważniejsze):
 - Każde stwierdzenie musi wynikać z profilu kandydata lub z jego odpowiedzi w "extraFacts" (has=true). W "sourceIds" podaj id pozycji profilu, z których korzystasz.
 - NIE wymyślaj firm, stanowisk, dat, liczb, procentów, narzędzi, certyfikatów ani obowiązków. Jeśli w "extraFacts" kandydat odpowiedział has=false, NIE przypisuj mu tej umiejętności.
 - NIE przenoś wymagań z ogłoszenia na kandydata: jeśli ogłoszenie wymaga np. "statystyki" albo "matematyki biznesowej", a profil tego nie potwierdza, nie pisz, że kandydat to zna - dotyczy to także podsumowania i umiejętności.
 - NIE dopisuj szczegółów, których nie ma w profilu: jak często ("codziennie"), do czego, w jakiej skali, z kim, z jakim efektem. Przed zwróceniem odpowiedzi sprawdź każde zdanie: czy wynika z profilu? Jeśli nie - usuń je albo oznacz jako "suggested".
 - Wolno przeredagować fakty językiem ogłoszenia (np. "robiłem posty na FB" → "Tworzenie i publikacja treści w social media (Facebook)").
-- Gdy proponujesz sformułowanie odważniejsze niż fakty (np. szacunkowa liczba, silniejsza rola, wniosek o efekcie), ustaw status "suggested", w "reason" napisz po polsku, co jest odważniejsze i co kandydat musi potwierdzić, a w "fallbackText" podaj bezpieczną, czysto faktyczną wersję. Używaj tego oszczędnie (maks. 3–4 na CV).
+- Gdy proponujesz sformułowanie odważniejsze niż fakty (np. szacunkowa liczba, silniejsza rola, wniosek o efekcie), ustaw status "suggested", w "reason" napisz ${forUser()}, co jest odważniejsze i co kandydat musi potwierdzić, a w "fallbackText" podaj bezpieczną, czysto faktyczną wersję. Używaj tego oszczędnie (maks. 3–4 na CV).
 
 ZASADY ATS:
 - Używaj DOSŁOWNEGO brzmienia słów kluczowych z ogłoszenia, gdy są zgodne z prawdą (ATS dopasowuje tekst dosłownie). Skrót i pełną nazwę podaj raz razem, np. "Google Analytics 4 (GA4)".

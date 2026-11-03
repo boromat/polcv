@@ -3,6 +3,7 @@ import { CareerPrefsSchema } from '../../shared/schemas';
 import * as store from '../storage/store';
 import { HttpError } from '../storage/store';
 import * as career from '../career';
+import { tr } from '../i18n';
 
 export const careerRouter = Router();
 
@@ -16,7 +17,7 @@ careerRouter.get(base, async (req, res) => {
 
 careerRouter.post(`${base}/chat`, async (req, res) => {
   const message = String(req.body?.message ?? '');
-  if (message.length > MAX_MESSAGE) throw new HttpError(400, `Wiadomość jest za długa (maks. ${MAX_MESSAGE} znaków).`);
+  if (message.length > MAX_MESSAGE) throw new HttpError(400, tr('Wiadomość jest za długa (maks. {max} znaków).', { max: MAX_MESSAGE }));
   res.json(await career.chat(req.params.pid, message));
 });
 
@@ -26,7 +27,7 @@ careerRouter.post(`${base}/reset`, async (req, res) => {
 
 careerRouter.put(`${base}/prefs`, async (req, res) => {
   const parsed = CareerPrefsSchema.safeParse(req.body);
-  if (!parsed.success) throw new HttpError(400, `Niepoprawne preferencje: ${parsed.error.issues[0]?.path.join('.')}`);
+  if (!parsed.success) throw new HttpError(400, tr('Niepoprawne preferencje: {field}', { field: parsed.error.issues[0]?.path.join('.') ?? '' }));
   res.json(await career.savePrefs(req.params.pid, parsed.data));
 });
 

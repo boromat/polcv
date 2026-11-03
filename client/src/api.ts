@@ -13,12 +13,13 @@ import type {
   TemplateId,
   UsageEntry,
 } from '../../shared/schemas';
+import { getLang, translate } from './i18n';
 
 async function req<T>(method: string, url: string, body?: unknown): Promise<T> {
   const isForm = body instanceof FormData;
   const res = await fetch(`/api${url}`, {
     method,
-    headers: body && !isForm ? { 'Content-Type': 'application/json' } : undefined,
+    headers: { 'X-PolCV-Lang': getLang(), ...(body && !isForm ? { 'Content-Type': 'application/json' } : {}) },
     body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
   });
   const text = await res.text();
@@ -28,7 +29,7 @@ async function req<T>(method: string, url: string, body?: unknown): Promise<T> {
   } catch {
     /* nie-JSON */
   }
-  if (!res.ok) throw new Error(data?.error || `Błąd ${res.status}`);
+  if (!res.ok) throw new Error(data?.error || translate('Błąd {status}', { status: res.status }));
   return data as T;
 }
 
@@ -134,8 +135,8 @@ export const api = {
   saveVersion: (pid: string, aid: string, v: number, patch: Partial<Pick<CvVersion, 'content' | 'decisions' | 'template' | 'photo' | 'rodo'>>) =>
     req<{ cv: CvVersion; pending: number }>('PUT', `${A(pid, aid)}/versions/${v}`, patch),
   evaluate: (pid: string, aid: string, v: number) => req<AtsReport>('POST', `${A(pid, aid)}/versions/${v}/evaluate`),
-  previewUrl: (pid: string, aid: string, v: number, bust: string) => `/api${A(pid, aid)}/versions/${v}/preview?${bust}`,
-  pdfUrl: (pid: string, aid: string, v: number) => `/api${A(pid, aid)}/versions/${v}/pdf?${Date.now()}`,
+  previewUrl: (pid: string, aid: string, v: number, bust: string) => `/api${A(pid, aid)}/versions/${v}/preview?lang=${getLang()}&${bust}`,
+  pdfUrl: (pid: string, aid: string, v: number) => `/api${A(pid, aid)}/versions/${v}/pdf?lang=${getLang()}&${Date.now()}`,
   exportPdf: (pid: string, aid: string) => req<Application>('POST', `${A(pid, aid)}/export`),
   downloadUrl: (pid: string, aid: string) => `/api${A(pid, aid)}/download`,
 
@@ -151,6 +152,6 @@ export const api = {
   letter: (pid: string, aid: string) => req<CoverLetter | null>('GET', `${A(pid, aid)}/letter`),
   makeLetter: (pid: string, aid: string) => req<CoverLetter>('POST', `${A(pid, aid)}/letter`),
   saveLetter: (pid: string, aid: string, l: CoverLetter) => req<CoverLetter>('PUT', `${A(pid, aid)}/letter`, l),
-  letterPreviewUrl: (pid: string, aid: string, bust: string) => `/api${A(pid, aid)}/letter/preview?${bust}`,
-  letterPdfUrl: (pid: string, aid: string, download = false) => `/api${A(pid, aid)}/letter/pdf?${download ? 'download=1&' : ''}${Date.now()}`,
+  letterPreviewUrl: (pid: string, aid: string, bust: string) => `/api${A(pid, aid)}/letter/preview?lang=${getLang()}&${bust}`,
+  letterPdfUrl: (pid: string, aid: string, download = false) => `/api${A(pid, aid)}/letter/pdf?lang=${getLang()}&${download ? 'download=1&' : ''}${Date.now()}`,
 };

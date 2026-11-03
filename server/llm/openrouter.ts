@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { appendUsage, getProfile, getSettings, HttpError, nowIso } from '../storage/store';
 import { maskForAi, profileTerms, TOKENS_NOTE } from '../privacy/polanon';
 import { plainDashes } from './strings';
+import { tr } from '../i18n';
 
 const API = 'https://openrouter.ai/api/v1';
 
@@ -37,7 +38,7 @@ async function resolveKey(profileId: string): Promise<string> {
     if (p?.apiKey) key = p.apiKey;
   }
   key ||= process.env.OPENROUTER_API_KEY || '';
-  if (!key) throw new HttpError(400, 'Brak klucza OpenRouter. Wklej go w Ustawieniach.');
+  if (!key) throw new HttpError(400, tr('Brak klucza OpenRouter. Wklej go w Ustawieniach.'));
   return key;
 }
 
@@ -98,7 +99,7 @@ async function chat(key: string, body: Record<string, unknown>, attempt = 0): Pr
     });
   } catch (e: any) {
     if (attempt < 1) return chat(key, body, attempt + 1);
-    throw new HttpError(502, `Brak połączenia z OpenRouter (${e.name === 'TimeoutError' ? 'przekroczony czas' : e.message}).`);
+    throw new HttpError(502, tr('Brak połączenia z OpenRouter ({reason}).', { reason: e.name === 'TimeoutError' ? tr('przekroczony czas') : e.message }));
   }
 
   const raw = await res.text();
@@ -112,8 +113,8 @@ async function chat(key: string, body: Record<string, unknown>, attempt = 0): Pr
   if (!res.ok || json?.error) {
     const status = json?.error?.code && typeof json.error.code === 'number' ? json.error.code : res.status;
     const msg: string = json?.error?.message || raw.slice(0, 300);
-    if (status === 401) throw new HttpError(401, 'OpenRouter odrzucił klucz API. Sprawdź klucz w Ustawieniach.');
-    if (status === 402) throw new HttpError(402, 'Brak środków na koncie OpenRouter. Doładuj konto na openrouter.ai/settings/credits.');
+    if (status === 401) throw new HttpError(401, tr('OpenRouter odrzucił klucz API. Sprawdź klucz w Ustawieniach.'));
+    if (status === 402) throw new HttpError(402, tr('Brak środków na koncie OpenRouter. Doładuj konto na openrouter.ai/settings/credits.'));
     if ((status === 429 || status >= 500) && attempt < 2) {
       await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
       return chat(key, body, attempt + 1);
@@ -248,8 +249,8 @@ Zwróć poprawiony, kompletny obiekt JSON.` },
   throw new HttpError(
     502,
     lastBroken
-      ? `Model ${model} zapętlił się albo urwał odpowiedź (${opts.schemaName}) w 3 próbach. Spróbuj ponownie albo wybierz inny model w Ustawieniach.`
-      : `Model ${model} zwrócił dane w złym formacie (${opts.schemaName}) w 3 próbach. Spróbuj ponownie albo wybierz inny model w Ustawieniach.`,
+      ? tr('Model {model} zapętlił się albo urwał odpowiedź ({task}) w 3 próbach. Spróbuj ponownie albo wybierz inny model w Ustawieniach.', { model, task: opts.schemaName })
+      : tr('Model {model} zwrócił dane w złym formacie ({task}) w 3 próbach. Spróbuj ponownie albo wybierz inny model w Ustawieniach.', { model, task: opts.schemaName }),
   );
 }
 
@@ -267,7 +268,7 @@ let modelCache: { at: number; list: ModelInfo[] } | null = null;
 export async function listModels(): Promise<ModelInfo[]> {
   if (modelCache && Date.now() - modelCache.at < 3600_000) return modelCache.list;
   const res = await fetch(`${API}/models`, { signal: AbortSignal.timeout(20_000) });
-  if (!res.ok) throw new HttpError(502, 'Nie udało się pobrać listy modeli z OpenRouter.');
+  if (!res.ok) throw new HttpError(502, tr('Nie udało się pobrać listy modeli z OpenRouter.'));
   const json: any = await res.json();
   const list: ModelInfo[] = (json.data as any[])
     .filter((m) => (m.supported_parameters ?? []).includes('structured_outputs') && !String(m.id).endsWith(':batch'))
@@ -285,11 +286,11 @@ export async function listModels(): Promise<ModelInfo[]> {
 /** Sprawdza klucz i saldo przez /key. */
 export async function checkKey(key: string): Promise<{ ok: boolean; message: string }> {
   const res = await fetch(`${API}/key`, { headers: { Authorization: `Bearer ${key}` }, signal: AbortSignal.timeout(15_000) });
-  if (res.status === 401) return { ok: false, message: 'Klucz nieprawidłowy.' };
-  if (!res.ok) return { ok: false, message: `OpenRouter odpowiedział kodem ${res.status}.` };
+  if (res.status === 401) return { ok: false, message: tr('Klucz nieprawidłowy.') };
+  if (!res.ok) return { ok: false, message: tr('OpenRouter odpowiedział kodem {status}.', { status: res.status }) };
   const j: any = await res.json();
   const d = j.data ?? {};
   const used = Number(d.usage ?? 0).toFixed(2);
-  const limit = d.limit == null ? 'bez limitu' : `limit ${Number(d.limit).toFixed(2)} $`;
-  return { ok: true, message: `Klucz działa. Zużyto ${used} $ (${limit}).` };
+  const limit = d.limit == null ? tr('bez limitu') : tr('limit {amount} $', { amount: Number(d.limit).toFixed(2) });
+  return { ok: true, message: tr('Klucz działa. Zużyto {used} $ ({limit}).', { used, limit }) };
 }

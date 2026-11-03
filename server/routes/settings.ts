@@ -4,6 +4,7 @@ import { checkKey, listModels } from '../llm/openrouter';
 import { activeSearchers, localPortalNames } from '../jobs/search';
 import { installPolanon, polanonStatus } from '../privacy/polanon';
 import type { Settings } from '../../shared/schemas';
+import { tr } from '../i18n';
 
 export const maskKey = (k: string) => (k ? `${k.slice(0, 8)}…${k.slice(-4)}` : '');
 
@@ -44,7 +45,7 @@ settingsRouter.post('/settings/polanon/install', async (_req, res) => {
 
 settingsRouter.post('/settings/check-key', async (req, res) => {
   const key = String(req.body?.apiKey || '').trim() || (await store.getSettings()).apiKey;
-  if (!key) return res.json({ ok: false, message: 'Brak klucza.' });
+  if (!key) return res.json({ ok: false, message: tr('Brak klucza.') });
   res.json(await checkKey(key));
 });
 
@@ -60,7 +61,7 @@ settingsRouter.get('/usage', async (_req, res) => {
   let total = 0;
   for (const u of usage) {
     total += u.cost;
-    const n = names[u.profileId] ?? 'usunięty profil';
+    const n = names[u.profileId] ?? tr('usunięty profil');
     byProfile[n] = (byProfile[n] ?? 0) + u.cost;
     byTask[u.task] = (byTask[u.task] ?? 0) + u.cost;
   }

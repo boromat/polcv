@@ -8,6 +8,7 @@ import { HttpError, newId, nowIso } from '../storage/store';
 import { cvFileToText } from '../cv/importCv';
 import { extractProfile, mergeProfile } from '../llm/prompts/extractProfile';
 import { maskKey } from './settings';
+import { tr } from '../i18n';
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 12 * 1024 * 1024 } });
 
@@ -22,7 +23,7 @@ profilesRouter.get('/profiles', async (_req, res) => {
 
 profilesRouter.post('/profiles', async (req, res) => {
   const name = String(req.body?.displayName ?? '').trim();
-  if (!name) throw new HttpError(400, 'Podaj nazwę profilu.');
+  if (!name) throw new HttpError(400, tr('Podaj nazwę profilu.'));
   const p = store.emptyProfile(name);
   await store.saveProfile(p);
   res.status(201).json(publicProfile(p));
@@ -35,7 +36,7 @@ profilesRouter.get('/profiles/:pid', async (req, res) => {
 profilesRouter.put('/profiles/:pid', async (req, res) => {
   const existing = await store.getProfile(req.params.pid);
   const parsed = ProfileSchema.safeParse({ ...existing, ...req.body, id: existing.id, createdAt: existing.createdAt });
-  if (!parsed.success) throw new HttpError(400, `Niepoprawne dane profilu: ${parsed.error.issues[0]?.path.join('.')} ${parsed.error.issues[0]?.message}`);
+  if (!parsed.success) throw new HttpError(400, tr('Niepoprawne dane profilu: {field} {problem}', { field: parsed.error.issues[0]?.path.join('.') ?? '', problem: parsed.error.issues[0]?.message ?? '' }));
   const next = parsed.data;
   // Zamaskowany klucz z formularza = bez zmian.
   if (next.apiKey === maskKey(existing.apiKey)) next.apiKey = existing.apiKey;
@@ -54,7 +55,7 @@ profilesRouter.delete('/profiles/:pid', async (req, res) => {
 profilesRouter.post('/profiles/:pid/import', upload.single('cv'), async (req, res) => {
   const profile = await store.getProfile(String(req.params.pid));
   const file = req.file;
-  if (!file) throw new HttpError(400, 'Nie wybrano pliku CV.');
+  if (!file) throw new HttpError(400, tr('Nie wybrano pliku CV.'));
   const original = Buffer.from(file.originalname, 'latin1').toString('utf8');
   const text = await cvFileToText(file.buffer, original);
 
@@ -102,9 +103,9 @@ profilesRouter.post('/profiles/:pid/import', upload.single('cv'), async (req, re
 profilesRouter.post('/profiles/:pid/photo', upload.single('photo'), async (req, res) => {
   const profile = await store.getProfile(String(req.params.pid));
   const file = req.file;
-  if (!file) throw new HttpError(400, 'Nie wybrano zdjęcia.');
+  if (!file) throw new HttpError(400, tr('Nie wybrano zdjęcia.'));
   const ext = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp' }[file.mimetype];
-  if (!ext) throw new HttpError(400, 'Zdjęcie musi być w formacie JPG, PNG lub WEBP.');
+  if (!ext) throw new HttpError(400, tr('Zdjęcie musi być w formacie JPG, PNG lub WEBP.'));
   if (profile.photo) await fs.rm(path.join(store.profileDir(profile.id), profile.photo), { force: true });
   profile.photo = `photo${ext}`;
   await fs.writeFile(path.join(store.profileDir(profile.id), profile.photo), file.buffer);
@@ -120,6 +121,6 @@ profilesRouter.delete('/profiles/:pid/photo', async (req, res) => {
 
 profilesRouter.get('/profiles/:pid/photo', async (req, res) => {
   const profile = await store.getProfile(req.params.pid);
-  if (!profile.photo) throw new HttpError(404, 'Brak zdjęcia');
+  if (!profile.photo) throw new HttpError(404, tr('Brak zdjęcia'));
   res.sendFile(path.join(store.profileDir(profile.id), profile.photo));
 });

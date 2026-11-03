@@ -1,6 +1,7 @@
 import type { CvContent, Profile, SectionKey } from '../../shared/schemas';
 import { sectionLabel } from '../cv/render';
 import { normalize } from './keywords';
+import { tr } from '../i18n';
 
 export const FORMAT_MAX = 20;
 
@@ -24,33 +25,33 @@ export function checkFormat(pdfText: string, pages: number, cv: CvContent, profi
     checks.push({ name, ok, detail, weight, partial });
 
   add(
-    'Tekst da się odczytać',
+    tr('Tekst da się odczytać'),
     pdfText.replace(/\s/g, '').length > 300,
-    pdfText.length > 300 ? 'PDF zawiera prawdziwy tekst, nie obrazek.' : 'W PDF jest bardzo mało tekstu do odczytania.',
+    pdfText.length > 300 ? tr('PDF zawiera prawdziwy tekst, nie obrazek.') : tr('W PDF jest bardzo mało tekstu do odczytania.'),
     4,
   );
 
   const name = profile.contact.fullName.trim();
   add(
-    'Imię i nazwisko',
+    tr('Imię i nazwisko'),
     !!name && norm.includes(normalize(name)),
-    name ? 'Odczytane poprawnie.' : 'Brak imienia i nazwiska w profilu - uzupełnij je.',
+    name ? tr('Odczytane poprawnie.') : tr('Brak imienia i nazwiska w profilu - uzupełnij je.'),
     2,
   );
 
   const email = profile.contact.email.trim();
   add(
-    'Adres e-mail',
+    tr('Adres e-mail'),
     !!email && pdfText.toLowerCase().includes(email.toLowerCase()),
-    email ? 'Odczytany poprawnie.' : 'Brak e-maila w profilu - ATS nie będzie mógł się z Tobą skontaktować.',
+    email ? tr('Odczytany poprawnie.') : tr('Brak e-maila w profilu - ATS nie będzie mógł się z Tobą skontaktować.'),
     2,
   );
 
   const phoneDigits = profile.contact.phone.replace(/\D/g, '');
   add(
-    'Numer telefonu',
+    tr('Numer telefonu'),
     phoneDigits.length >= 9 && pdfText.replace(/\D/g, '').includes(phoneDigits.slice(-9)),
-    phoneDigits.length >= 9 ? 'Odczytany poprawnie.' : 'Brak telefonu w profilu (albo jest niepełny).',
+    phoneDigits.length >= 9 ? tr('Odczytany poprawnie.') : tr('Brak telefonu w profilu (albo jest niepełny).'),
     2,
   );
 
@@ -67,9 +68,9 @@ export function checkFormat(pdfText: string, pages: number, cv: CvContent, profi
   const used = cv.sectionOrder.filter((k) => hasContent(cv, k));
   const foundHeadings = used.filter((k) => headingLine(k) >= 0);
   add(
-    'Standardowe nagłówki sekcji',
+    tr('Standardowe nagłówki sekcji'),
     foundHeadings.length >= Math.min(3, used.length),
-    `Rozpoznane nagłówki: ${foundHeadings.map((k) => sectionLabel(cv.language, k)).join(', ') || 'brak'}.`,
+    tr('Rozpoznane nagłówki: {list}.', { list: foundHeadings.map((k) => sectionLabel(cv.language, k)).join(', ') || tr('brak') }),
     2,
   );
 
@@ -77,16 +78,20 @@ export function checkFormat(pdfText: string, pages: number, cv: CvContent, profi
   const hasPolish = /[ąćęłńóśźż]/i.test(pdfText);
   const charsOk = !garbled && (cv.language === 'en' || hasPolish);
   add(
-    'Polskie znaki i kodowanie',
+    tr('Polskie znaki i kodowanie'),
     charsOk,
-    garbled ? 'W tekście są zepsute znaki - ATS może źle odczytać CV.' : charsOk ? 'Znaki odczytane poprawnie.' : 'Nie wykryto polskich znaków w CV po polsku.',
+    garbled
+      ? tr('W tekście są zepsute znaki - ATS może źle odczytać CV.')
+      : charsOk
+        ? tr('Znaki odczytane poprawnie.')
+        : tr('Nie wykryto polskich znaków w CV po polsku.'),
     2,
   );
 
   add(
-    'Długość CV',
+    tr('Długość CV'),
     pages <= 1,
-    pages <= 1 ? 'Jedna strona - idealnie dla studenta/juniora.' : `${pages} strony - dla juniora najlepiej skrócić do jednej.`,
+    pages <= 1 ? tr('Jedna strona - idealnie dla studenta/juniora.') : tr('{pages} strony - dla juniora najlepiej skrócić do jednej.', { pages }),
     3,
     pages === 2 ? 0.5 : undefined,
   );
@@ -96,7 +101,12 @@ export function checkFormat(pdfText: string, pages: number, cv: CvContent, profi
   const ordered = positions.every((p, i) => i === 0 || p > positions[i - 1]);
   const namePos = !name ? -1 : byLines ? lines.findIndex((l) => l.includes(normalize(name))) : norm.indexOf(normalize(name));
   const orderOk = ordered && (namePos === -1 || positions.length === 0 || namePos < positions[0]);
-  add('Kolejność czytania', orderOk, orderOk ? 'ATS czyta sekcje w dobrej kolejności.' : 'Sekcje są odczytywane w innej kolejności niż na stronie.', 2);
+  add(
+    tr('Kolejność czytania'),
+    orderOk,
+    orderOk ? tr('ATS czyta sekcje w dobrej kolejności.') : tr('Sekcje są odczytywane w innej kolejności niż na stronie.'),
+    2,
+  );
 
   const dateParts = [...cv.experience.map((e) => e.dates), ...cv.projects.map((p) => p.dates), ...cv.education.map((e) => e.dates)]
     .filter(Boolean)
@@ -106,7 +116,12 @@ export function checkFormat(pdfText: string, pages: number, cv: CvContent, profi
   // Sam rok (gdy miesiąc nieznany) i "obecnie" pasują do każdego formatu; niespójne jest mieszanie MM.RRRR z MM/RRRR.
   const kinds = new Set(dateParts.map((d) => DATE_PATTERNS.findIndex((p) => p.test(d))).filter((i) => i === 0 || i === 1));
   const datesOk = !dateParts.some((d) => DATE_PATTERNS.every((p) => !p.test(d))) && kinds.size <= 1;
-  add('Spójny format dat', datesOk, datesOk ? 'Daty w jednym formacie.' : 'Daty są zapisane w różnych formatach - ujednolić np. do MM.RRRR.', 1);
+  add(
+    tr('Spójny format dat'),
+    datesOk,
+    datesOk ? tr('Daty w jednym formacie.') : tr('Daty są zapisane w różnych formatach - ujednolić np. do MM.RRRR.'),
+    1,
+  );
 
   const score = Math.round(checks.reduce((s, c) => s + (c.ok ? c.weight : c.partial ? c.weight * c.partial : 0), 0));
   return { score, max: FORMAT_MAX, pages, checks: checks.map(({ partial, ...c }) => c) };

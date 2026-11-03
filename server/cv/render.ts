@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import type { CoverLetter, CvContent, CvText, CvVersion, Profile, SectionKey, TemplateId } from '../../shared/schemas';
+import { tr } from '../i18n';
 
 const require = createRequire(import.meta.url);
 
@@ -173,6 +174,7 @@ function docHtml(template: TemplateId, title: string, body: string, mode: Render
     mode === 'preview'
       ? `<script>
 (function(){
+  var pageEnd=${JSON.stringify(tr('koniec strony {n}'))};
   function draw(){
     var s=document.querySelector('.sheet'); if(!s) return;
     document.querySelectorAll('.page-guide').forEach(function(g){g.remove();});
@@ -181,7 +183,7 @@ function docHtml(template: TemplateId, title: string, body: string, mode: Render
     Array.prototype.forEach.call(s.children,function(ch){ if(!ch.classList.contains('page-guide')) end=Math.max(end, ch.offsetTop+ch.offsetHeight); });
     var n=1;
     while(end>top+contentH*n+1){ var g=document.createElement('div'); g.className='page-guide'; g.style.top=(top+contentH*n)+'px';
-      g.innerHTML='<span>koniec strony '+n+'</span>'; s.appendChild(g); n++; }
+      var label=document.createElement('span'); label.textContent=pageEnd.replace('{n}', n); g.appendChild(label); s.appendChild(g); n++; }
     try{ parent.postMessage({type:'cv-pages', pages:n}, '*'); }catch(e){}
   }
   // Kartka A4 (≈794 px) skalowana do szerokości panelu podglądu.

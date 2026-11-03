@@ -8,6 +8,7 @@ import { profilesRouter } from './routes/profiles';
 import { applicationsRouter } from './routes/applications';
 import { careerRouter } from './routes/career';
 import { closeBrowser } from './cv/browser';
+import { langMiddleware, tr } from './i18n';
 
 const PORT = Number(process.env.PORT || 3000);
 // Domyślnie tylko ten komputer; CV_HOST=0.0.0.0 udostępnia w sieci lokalnej.
@@ -15,15 +16,16 @@ const HOST = process.env.CV_HOST || '127.0.0.1';
 
 const app = express();
 app.use(express.json({ limit: '5mb' }));
+app.use('/api', langMiddleware);
 
 app.use('/api', settingsRouter, profilesRouter, applicationsRouter, careerRouter);
 
-app.use('/api', (_req, _res, next) => next(new HttpError(404, 'Nie ma takiego adresu API')));
+app.use('/api', (_req, _res, next) => next(new HttpError(404, tr('Nie ma takiego adresu API'))));
 
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   const status = err instanceof HttpError ? err.status : err?.code === 'LIMIT_FILE_SIZE' ? 413 : 500;
   const message =
-    err instanceof HttpError ? err.message : err?.code === 'LIMIT_FILE_SIZE' ? 'Plik jest za duży (maks. 12 MB).' : `Błąd programu: ${err?.message ?? err}`;
+    err instanceof HttpError ? err.message : err?.code === 'LIMIT_FILE_SIZE' ? tr('Plik jest za duży (maks. 12 MB).') : tr('Błąd programu: {error}', { error: err?.message ?? String(err) });
   if (status >= 500) console.error(err);
   res.status(status).json({ error: message });
 });

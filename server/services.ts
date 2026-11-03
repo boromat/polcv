@@ -16,6 +16,7 @@ import { photoDataUri, renderCvHtml, renderLetterHtml, type RenderMode } from '.
 import { htmlToPdf } from './cv/pdf';
 import { buildReport } from './ats/score';
 import { countPhrase, tokenize } from './ats/keywords';
+import { tr } from './i18n';
 
 const ctxOf = (app: Application, task: string) => ({ profileId: app.profileId, applicationId: app.id, task });
 
@@ -24,14 +25,14 @@ const ctxOf = (app: Application, task: string) => ({ profileId: app.profileId, a
 export async function createApplication(profileId: string, url: string, pastedText: string): Promise<Application> {
   await store.getProfile(profileId);
   let rawText = pastedText.trim();
-  let fetchMethod = 'wklejony tekst';
+  let fetchMethod = 'wklejony tekst'; // zapisana wartość - tłumaczy ją widok ogłoszenia
   if (!rawText) {
-    if (!url.trim()) throw new HttpError(400, 'Podaj link do ogłoszenia albo wklej jego treść.');
+    if (!url.trim()) throw new HttpError(400, tr('Podaj link do ogłoszenia albo wklej jego treść.'));
     const fetched = await fetchPosting(url);
     rawText = fetched.text;
     fetchMethod = fetched.method;
   }
-  if (rawText.length < 200) throw new HttpError(400, 'Treść ogłoszenia jest za krótka - wklej całe ogłoszenie.');
+  if (rawText.length < 200) throw new HttpError(400, tr('Treść ogłoszenia jest za krótka - wklej całe ogłoszenie.'));
 
   const t = nowIso();
   const app: Application = {
@@ -59,7 +60,7 @@ export async function createApplication(profileId: string, url: string, pastedTe
 
 export async function runGapAnalysis(profileId: string, appId: string): Promise<Application> {
   const app = await store.getApplication(profileId, appId);
-  if (!app.posting) throw new HttpError(409, 'Najpierw trzeba przeanalizować ogłoszenie.');
+  if (!app.posting) throw new HttpError(409, tr('Najpierw trzeba przeanalizować ogłoszenie.'));
   const profile = await store.getProfile(profileId);
   const gap = await gapQuestions(profile, app.posting, ctxOf(app, 'pytania o braki'));
   app.gap = { questions: gap.questions, covered: gap.covered, answers: [] };
@@ -70,14 +71,14 @@ export async function runGapAnalysis(profileId: string, appId: string): Promise<
 export async function saveAnswers(profileId: string, appId: string, answers: GapAnswer[]): Promise<Application> {
   const app = await store.getApplication(profileId, appId);
   const profile = await store.getProfile(profileId);
-  const source = `Odpowiedź przy aplikacji: ${app.posting?.title ?? ''} – ${app.posting?.company ?? ''}`.trim();
+  const source = tr('Odpowiedź przy aplikacji: {title} – {company}', { title: app.posting?.title ?? '', company: app.posting?.company ?? '' }).trim();
   for (const a of answers) {
     if (!a.has && !a.answer.trim()) continue;
     profile.extraFacts.push({
       id: newId(),
       topic: a.requirement,
       has: a.has,
-      answer: a.has ? a.answer.trim() : a.answer.trim() || 'Nie znam / nie mam doświadczenia.',
+      answer: a.has ? a.answer.trim() : a.answer.trim() || tr('Nie znam / nie mam doświadczenia.'),
       source,
       date: nowIso().slice(0, 10),
     });
@@ -108,7 +109,7 @@ function withFreshIds(c: CvContent): CvContent {
 
 export async function generate(profileId: string, appId: string, language?: 'pl' | 'en', template?: TemplateId): Promise<CvVersion> {
   const app = await store.getApplication(profileId, appId);
-  if (!app.posting) throw new HttpError(409, 'Brak przeanalizowanego ogłoszenia.');
+  if (!app.posting) throw new HttpError(409, tr('Brak przeanalizowanego ogłoszenia.'));
   const profile = await store.getProfile(profileId);
   const lang = language ?? decideLanguage(app.posting);
   const content = withFreshIds(await generateCv(profile, app.posting, lang, ctxOf(app, 'pisanie CV')));
@@ -173,7 +174,7 @@ export async function versionPdf(profileId: string, appId: string, v: number) {
 
 export async function evaluate(profileId: string, appId: string, v: number) {
   const app = await store.getApplication(profileId, appId);
-  if (!app.posting) throw new HttpError(409, 'Brak przeanalizowanego ogłoszenia.');
+  if (!app.posting) throw new HttpError(409, tr('Brak przeanalizowanego ogłoszenia.'));
   const [profile, cv] = await Promise.all([store.getProfile(profileId), store.getVersion(profileId, appId, v)]);
   const { text, pages } = await htmlToPdf(await renderCv(profile, cv, 'pdf'));
 
@@ -184,7 +185,7 @@ export async function evaluate(profileId: string, appId: string, v: number) {
   } catch (e: any) {
     // Brak klucza / zły klucz / brak środków / niedziałające maskowanie - przerywamy, żeby nie pokazać zawyżonego, niepełnego wyniku.
     if (e instanceof HttpError && [400, 401, 402, 503].includes(e.status)) throw e;
-    aiError = e.message || 'Nie udało się uzyskać oceny AI.';
+    aiError = e.message || tr('Nie udało się uzyskać oceny AI.');
   }
   const report = buildReport({ version: v, pdfText: text, pages, cv: applyDecisions(cv), profile, posting: app.posting, review, aiError });
   await store.saveReport(profileId, appId, report);
@@ -193,7 +194,7 @@ export async function evaluate(profileId: string, appId: string, v: number) {
 
 export async function improve(profileId: string, appId: string): Promise<CvVersion> {
   const app = await store.getApplication(profileId, appId);
-  if (!app.posting || !app.currentVersion) throw new HttpError(409, 'Najpierw wygeneruj CV.');
+  if (!app.posting || !app.currentVersion) throw new HttpError(409, tr('Najpierw wygeneruj CV.'));
   const current = await store.getVersion(profileId, appId, app.currentVersion);
   let report = await store.getReport(profileId, appId, current.version);
   if (!report || report.createdAt < current.updatedAt) report = await evaluate(profileId, appId, current.version);
@@ -262,10 +263,10 @@ export const shortCompany = (s: string) =>
 
 export async function exportPdf(profileId: string, appId: string): Promise<Application> {
   const app = await store.getApplication(profileId, appId);
-  if (!app.currentVersion) throw new HttpError(409, 'Najpierw wygeneruj CV.');
+  if (!app.currentVersion) throw new HttpError(409, tr('Najpierw wygeneruj CV.'));
   const [profile, cv] = await Promise.all([store.getProfile(profileId), store.getVersion(profileId, appId, app.currentVersion)]);
   const pending = pendingSuggestions(cv);
-  if (pending) throw new HttpError(409, `Zatwierdź albo odrzuć ${pending} sugestie (żółte fragmenty), zanim pobierzesz PDF.`);
+  if (pending) throw new HttpError(409, tr('Zatwierdź albo odrzuć {n} sugestie (żółte fragmenty), zanim pobierzesz PDF.', { n: pending }));
   const { pdf } = await htmlToPdf(await renderCv(profile, cv, 'pdf'));
   const name = [profile.contact.fullName || profile.displayName, 'CV', shortCompany(app.posting?.company ?? ''), app.posting?.title].filter(Boolean).map((x) => fileSafe(String(x))).filter(Boolean).join('_');
   const file = `${name || 'CV'}.pdf`;
@@ -280,7 +281,7 @@ export async function exportPdf(profileId: string, appId: string): Promise<Appli
 
 export async function makeInterviewPrep(profileId: string, appId: string) {
   const app = await store.getApplication(profileId, appId);
-  if (!app.posting || !app.currentVersion) throw new HttpError(409, 'Najpierw wygeneruj CV.');
+  if (!app.posting || !app.currentVersion) throw new HttpError(409, tr('Najpierw wygeneruj CV.'));
   const profile = await store.getProfile(profileId);
   const { text } = await versionPdf(profileId, appId, app.currentVersion);
   const prep = await interviewPrep(profile, app.posting, text, ctxOf(app, 'przygotowanie do rozmowy'));
@@ -292,7 +293,7 @@ export async function makeInterviewPrep(profileId: string, appId: string) {
 
 export async function makeCoverLetter(profileId: string, appId: string) {
   const app = await store.getApplication(profileId, appId);
-  if (!app.posting) throw new HttpError(409, 'Brak przeanalizowanego ogłoszenia.');
+  if (!app.posting) throw new HttpError(409, tr('Brak przeanalizowanego ogłoszenia.'));
   const profile = await store.getProfile(profileId);
   const cv = app.currentVersion ? await store.getVersion(profileId, appId, app.currentVersion) : null;
   const lang = cv?.content.language ?? decideLanguage(app.posting);
@@ -306,7 +307,7 @@ export async function makeCoverLetter(profileId: string, appId: string) {
 export async function letterPdf(profileId: string, appId: string) {
   const app = await store.getApplication(profileId, appId);
   const letter = await store.getCoverLetter(profileId, appId);
-  if (!letter || !app.posting) throw new HttpError(404, 'Brak listu motywacyjnego.');
+  if (!letter || !app.posting) throw new HttpError(404, tr('Brak listu motywacyjnego.'));
   const profile = await store.getProfile(profileId);
   const cv = app.currentVersion ? await store.getVersion(profileId, appId, app.currentVersion) : null;
   const html = renderLetterHtml(letter, profile, cv?.template ?? 'modern', app.posting, 'pdf');
@@ -318,7 +319,7 @@ export async function letterPdf(profileId: string, appId: string) {
 export async function letterPreview(profileId: string, appId: string) {
   const app = await store.getApplication(profileId, appId);
   const letter = await store.getCoverLetter(profileId, appId);
-  if (!letter || !app.posting) throw new HttpError(404, 'Brak listu motywacyjnego.');
+  if (!letter || !app.posting) throw new HttpError(404, tr('Brak listu motywacyjnego.'));
   const profile = await store.getProfile(profileId);
   const cv = app.currentVersion ? await store.getVersion(profileId, appId, app.currentVersion) : null;
   return renderLetterHtml(letter, profile, cv?.template ?? 'modern', app.posting, 'preview');

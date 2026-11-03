@@ -7,6 +7,7 @@ import '@fontsource/inter/600.css';
 import '@fontsource/inter/700.css';
 import './styles.css';
 import { AppProvider, useApp } from './ctx';
+import { LangProvider, useT } from './i18n';
 import { ProfilesPage } from './pages/ProfilesPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { NewApplicationPage } from './pages/NewApplicationPage';
@@ -17,6 +18,7 @@ import { CareerPage } from './pages/CareerPage';
 
 function Shell({ children }: { children: ReactNode }) {
   const { current, profiles, select, settings } = useApp();
+  const { t, lang, setLang } = useT();
   const nav = useNavigate();
   return (
     <>
@@ -26,20 +28,27 @@ function Shell({ children }: { children: ReactNode }) {
         </Link>
         {current && (
           <nav className="nav">
-            <NavLink to="/career">Szukaj pracy</NavLink>
-            <NavLink to="/new">Nowe CV</NavLink>
-            <NavLink to="/history">Historia</NavLink>
-            <NavLink to="/profile">Mój profil</NavLink>
-            <NavLink to="/settings">Ustawienia</NavLink>
+            <NavLink to="/career">{t('Szukaj pracy')}</NavLink>
+            <NavLink to="/new">{t('Nowe CV')}</NavLink>
+            <NavLink to="/history">{t('Historia')}</NavLink>
+            <NavLink to="/profile">{t('Mój profil')}</NavLink>
+            <NavLink to="/settings">{t('Ustawienia')}</NavLink>
           </nav>
         )}
         <div className="spacer" />
+        <div className="lang-switch" role="group" aria-label={t('Język interfejsu')}>
+          {(['pl', 'en'] as const).map((l) => (
+            <button key={l} className={lang === l ? 'active' : ''} aria-pressed={lang === l} onClick={() => setLang(l)}>
+              {l.toUpperCase()}
+            </button>
+          ))}
+        </div>
         {current && (
           <div className="profile-switch">
-            <span className="faint">Profil:</span>
+            <span className="faint">{t('Profil:')}</span>
             <select
               value={current.id}
-              aria-label="Wybierz profil"
+              aria-label={t('Wybierz profil')}
               onChange={(e) => {
                 if (e.target.value === '__manage') nav('/profiles');
                 else {
@@ -54,7 +63,7 @@ function Shell({ children }: { children: ReactNode }) {
                   {p.displayName}
                 </option>
               ))}
-              <option value="__manage">Zarządzaj profilami…</option>
+              <option value="__manage">{t('Zarządzaj profilami…')}</option>
             </select>
           </div>
         )}
@@ -62,7 +71,7 @@ function Shell({ children }: { children: ReactNode }) {
       {settings && !settings.hasKey && current && !current.apiKey && (
         <div className="container" style={{ paddingBottom: 0 }}>
           <div className="callout warn">
-            <b>Brak klucza OpenRouter.</b> Bez niego AI nie zadziała. <Link to="/settings">Przejdź do Ustawień</Link>, żeby go wkleić.
+            <b>{t('Brak klucza OpenRouter.')}</b> {t('Bez niego AI nie zadziała.')} <Link to="/settings">{t('Przejdź do Ustawień')}</Link>{t(', żeby go wkleić.')}
           </div>
         </div>
       )}
@@ -100,10 +109,12 @@ function App() {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
-      <AppProvider>
-        <App />
-      </AppProvider>
-    </BrowserRouter>
+    <LangProvider>
+      <BrowserRouter>
+        <AppProvider>
+          <App />
+        </AppProvider>
+      </BrowserRouter>
+    </LangProvider>
   </StrictMode>,
 );

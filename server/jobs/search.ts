@@ -4,6 +4,7 @@ import type { CareerPrefs, JobLead, RoleProposal } from '../../shared/schemas';
 import { normalize } from '../ats/keywords';
 import { distanceKm, geocodeCity, type Point } from './geocode';
 import { APP_UA } from './http';
+import { tr } from '../i18n';
 
 type Seniority = RoleProposal['seniority'];
 type Scope = 'local' | 'remote';
@@ -158,6 +159,7 @@ export function screenLeads(leads: JobLead[], prefs: CareerPrefs, seniority: Sen
       count('dla bardziej doświadczonych');
       continue;
     }
+    // Powody i klucze statystyk zostają po polsku (to zapisane dane) - przegląd ofert tłumaczy je przy wyświetlaniu.
     let reason = '';
     // "dowolna" = forma umowy do uzgodnienia, więc pasuje do każdej preferencji.
     if (prefs.contracts.length && l.contracts.length && !l.contracts.some((c) => c === 'dowolna' || (prefs.contracts as string[]).includes(c))) reason = `umowa: ${l.contracts.join(', ')}`;
@@ -233,7 +235,7 @@ export async function searchRole(role: RoleProposal, prefs: CareerPrefs): Promis
   const scopes: Scope[] = [];
   if (prefs.city.trim() && (prefs.onsite || prefs.hybrid)) scopes.push('local');
   if (prefs.remote) scopes.push('remote');
-  if (!scopes.length) return { kept: [], excluded: [], stats: {}, errors: ['Ustaw miasto albo zaznacz pracę zdalną w preferencjach.'], scanned: 0 };
+  if (!scopes.length) return { kept: [], excluded: [], stats: {}, errors: [tr('Ustaw miasto albo zaznacz pracę zdalną w preferencjach.')], scanned: 0 };
 
   // Po usunięciu "junior" z "junior AI" zostaje samo "AI" - zbyt ogólne, pomijamy frazy krótsze niż 4 znaki.
   const phrases = [...new Set([...role.keywords, role.title].map(cleanPhrase).filter((p) => p.length > 3))].slice(0, 3);
@@ -250,6 +252,6 @@ export async function searchRole(role: RoleProposal, prefs: CareerPrefs): Promis
     if (r.status === 'fulfilled') all.push(...r.value);
     else failed.add(jobs[i].portal);
   });
-  const errors = [...failed].map((p) => `${p}: nie udało się pobrać części wyników.`);
+  const errors = [...failed].map((p) => tr('{portal}: nie udało się pobrać części wyników.', { portal: p }));
   return { ...screenLeads(all, prefs, role.seniority), errors, scanned: all.length };
 }

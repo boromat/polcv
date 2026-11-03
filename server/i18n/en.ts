@@ -1,0 +1,139 @@
+/** Angielskie tłumaczenia komunikatów serwera i raportu ATS. Klucz to polski tekst z kodu. */
+export const EN: Record<string, string> = {
+  'Nie ma takiego adresu API': 'There is no such API address',
+  'Plik jest za duży (maks. 12 MB).': 'The file is too large (max. 12 MB).',
+  'Błąd programu: {error}': 'Program error: {error}',
+
+  // routes/*
+  'Wiadomość jest za długa (maks. {max} znaków).': 'The message is too long (max. {max} characters).',
+  'Niepoprawne preferencje: {field}': 'Invalid preferences: {field}',
+  'Brak klucza.': 'No key provided.',
+  'usunięty profil': 'deleted profile',
+  'Podaj nazwę profilu.': 'Enter a profile name.',
+  'Niepoprawne dane profilu: {field} {problem}': 'Invalid profile data: {field} {problem}',
+  'Nie wybrano pliku CV.': 'No CV file was selected.',
+  'Nie wybrano zdjęcia.': 'No photo was selected.',
+  'Zdjęcie musi być w formacie JPG, PNG lub WEBP.': 'The photo must be a JPG, PNG or WEBP file.',
+  'Brak zdjęcia': 'No photo',
+  'Nieprawidłowy numer wersji': 'Invalid version number',
+  'Nieznany status': 'Unknown status',
+  'Niepoprawne odpowiedzi': 'Invalid answers',
+  'Niepoprawne dane CV: {field}': 'Invalid CV data: {field}',
+  'Ten PDF nie został jeszcze zapisany.': 'This PDF has not been saved yet.',
+  'Niepoprawny list': 'Invalid cover letter',
+
+  // career.ts, jobs/search.ts
+  'Rozmowa z doradcą kariery': 'Chat with the career advisor',
+  'Wyszukiwanie ofert jest wyłączone. Możesz je włączyć w Ustawieniach albo otworzyć wyszukiwanie na portalu linkiem przy stanowisku.':
+    'Job search is turned off. You can turn it on in Settings, or use the link next to the role to search the job portal yourself.',
+  'Nie ma takiej propozycji - wygeneruj propozycje ponownie.': 'This role suggestion no longer exists. Generate the suggestions again.',
+  'Nie udało się ocenić dopasowania ofert przez AI - pokazuję je bez oceny.':
+    'The AI could not score how well these job postings match, so they are shown without a score.',
+  'Ustaw miasto albo zaznacz pracę zdalną w preferencjach.': 'Set a city or tick remote work in your preferences.',
+  '{portal}: nie udało się pobrać części wyników.': '{portal}: some of the results could not be fetched.',
+
+  // services.ts
+  'Podaj link do ogłoszenia albo wklej jego treść.': 'Enter a link to the job posting or paste the posting text.',
+  'Treść ogłoszenia jest za krótka - wklej całe ogłoszenie.': 'The posting text is too short. Paste the whole job posting.',
+  'Najpierw trzeba przeanalizować ogłoszenie.': 'The job posting has to be analysed first.',
+  'Odpowiedź przy aplikacji: {title} – {company}': 'Answer given when applying: {title} - {company}',
+  'Nie znam / nie mam doświadczenia.': "I don't know it / I have no experience with it.",
+  'Brak przeanalizowanego ogłoszenia.': 'There is no analysed job posting.',
+  'Nie udało się uzyskać oceny AI.': 'Could not get the AI review.',
+  'Najpierw wygeneruj CV.': 'Generate the CV first.',
+  'Zatwierdź albo odrzuć {n} sugestie (żółte fragmenty), zanim pobierzesz PDF.':
+    'Accept or reject the remaining suggestions ({n}, highlighted in yellow) before you download the PDF.',
+  'Brak listu motywacyjnego.': 'There is no cover letter yet.',
+
+  // storage/store.ts
+  'Nieprawidłowy identyfikator': 'Invalid identifier',
+  'Nie znaleziono profilu': 'Profile not found',
+  'Nie znaleziono aplikacji': 'Application not found',
+  'Brak wersji CV nr {v}': 'CV version {v} does not exist',
+
+  // cv/importCv.ts, cv/browser.ts, cv/render.ts, jobs/fetchPosting.ts
+  'Obsługiwane formaty CV: PDF, DOCX, TXT.': 'Supported CV formats: PDF, DOCX, TXT.',
+  'Z tego pliku nie da się odczytać tekstu (to może być skan lub obrazek). Wgraj CV zapisane jako PDF z Worda/Google Docs albo plik DOCX.':
+    'No text can be read from this file (it may be a scan or an image). Upload a CV saved as a PDF from Word or Google Docs, or a DOCX file.',
+  'Nie udało się uruchomić przeglądarki Chromium ({error}). Uruchom w folderze programu: npx playwright install chromium':
+    'Could not start the Chromium browser ({error}). In the program folder, run: npx playwright install chromium',
+  'koniec strony {n}': 'end of page {n}',
+  'To nie wygląda na poprawny link (powinien zaczynać się od https://).': 'This does not look like a valid link (it should start with https://).',
+  'Obsługiwane są tylko linki http(s).': 'Only http(s) links are supported.',
+  'Nie udało się pobrać treści ogłoszenia z tego linku (strona mogła zablokować pobieranie). Skopiuj tekst ogłoszenia i wklej go w pole poniżej.':
+    'Could not fetch the job posting from this link (the site may have blocked it). Copy the posting text and paste it into the field below.',
+
+  // cv/rodo.ts: wyjaśnienia decyzji o klauzuli i zdjęciu (sama klauzula idzie za językiem CV)
+  'Ogłoszenie podaje własną treść klauzuli - wklejono ją dosłownie.': 'The job posting gives its own clause wording, so it was copied word for word.',
+  'Firma zagraniczna i CV po angielsku - klauzula RODO nie jest zwyczajowo wymagana.':
+    'Foreign company and an English CV: a GDPR consent clause is not usually expected.',
+  'Polska firma, CV po angielsku - dodano klauzulę w wersji angielskiej.': 'Polish company, English CV: the English version of the clause was added.',
+  'Standardowa klauzula + zgoda na przyszłe rekrutacje (ogłoszenie o nią prosi).':
+    'Standard clause plus consent for future recruitment (the job posting asks for it).',
+  'Polska oferta bez własnej klauzuli - dodano standardową klauzulę RODO.': 'Polish job posting without its own clause: the standard GDPR clause was added.',
+  'Profil nie ma zdjęcia.': 'Your profile has no photo.',
+  'Ogłoszenie prosi o CV bez zdjęcia.': 'The job posting asks for a CV without a photo.',
+  'Ogłoszenie prosi o zdjęcie.': 'The job posting asks for a photo.',
+  'Oferta zagraniczna/anglojęzyczna - tam CV zwykle są bez zdjęcia.': 'Foreign or English-language job posting: CVs there usually have no photo.',
+  'Polska oferta - zdjęcie jest tu zwyczajowe.': 'Polish job posting: a photo is customary here.',
+
+  // llm/openrouter.ts
+  'Brak klucza OpenRouter. Wklej go w Ustawieniach.': 'No OpenRouter key. Paste it in Settings.',
+  'Brak połączenia z OpenRouter ({reason}).': 'Could not connect to OpenRouter ({reason}).',
+  'przekroczony czas': 'timed out',
+  'OpenRouter odrzucił klucz API. Sprawdź klucz w Ustawieniach.': 'OpenRouter rejected the API key. Check the key in Settings.',
+  'Brak środków na koncie OpenRouter. Doładuj konto na openrouter.ai/settings/credits.':
+    'Your OpenRouter account has no credit left. Top it up at openrouter.ai/settings/credits.',
+  'Model {model} zapętlił się albo urwał odpowiedź ({task}) w 3 próbach. Spróbuj ponownie albo wybierz inny model w Ustawieniach.':
+    'The model {model} got stuck in a loop or cut its answer short ({task}) in 3 attempts. Try again or choose a different model in Settings.',
+  'Model {model} zwrócił dane w złym formacie ({task}) w 3 próbach. Spróbuj ponownie albo wybierz inny model w Ustawieniach.':
+    'The model {model} returned data in the wrong format ({task}) in 3 attempts. Try again or choose a different model in Settings.',
+  'Nie udało się pobrać listy modeli z OpenRouter.': 'Could not fetch the model list from OpenRouter.',
+  'Klucz nieprawidłowy.': 'The key is invalid.',
+  'OpenRouter odpowiedział kodem {status}.': 'OpenRouter responded with code {status}.',
+  'bez limitu': 'no limit',
+  'limit {amount} $': 'limit {amount} USD',
+  'Klucz działa. Zużyto {used} $ ({limit}).': 'The key works. Used so far: {used} USD ({limit}).',
+
+  // privacy/polanon.ts (stan i błędy pokazywane w Ustawieniach)
+  '{command} to Python {version}': '{command} is Python {version}',
+  'Pakiet polanon nie jest zainstalowany.': 'The polanon package is not installed.',
+  'polanon wymaga Pythona 3.11 lub nowszego ({found}).': 'polanon needs Python 3.11 or newer ({found}).',
+  'Nie znaleziono Pythona 3.11+.': 'Python 3.11+ was not found.',
+  'polanon nie wystartował w ciągu 60 s': 'polanon did not start within 60 s',
+  'proces polanon zakończył się (kod {code})': 'the polanon process exited (code {code})',
+  'proces polanon nie działa': 'the polanon process is not running',
+  'polanon nie odpowiedział w ciągu 120 s': 'polanon did not respond within 120 s',
+  'Maskowanie danych osobowych (polanon) jest włączone, ale nie działa: {error}. Nic nie zostało wysłane do AI. Napraw to w Ustawieniach albo wyłącz maskowanie.':
+    'Personal data masking (polanon) is turned on but is not working: {error}. Nothing was sent to the AI. Fix it in Settings or turn masking off.',
+
+  // ats/formatChecks.ts: nazwy i opisy kontroli w raporcie ATS
+  'Tekst da się odczytać': 'Text can be read',
+  'PDF zawiera prawdziwy tekst, nie obrazek.': 'The PDF contains real text, not an image.',
+  'W PDF jest bardzo mało tekstu do odczytania.': 'The PDF has very little readable text.',
+  'Imię i nazwisko': 'Full name',
+  'Odczytane poprawnie.': 'Read correctly.',
+  'Brak imienia i nazwiska w profilu - uzupełnij je.': 'Your profile has no full name. Please add it.',
+  'Adres e-mail': 'Email address',
+  'Odczytany poprawnie.': 'Read correctly.',
+  'Brak e-maila w profilu - ATS nie będzie mógł się z Tobą skontaktować.':
+    'Your profile has no email address, so the ATS will have no way to contact you.',
+  'Numer telefonu': 'Phone number',
+  'Brak telefonu w profilu (albo jest niepełny).': 'Your profile has no phone number (or it is incomplete).',
+  'Standardowe nagłówki sekcji': 'Standard section headings',
+  'Rozpoznane nagłówki: {list}.': 'Recognised headings: {list}.',
+  brak: 'none',
+  'Polskie znaki i kodowanie': 'Polish characters and encoding',
+  'W tekście są zepsute znaki - ATS może źle odczytać CV.': 'The text contains broken characters, so the ATS may misread your CV.',
+  'Znaki odczytane poprawnie.': 'Characters read correctly.',
+  'Nie wykryto polskich znaków w CV po polsku.': 'No Polish characters were found in a CV written in Polish.',
+  'Długość CV': 'CV length',
+  'Jedna strona - idealnie dla studenta/juniora.': 'One page: ideal for a student or junior.',
+  '{pages} strony - dla juniora najlepiej skrócić do jednej.': '{pages} pages: for a junior, it is best to cut it down to one.',
+  'Kolejność czytania': 'Reading order',
+  'ATS czyta sekcje w dobrej kolejności.': 'The ATS reads the sections in the right order.',
+  'Sekcje są odczytywane w innej kolejności niż na stronie.': 'The sections are read in a different order than they appear on the page.',
+  'Spójny format dat': 'Consistent date format',
+  'Daty w jednym formacie.': 'All dates use the same format.',
+  'Daty są zapisane w różnych formatach - ujednolić np. do MM.RRRR.': 'Dates are written in different formats. Make them consistent, e.g. MM.YYYY.',
+};

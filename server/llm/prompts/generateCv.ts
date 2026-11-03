@@ -1,11 +1,11 @@
 import { CvContentSchema, type CvContent, type JobPosting, type Profile, type AtsReport } from '../../../shared/schemas';
 import { callJson, type LlmContext } from '../openrouter';
-import { json, postingForPrompt, profileForPrompt, today, WRITING_RULES } from './common';
+import { json, postingForPrompt, profileForPrompt, today, writingRules, forUser } from './common';
 
 const SYSTEM = (lang: 'pl' | 'en') => `Jesteś doświadczonym rekruterem i ekspertem od CV przechodzących przez systemy ATS oraz automatyczną ocenę AI. Piszesz CV kandydata (student/junior) dopasowane do konkretnego ogłoszenia.
 
-JĘZYK CV: ${lang === 'pl' ? 'polski' : 'angielski'}. Całą treść pisz w tym języku (nazwy własne, technologie i narzędzia zostaw w oryginale). Pole "notes" zawsze po polsku.
-${WRITING_RULES}
+JĘZYK CV: ${lang === 'pl' ? 'polski' : 'angielski'}. Całą treść pisz w tym języku (nazwy własne, technologie i narzędzia zostaw w oryginale). Pole "notes" zawsze ${forUser()}.
+${writingRules()}
 STRUKTURA:
 - "headline": tytuł stanowiska z ogłoszenia (dosłownie) albo jego bliski odpowiednik zgodny z poziomem kandydata.
 - "summary": 2–4 zdania dopasowane do ogłoszenia: kim jest kandydat (np. student kierunku X), 3–4 najważniejsze dopasowane umiejętności, jeden konkretny dowód (projekt/osiągnięcie), co wnosi na tym stanowisku. Bez "Ja", bez frazesów. Też obiekt z statusem fact/suggested.
@@ -17,7 +17,8 @@ STRUKTURA:
 - "interests": maks. 3 krótkie pozycje z profilu, tylko jeśli pomagają (inaczej pusta lista).
 - Objętość: cel to JEDNA strona A4 (ok. 350–480 słów łącznie). Lepiej mniej i trafniej.
 - "id" każdego obiektu tekstu: dowolny unikalny (np. s1, e1b1).
-- "notes": 2–4 zdania po polsku dla kandydata: co podkreślono pod to ogłoszenie i jakich wymagań brakuje (żeby mógł się douczyć lub uzupełnić profil).
+- Klauzulę RODO i zdjęcie program dodaje do CV sam, według ogłoszenia: nie wpisuj ich do treści i nie pisz o nich w "notes".
+- "notes": 2–4 zdania ${forUser()} dla kandydata: co podkreślono pod to ogłoszenie i jakich wymagań brakuje (żeby mógł się douczyć lub uzupełnić profil).
 Dzisiejsza data: ${today()}.`;
 
 export async function generateCv(

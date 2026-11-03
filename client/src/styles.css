@@ -53,6 +53,10 @@ p { margin: 0; }
 .nav a.active { background: var(--accent-soft); color: var(--accent); }
 .topbar .spacer { flex: 1; }
 .profile-switch { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.lang-switch { display: flex; border: 1px solid var(--border); border-radius: 7px; overflow: hidden; flex-shrink: 0; }
+.lang-switch button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 12px; font-weight: 600; padding: 5px 9px; cursor: pointer; }
+.lang-switch button + button { border-left: 1px solid var(--border); }
+.lang-switch button.active { background: var(--accent-soft); color: var(--accent); }
 .profile-switch select { max-width: 200px; }
 @media (max-width: 720px) {
   .topbar { flex-wrap: wrap; gap: 8px 12px; padding: 8px 16px; }

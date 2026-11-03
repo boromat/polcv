@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Application, GapAnswer, TemplateId } from '../../../../shared/schemas';
 import { Field, TEMPLATES } from '../../components/ui';
+import { useT } from '../../i18n';
 
 export function GapStep({
   app,
@@ -9,6 +10,7 @@ export function GapStep({
   app: Application;
   onGenerate: (answers: GapAnswer[], opts: { language?: 'pl' | 'en'; template: TemplateId }) => void;
 }) {
+  const { t } = useT();
   const questions = app.gap?.questions ?? [];
   const [answers, setAnswers] = useState<Record<string, { has: boolean | null; answer: string }>>(() =>
     Object.fromEntries(questions.map((q) => [q.id, { has: null, answer: '' }])),
@@ -33,40 +35,40 @@ export function GapStep({
     <div className="gap-layout">
       <div className="stack lg">
         <div className="card">
-          <h2>Kilka pytań, zanim napiszę CV</h2>
+          <h2>{t('Kilka pytań, zanim napiszę CV')}</h2>
           <p className="muted small" style={{ marginTop: 4 }}>
-            Ogłoszenie wymaga rzeczy, których nie ma w Twoim profilu. Jeśli coś znasz - napisz krótko, gdzie i w jaki sposób, a trafi to do CV.
-            Odpowiedzi zapiszą się w profilu, więc przy kolejnych ogłoszeniach nie będę pytać ponownie. Możesz też pominąć pytanie.
+            {t('Ogłoszenie wymaga rzeczy, których nie ma w Twoim profilu. Jeśli coś znasz - napisz krótko, gdzie i w jaki sposób, a trafi to do CV.')}{' '}
+            {t('Odpowiedzi zapiszą się w profilu, więc przy kolejnych ogłoszeniach nie będę pytać ponownie. Możesz też pominąć pytanie.')}
           </p>
         </div>
         {questions.length === 0 && (
-          <div className="callout good">Twój profil pokrywa wymagania z ogłoszenia - nie mam dodatkowych pytań.</div>
+          <div className="callout good">{t('Twój profil pokrywa wymagania z ogłoszenia - nie mam dodatkowych pytań.')}</div>
         )}
         {questions.map((q, i) => {
           const a = answers[q.id];
           return (
             <div key={q.id} className="card stack">
               <div className="row between">
-                <span className="faint">Pytanie {i + 1} z {questions.length}</span>
-                <span className={`badge ${q.importance === 'must' ? 'bad' : 'warn'}`}>{q.importance === 'must' ? 'wymagane' : 'mile widziane'}</span>
+                <span className="faint">{t('Pytanie {n} z {total}', { n: i + 1, total: questions.length })}</span>
+                <span className={`badge ${q.importance === 'must' ? 'bad' : 'warn'}`}>{q.importance === 'must' ? t('wymagane') : t('mile widziane')}</span>
               </div>
               <div className={`requirement ${q.importance}`}>{q.requirement}</div>
               <h3>{q.question}</h3>
               <div className="row">
                 <label className="check">
-                  <input type="radio" name={q.id} checked={a?.has === true} onChange={() => set(q.id, { has: true })} /> Tak, znam to
+                  <input type="radio" name={q.id} checked={a?.has === true} onChange={() => set(q.id, { has: true })} /> {t('Tak, znam to')}
                 </label>
                 <label className="check">
-                  <input type="radio" name={q.id} checked={a?.has === false} onChange={() => set(q.id, { has: false })} /> Nie znam
+                  <input type="radio" name={q.id} checked={a?.has === false} onChange={() => set(q.id, { has: false })} /> {t('Nie znam')}
                 </label>
                 {a?.has !== null && (
                   <button className="btn ghost sm" onClick={() => set(q.id, { has: null, answer: '' })}>
-                    Pomiń
+                    {t('Pomiń')}
                   </button>
                 )}
               </div>
               {a?.has === true && (
-                <Field label="Gdzie i co konkretnie?" hint={q.hint}>
+                <Field label={t('Gdzie i co konkretnie?')} hint={q.hint}>
                   <textarea rows={3} value={a.answer} onChange={(e) => set(q.id, { answer: e.target.value })} autoFocus />
                 </Field>
               )}
@@ -75,40 +77,40 @@ export function GapStep({
         })}
 
         <div className="card stack">
-          <h3>Ustawienia CV</h3>
+          <h3>{t('Ustawienia CV')}</h3>
           <div className="grid2">
-            <Field label="Język CV" hint={`Automatycznie: ${autoLang === 'pl' ? 'polski' : 'angielski'} (wg ogłoszenia).`}>
+            <Field label={t('Język CV')} hint={t('Automatycznie: {language} (wg ogłoszenia).', { language: autoLang === 'pl' ? t('polski') : t('angielski') })}>
               <select value={language} onChange={(e) => setLanguage(e.target.value as '' | 'pl' | 'en')}>
-                <option value="">Automatycznie</option>
-                <option value="pl">Polski</option>
-                <option value="en">Angielski</option>
+                <option value="">{t('Automatycznie')}</option>
+                <option value="pl">{t('Polski')}</option>
+                <option value="en">{t('Angielski')}</option>
               </select>
             </Field>
-            <Field label="Szablon" hint="Wszystkie są bezpieczne dla ATS. Zmienisz go też później.">
+            <Field label={t('Szablon')} hint={t('Wszystkie są bezpieczne dla ATS. Zmienisz go też później.')}>
               <select value={template} onChange={(e) => setTemplate(e.target.value as TemplateId)}>
-                {TEMPLATES.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name} - {t.desc}
+                {TEMPLATES.map((tpl) => (
+                  <option key={tpl.id} value={tpl.id}>
+                    {t(tpl.name)} - {t(tpl.desc)}
                   </option>
                 ))}
               </select>
             </Field>
           </div>
-          {missingDetail && <div className="callout warn small">Przy odpowiedziach „Tak” dopisz krótko szczegóły - bez nich AI nie będzie miało czego wpisać do CV.</div>}
+          {missingDetail && <div className="callout warn small">{t('Przy odpowiedziach „Tak” dopisz krótko szczegóły - bez nich AI nie będzie miało czego wpisać do CV.')}</div>}
           <div className="row" style={{ justifyContent: 'flex-end' }}>
             <button className="btn primary lg" onClick={submit}>
-              Napisz CV →
+              {t('Napisz CV')} →
             </button>
           </div>
         </div>
       </div>
 
       <div className="card stack side">
-        <h3>Ogłoszenie w skrócie</h3>
+        <h3>{t('Ogłoszenie w skrócie')}</h3>
         <p className="small">{posting.summary}</p>
         {app.gap && app.gap.covered.length > 0 && (
           <div>
-            <b className="small">Masz w profilu:</b>
+            <b className="small">{t('Masz w profilu:')}</b>
             <div className="chips" style={{ marginTop: 6 }}>
               {app.gap.covered.map((c) => (
                 <span key={c} className="badge good">✓ {c}</span>
@@ -117,7 +119,7 @@ export function GapStep({
           </div>
         )}
         <div>
-          <b className="small">Słowa kluczowe ATS:</b>
+          <b className="small">{t('Słowa kluczowe ATS:')}</b>
           <div className="chips" style={{ marginTop: 6 }}>
             {posting.keywords.map((k) => (
               <span key={k.term} className={`badge ${k.importance === 'must' ? 'accent' : ''}`}>{k.term}</span>

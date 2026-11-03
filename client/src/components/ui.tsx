@@ -1,17 +1,19 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { getLang, useT } from '../i18n';
 
 export function Busy({ message, hint }: { message: string; hint?: string }) {
+  const { t } = useT();
   const [sec, setSec] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setSec((s) => s + 1), 1000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setSec((s) => s + 1), 1000);
+    return () => clearInterval(timer);
   }, []);
   return (
     <div className="busy-overlay" role="status" aria-live="polite">
       <div className="busy-box">
         <div className="spinner" />
         <h3>{message}</h3>
-        <p className="muted small">{hint ?? 'AI pracuje - zwykle trwa to 15–60 sekund.'}</p>
+        <p className="muted small">{hint ?? t('AI pracuje - zwykle trwa to 15–60 sekund.')}</p>
         <p className="faint">{sec} s</p>
       </div>
     </div>
@@ -19,12 +21,13 @@ export function Busy({ message, hint }: { message: string; hint?: string }) {
 }
 
 export function ErrorBox({ error, onClose }: { error: string | null; onClose?: () => void }) {
+  const { t } = useT();
   if (!error) return null;
   return (
     <div className="callout error row between" role="alert">
       <span>{error}</span>
       {onClose && (
-        <button className="icon-btn" onClick={onClose} aria-label="Zamknij">
+        <button className="icon-btn" onClick={onClose} aria-label={t('Zamknij')}>
           ✕
         </button>
       )}
@@ -37,13 +40,17 @@ export const scoreTone = (s: number | null | undefined) => (s == null ? '' : s >
 export const scoreColor = (s: number) => (s >= 75 ? 'var(--good)' : s >= 55 ? 'var(--warn)' : 'var(--bad)');
 
 export function ScoreBadge({ score }: { score: number | null | undefined }) {
-  if (score == null) return <span className="badge">brak oceny</span>;
+  const { t } = useT();
+  if (score == null) return <span className="badge">{t('brak oceny')}</span>;
   return <span className={`badge ${scoreTone(score)}`}>{score}/100</span>;
 }
 
-export const usd = (n: number) => `${n < 0.01 && n > 0 ? n.toFixed(4) : n.toFixed(2)} $`;
+export const usd = (n: number) => {
+  const v = n < 0.01 && n > 0 ? n.toFixed(4) : n.toFixed(2);
+  return getLang() === 'en' ? `$${v}` : `${v} $`;
+};
 export const fmtDate = (iso: string) =>
-  new Date(iso).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  new Date(iso).toLocaleDateString(getLang() === 'en' ? 'en-GB' : 'pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
 export function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
   return (

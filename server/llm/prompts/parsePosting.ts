@@ -1,8 +1,9 @@
 import { JobPostingSchema, type JobPosting } from '../../../shared/schemas';
 import { callJson, type LlmContext } from '../openrouter';
-import { today } from './common';
+import { plainDashes } from '../strings';
+import { forUser, today } from './common';
 
-const SYSTEM = `Jesteś ekspertem rekrutacji i systemów ATS na polskim rynku pracy. Analizujesz ogłoszenie o pracę i zamieniasz je na strukturę.
+const SYSTEM = () => `Jesteś ekspertem rekrutacji i systemów ATS na polskim rynku pracy. Analizujesz ogłoszenie o pracę i zamieniasz je na strukturę.
 Zasady:
 - Opieraj się wyłącznie na tekście ogłoszenia. Pomijaj elementy strony niezwiązane z ofertą (menu, inne oferty, stopki portalu).
 - "language" = język, w którym napisano ogłoszenie. "cvLanguageRequired": "en", jeśli ogłoszenie prosi o CV po angielsku lub jest w całości po angielsku; "pl", jeśli prosi o CV po polsku; inaczej "any".
@@ -12,19 +13,21 @@ Zasady:
 - "rodoClause": jeśli ogłoszenie zawiera treść klauzuli zgody na przetwarzanie danych osobowych, którą kandydat ma umieścić w CV, przepisz ją DOSŁOWNIE. Informacje o administratorze danych (obowiązek informacyjny firmy) to nie jest klauzula do CV - wtedy zostaw pusty string.
 - "mentionsFutureRecruitment": true, jeśli ogłoszenie prosi o zgodę na przyszłe rekrutacje.
 - "photoPreference": "unwanted", jeśli ogłoszenie prosi o CV bez zdjęcia; "wanted", jeśli prosi o zdjęcie; inaczej "unspecified".
-- "summary": 2–3 zdania po polsku o tym, czego firma szuka.
+- "summary": 2–3 zdania ${forUser()} o tym, czego firma szuka. "applicationNotes" też ${forUser()}.
 Dzisiejsza data: ${today()}.`;
 
 export async function parsePosting(text: string, url: string, ctx: LlmContext): Promise<JobPosting> {
-  return callJson({
+  const posting = await callJson({
     schema: JobPostingSchema,
     schemaName: 'job_posting',
     verbatim: true,
     tier: 'fast',
     temperature: 0,
     maxTokens: 6000,
-    system: SYSTEM,
+    system: SYSTEM(),
     user: `${url ? `Link: ${url}\n\n` : ''}Treść ogłoszenia:\n"""\n${text}\n"""`,
     ctx,
   });
+  // Ogłoszenie przepisujemy dosłownie (np. klauzula RODO), ale podsumowanie pisze AI - bez długich myślników.
+  return { ...posting, summary: plainDashes(posting.summary), applicationNotes: plainDashes(posting.applicationNotes) };
 }

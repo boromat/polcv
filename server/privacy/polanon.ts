@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import type { Profile, Settings } from '../../shared/schemas';
 import { HttpError } from '../storage/store';
 import { collectStrings, replaceStrings } from '../llm/strings';
+import { tr } from '../i18n';
 
 /**
  * Opcjonalne maskowanie danych osobowych przez polanon (pakiet Pythona, `pip install polanon`).
@@ -72,15 +73,15 @@ async function findPython(pythonPath: string): Promise<Found> {
     try {
       const info = JSON.parse(r.stdout.trim().split('\n').at(-1)!);
       if (tooOld(info.python)) {
-        old ||= `${cmd.join(' ')} to Python ${info.python}`;
+        old ||= tr('{command} to Python {version}', { command: cmd.join(' '), version: info.python });
         continue;
       }
-      return { ...info, cmd, command: cmd.join(' '), error: info.polanon ? '' : 'Pakiet polanon nie jest zainstalowany.' };
+      return { ...info, cmd, command: cmd.join(' '), error: info.polanon ? '' : tr('Pakiet polanon nie jest zainstalowany.') };
     } catch {
       /* to nie nasz skrypt odpowiedział - próbujemy dalej */
     }
   }
-  const error = old ? `polanon wymaga Pythona 3.11 lub nowszego (${old}).` : 'Nie znaleziono Pythona 3.11+.';
+  const error = old ? tr('polanon wymaga Pythona 3.11 lub nowszego ({found}).', { found: old }) : tr('Nie znaleziono Pythona 3.11+.');
   return { python: null, command: null, cmd: [], polanon: null, spacy: false, model: false, error };
 }
 
@@ -118,7 +119,7 @@ class Bridge {
     this.child.stderr.on('data', (d) => (stderr = (stderr + d).slice(-2000)));
     this.ready = new Promise((resolve, reject) => {
       // Z modelem spaCy start trwa kilka–kilkanaście sekund.
-      const startTimer = setTimeout(() => reject(new Error('polanon nie wystartował w ciągu 60 s')), 60_000);
+      const startTimer = setTimeout(() => reject(new Error(tr('polanon nie wystartował w ciągu 60 s'))), 60_000);
       createInterface({ input: this.child.stdout }).on('line', (line) => {
         let msg: any;
         try {
@@ -148,19 +149,21 @@ class Bridge {
         this.pending.clear();
       };
       this.child.on('error', die);
-      this.child.on('exit', (code) => die(new Error(`proces polanon zakończył się (kod ${code})${stderr.trim() ? `: ${stderr.trim().split('\n').at(-1)}` : ''}`)));
+      this.child.on('exit', (code) =>
+        die(new Error(`${tr('proces polanon zakończył się (kod {code})', { code: String(code) })}${stderr.trim() ? `: ${stderr.trim().split('\n').at(-1)}` : ''}`)),
+      );
     });
     this.ready.catch(() => {}); // błąd startu zgłasza call(), a nie "unhandled rejection"
   }
 
   async call(req: Record<string, unknown>): Promise<any> {
     await this.ready;
-    if (this.dead) throw new Error('proces polanon nie działa');
+    if (this.dead) throw new Error(tr('proces polanon nie działa'));
     const id = this.nextId++;
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pending.delete(id);
-        reject(new Error('polanon nie odpowiedział w ciągu 120 s'));
+        reject(new Error(tr('polanon nie odpowiedział w ciągu 120 s')));
       }, 120_000);
       this.pending.set(id, { resolve, reject, timer });
       this.child.stdin.write(`${JSON.stringify({ ...req, id })}\n`);
@@ -210,7 +213,7 @@ export interface Masked {
 const unavailable = (e: any) =>
   new HttpError(
     503,
-    `Maskowanie danych osobowych (polanon) jest włączone, ale nie działa: ${e?.message ?? e}. Nic nie zostało wysłane do AI. Napraw to w Ustawieniach albo wyłącz maskowanie.`,
+    tr('Maskowanie danych osobowych (polanon) jest włączone, ale nie działa: {error}. Nic nie zostało wysłane do AI. Napraw to w Ustawieniach albo wyłącz maskowanie.', { error: String(e?.message ?? e) }),
   );
 
 export interface ProfileTerm {

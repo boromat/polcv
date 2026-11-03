@@ -1,13 +1,25 @@
 import type { AtsReport } from '../../../../shared/schemas';
 import { scoreColor } from '../../components/ui';
+import { useT } from '../../i18n';
 
-const CRITERIA: Record<string, string> = {
-  must_have_match: 'Spełnienie wymagań obowiązkowych',
-  achievements: 'Konkretne osiągnięcia i efekty',
-  summary_fit: 'Dopasowanie nagłówka i podsumowania',
-  clarity: 'Czytelność i zwięzłość',
-  red_flags: 'Brak czerwonych flag',
-};
+type T = ReturnType<typeof useT>['t'];
+
+// Nazwy kryteriów oceny AI; funkcja zamiast stałej, żeby brały aktualny język.
+const criteria = (t: T): Record<string, string> => ({
+  must_have_match: t('Spełnienie wymagań obowiązkowych'),
+  achievements: t('Konkretne osiągnięcia i efekty'),
+  summary_fit: t('Dopasowanie nagłówka i podsumowania'),
+  clarity: t('Czytelność i zwięzłość'),
+  red_flags: t('Brak czerwonych flag'),
+});
+
+// Werdykt AI to wartość z ustalonego zbioru (dane), tłumaczymy tylko to, co widać.
+const verdictLabels = (t: T): Record<string, string> => ({
+  tak: t('tak'),
+  'raczej tak': t('raczej tak'),
+  'raczej nie': t('raczej nie'),
+  nie: t('nie'),
+});
 
 function Meter({ label, value, max, hint }: { label: string; value: number; max: number; hint: string }) {
   const pct = Math.round((value / max) * 100);
@@ -41,27 +53,31 @@ export function ReportView({
   onImprove: () => void;
   pending: number;
 }) {
+  const { t } = useT();
   if (!report) {
     return (
       <div className="card empty">
-        <h2>Ta wersja nie ma jeszcze oceny</h2>
+        <h2>{t('Ta wersja nie ma jeszcze oceny')}</h2>
         <button className="btn primary" onClick={onEvaluate}>
-          Oceń CV
+          {t('Oceń CV')}
         </button>
       </div>
     );
   }
   const r = report;
   const review = r.ai?.review;
-  const verdictTone = review ? (review.wouldInterview === 'tak' || review.wouldInterview === 'raczej tak' ? 'good' : 'bad') : '';
+  const positive = review ? review.wouldInterview === 'tak' || review.wouldInterview === 'raczej tak' : false;
+  const verdictTone = review ? (positive ? 'good' : 'bad') : '';
+  const CRITERIA = criteria(t);
+  const VERDICTS = verdictLabels(t);
 
   return (
     <div className="stack lg">
       {stale && (
         <div className="callout warn row between">
-          <span>CV zmieniło się od ostatniej oceny - wynik może być nieaktualny.</span>
+          <span>{t('CV zmieniło się od ostatniej oceny - wynik może być nieaktualny.')}</span>
           <button className="btn sm" onClick={onEvaluate}>
-            Oceń ponownie
+            {t('Oceń ponownie')}
           </button>
         </div>
       )}
@@ -73,45 +89,49 @@ export function ReportView({
               <div>{r.total}</div>
             </div>
             <div className="stack" style={{ gap: 6 }}>
-              <h2>Ocena łączna</h2>
-              {!r.ai && <span className="badge warn" style={{ alignSelf: 'flex-start' }}>niepełna - bez oceny AI</span>}
+              <h2>{t('Ocena łączna')}</h2>
+              {!r.ai && <span className="badge warn" style={{ alignSelf: 'flex-start' }}>{t('niepełna - bez oceny AI')}</span>}
               {review && (
                 <span className={`badge ${verdictTone}`} style={{ alignSelf: 'flex-start' }}>
-                  AI-rekruter: {review.wouldInterview === 'tak' || review.wouldInterview === 'raczej tak' ? 'zaprosiłby na rozmowę' : 'raczej nie zaprosiłby'} ({review.wouldInterview})
+                  {t('AI-rekruter:')} {positive ? t('zaprosiłby na rozmowę') : t('raczej nie zaprosiłby')} ({VERDICTS[review.wouldInterview] ?? review.wouldInterview})
                 </span>
               )}
               {review && <p className="small">{review.verdict}</p>}
             </div>
           </div>
           <div className="stack">
-            <Meter label="Słowa kluczowe ATS" value={r.keywords.score} max={r.keywords.max} hint="Czy CV zawiera słowa, których szuka filtr ATS." />
-            <Meter label="Format i czytelność dla ATS" value={r.format.score} max={r.format.max} hint="Sprawdzone na gotowym PDF - tak, jak czyta go ATS." />
+            <Meter label={t('Słowa kluczowe ATS')} value={r.keywords.score} max={r.keywords.max} hint={t('Czy CV zawiera słowa, których szuka filtr ATS.')} />
+            <Meter label={t('Format i czytelność dla ATS')} value={r.format.score} max={r.format.max} hint={t('Sprawdzone na gotowym PDF - tak, jak czyta go ATS.')} />
             {r.ai ? (
-              <Meter label="Ocena AI-rekrutera" value={r.ai.score} max={r.ai.max} hint="Jak oceniłby Cię automatyczny screening AI." />
+              <Meter label={t('Ocena AI-rekrutera')} value={r.ai.score} max={r.ai.max} hint={t('Jak oceniłby Cię automatyczny screening AI.')} />
             ) : (
-              <div className="callout warn small">Ocena AI nie powiodła się: {r.aiError}</div>
+              <div className="callout warn small">{t('Ocena AI nie powiodła się:')} {r.aiError}</div>
             )}
           </div>
         </div>
         <div className="row" style={{ marginTop: 16, justifyContent: 'flex-end' }}>
-          <span className="faint">AI wprowadzi poprawki, które nie wymagają nowych informacji, i oceni CV jeszcze raz.</span>
-          <button className="btn primary" onClick={onImprove} disabled={pending > 0} title={pending > 0 ? 'Najpierw zdecyduj o żółtych sugestiach' : ''}>
-            Popraw automatycznie
+          <span className="faint">{t('AI wprowadzi poprawki, które nie wymagają nowych informacji, i oceni CV jeszcze raz.')}</span>
+          <button className="btn primary" onClick={onImprove} disabled={pending > 0} title={pending > 0 ? t('Najpierw zdecyduj o żółtych sugestiach') : ''}>
+            {t('Popraw automatycznie')}
           </button>
         </div>
-        {pending > 0 && <p className="faint" style={{ textAlign: 'right' }}>Najpierw zdecyduj o {pending} żółtych sugestiach w edytorze.</p>}
+        {pending > 0 && (
+          <p className="faint" style={{ textAlign: 'right' }}>
+            {pending === 1 ? t('Najpierw zdecyduj o 1 żółtej sugestii w edytorze.') : t('Najpierw zdecyduj o {n} żółtych sugestiach w edytorze.', { n: pending })}
+          </p>
+        )}
       </div>
 
       <div className="card stack">
-        <h2>Słowa kluczowe z ogłoszenia</h2>
+        <h2>{t('Słowa kluczowe z ogłoszenia')}</h2>
         <p className="muted small">
-          Filtr ATS szuka w CV konkretnych słów z ogłoszenia. Wymagane liczą się 3× mocniej niż mile widziane. Polskie odmiany i skróty są rozpoznawane.
+          {t('Filtr ATS szuka w CV konkretnych słów z ogłoszenia. Wymagane liczą się 3× mocniej niż mile widziane. Polskie odmiany i skróty są rozpoznawane.')}
         </p>
         <div>
-          <b className="small">Znalezione ({r.keywords.matched.length})</b>
+          <b className="small">{t('Znalezione ({n})', { n: r.keywords.matched.length })}</b>
           <div className="chips" style={{ marginTop: 6 }}>
             {r.keywords.matched.map((k) => (
-              <span key={k.term} className="badge good" title={`Znalezione jako „${k.foundAs}”`}>
+              <span key={k.term} className="badge good" title={t('Znalezione jako „{term}”', { term: k.foundAs })}>
                 ✓ {k.term} {k.count > 1 && <span className="faint">×{k.count}</span>}
               </span>
             ))}
@@ -119,27 +139,27 @@ export function ReportView({
         </div>
         {r.keywords.missing.length > 0 && (
           <div>
-            <b className="small">Brakujące ({r.keywords.missing.length})</b>
+            <b className="small">{t('Brakujące ({n})', { n: r.keywords.missing.length })}</b>
             <div className="chips" style={{ marginTop: 6 }}>
               {r.keywords.missing.map((k) => (
                 <span key={k.term} className={`badge ${k.importance === 'must' ? 'bad' : 'warn'}`}>
-                  ✕ {k.term} <span className="faint">({k.importance === 'must' ? 'wymagane' : 'mile widziane'})</span>
+                  ✕ {k.term} <span className="faint">({k.importance === 'must' ? t('wymagane') : t('mile widziane')})</span>
                 </span>
               ))}
             </div>
             <p className="faint" style={{ marginTop: 6 }}>
-              Jeśli coś z tej listy znasz, dopisz to w profilu albo w edytorze - wtedy CV dostanie te punkty. Jeśli nie znasz, nie dopisuj.
+              {t('Jeśli coś z tej listy znasz, dopisz to w profilu albo w edytorze - wtedy CV dostanie te punkty. Jeśli nie znasz, nie dopisuj.')}
             </p>
           </div>
         )}
         {r.keywords.stuffing.length > 0 && (
-          <div className="callout warn small">Za dużo powtórzeń (wygląda na upychanie słów): {r.keywords.stuffing.join(', ')}.</div>
+          <div className="callout warn small">{t('Za dużo powtórzeń (wygląda na upychanie słów): {terms}.', { terms: r.keywords.stuffing.join(', ') })}</div>
         )}
       </div>
 
       <div className="card stack">
-        <h2>Format i czytelność dla ATS</h2>
-        <p className="muted small">Strony: {r.format.pages}. Kontrole na tekście odczytanym z gotowego pliku PDF.</p>
+        <h2>{t('Format i czytelność dla ATS')}</h2>
+        <p className="muted small">{t('Strony: {n}. Kontrole na tekście odczytanym z gotowego pliku PDF.', { n: r.format.pages })}</p>
         <ul className="check-list">
           {r.format.checks.map((c) => (
             <li key={c.name}>
@@ -155,7 +175,7 @@ export function ReportView({
       {review && (
         <>
           <div className="card stack">
-            <h2>Ocena AI-rekrutera</h2>
+            <h2>{t('Ocena AI-rekrutera')}</h2>
             {review.criteria.map((c) => (
               <div key={c.key} className="meter">
                 <div className="row">
@@ -175,7 +195,7 @@ export function ReportView({
 
           <div className="grid2">
             <div className="card">
-              <h3>Mocne strony</h3>
+              <h3>{t('Mocne strony')}</h3>
               <ul className="check-list" style={{ marginTop: 10 }}>
                 {review.strengths.map((s, i) => (
                   <li key={i}><span className="ic ok-ic">+</span>{s}</li>
@@ -183,7 +203,7 @@ export function ReportView({
               </ul>
             </div>
             <div className="card">
-              <h3>Słabe strony</h3>
+              <h3>{t('Słabe strony')}</h3>
               <ul className="check-list" style={{ marginTop: 10 }}>
                 {review.weaknesses.map((s, i) => (
                   <li key={i}><span className="ic bad-ic">–</span>{s}</li>
@@ -193,12 +213,12 @@ export function ReportView({
           </div>
 
           <div className="card stack">
-            <h2>Proponowane poprawki</h2>
+            <h2>{t('Proponowane poprawki')}</h2>
             {review.fixes.map((f, i) => (
               <div key={i} className="fix">
                 <div className="row between">
                   <span className="badge">{f.section}</span>
-                  {f.needsUserInput && <span className="badge warn">wymaga Twoich danych</span>}
+                  {f.needsUserInput && <span className="badge warn">{t('wymaga Twoich danych')}</span>}
                 </div>
                 {f.find && (
                   <div className="small">
@@ -212,7 +232,7 @@ export function ReportView({
               </div>
             ))}
             <p className="faint">
-              Poprawki oznaczone „wymaga Twoich danych” potrzebują informacji, których AI nie zna (np. liczb). Dopisz je w profilu lub w edytorze.
+              {t('Poprawki oznaczone „wymaga Twoich danych” potrzebują informacji, których AI nie zna (np. liczb). Dopisz je w profilu lub w edytorze.')}
             </p>
           </div>
         </>

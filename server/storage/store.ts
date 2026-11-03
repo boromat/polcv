@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { nanoid } from 'nanoid';
 import type { Application, CvVersion, Profile, Settings, UsageEntry, AtsReport, InterviewPrep, CoverLetter, Career } from '../../shared/schemas';
+import { tr } from '../i18n';
 
 export const DATA_DIR = path.resolve(process.env.CV_DATA_DIR || path.join(process.cwd(), 'data'));
 
@@ -10,7 +11,7 @@ export const nowIso = () => new Date().toISOString();
 
 /** Identyfikatory trafiają do ścieżek plików - dopuszczamy tylko bezpieczne znaki. */
 function safeId(id: string): string {
-  if (!/^[A-Za-z0-9_-]{1,64}$/.test(id)) throw new HttpError(400, 'Nieprawidłowy identyfikator');
+  if (!/^[A-Za-z0-9_-]{1,64}$/.test(id)) throw new HttpError(400, tr('Nieprawidłowy identyfikator'));
   return id;
 }
 
@@ -102,7 +103,7 @@ export async function listProfiles(): Promise<Profile[]> {
 
 export async function getProfile(id: string): Promise<Profile> {
   const p = await readJson<Profile>(profileFile(id));
-  if (!p) throw new HttpError(404, 'Nie znaleziono profilu');
+  if (!p) throw new HttpError(404, tr('Nie znaleziono profilu'));
   return { ...emptyProfile(p.displayName), ...p };
 }
 
@@ -136,7 +137,7 @@ export async function listApplications(profileId: string): Promise<Application[]
 
 export async function getApplication(profileId: string, appId: string): Promise<Application> {
   const a = await readJson<Application>(appFile(profileId, appId));
-  if (!a) throw new HttpError(404, 'Nie znaleziono aplikacji');
+  if (!a) throw new HttpError(404, tr('Nie znaleziono aplikacji'));
   return a;
 }
 
@@ -157,7 +158,7 @@ const reportFile = (pid: string, aid: string, v: number) => path.join(appDir(pid
 
 export async function getVersion(pid: string, aid: string, v: number): Promise<CvVersion> {
   const cv = await readJson<CvVersion>(versionFile(pid, aid, v));
-  if (!cv) throw new HttpError(404, `Brak wersji CV nr ${v}`);
+  if (!cv) throw new HttpError(404, tr('Brak wersji CV nr {v}', { v }));
   return cv;
 }
 

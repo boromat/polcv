@@ -1,9 +1,9 @@
 import { CoverLetterSchema, InterviewPrepSchema, type CoverLetter, type InterviewPrep, type JobPosting, type Profile } from '../../../shared/schemas';
 import { callJson, type LlmContext } from '../openrouter';
-import { json, postingForPrompt, profileForPrompt, today } from './common';
+import { forUser, json, postingForPrompt, profileForPrompt, today } from './common';
 
 const INTERVIEW_SYSTEM = (lang: 'pl' | 'en') => `Jesteś doświadczonym rekruterem i coachem kariery. Przygotowujesz kandydata (student/junior) do rozmowy kwalifikacyjnej na konkretne stanowisko.
-Język: opisy, wyjaśnienia i wskazówki po polsku; "suggestedAnswer" w języku, w którym prawdopodobnie odbędzie się rozmowa (${lang === 'pl' ? 'polski' : 'angielski'}).
+Język: opisy, wyjaśnienia i wskazówki ${forUser()}; "suggestedAnswer" w języku, w którym prawdopodobnie odbędzie się rozmowa (${lang === 'pl' ? 'polski' : 'angielski'}).
 Zasady:
 - 12–16 pytań, które realnie mogą paść: techniczne/merytoryczne z wymagań ogłoszenia, behawioralne, o doświadczenie i projekty z CV, motywacja i firma, trudne (braki, luki, "dlaczego nie masz X").
 - "suggestedAnswer": gotowa do przećwiczenia odpowiedź OPARTA WYŁĄCZNIE na faktach z profilu kandydata, przy behawioralnych w schemacie STAR (Sytuacja, Zadanie, Działanie, Rezultat). Jeśli kandydat nie ma doświadczenia, pokaż uczciwą odpowiedź (czego się uczy, co zrobi). Nie wymyślaj faktów.
