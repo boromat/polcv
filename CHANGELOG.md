@@ -15,6 +15,12 @@ All notable changes to PolCV are recorded here. The format follows
   already in the profile stay untouched, missing technologies are added as skills, and the GitHub
   link goes into your contact links.
 
+### Fixed
+
+- Gap questions no longer fail with "wrong format" for large profiles: the answer limit is higher, the
+  list of covered requirements is shorter, and when the model keeps writing gendered forms such as
+  "używałeś" after its retries, the questions are accepted instead of stopping the CV.
+
 ## [1.0.1] - 2026-11-03
 
 ### Added
