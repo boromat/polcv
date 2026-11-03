@@ -61,7 +61,7 @@ describe('tłumaczenia interfejsu', () => {
 });
 
 describe('tłumaczenia serwera', () => {
-  const used = keys(files('server', ['server/jobs/local']), /tr/);
+  const used = keys(files('server'), /tr/);
 
   it('każdy tekst z tr(…) ma angielską wersję', () => {
     const missing = [...used].filter(([k]) => !(k in SERVER_EN)).map(([k, f]) => `${f}: ${k}`);

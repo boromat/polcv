@@ -2,7 +2,7 @@ import { Router } from 'express';
 import * as store from '../storage/store';
 import { HttpError } from '../storage/store';
 import { checkKey, listModels } from '../llm/openrouter';
-import { activeSearchers, localPortalNames } from '../jobs/search';
+import { activeSearchers } from '../jobs/search';
 import { checkPythonPath, installPolanon, polanonStatus } from '../privacy/polanon';
 import type { Settings } from '../../shared/schemas';
 import { tr } from '../i18n';
@@ -16,7 +16,6 @@ const view = async ({ apiKey, ...rest }: Settings) => ({
   hasKey: !!apiKey,
   ...rest,
   searchPortals: Object.values(await activeSearchers()).map((s) => s.name),
-  localPortals: await localPortalNames(),
 });
 
 settingsRouter.get('/settings', async (_req, res) => {

@@ -45,11 +45,9 @@ export interface SettingsView {
   pythonPath: string;
   /** Portale, które program przeszukuje sam, gdy wyszukiwanie jest włączone. */
   searchPortals: string[];
-  /** Portale z lokalnych dodatków (server/jobs/local/), których nie ma w repozytorium. */
-  localPortals: string[];
 }
 
-export type SettingsPatch = Partial<Omit<SettingsView, 'apiKeyMasked' | 'hasKey' | 'searchPortals' | 'localPortals'> & { apiKey: string }>;
+export type SettingsPatch = Partial<Omit<SettingsView, 'apiKeyMasked' | 'hasKey' | 'searchPortals'> & { apiKey: string }>;
 
 export interface PolanonStatus {
   python: string | null;

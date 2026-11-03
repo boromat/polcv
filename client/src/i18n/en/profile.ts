@@ -151,8 +151,6 @@ export const profile: Record<string, string> = {
   'Wyłącz wyszukiwanie': 'Turn off job search',
   'Portale z ofertami zwykle ograniczają w regulaminach automatyczne pobieranie danych. Program pyta tylko tam, gdzie pozwala na to plik robots.txt, i przedstawia się jako PolCV, ale za korzystanie odpowiadasz Ty.':
     'Job portals usually restrict automated data collection in their terms of service. The app only sends queries where robots.txt allows it and identifies itself as PolCV, but you are responsible for how you use it.',
-  'Ta kopia ma też lokalne dodatki ({portals}), które tych zasad nie spełniają.':
-    'This copy also has local add-ons ({portals}) that do not follow these rules.',
   'Włącz wyszukiwanie': 'Turn on job search',
 
   // SettingsPage: ochrona danych osobowych (polanon)

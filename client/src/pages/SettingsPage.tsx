@@ -52,9 +52,6 @@ function JobSearchCard({ settings, onSave }: { settings: SettingsView; onSave: (
         <>
           <div className="callout warn small">
             {t('Portale z ofertami zwykle ograniczają w regulaminach automatyczne pobieranie danych. Program pyta tylko tam, gdzie pozwala na to plik robots.txt, i przedstawia się jako PolCV, ale za korzystanie odpowiadasz Ty.')}
-            {settings.localPortals.length > 0 && (
-              <> {t('Ta kopia ma też lokalne dodatki ({portals}), które tych zasad nie spełniają.', { portals: settings.localPortals.join(', ') })}</>
-            )}
           </div>
           <button className="btn sm" style={{ alignSelf: 'flex-start' }} onClick={enable}>
             {t('Włącz wyszukiwanie')}

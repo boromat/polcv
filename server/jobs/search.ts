@@ -193,25 +193,20 @@ type Searchers = Record<string, { name: string; run: Searcher }>;
 // a justjoin.it zabrania /api/ - dla nich program podaje gotowe linki do otwarcia w przeglądarce.
 const PUBLIC_SEARCHERS: Searchers = { nofluff: { name: 'nofluffjobs', run: searchNofluff } };
 
-// Własne wyszukiwarki z folderu server/jobs/local/ (poza repozytorium) - wczytywane, jeśli istnieją.
-const LOCAL_MODULE = './local/portals.ts';
-let localSearchers: Promise<Searchers> | null = null;
-const loadLocal = (): Promise<Searchers> =>
-  (localSearchers ??= import(LOCAL_MODULE).then(
-    (m) => m.LOCAL_SEARCHERS ?? {},
+// Opcjonalny moduł z dodatkowymi źródłami ofert (eksport SEARCHERS); bez niego działa samo nofluffjobs.
+const EXTRA_MODULE = './local/portals.ts';
+let extraSearchers: Promise<Searchers> | null = null;
+const loadExtra = (): Promise<Searchers> =>
+  (extraSearchers ??= import(EXTRA_MODULE).then(
+    (m) => m.SEARCHERS ?? {},
     (e) => {
-      if (e?.code !== 'ERR_MODULE_NOT_FOUND') console.warn(`[szukaj] Nie udało się wczytać ${LOCAL_MODULE}: ${e?.message}`);
+      if (e?.code !== 'ERR_MODULE_NOT_FOUND') console.warn(`[szukaj] Nie udało się wczytać ${EXTRA_MODULE}: ${e?.message}`);
       return {};
     },
   ));
 
 export async function activeSearchers(): Promise<Searchers> {
-  return { ...PUBLIC_SEARCHERS, ...(await loadLocal()) };
-}
-
-/** Nazwy portali z lokalnych dodatków - Ustawienia uprzedzają, że nie trzymają się zasad z robots.txt. */
-export async function localPortalNames(): Promise<string[]> {
-  return Object.values(await loadLocal()).map((s) => s.name);
+  return { ...PUBLIC_SEARCHERS, ...(await loadExtra()) };
 }
 
 async function pool<T>(tasks: (() => Promise<T>)[], limit: number): Promise<PromiseSettledResult<T>[]> {
