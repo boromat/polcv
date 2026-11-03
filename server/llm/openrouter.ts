@@ -83,6 +83,7 @@ interface ChatResponse {
   cost: number;
   tokensIn: number;
   tokensOut: number;
+  reasoningTokens: number;
 }
 
 async function chat(key: string, body: Record<string, unknown>, attempt = 0): Promise<ChatResponse> {
@@ -134,6 +135,7 @@ async function chat(key: string, body: Record<string, unknown>, attempt = 0): Pr
     cost: Number(json.usage?.cost ?? 0),
     tokensIn: Number(json.usage?.prompt_tokens ?? 0),
     tokensOut: Number(json.usage?.completion_tokens ?? 0),
+    reasoningTokens: Number(json.usage?.completion_tokens_details?.reasoning_tokens ?? 0),
   };
 }
 
@@ -154,6 +156,10 @@ export async function callJson<T>(opts: CallOptions<T>): Promise<T> {
     ? await maskForAi(opts.user, settings, profileTerms(opts.ctx.profileId ? await getProfile(opts.ctx.profileId).catch(() => null) : null))
     : null;
   const user = masked?.text ?? opts.user;
+  const params = await modelParams(model);
+  // Myślenie modelu (reasoning) zjada limit odpowiedzi: Haiku 5.5 potrafił wymyślać 10 000 tokenów i nie napisać CV.
+  // Do zwracania JSON-a niepotrzebne, więc je wyłączamy; modele, które muszą myśleć, dostają niski poziom (niżej).
+  let reasoning: Record<string, unknown> | null = params?.has('reasoning') ? { enabled: false } : null;
 
   let system = `${opts.system}${masked ? TOKENS_NOTE : ''}${opts.verbatim ? '' : DASH_NOTE}
 
@@ -176,11 +182,13 @@ Zwróć WYŁĄCZNIE jeden obiekt JSON zgodny z podanym schematem, bez komentarzy
   const send = async (extra: { role: string; content: string }[], temp: number): Promise<ChatResponse> => {
     const body: Record<string, unknown> = {
       model,
-      temperature: temp,
       max_tokens: opts.maxTokens ?? 8000,
       usage: { include: true },
       messages: [{ role: 'system', content: system }, { role: 'user', content: user }, ...extra],
     };
+    // Parametr, którego model nie zna (np. temperatura w Claude 5.5), sprawia, że require_parameters nie znajduje żadnego dostawcy.
+    if (!params || params.has('temperature')) body.temperature = temp;
+    if (reasoning) body.reasoning = reasoning;
     if (useSchema) {
       body.response_format = { type: 'json_schema', json_schema: { name: opts.schemaName, strict: true, schema: jsonSchema } };
       // Tylko dostawcy, którzy naprawdę wymuszają schemat (inaczej OpenRouter może trafić na takiego, który go ignoruje).
@@ -191,7 +199,12 @@ Zwróć WYŁĄCZNIE jeden obiekt JSON zgodny z podanym schematem, bez komentarzy
       await record(r);
       return r;
     } catch (e: any) {
-      const unsupported = e instanceof HttpError && (e.status === 400 || e.status === 404) && /endpoint|provider|response_format|json_schema|structured|parameter/i.test(e.message);
+      if (reasoning && e instanceof HttpError && e.status === 400 && /reasoning/i.test(e.message)) {
+        // "Reasoning is mandatory" (np. gpt-5-nano): niech myśli krótko; gdy i to nie przejdzie, bez tego parametru.
+        reasoning = reasoning.enabled === false ? { effort: 'low' } : null;
+        return send(extra, temp);
+      }
+      const unsupported =e instanceof HttpError && (e.status === 400 || e.status === 404) && /endpoint|provider|response_format|json_schema|structured|parameter/i.test(e.message);
       if (useSchema && unsupported) {
         // 404 = żaden dostawca nie spełnia require_parameters → próbujemy bez tego filtra;
         // 400 o response_format = model w ogóle nie zna schematu.
@@ -232,7 +245,7 @@ ${JSON.stringify(jsonSchema)}`;
     }
     lastBroken = !res.content.trim() || res.finishReason === 'length';
     console.warn(
-      `[AI] ${opts.schemaName}: odrzucona odpowiedź ${attempt}/3 (${res.model}, finish=${res.finishReason || '?'}, ${res.tokensOut} tok.): ${parsed.error.slice(0, 300)}`,
+      `[AI] ${opts.schemaName}: odrzucona odpowiedź ${attempt}/3 (${res.model}, finish=${res.finishReason || '?'}, ${res.tokensOut} tok.${res.reasoningTokens ? `, w tym ${res.reasoningTokens} na myślenie` : ''}): ${parsed.error.slice(0, 300)}`,
     );
     if (attempt === 3) break;
     if (lastBroken || attempt === 2) res = await send([], freshTemp);
@@ -264,15 +277,28 @@ export interface ModelInfo {
   contextLength: number;
 }
 
-let modelCache: { at: number; list: ModelInfo[] } | null = null;
+let catalogCache: { at: number; models: any[] } | null = null;
 
-/** Lista modeli obsługujących structured outputs (publiczne API, bez klucza). */
-export async function listModels(): Promise<ModelInfo[]> {
-  if (modelCache && Date.now() - modelCache.at < 3600_000) return modelCache.list;
+/** Wszystkie modele z OpenRouter (publiczne API, bez klucza), trzymane godzinę. */
+async function catalog(): Promise<any[]> {
+  if (catalogCache && Date.now() - catalogCache.at < 3600_000) return catalogCache.models;
   const res = await fetch(`${API}/models`, { signal: AbortSignal.timeout(20_000) });
   if (!res.ok) throw new HttpError(502, tr('Nie udało się pobrać listy modeli z OpenRouter.'));
   const json: any = await res.json();
-  const list: ModelInfo[] = (json.data as any[])
+  if (!Array.isArray(json?.data)) throw new HttpError(502, tr('Nie udało się pobrać listy modeli z OpenRouter.'));
+  catalogCache = { at: Date.now(), models: json.data };
+  return json.data;
+}
+
+/** Parametry, które model obsługuje według OpenRouter; null, gdy listy nie da się pobrać albo modelu na niej nie ma. */
+async function modelParams(model: string): Promise<Set<string> | null> {
+  const m = await catalog().then((list) => list.find((x) => x.id === model), () => null);
+  return m ? new Set<string>(m.supported_parameters ?? []) : null;
+}
+
+/** Lista modeli obsługujących structured outputs. */
+export async function listModels(): Promise<ModelInfo[]> {
+  return (await catalog())
     .filter((m) => (m.supported_parameters ?? []).includes('structured_outputs') && !String(m.id).endsWith(':batch'))
     .map((m) => ({
       id: m.id,
@@ -281,8 +307,6 @@ export async function listModels(): Promise<ModelInfo[]> {
       completionPrice: Number(m.pricing?.completion ?? 0) * 1e6,
       contextLength: Number(m.context_length ?? 0),
     }));
-  modelCache = { at: Date.now(), list };
-  return list;
 }
 
 /** Sprawdza klucz i saldo przez /key. */

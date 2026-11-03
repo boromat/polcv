@@ -20,6 +20,11 @@ All notable changes to PolCV are recorded here. The format follows
 - Gap questions no longer fail with "wrong format" for large profiles: the answer limit is higher, the
   list of covered requirements is shorter, and when the model keeps writing gendered forms such as
   "używałeś" after its retries, the questions are accepted instead of stopping the CV.
+- Writing a CV with Claude Haiku 5.5 no longer fails with "the model looped or cut its answer off".
+  The model spent its whole answer limit on thinking before writing anything; reasoning is now turned
+  off for JSON answers (models that must reason think briefly instead). The app also checks which
+  parameters a model supports and stops sending a temperature to models that ignore it, so providers
+  that enforce the answer format are found again.
 
 ## [1.0.1] - 2026-11-03
 
