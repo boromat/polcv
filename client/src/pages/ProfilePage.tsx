@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { Profile } from '../../../shared/schemas';
 import { api } from '../api';
 import { useApp } from '../ctx';
@@ -6,6 +6,9 @@ import { Busy, ErrorBox, Field, LazyText } from '../components/ui';
 import { useT } from '../i18n';
 
 const rid = () => Math.random().toString(36).slice(2, 12);
+
+/** Po tylu ms od ostatniej zmiany profil zapisuje się sam. */
+const AUTOSAVE_MS = 1000;
 
 /** Lista jako tekst "jedna pozycja w linii" - zatwierdzana po wyjściu z pola. */
 function LinesField({ value, onChange, rows = 3, placeholder }: { value: string[]; onChange: (v: string[]) => void; rows?: number; placeholder?: string }) {
@@ -108,7 +111,7 @@ export function ProfilePage() {
   const { t } = useT();
   const { current, reloadProfiles } = useApp();
   const [p, setP] = useState<Profile | null>(null);
-  const [dirty, setDirty] = useState(false);
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
@@ -118,52 +121,115 @@ export function ProfilePage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const photoRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (current) api.profile(current.id).then(setP).catch((e) => setError(e.message));
-  }, [current?.id]);
+  // Autozapis. `latest` to aktualny stan formularza; `rev` liczy zmiany użytkownika,
+  // `queuedRev` to ostatnia wysłana do zapisu, `savedRev` ostatnia zapisana. Zapisy idą po kolei.
+  const latest = useRef<Profile | null>(null);
+  const rev = useRef(0);
+  const queuedRev = useRef(0);
+  const savedRev = useRef(0);
+  const chain = useRef(Promise.resolve());
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  // Ostrzeżenie przy zamykaniu karty z niezapisanymi zmianami.
+  /** Zmiana formularza bez zapisu (np. dane, które serwer już ma). */
+  const local = (fn: (x: Profile) => Profile) => {
+    if (!latest.current) return;
+    latest.current = fn(latest.current);
+    setP(latest.current);
+  };
+
+  const flush = useCallback(() => {
+    clearTimeout(timer.current);
+    const snap = latest.current;
+    const r = rev.current;
+    if (!snap || r === queuedRev.current) return chain.current;
+    queuedRev.current = r;
+    setSaveState('saving');
+    chain.current = chain.current.then(async () => {
+      try {
+        const saved = await api.saveProfile(snap.id, snap);
+        savedRev.current = Math.max(savedRev.current, r);
+        // Z odpowiedzi bierzemy tylko listę plików (import CV dopisuje plik): użytkownik mógł w tym czasie pisać dalej.
+        if (latest.current?.id === snap.id) {
+          latest.current = { ...latest.current, files: saved.files };
+          setP(latest.current);
+        }
+        if (rev.current === savedRev.current) setSaveState('saved');
+        reloadProfiles().catch(() => {});
+      } catch (e: any) {
+        // Następny flush (kolejna zmiana albo „Spróbuj ponownie”) wyśle zapis jeszcze raz.
+        if (queuedRev.current === r) queuedRev.current = -1;
+        setSaveState('error');
+        setError(e.message);
+      }
+    });
+    return chain.current;
+  }, [reloadProfiles]);
+
   useEffect(() => {
-    if (!dirty) return;
-    const h = (e: BeforeUnloadEvent) => e.preventDefault();
-    window.addEventListener('beforeunload', h);
-    return () => window.removeEventListener('beforeunload', h);
-  }, [dirty]);
+    if (!current) return;
+    let alive = true;
+    api
+      .profile(current.id)
+      .then((x) => {
+        if (!alive) return;
+        latest.current = x;
+        queuedRev.current = savedRev.current = rev.current;
+        setP(x);
+        setSaveState('idle');
+      })
+      .catch((e) => alive && setError(e.message));
+    return () => {
+      alive = false;
+      // Wyjście ze strony albo zmiana profilu: zapisujemy to, co zostało wpisane.
+      flush();
+    };
+  }, [current?.id, flush]);
+
+  // Zapis także przy wyjściu z okna lub karty; zamknięcie karty przed zapisem pyta o potwierdzenie.
+  useEffect(() => {
+    const blur = () => void flush();
+    const hidden = () => document.visibilityState === 'hidden' && flush();
+    const leave = (e: BeforeUnloadEvent) => {
+      if (rev.current === savedRev.current) return;
+      flush();
+      e.preventDefault();
+    };
+    window.addEventListener('blur', blur);
+    document.addEventListener('visibilitychange', hidden);
+    window.addEventListener('beforeunload', leave);
+    return () => {
+      window.removeEventListener('blur', blur);
+      document.removeEventListener('visibilitychange', hidden);
+      window.removeEventListener('beforeunload', leave);
+    };
+  }, [flush]);
 
   if (!p || !current) return <div className="container">{error ? <ErrorBox error={error} /> : t('Ładowanie…')}</div>;
 
   const set = (patch: Partial<Profile>) => {
-    setP({ ...p, ...patch });
-    setDirty(true);
-  };
-
-  const save = async () => {
-    setError(null);
-    try {
-      const saved = await api.saveProfile(p.id, p);
-      setP(saved);
-      setDirty(false);
-      setNewIds(new Set());
-      setInfo(t('Profil zapisany.'));
-      setTimeout(() => setInfo(null), 3000);
-      await reloadProfiles();
-    } catch (e: any) {
-      setError(e.message);
-    }
+    local((x) => ({ ...x, ...patch }));
+    rev.current++;
+    setSaveState('saving');
+    clearTimeout(timer.current);
+    timer.current = setTimeout(flush, AUTOSAVE_MS);
   };
 
   const importFile = async (file: File) => {
     setError(null);
     setBusy(t('Czytam Twoje CV i wypełniam profil…'));
     try {
+      // Serwer buduje propozycję z zapisanego profilu, więc najpierw zapisujemy ręczne zmiany.
+      await flush();
+      if (rev.current !== savedRev.current) throw new Error(t('Nie udało się zapisać zmian w profilu, więc CV nie zostało wczytane. Spróbuj ponownie.'));
       const { mode, proposal, newIds } = await api.importCv(p.id, file);
-      setP({ ...p, ...proposal });
+      // Propozycja trafia do bieżącego stanu formularza i od razu się zapisuje (import kosztuje).
+      set(proposal);
+      flush();
       setNewIds(new Set(newIds));
-      setDirty(true);
       setInfo(
         mode === 'new'
-          ? t('AI wypełniło profil na podstawie CV. Sprawdź dane, popraw, co trzeba, i kliknij „Zapisz profil”.')
-          : t('AI połączyło nowe CV z profilem. Nowe pozycje są oznaczone na zielono. Sprawdź i kliknij „Zapisz profil”.'),
+          ? t('AI wypełniło profil na podstawie CV i zapisało go. Sprawdź dane i popraw, co trzeba.')
+          : t('AI połączyło nowe CV z profilem i zapisało zmiany. Nowe pozycje są oznaczone na zielono - sprawdź je.'),
       );
     } catch (e: any) {
       setError(e.message);
@@ -175,13 +241,42 @@ export function ProfilePage() {
   const uploadPhoto = async (file: File) => {
     setError(null);
     try {
+      // Po zapisie w toku, żeby zapis formularza nie cofnął zdjęcia na serwerze.
+      await flush();
       const saved = await api.uploadPhoto(p.id, file);
-      setP({ ...p, photo: saved.photo });
+      local((x) => ({ ...x, photo: saved.photo }));
       setPhotoBust(String(Date.now()));
     } catch (e: any) {
       setError(e.message);
     }
   };
+
+  const deletePhoto = async () => {
+    setError(null);
+    try {
+      await flush();
+      await api.deletePhoto(p.id);
+      local((x) => ({ ...x, photo: '' }));
+    } catch (e: any) {
+      setError(e.message);
+    }
+  };
+
+  const saveStatus =
+    saveState === 'saving' ? (
+      <span className="badge">{t('zapisuję…')}</span>
+    ) : saveState === 'saved' ? (
+      <span className="badge good">{t('zapisano')}</span>
+    ) : saveState === 'error' ? (
+      <>
+        <span className="badge bad">{t('nie zapisano')}</span>
+        <button className="btn sm" onClick={() => flush()}>
+          {t('Spróbuj ponownie')}
+        </button>
+      </>
+    ) : (
+      <span className="faint">{t('Zmiany zapisują się same.')}</span>
+    );
 
   const empty = !p.experience.length && !p.education.length && !p.skills.length;
 
@@ -193,11 +288,8 @@ export function ProfilePage() {
           <h1>{t('Mój profil')}</h1>
           <p className="sub">{t('Wszystko, co o Tobie wie program. AI wybiera z tego to, co pasuje do danego ogłoszenia - im więcej szczegółów, tym lepsze CV.')}</p>
         </div>
-        <div className="row">
-          {dirty && <span className="badge warn">{t('niezapisane zmiany')}</span>}
-          <button className="btn primary" onClick={save} disabled={!dirty}>
-            {t('Zapisz profil')}
-          </button>
+        <div className="row" role="status" aria-live="polite">
+          {saveStatus}
         </div>
       </div>
 
@@ -292,13 +384,7 @@ export function ProfilePage() {
               {p.photo ? t('Zmień zdjęcie') : t('Dodaj zdjęcie')}
             </button>
             {p.photo && (
-              <button
-                className="btn ghost sm danger"
-                onClick={async () => {
-                  await api.deletePhoto(p.id);
-                  setP({ ...p, photo: '' });
-                }}
-              >
+              <button className="btn ghost sm danger" onClick={deletePhoto}>
                 {t('Usuń')}
               </button>
             )}
@@ -494,9 +580,7 @@ export function ProfilePage() {
         </div>
 
         <div className="row" style={{ justifyContent: 'flex-end' }}>
-          <button className="btn primary lg" onClick={save} disabled={!dirty}>
-            {t('Zapisz profil')}
-          </button>
+          {saveStatus}
         </div>
       </div>
     </div>

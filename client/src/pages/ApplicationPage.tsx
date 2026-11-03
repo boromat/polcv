@@ -3,10 +3,10 @@ import { Link, useParams } from 'react-router-dom';
 import type { CvVersion, GapAnswer, TemplateId } from '../../../shared/schemas';
 import { api, type AppDetail, type VersionDetail } from '../api';
 import { useApp } from '../ctx';
-import { useT } from '../i18n';
-import { Busy, ErrorBox, fmtDate, ScoreBadge, STATUS_LABELS, STATUSES, usd } from '../components/ui';
+import { translate, useT } from '../i18n';
+import { Busy, ErrorBox, fmtDate, openWhenReady, ScoreBadge, STATUS_LABELS, STATUSES, usd } from '../components/ui';
 import { GapStep } from './app/GapStep';
-import { CvEditor } from './app/CvEditor';
+import { CvEditor, pendingCount } from './app/CvEditor';
 import { ReportView } from './app/ReportView';
 import { InterviewView, LetterView, PostingView } from './app/ExtrasViews';
 
@@ -15,6 +15,9 @@ type Patch = Partial<Pick<CvVersion, 'content' | 'decisions' | 'template' | 'pho
 
 // Polska odmiana liczebników: 2-4 (oprócz 12-14) bierze formę "strony", reszta "stron".
 const plFew = (n: number) => n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20);
+
+/** Porównanie odpowiedzi bez względu na kolejność kluczy w obiektach. */
+const answersKey = (list: GapAnswer[]) => JSON.stringify(list.map((a) => [a.questionId, a.has, a.answer]));
 
 export function ApplicationPage() {
   const { aid = '' } = useParams();
@@ -32,6 +35,10 @@ export function ApplicationPage() {
   const [pages, setPages] = useState<number | null>(null);
   const gapStarted = useRef(false);
   const saveChain = useRef(Promise.resolve());
+  // Pola CV, których zapis się nie udał (do ponowienia przed akcją AI albo PDF).
+  const unsaved = useRef<{ v: number; patch: Patch; error: string } | null>(null);
+  // Ostatnio zapisane odpowiedzi na pytania (null = jeszcze nic nie wysłano z tej strony).
+  const savedAnswers = useRef<string | null>(null);
 
   const loadDetail = useCallback(async () => {
     const d = await api.application(pid, aid);
@@ -48,18 +55,59 @@ export function ApplicationPage() {
     [pid, aid],
   );
 
+  // Zmiany CV zapisujemy po kolei; nieudany zapis zostaje w `unsaved` do ponowienia.
+  const queueSave = useCallback(
+    (v: number, p: Patch) => {
+      saveChain.current = saveChain.current.then(async () => {
+        try {
+          await api.saveVersion(pid, aid, v, p);
+        } catch (e: any) {
+          const prev = unsaved.current?.v === v ? unsaved.current.patch : {};
+          unsaved.current = { v, patch: { ...prev, ...p }, error: e.message };
+          setError(e.message);
+          return;
+        }
+        if (unsaved.current?.v === v) {
+          const rest: Patch = { ...unsaved.current.patch };
+          for (const k of Object.keys(p) as (keyof Patch)[]) delete rest[k];
+          unsaved.current = Object.keys(rest).length ? { ...unsaved.current, patch: rest } : null;
+        }
+        try {
+          const fresh = await api.version(pid, aid, v);
+          // Lokalna treść CV jest źródłem prawdy podczas edycji; z serwera bierzemy tylko wyliczenia.
+          setVd((prev) => (prev && prev.cv.version === v ? { ...fresh, cv: prev.cv, pending: pendingCount(prev.cv) } : prev));
+          setBust(String(Date.now()));
+        } catch (e: any) {
+          setError(e.message);
+        }
+      });
+    },
+    [pid, aid],
+  );
+
+  /** Czeka na zapis edycji (pole zatwierdza się dopiero przy kliknięciu przycisku), żeby AI i PDF nie czytały starszej wersji z dysku. */
+  const flushSaves = useCallback(async () => {
+    await saveChain.current;
+    if (unsaved.current) {
+      queueSave(unsaved.current.v, unsaved.current.patch);
+      await saveChain.current;
+    }
+    if (unsaved.current) throw new Error(translate('Nie udało się zapisać zmian w CV: {error}', { error: unsaved.current.error }));
+  }, [queueSave]);
+
   const run = useCallback(async (message: string, fn: (step: (m: string, hint?: string) => void) => Promise<void>, hint?: string) => {
     setError(null);
     setNotice(null);
     setBusy({ message, hint });
     try {
+      await flushSaves();
       await fn((m, h) => setBusy({ message: m, hint: h }));
     } catch (e: any) {
       setError(e.message);
     } finally {
       setBusy(null);
     }
-  }, []);
+  }, [flushSaves]);
 
   useEffect(() => {
     loadDetail()
@@ -100,14 +148,23 @@ export function ApplicationPage() {
     await loadVersion(v);
   };
 
-  const generate = (answers: GapAnswer[], opts: { language?: 'pl' | 'en'; template: TemplateId }) =>
-    run(t('Zapisuję odpowiedzi w profilu…'), async (step) => {
-      if (answers.length) await api.answers(pid, aid, answers);
-      step(t('Piszę CV pod to ogłoszenie…'), t('Wybieram z profilu to, co pasuje, i piszę językiem ogłoszenia. To zwykle 30–60 sekund.'));
+  const generate = (answers: GapAnswer[], opts: { language?: 'pl' | 'en'; template: TemplateId }) => {
+    // Odpowiedzi wysyłamy tylko po zmianie: ponowna próba po błędzie nie dopisuje do profilu tych samych faktów.
+    const key = answersKey(answers);
+    const send = key !== (savedAnswers.current ?? answersKey(app.gap?.answers ?? []));
+    const writing = t('Piszę CV pod to ogłoszenie…');
+    const writingHint = t('Wybieram z profilu to, co pasuje, i piszę językiem ogłoszenia. To zwykle 30–60 sekund.');
+    return run(send ? t('Zapisuję odpowiedzi w profilu…') : writing, async (step) => {
+      if (send) {
+        await api.answers(pid, aid, answers);
+        savedAnswers.current = key;
+      }
+      step(writing, writingHint);
       const cv = await api.generate(pid, aid, opts);
       await evaluateAndReload(cv.version, step);
       setTab('cv');
-    });
+    }, send ? undefined : writingHint);
+  };
 
   const regenerate = () => {
     if (!confirm(t('Napisać CV od nowa? Obecna wersja zostanie zachowana na liście wersji.'))) return;
@@ -145,20 +202,15 @@ export function ApplicationPage() {
       await loadVersion(v);
     });
 
-  // Zmiany zapisujemy po kolei i od razu pokazujemy lokalnie (żeby szybkie edycje się nie nadpisywały).
+  // Zmiany od razu pokazujemy lokalnie, a zapisujemy po kolei (żeby szybkie edycje się nie nadpisywały).
   const patch = (p: Patch) => {
     if (!vd) return;
-    setVd((prev) => (prev ? { ...prev, cv: { ...prev.cv, ...p }, reportStale: !!prev.report } : prev));
-    const v = vd.cv.version;
-    saveChain.current = saveChain.current
-      .then(async () => {
-        await api.saveVersion(pid, aid, v, p);
-        const fresh = await api.version(pid, aid, v);
-        // Lokalna treść CV jest źródłem prawdy podczas edycji; z serwera bierzemy tylko wyliczenia.
-        setVd((prev) => (prev && prev.cv.version === v ? { ...fresh, cv: prev.cv } : prev));
-        setBust(String(Date.now()));
-      })
-      .catch((e) => setError(e.message));
+    setVd((prev) => {
+      if (!prev) return prev;
+      const cv = { ...prev.cv, ...p };
+      return { ...prev, cv, reportStale: !!prev.report, pending: pendingCount(cv) };
+    });
+    queueSave(vd.cv.version, p);
   };
 
   const setStatus = async (status: string) => {
@@ -166,9 +218,19 @@ export function ApplicationPage() {
     await loadDetail();
   };
 
-  const saveNotes = async (notes: string) => {
-    await api.patchApplication(pid, aid, { notes }).catch((e) => setError(e.message));
+  // Notatka idzie do tej samej kolejki, żeby akcja AI (zapisuje całą aplikację) nie nadpisała jej starszą wersją.
+  const saveNotes = (notes: string) => {
+    saveChain.current = saveChain.current.then(async () => {
+      try {
+        await api.patchApplication(pid, aid, { notes });
+        setDetail((d) => (d ? { ...d, application: { ...d.application, notes } } : d));
+      } catch (e: any) {
+        setError(e.message);
+      }
+    });
   };
+
+  const previewPdf = () => openWhenReady(flushSaves(), () => api.pdfUrl(pid, aid, app.currentVersion)).catch((e) => setError(e.message));
 
   const pagesLabel = (n: number) => (n === 1 ? t('{n} strona', { n }) : plFew(n) ? t('{n} strony', { n }) : t('{n} stron', { n }));
   const pendingNote = (n: number) =>
@@ -293,9 +355,9 @@ export function ApplicationPage() {
                 <button className="btn sm" onClick={improve} disabled={vd.pending > 0} title={vd.pending > 0 ? decideFirst : ''}>
                   {t('Popraw automatycznie')}
                 </button>
-                <a className="btn sm" href={api.pdfUrl(pid, aid, app.currentVersion)} target="_blank" rel="noreferrer">
+                <button className="btn sm" onClick={previewPdf}>
                   {t('Podgląd PDF')}
-                </a>
+                </button>
                 <button className="btn primary sm" onClick={exportPdf} disabled={vd.pending > 0} title={vd.pending > 0 ? decideFirst : ''}>
                   {t('Pobierz PDF')}
                 </button>
@@ -332,8 +394,8 @@ export function ApplicationPage() {
             )}
             {tab === 'report' && <ReportView report={vd.report} stale={vd.reportStale} onEvaluate={evaluate} onImprove={improve} pending={vd.pending} />}
             {tab === 'posting' && <PostingView app={app} />}
-            {tab === 'interview' && <InterviewView pid={pid} app={app} run={(m, fn, h) => run(m, async () => { await fn(); await loadDetail(); }, h)} />}
-            {tab === 'letter' && <LetterView pid={pid} app={app} run={(m, fn, h) => run(m, async () => { await fn(); await loadDetail(); }, h)} />}
+            {tab === 'interview' && <InterviewView key={app.id} pid={pid} app={app} run={(m, fn, h) => run(m, async () => { await fn(); await loadDetail(); }, h)} />}
+            {tab === 'letter' && <LetterView key={app.id} pid={pid} app={app} run={(m, fn, h) => run(m, async () => { await fn(); await loadDetail(); }, h)} />}
           </>
         )}
       </div>

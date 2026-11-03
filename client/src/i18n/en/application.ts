@@ -19,6 +19,7 @@ export const application: Record<string, string> = {
   'PDF zapisany w historii i pobrany. Status zmieniono na „Wysłane” - zmień go, jeśli CV nie zostało jeszcze wysłane.':
     'PDF saved to History and downloaded. The status was changed to "Sent"; change it if you have not sent the CV yet.',
   'Przełączam wersję…': 'Switching version…',
+  'Nie udało się zapisać zmian w CV: {error}': 'Your CV changes could not be saved: {error}',
   '{n} strona': '{n} page',
   '{n} strony': '{n} pages',
   '{n} stron': '{n} pages',
@@ -210,6 +211,9 @@ export const application: Record<string, string> = {
     'When a company invites you to an interview, click below. The AI will prepare the questions you are most likely to get (about the requirements in the job posting, your projects and situations at work), with suggested answers based on your experience, plus a list of topics to review.',
   'Przygotuj mnie do rozmowy': 'Prepare me for the interview',
   'Wygeneruj od nowa': 'Generate again',
+  'Przygotować rozmowę od nowa? Obecne pytania i odpowiedzi zostaną zastąpione.':
+    'Prepare the interview again? The current questions and answers will be replaced.',
+  'Nie udało się wczytać zapisanej wersji: {error}': 'The saved version could not be loaded: {error}',
   'Pytania: {category}': 'Questions: {category}',
   'Co chcą sprawdzić:': 'What they want to find out:',
   'Tematy do powtórki': 'Topics to review',
@@ -227,6 +231,9 @@ export const application: Record<string, string> = {
   'To ogłoszenie wymaga listu motywacyjnego.': 'This job posting requires a cover letter.',
   'Napisz list motywacyjny': 'Write the cover letter',
   'Treść listu': 'Letter text',
+  'Napisać list od nowa? Obecna treść listu razem z Twoimi poprawkami zostanie zastąpiona.':
+    'Rewrite the letter from scratch? The current text, including your edits, will be replaced.',
+  'Nie udało się zapisać listu: {error}': 'The letter could not be saved: {error}',
   'Pobierz list jako PDF': 'Download the letter as PDF',
   'Podgląd listu': 'Letter preview',
 };

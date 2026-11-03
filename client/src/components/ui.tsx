@@ -86,6 +86,25 @@ export function LazyText({
   );
 }
 
+/**
+ * Otwiera adres w nowej karcie, gdy `ready` się zakończy (np. zapis zmian przed podglądem PDF).
+ * Kartę otwieramy od razu przy kliknięciu, bo po czekaniu przeglądarka mogłaby ją zablokować jako wyskakujące okno.
+ */
+export async function openWhenReady(ready: Promise<unknown>, url: () => string) {
+  const tab = window.open('', '_blank');
+  try {
+    await ready;
+  } catch (e) {
+    tab?.close();
+    throw e;
+  }
+  const href = new URL(url(), window.location.href).href;
+  if (tab) {
+    tab.opener = null;
+    tab.location.href = href;
+  } else window.open(href, '_blank', 'noopener');
+}
+
 export const STATUS_LABELS: Record<string, string> = {
   szkic: 'Szkic',
   przygotowane: 'Przygotowane',

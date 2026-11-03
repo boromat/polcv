@@ -1,8 +1,60 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Application, CoverLetter, InterviewPrep } from '../../../../shared/schemas';
 import { api } from '../../api';
-import { LazyText } from '../../components/ui';
+import { ErrorBox, LazyText } from '../../components/ui';
 import { useT } from '../../i18n';
+
+/** Wczytuje zapisany wynik AI. Błąd wczytania nie może wyglądać jak brak wyniku (pusty stan zachęca do płatnego nadpisania). */
+function useSaved<T>(has: boolean, load: () => Promise<T | null>) {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(has);
+  const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const loaded = data !== null;
+  useEffect(() => {
+    // Wynik wygenerowany na tej stronie już mamy, nie wczytujemy go drugi raz.
+    if (!has || loaded) {
+      setLoading(false);
+      return;
+    }
+    let alive = true;
+    setLoading(true);
+    setError(null);
+    load()
+      .then((d) => {
+        if (alive) setData(d);
+      })
+      .catch((e) => {
+        if (alive) setError(e.message);
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [has, loaded, attempt]);
+  return { data, setData, loading, error, retry: () => setAttempt((n) => n + 1) };
+}
+
+function LoadState({ title, loading, error, retry }: { title: string; loading: boolean; error: string | null; retry: () => void }) {
+  const { t } = useT();
+  return (
+    <div className="card empty">
+      <h2>{title}</h2>
+      {error ? (
+        <>
+          <ErrorBox error={t('Nie udało się wczytać zapisanej wersji: {error}', { error })} />
+          <button className="btn" onClick={retry}>
+            {t('Spróbuj ponownie')}
+          </button>
+        </>
+      ) : (
+        loading && <p>{t('Ładowanie…')}</p>
+      )}
+    </div>
+  );
+}
 
 export function PostingView({ app }: { app: Application }) {
   const { t } = useT();
@@ -67,17 +119,17 @@ export function PostingView({ app }: { app: Application }) {
 
 export function InterviewView({ pid, app, run }: { pid: string; app: Application; run: (msg: string, fn: () => Promise<void>, hint?: string) => void }) {
   const { t } = useT();
-  const [prep, setPrep] = useState<InterviewPrep | null>(null);
-  useEffect(() => {
-    if (app.hasInterviewPrep) api.interview(pid, app.id).then(setPrep);
-  }, [app.id, app.hasInterviewPrep]);
+  const saved = useSaved<InterviewPrep>(app.hasInterviewPrep, () => api.interview(pid, app.id));
+  const prep = saved.data;
 
-  const make = () =>
+  const make = () => {
+    if (prep && !confirm(t('Przygotować rozmowę od nowa? Obecne pytania i odpowiedzi zostaną zastąpione.'))) return;
     run(
       t('Przygotowuję pytania i odpowiedzi na rozmowę…'),
-      async () => setPrep(await api.makeInterview(pid, app.id)),
+      async () => saved.setData(await api.makeInterview(pid, app.id)),
       t('Analizuję ogłoszenie, Twoje CV i profil - to potrwa około minuty.'),
     );
+  };
 
   // Kategoria pytania to wartość z ustalonego zbioru (dane), tłumaczymy tylko napis.
   const categories: Record<string, string> = {
@@ -88,6 +140,7 @@ export function InterviewView({ pid, app, run }: { pid: string; app: Application
     trudne: t('trudne'),
   };
 
+  if (!prep && (saved.loading || saved.error)) return <LoadState title={t('Przygotowanie do rozmowy')} loading={saved.loading} error={saved.error} retry={saved.retry} />;
   if (!prep) {
     return (
       <div className="card empty">
@@ -170,24 +223,52 @@ export function InterviewView({ pid, app, run }: { pid: string; app: Application
 
 export function LetterView({ pid, app, run }: { pid: string; app: Application; run: (msg: string, fn: () => Promise<void>, hint?: string) => void }) {
   const { t } = useT();
-  const [letter, setLetter] = useState<CoverLetter | null>(null);
+  const saved = useSaved<CoverLetter>(app.hasCoverLetter, () => api.letter(pid, app.id));
+  const letter = saved.data;
   const [bust, setBust] = useState(String(Date.now()));
-  useEffect(() => {
-    if (app.hasCoverLetter) api.letter(pid, app.id).then(setLetter);
-  }, [app.id, app.hasCoverLetter]);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  // Zapisy listu idą po kolei; `failed` = ostatni zapis się nie udał (każdy zapis wysyła cały list, więc kolejny udany to naprawia).
+  const chain = useRef(Promise.resolve());
+  const failed = useRef(false);
 
-  const make = () =>
-    run(t('Piszę list motywacyjny…'), async () => {
-      setLetter(await api.makeLetter(pid, app.id));
-      setBust(String(Date.now()));
+  const save = (l: CoverLetter) => {
+    saved.setData(l);
+    chain.current = chain.current.then(async () => {
+      try {
+        await api.saveLetter(pid, app.id, l);
+        failed.current = false;
+        setSaveError(null);
+        setBust(String(Date.now()));
+      } catch (e: any) {
+        failed.current = true;
+        setSaveError(t('Nie udało się zapisać listu: {error}', { error: e.message }));
+      }
     });
-
-  const save = async (l: CoverLetter) => {
-    setLetter(l);
-    await api.saveLetter(pid, app.id, l);
-    setBust(String(Date.now()));
   };
 
+  const make = () => {
+    if (letter && !confirm(t('Napisać list od nowa? Obecna treść listu razem z Twoimi poprawkami zostanie zastąpiona.'))) return;
+    run(t('Piszę list motywacyjny…'), async () => {
+      // Zapis w toku nie może nadpisać nowego listu starą treścią.
+      await chain.current;
+      saved.setData(await api.makeLetter(pid, app.id));
+      failed.current = false;
+      setSaveError(null);
+      setBust(String(Date.now()));
+    });
+  };
+
+  // PDF dopiero po zapisaniu ostatnich poprawek (pole zatwierdza się przy kliknięciu przycisku).
+  const download = async () => {
+    await chain.current;
+    if (failed.current && letter) {
+      save(letter);
+      await chain.current;
+    }
+    if (!failed.current) window.location.href = api.letterPdfUrl(pid, app.id, true);
+  };
+
+  if (!letter && (saved.loading || saved.error)) return <LoadState title={t('List motywacyjny')} loading={saved.loading} error={saved.error} retry={saved.retry} />;
   if (!letter) {
     return (
       <div className="card empty">
@@ -221,9 +302,10 @@ export function LetterView({ pid, app, run }: { pid: string; app: Application; r
           ))}
           <LazyText value={letter.closing} onCommit={(closing) => save({ ...letter, closing })} />
         </div>
-        <a className="btn primary" href={api.letterPdfUrl(pid, app.id, true)}>
+        <ErrorBox error={saveError} onClose={() => setSaveError(null)} />
+        <button className="btn primary" onClick={download}>
           {t('Pobierz list jako PDF')}
-        </a>
+        </button>
       </div>
       <div className="preview-pane">
         <iframe className="preview-frame" title={t('Podgląd listu')} src={api.letterPreviewUrl(pid, app.id, bust)} />

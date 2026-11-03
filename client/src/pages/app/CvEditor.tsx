@@ -7,6 +7,30 @@ const rid = () => `t${Math.random().toString(36).slice(2, 10)}`;
 const newText = (): CvText => ({ id: rid(), text: '', status: 'fact', reason: '', fallbackText: '', sourceIds: [] });
 
 type Patch = Partial<Pick<CvVersion, 'content' | 'decisions' | 'template' | 'photo' | 'rodo'>>;
+type Decision = 'accepted' | 'rejected';
+
+/** Decyzja wpisana w treść: zaakceptowana → fakt, odrzucona → bezpieczna wersja jako fakt, a bez niej usunięcie (null). */
+function resolveText(item: CvText, d: Decision): CvText | null {
+  if (d === 'accepted') return { ...item, status: 'fact', reason: '', fallbackText: '' };
+  return item.fallbackText.trim() ? { ...item, text: item.fallbackText, status: 'fact', reason: '', fallbackText: '' } : null;
+}
+
+/** Treść z wpisanymi decyzjami, tak samo jak applyDecisions na serwerze (starsze wersje trzymały decyzje osobno). */
+function withDecisions(c: CvContent, decisions: CvVersion['decisions']): CvContent {
+  const r = (x: CvText) => (x.status === 'suggested' && decisions[x.id] ? resolveText(x, decisions[x.id]) : x);
+  const keep = (items: CvText[]) => items.map(r).filter((x): x is CvText => x !== null);
+  return {
+    ...c,
+    summary: r(c.summary) ?? { ...c.summary, text: '', status: 'fact', reason: '', fallbackText: '' },
+    experience: c.experience.map((e) => ({ ...e, bullets: keep(e.bullets) })),
+    projects: c.projects.map((p) => ({ ...p, bullets: keep(p.bullets) })),
+  };
+}
+
+const allTexts = (c: CvContent) => [c.summary, ...c.experience.flatMap((e) => e.bullets), ...c.projects.flatMap((p) => p.bullets)];
+
+/** Liczba sugestii bez decyzji - to samo liczy serwer (pendingSuggestions). */
+export const pendingCount = (cv: Pick<CvVersion, 'content' | 'decisions'>) => allTexts(cv.content).filter((x) => x.status === 'suggested' && !cv.decisions[x.id]).length;
 
 function Suggestion({ item, focus, onDecide }: { item: CvText; focus: boolean; onDecide: (d: 'accepted' | 'rejected') => void }) {
   const { t } = useT();
@@ -85,12 +109,14 @@ export function CvEditor({
   focusId: string | null;
 }) {
   const { t } = useT();
-  const c = cv.content;
-  const setC = (patch: Partial<CvContent>) => onPatch({ content: { ...c, ...patch } });
-  const decide = (id: string, d: 'accepted' | 'rejected') => onPatch({ decisions: { ...cv.decisions, [id]: d } });
+  // Edytor pokazuje treść z wpisanymi decyzjami: odrzucona sugestia nie może wrócić przy kolejnej edycji.
+  const legacy = Object.keys(cv.decisions).length > 0;
+  const c = legacy ? withDecisions(cv.content, cv.decisions) : cv.content;
+  const setContent = (content: CvContent) => onPatch(legacy ? { content, decisions: {} } : { content });
+  const setC = (patch: Partial<CvContent>) => setContent({ ...c, ...patch });
+  const decide = (id: string, d: Decision) => setContent(withDecisions(c, { [id]: d }));
 
-  const all = [c.summary, ...c.experience.flatMap((e) => e.bullets), ...c.projects.flatMap((p) => p.bullets)];
-  const pending = all.filter((x) => x.status === 'suggested' && !cv.decisions[x.id]);
+  const pending = allTexts(c).filter((x) => x.status === 'suggested');
   const [rodoEdit, setRodoEdit] = useState(false);
 
   const allSections: SectionKey[] = ['summary', 'experience', 'projects', 'education', 'skills', 'certificates', 'languages', 'interests'];

@@ -12,17 +12,20 @@ export const profile: Record<string, string> = {
 
   // ProfilePage: nagłówek, zapis i import CV
   'Ładowanie…': 'Loading…',
-  'Profil zapisany.': 'Profile saved.',
   'Czytam Twoje CV i wypełniam profil…': 'Reading your CV and filling in your profile…',
-  'AI wypełniło profil na podstawie CV. Sprawdź dane, popraw, co trzeba, i kliknij „Zapisz profil”.':
-    'The AI filled in your profile from your CV. Check the details, fix anything that needs it and click "Save profile".',
-  'AI połączyło nowe CV z profilem. Nowe pozycje są oznaczone na zielono. Sprawdź i kliknij „Zapisz profil”.':
-    'The AI merged the new CV into your profile. New entries are marked in green. Check them and click "Save profile".',
+  'Nie udało się zapisać zmian w profilu, więc CV nie zostało wczytane. Spróbuj ponownie.':
+    'Your profile changes could not be saved, so the CV was not imported. Please try again.',
+  'AI wypełniło profil na podstawie CV i zapisało go. Sprawdź dane i popraw, co trzeba.':
+    'The AI filled in your profile from your CV and saved it. Check the details and fix anything that needs it.',
+  'AI połączyło nowe CV z profilem i zapisało zmiany. Nowe pozycje są oznaczone na zielono - sprawdź je.':
+    'The AI merged the new CV into your profile and saved the changes. New entries are marked in green, so check them.',
   'Mój profil': 'My profile',
   'Wszystko, co o Tobie wie program. AI wybiera z tego to, co pasuje do danego ogłoszenia - im więcej szczegółów, tym lepsze CV.':
     'Everything the app knows about you. The AI picks what fits each posting, so the more detail you add, the better the CV.',
-  'niezapisane zmiany': 'unsaved changes',
-  'Zapisz profil': 'Save profile',
+  'zapisuję…': 'saving…',
+  'nie zapisano': 'not saved',
+  'Spróbuj ponownie': 'Try again',
+  'Zmiany zapisują się same.': 'Changes are saved automatically.',
   'Krok 1: wgraj swoje obecne CV': 'Step 1: upload your current CV',
   'Wgraj nowsze CV': 'Upload a newer CV',
   'PDF albo DOCX. Plik zostaje zapisany w profilu, a AI przepisze z niego dane do formularza poniżej.':

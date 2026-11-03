@@ -12,9 +12,16 @@ export function GapStep({
 }) {
   const { t } = useT();
   const questions = app.gap?.questions ?? [];
-  const [answers, setAnswers] = useState<Record<string, { has: boolean | null; answer: string }>>(() =>
-    Object.fromEntries(questions.map((q) => [q.id, { has: null, answer: '' }])),
-  );
+  // Zapisane odpowiedzi (np. po odświeżeniu strony w trakcie pisania CV) wracają do formularza, żeby nie wpisywać ich drugi raz.
+  const [answers, setAnswers] = useState<Record<string, { has: boolean | null; answer: string }>>(() => {
+    const saved = new Map((app.gap?.answers ?? []).map((a) => [a.questionId, a]));
+    return Object.fromEntries(
+      questions.map((q) => {
+        const a = saved.get(q.id);
+        return [q.id, a ? { has: a.has, answer: a.answer } : { has: null, answer: '' }];
+      }),
+    );
+  });
   const [language, setLanguage] = useState<'' | 'pl' | 'en'>('');
   const [template, setTemplate] = useState<TemplateId>('modern');
   const posting = app.posting!;
@@ -69,7 +76,8 @@ export function GapStep({
               </div>
               {a?.has === true && (
                 <Field label={t('Gdzie i co konkretnie?')} hint={q.hint}>
-                  <textarea rows={3} value={a.answer} onChange={(e) => set(q.id, { answer: e.target.value })} autoFocus />
+                  {/* Fokus tylko na świeżo otwartym polu, nie na wczytanych odpowiedziach. */}
+                  <textarea rows={3} value={a.answer} onChange={(e) => set(q.id, { answer: e.target.value })} autoFocus={!a.answer} />
                 </Field>
               )}
             </div>
