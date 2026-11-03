@@ -50,6 +50,12 @@ export const EN: Record<string, string> = {
   'Nie znaleziono profilu': 'Profile not found',
   'Nie znaleziono aplikacji': 'Application not found',
   'Brak wersji CV nr {v}': 'CV version {v} does not exist',
+  'Plik {file} jest uszkodzony i nie da się go odczytać ({error}).': 'The file {file} is damaged and cannot be read ({error}).',
+
+  // security.ts
+  'Odmowa dostępu: PolCV przyjmuje zapytania tylko pod adresem localhost, a to przyszło pod adres {host}. Jeśli otwierasz program pod inną nazwą, dopisz ją w zmiennej CV_ALLOWED_HOSTS.':
+    'Access denied: PolCV only accepts requests sent to localhost, but this one was sent to {host}. If you open the program under a different name, add it to the CV_ALLOWED_HOSTS variable.',
+  'Odmowa dostępu: zapytanie z innej strony ({origin}) zostało zablokowane.': 'Access denied: a request from another website ({origin}) was blocked.',
 
   // cv/importCv.ts, cv/browser.ts, cv/render.ts, jobs/fetchPosting.ts
   'Obsługiwane formaty CV: PDF, DOCX, TXT.': 'Supported CV formats: PDF, DOCX, TXT.',
@@ -100,7 +106,12 @@ export const EN: Record<string, string> = {
   'Pakiet polanon nie jest zainstalowany.': 'The polanon package is not installed.',
   'polanon wymaga Pythona 3.11 lub nowszego ({found}).': 'polanon needs Python 3.11 or newer ({found}).',
   'Nie znaleziono Pythona 3.11+.': 'Python 3.11+ was not found.',
-  'polanon nie wystartował w ciągu 60 s': 'polanon did not start within 60 s',
+  'polanon nie wystartował w ciągu {seconds} s': 'polanon did not start within {seconds} s',
+  'Podaj pełną ścieżkę do pliku Pythona na tym komputerze, np. C:\\Python312\\python.exe. Ścieżki względne i sieciowe nie są dozwolone, a puste pole oznacza wykrywanie automatyczne.':
+    'Enter the full path to the Python file on this computer, e.g. C:\\Python312\\python.exe. Relative and network paths are not allowed; leave the field empty to detect Python automatically.',
+  'Wskazany plik ({name}) to nie Python. Podaj ścieżkę do python.exe, python3.exe albo py.exe (w Linuksie i macOS: python albo python3).':
+    'The selected file ({name}) is not Python. Enter the path to python.exe, python3.exe or py.exe (on Linux and macOS: python or python3).',
+  'Nie znaleziono pliku {path}.': 'File not found: {path}.',
   'proces polanon zakończył się (kod {code})': 'the polanon process exited (code {code})',
   'proces polanon nie działa': 'the polanon process is not running',
   'polanon nie odpowiedział w ciągu 120 s': 'polanon did not respond within 120 s',

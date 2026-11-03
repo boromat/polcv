@@ -6,6 +6,9 @@
   "license": "MIT",
   "author": "BoroMat",
   "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
   "scripts": {
     "dev": "concurrently -k -n server,client -c blue,green \"tsx watch server/index.ts\" \"vite\"",
     "build": "vite build",

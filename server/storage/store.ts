@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { randomUUID } from 'node:crypto';
 import { nanoid } from 'nanoid';
 import type { Application, CvVersion, Profile, Settings, UsageEntry, AtsReport, InterviewPrep, CoverLetter, Career } from '../../shared/schemas';
 import { tr } from '../i18n';
@@ -21,21 +22,109 @@ export class HttpError extends Error {
   }
 }
 
+// ---------- Pliki JSON: blokada, zapis atomowy ----------
+
+const RETRY_CODES = new Set(['EPERM', 'EBUSY', 'EACCES']);
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Windows: antywirus, indeksowanie albo OneDrive potrafią na chwilę zablokować plik - próbujemy jeszcze kilka razy. */
+async function retryBusy<T>(fn: () => Promise<T>): Promise<T> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fn();
+    } catch (e: any) {
+      if (attempt >= 5 || !RETRY_CODES.has(e?.code)) throw e;
+      await sleep(25 * 2 ** attempt);
+    }
+  }
+}
+
+const locks = new Map<string, Promise<void>>();
+const lockKey = (file: string) => {
+  const abs = path.resolve(file);
+  return process.platform === 'win32' ? abs.toLowerCase() : abs;
+};
+
+/**
+ * Operacje na tym samym pliku idą po kolei (kolejka obietnic na ścieżkę). Każdy zapis przechodzi przez tę blokadę.
+ * Blokada nie jest wielokrotna: wewnątrz fn nie wolno czekać na blokadę tego samego pliku.
+ */
+export function withFileLock<T>(file: string, fn: () => Promise<T>): Promise<T> {
+  const key = lockKey(file);
+  const run = (locks.get(key) ?? Promise.resolve()).then(fn);
+  const tail = run.then(
+    () => {},
+    () => {},
+  );
+  locks.set(key, tail);
+  void tail.then(() => {
+    if (locks.get(key) === tail) locks.delete(key);
+  });
+  return run;
+}
+
 async function readJson<T>(file: string): Promise<T | null> {
+  let raw: string;
   try {
-    return JSON.parse(await fs.readFile(file, 'utf8')) as T;
+    raw = await retryBusy(() => fs.readFile(file, 'utf8'));
   } catch (e: any) {
-    if (e.code === 'ENOENT') return null;
+    if (e.code === 'ENOENT' || e.code === 'ENOTDIR') return null;
+    throw e;
+  }
+  try {
+    // BOM dopisuje np. starszy Notatnik przy ręcznej edycji.
+    return JSON.parse(raw.replace(/^\uFEFF/, '')) as T;
+  } catch (e: any) {
+    throw new Error(tr('Plik {file} jest uszkodzony i nie da się go odczytać ({error}).', { file, error: e.message }));
+  }
+}
+
+/** Do list: uszkodzony plik pomijamy z ostrzeżeniem w konsoli, zamiast blokować cały widok. */
+async function readListed<T>(file: string): Promise<T | null> {
+  try {
+    const v = await readJson<T>(file);
+    if (v === null || typeof v === 'object') return v;
+    throw new Error('to nie jest obiekt JSON');
+  } catch (e: any) {
+    console.warn(`[dane] Pomijam plik, którego nie da się odczytać: ${file} (${e?.message ?? e})`);
+    return null;
+  }
+}
+
+/** Zapis bez blokady - tylko dla kodu, który już ją trzyma. */
+async function writeJsonNow(file: string, data: unknown): Promise<void> {
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  // Unikalna nazwa: dwa zapisy naraz nie mogą pisać do jednego pliku tymczasowego.
+  const tmp = `${file}.${randomUUID()}.tmp`;
+  try {
+    await fs.writeFile(tmp, JSON.stringify(data, null, 2), 'utf8');
+    await retryBusy(() => fs.rename(tmp, file));
+  } catch (e) {
+    await fs.rm(tmp, { force: true }).catch(() => {});
     throw e;
   }
 }
 
-async function writeJson(file: string, data: unknown): Promise<void> {
-  await fs.mkdir(path.dirname(file), { recursive: true });
-  const tmp = `${file}.${process.pid}.tmp`;
-  await fs.writeFile(tmp, JSON.stringify(data, null, 2), 'utf8');
-  await fs.rename(tmp, file);
+const writeJson = (file: string, data: unknown): Promise<void> => withFileLock(file, () => writeJsonNow(file, data));
+
+/**
+ * Odczyt, zmiana i zapis pod jedną blokadą - równoległe zapytania nie nadpisują sobie zmian.
+ * fn zmienia obiekt w miejscu albo zwraca nowy; gdy nic się nie zmieniło, plik nie jest zapisywany.
+ */
+function updateJson<T>(file: string, read: () => Promise<T>, fn: Updater<T>, stamp: (next: T) => T = (x) => x): Promise<T> {
+  return withFileLock(file, async () => {
+    const cur = await read();
+    const before = JSON.stringify(cur);
+    const res = await fn(cur);
+    const next = res === undefined ? cur : (res as T);
+    if (JSON.stringify(next) === before) return next;
+    const out = stamp(next);
+    await writeJsonNow(file, out);
+    return out;
+  });
 }
+
+export type Updater<T> = (cur: T) => void | T | Promise<void | T>;
 
 // ---------- Ustawienia ----------
 
@@ -56,9 +145,11 @@ export async function getSettings(): Promise<Settings> {
 }
 
 export async function saveSettings(patch: Partial<Settings>): Promise<Settings> {
-  const next = { ...(await getSettings()), ...patch };
-  await writeJson(settingsFile(), next);
-  return next;
+  return withFileLock(settingsFile(), async () => {
+    const next = { ...(await getSettings()), ...patch };
+    await writeJsonNow(settingsFile(), next);
+    return next;
+  });
 }
 
 // ---------- Profile ----------
@@ -95,10 +186,10 @@ export async function listProfiles(): Promise<Profile[]> {
   const dirs = await fs.readdir(root).catch(() => [] as string[]);
   const out: Profile[] = [];
   for (const d of dirs) {
-    const p = await readJson<Profile>(path.join(root, d, 'profile.json'));
+    const p = await readListed<Profile>(path.join(root, d, 'profile.json'));
     if (p) out.push(p);
   }
-  return out.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  return out.sort((a, b) => String(a.createdAt ?? '').localeCompare(String(b.createdAt ?? '')));
 }
 
 export async function getProfile(id: string): Promise<Profile> {
@@ -113,8 +204,13 @@ export async function saveProfile(p: Profile): Promise<Profile> {
   return next;
 }
 
+/** Zmiana profilu na świeżo odczytanych danych, np. po długim wywołaniu AI. */
+export async function updateProfile(id: string, fn: Updater<Profile>): Promise<Profile> {
+  return updateJson(profileFile(id), () => getProfile(id), fn, (p) => ({ ...p, updatedAt: nowIso() }));
+}
+
 export async function deleteProfile(id: string): Promise<void> {
-  await fs.rm(profileDir(id), { recursive: true, force: true });
+  await withFileLock(profileFile(id), () => fs.rm(profileDir(id), { recursive: true, force: true, maxRetries: 5 }));
 }
 
 export const profileFilesDir = (id: string) => path.join(profileDir(id), 'files');
@@ -129,10 +225,10 @@ export async function listApplications(profileId: string): Promise<Application[]
   const dirs = await fs.readdir(root).catch(() => [] as string[]);
   const out: Application[] = [];
   for (const d of dirs) {
-    const a = await readJson<Application>(path.join(root, d, 'application.json'));
+    const a = await readListed<Application>(path.join(root, d, 'application.json'));
     if (a) out.push(a);
   }
-  return out.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return out.sort((a, b) => String(b.createdAt ?? '').localeCompare(String(a.createdAt ?? '')));
 }
 
 export async function getApplication(profileId: string, appId: string): Promise<Application> {
@@ -147,8 +243,13 @@ export async function saveApplication(a: Application): Promise<Application> {
   return next;
 }
 
+/** Zmienia tylko to, co ustawi fn, na aktualnej wersji z dysku - np. notatka zapisana w trakcie generowania CV zostaje. */
+export async function updateApplication(profileId: string, appId: string, fn: Updater<Application>): Promise<Application> {
+  return updateJson(appFile(profileId, appId), () => getApplication(profileId, appId), fn, (a) => ({ ...a, updatedAt: nowIso() }));
+}
+
 export async function deleteApplication(profileId: string, appId: string): Promise<void> {
-  await fs.rm(appDir(profileId, appId), { recursive: true, force: true });
+  await withFileLock(appFile(profileId, appId), () => fs.rm(appDir(profileId, appId), { recursive: true, force: true, maxRetries: 5 }));
 }
 
 // Wersje CV i raporty
@@ -166,10 +267,26 @@ export async function saveVersion(pid: string, aid: string, cv: CvVersion): Prom
   await writeJson(versionFile(pid, aid, cv.version), cv);
 }
 
-export async function listVersions(pid: string, aid: string): Promise<CvVersion[]> {
+/** Numery wersji z nazw plików - liczą się też pliki, których nie da się odczytać, żeby nowa wersja ich nie nadpisała. */
+async function versionNumbers(pid: string, aid: string): Promise<number[]> {
   const files = await fs.readdir(appDir(pid, aid)).catch(() => [] as string[]);
-  const nums = files.map((f) => /^cv\.v(\d+)\.json$/.exec(f)?.[1]).filter(Boolean).map(Number).sort((a, b) => a - b);
-  return Promise.all(nums.map((n) => getVersion(pid, aid, n)));
+  return files.map((f) => /^cv\.v(\d+)\.json$/.exec(f)?.[1]).filter(Boolean).map(Number).sort((a, b) => a - b);
+}
+
+export async function listVersions(pid: string, aid: string): Promise<CvVersion[]> {
+  const nums = await versionNumbers(pid, aid);
+  const list = await Promise.all(nums.map((n) => readListed<CvVersion>(versionFile(pid, aid, n))));
+  return list.filter((cv): cv is CvVersion => !!cv);
+}
+
+/** Nowa wersja z kolejnym numerem po najwyższej istniejącej; dwa równoległe zapisy nie dostaną tego samego numeru. */
+export async function addVersion(pid: string, aid: string, build: (version: number) => CvVersion): Promise<CvVersion> {
+  return withFileLock(path.join(appDir(pid, aid), 'cv.next-version'), async () => {
+    const version = (await versionNumbers(pid, aid)).reduce((m, v) => Math.max(m, v), 0) + 1;
+    const cv = { ...build(version), version };
+    await writeJson(versionFile(pid, aid, version), cv);
+    return cv;
+  });
 }
 
 export const getReport = (pid: string, aid: string, v: number) => readJson<AtsReport>(reportFile(pid, aid, v));
@@ -216,13 +333,20 @@ export async function getCareer(pid: string): Promise<Career> {
 
 export const saveCareer = (pid: string, c: Career) => writeJson(careerFile(pid), c);
 
+/** Zmiana danych doradcy na świeżo odczytanych danych - równoległe wyszukiwania i rozmowa nie nadpisują sobie wyników. */
+export async function updateCareer(pid: string, fn: Updater<Career>): Promise<Career> {
+  return updateJson(careerFile(pid), () => getCareer(pid), fn);
+}
+
 // ---------- Koszty ----------
 
 const usageFile = () => path.join(DATA_DIR, 'usage.jsonl');
 
 export async function appendUsage(e: UsageEntry): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.appendFile(usageFile(), JSON.stringify(e) + '\n', 'utf8');
+  await withFileLock(usageFile(), async () => {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    await retryBusy(() => fs.appendFile(usageFile(), JSON.stringify(e) + '\n', 'utf8'));
+  });
 }
 
 export async function readUsage(): Promise<UsageEntry[]> {

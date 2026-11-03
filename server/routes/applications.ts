@@ -60,15 +60,21 @@ applicationsRouter.get(`${base}/:aid`, async (req, res) => {
 
 applicationsRouter.patch(`${base}/:aid`, async (req, res) => {
   const { pid, aid } = req.params;
-  const app = await store.getApplication(pid, aid);
   const { status, notes, currentVersion } = req.body ?? {};
-  if (status !== undefined) {
-    if (!ApplicationStatuses.includes(status)) throw new HttpError(400, tr('Nieznany status'));
-    app.status = status;
-  }
-  if (typeof notes === 'string') app.notes = notes;
-  if (currentVersion !== undefined) return res.json(await svc.setCurrentVersion(pid, aid, num(String(currentVersion))));
-  res.json(await store.saveApplication(app));
+  // Zmiana na aktualnej wersji z dysku: zapis z trwającego generowania CV nie cofnie notatki ani statusu (i odwrotnie).
+  const app = await store.updateApplication(pid, aid, async (app) => {
+    if (status !== undefined) {
+      if (!ApplicationStatuses.includes(status)) throw new HttpError(400, tr('Nieznany status'));
+      app.status = status;
+    }
+    if (typeof notes === 'string') app.notes = notes;
+    if (currentVersion !== undefined) {
+      const v = num(String(currentVersion));
+      await store.getVersion(pid, aid, v);
+      app.currentVersion = v;
+    }
+  });
+  res.json(app);
 });
 
 applicationsRouter.delete(`${base}/:aid`, async (req, res) => {

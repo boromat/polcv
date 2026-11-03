@@ -1,4 +1,4 @@
-import type { Career, CareerPrefs } from '../shared/schemas';
+import type { Career, CareerPrefs, Profile } from '../shared/schemas';
 import * as store from './storage/store';
 import { HttpError, newId, nowIso } from './storage/store';
 import { careerTurn, proposeRoles, rankOffers } from './llm/prompts/career';
@@ -11,61 +11,68 @@ const MAX_EXCLUDED = 10;
 
 /** Jedna tura rozmowy: zapis wiadomości kandydata, odpowiedź doradcy, preferencje i nowe fakty do profilu. */
 export async function chat(profileId: string, message: string): Promise<Career> {
-  const career = await store.getCareer(profileId);
   const text = message.trim();
+  let career: Career;
   if (text) {
     // Zapisujemy od razu - jeśli AI zawiedzie, wiadomość kandydata nie przepadnie.
-    career.chat.push({ role: 'user', content: text, at: nowIso() });
-    await store.saveCareer(profileId, career);
-  } else if (career.chat.length && career.chat.at(-1)!.role === 'assistant') {
+    career = await store.updateCareer(profileId, (c) => {
+      c.chat.push({ role: 'user', content: text, at: nowIso() });
+    });
+  } else {
+    career = await store.getCareer(profileId);
     // Pusta wiadomość: otwiera rozmowę albo ponawia odpowiedź na ostatnią wiadomość kandydata.
-    return career;
+    if (career.chat.length && career.chat.at(-1)!.role === 'assistant') return career;
   }
+  const basis = career.chat.at(-1);
 
   const profile = await store.getProfile(profileId);
   const turn = await careerTurn(profile, career);
 
-  career.chat.push({ role: 'assistant', content: turn.reply, at: nowIso() });
-  career.prefs = turn.prefs;
-  career.summary = turn.summary || career.summary;
-  career.done = turn.done;
-
   // Konkretne informacje o doświadczeniu trafiają do profilu - wykorzystają je kolejne CV.
-  const known = new Set(profile.extraFacts.map((f) => normalize(f.topic)));
-  const fresh = turn.newFacts.filter((f) => f.topic.trim() && f.answer.trim() && !known.has(normalize(f.topic)));
-  if (fresh.length) {
-    for (const f of fresh) {
-      profile.extraFacts.push({ id: newId(), topic: f.topic.trim(), has: true, answer: f.answer.trim(), source: tr('Rozmowa z doradcą kariery'), date: nowIso().slice(0, 10) });
-    }
-    await store.saveProfile(profile);
+  // Dopisujemy do świeżo odczytanego profilu: zmiany zrobione w trakcie odpowiedzi AI zostają.
+  const isNew = (p: Profile) => {
+    const known = new Set(p.extraFacts.map((f) => normalize(f.topic)));
+    return turn.newFacts.filter((f) => f.topic.trim() && f.answer.trim() && !known.has(normalize(f.topic)));
+  };
+  if (isNew(profile).length) {
+    await store.updateProfile(profileId, (p) => {
+      for (const f of isNew(p)) {
+        p.extraFacts.push({ id: newId(), topic: f.topic.trim(), has: true, answer: f.answer.trim(), source: tr('Rozmowa z doradcą kariery'), date: nowIso().slice(0, 10) });
+      }
+    });
   }
-  await store.saveCareer(profileId, career);
-  return career;
+
+  return store.updateCareer(profileId, (c) => {
+    // Rozmowa wyczyszczona w trakcie odpowiedzi - ta odpowiedź dotyczy starej rozmowy, więc ją pomijamy.
+    if (basis && !c.chat.some((m) => m.at === basis.at && m.role === basis.role && m.content === basis.content)) return;
+    c.chat.push({ role: 'assistant', content: turn.reply, at: nowIso() });
+    c.prefs = turn.prefs;
+    c.summary = turn.summary || c.summary;
+    c.done = turn.done;
+  });
 }
 
 export async function resetChat(profileId: string): Promise<Career> {
-  const career = await store.getCareer(profileId);
-  career.chat = [];
-  career.done = false;
-  await store.saveCareer(profileId, career);
-  return career;
+  return store.updateCareer(profileId, (c) => {
+    c.chat = [];
+    c.done = false;
+  });
 }
 
 export async function savePrefs(profileId: string, prefs: CareerPrefs): Promise<Career> {
-  const career = await store.getCareer(profileId);
-  career.prefs = { ...prefs, radiusKm: Math.max(0, Math.min(200, Math.round(prefs.radiusKm || 0))), salaryMin: Math.max(0, Math.round(prefs.salaryMin || 0)) };
-  await store.saveCareer(profileId, career);
-  return career;
+  return store.updateCareer(profileId, (c) => {
+    c.prefs = { ...prefs, radiusKm: Math.max(0, Math.min(200, Math.round(prefs.radiusKm || 0))), salaryMin: Math.max(0, Math.round(prefs.salaryMin || 0)) };
+  });
 }
 
 export async function makeProposals(profileId: string): Promise<Career> {
   const [profile, career] = await Promise.all([store.getProfile(profileId), store.getCareer(profileId)]);
   const res = await proposeRoles(profile, career);
   const roles = res.roles.map((r, i) => ({ ...r, id: `r${i + 1}`, keywords: r.keywords.slice(0, 4) }));
-  career.proposals = { createdAt: nowIso(), intro: res.intro, roles };
-  career.offers = {};
-  await store.saveCareer(profileId, career);
-  return career;
+  return store.updateCareer(profileId, (c) => {
+    c.proposals = { createdAt: nowIso(), intro: res.intro, roles };
+    c.offers = {};
+  });
 }
 
 /** Oferty dla stanowiska: wyszukiwanie na portalach, filtry z preferencji, ocena dopasowania przez AI. */
@@ -76,6 +83,7 @@ export async function findOffers(profileId: string, roleId: string): Promise<Car
   const [profile, career] = await Promise.all([store.getProfile(profileId), store.getCareer(profileId)]);
   const role = career.proposals?.roles.find((r) => r.id === roleId);
   if (!role) throw new HttpError(404, tr('Nie ma takiej propozycji - wygeneruj propozycje ponownie.'));
+  const proposalsAt = career.proposals!.createdAt;
 
   const { kept, excluded, stats, errors, scanned } = await searchRole(role, career.prefs);
   // Najpierw oferty z frazą w tytule, potem najnowsze - do oceny AI trafia ograniczona liczba.
@@ -108,7 +116,10 @@ export async function findOffers(profileId: string, roleId: string): Promise<Car
     extra.sort(byMatch);
   }
 
-  career.offers[roleId] = { fetchedAt: nowIso(), items, excluded: extra, stats, errors, scanned };
-  await store.saveCareer(profileId, career);
-  return career;
+  // Wyszukiwanie i ocena trwają długo, a klient szuka kilku stanowisk naraz - zapisujemy tylko wynik tego stanowiska.
+  return store.updateCareer(profileId, (c) => {
+    // Propozycje wygenerowane od nowa w trakcie wyszukiwania - wynik dotyczy starej listy, więc go pomijamy.
+    if (c.proposals?.createdAt !== proposalsAt) return;
+    c.offers[roleId] = { fetchedAt: nowIso(), items, excluded: extra, stats, errors, scanned };
+  });
 }

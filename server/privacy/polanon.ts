@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
@@ -30,6 +32,53 @@ export interface PolanonStatus {
 
 interface Found extends PolanonStatus {
   cmd: string[];
+}
+
+// ---------- Ścieżka do Pythona z Ustawień ----------
+
+const PYTHON_NAME = {
+  win32: /^(python(3(\.\d+)?)?|py)\.exe$/i,
+  other: /^python(3(\.\d+)?)?$/,
+};
+
+export type PythonPathCheck = { ok: true; path: string } | { ok: false; error: string };
+
+function fileExists(p: string): boolean {
+  try {
+    return fs.statSync(p).isFile();
+  } catch (e: any) {
+    if (e?.code === 'ENOENT' || e?.code === 'ENOTDIR') return false;
+    // Aliasy Pythona ze Sklepu Microsoft (WindowsApps) istnieją, ale stat zwraca dla nich EACCES.
+    try {
+      const l = fs.lstatSync(p);
+      return l.isFile() || l.isSymbolicLink();
+    } catch {
+      return false;
+    }
+  }
+}
+
+/**
+ * Program uruchamia ten plik, więc dopuszczamy tylko pełną ścieżkę do istniejącego Pythona na tym komputerze
+ * (bez ścieżek sieciowych \\serwer\udział i względnych). Puste = wykryj automatycznie.
+ */
+export function checkPythonPath(raw: string, platform: NodeJS.Platform = process.platform): PythonPathCheck {
+  let p = raw.trim();
+  // "Kopiuj jako ścieżkę" w Windows 11 dodaje cudzysłowy.
+  if (/^(["']).*\1$/.test(p) && p.length >= 2) p = p.slice(1, -1).trim();
+  if (!p) return { ok: true, path: '' };
+  const win = platform === 'win32';
+  const network = p.startsWith('\\\\') || p.startsWith('//') || (win && p.startsWith('/\\')) || (win && p.startsWith('\\/'));
+  const absolute = win ? /^[A-Za-z]:[\\/]/.test(p) : p.startsWith('/');
+  if (network || !absolute) {
+    return { ok: false, error: tr('Podaj pełną ścieżkę do pliku Pythona na tym komputerze, np. C:\\Python312\\python.exe. Ścieżki względne i sieciowe nie są dozwolone, a puste pole oznacza wykrywanie automatyczne.') };
+  }
+  const name = (win ? path.win32 : path.posix).basename(p);
+  if (!(win ? PYTHON_NAME.win32 : PYTHON_NAME.other).test(name)) {
+    return { ok: false, error: tr('Wskazany plik ({name}) to nie Python. Podaj ścieżkę do python.exe, python3.exe albo py.exe (w Linuksie i macOS: python albo python3).', { name }) };
+  }
+  if (!fileExists(p)) return { ok: false, error: tr('Nie znaleziono pliku {path}.', { path: p }) };
+  return { ok: true, path: p };
 }
 
 function candidates(pythonPath: string): string[][] {
@@ -66,8 +115,11 @@ const tooOld = (version: string) => {
 };
 
 async function findPython(pythonPath: string): Promise<Found> {
+  // Ponowne sprawdzenie przed uruchomieniem - settings.json mógł zostać zmieniony ręcznie.
+  const checked = checkPythonPath(pythonPath);
+  if (!checked.ok) return { python: null, command: null, cmd: [], polanon: null, spacy: false, model: false, error: checked.error };
   let old = '';
-  for (const cmd of candidates(pythonPath)) {
+  for (const cmd of candidates(checked.path)) {
     const r = await run(cmd, [BRIDGE, '--status'], 15_000);
     if (r.code !== 0) continue;
     try {
@@ -117,9 +169,17 @@ class Bridge {
     this.child = spawn(cmd[0], [...cmd.slice(1), BRIDGE, ...(ner ? ['--ner'] : [])], { env: ENV, windowsHide: true });
     let stderr = '';
     this.child.stderr.on('data', (d) => (stderr = (stderr + d).slice(-2000)));
+    // Zapis do Pythona, który właśnie się zamknął (EPIPE), nie może wyłączyć serwera - błąd zgłosi 'exit'.
+    this.child.stdin.on('error', () => {});
     this.ready = new Promise((resolve, reject) => {
-      // Z modelem spaCy start trwa kilka–kilkanaście sekund.
-      const startTimer = setTimeout(() => reject(new Error(tr('polanon nie wystartował w ciągu 60 s'))), 60_000);
+      // Z modelem spaCy start trwa kilka–kilkanaście sekund, na wolnym dysku dłużej.
+      const startSeconds = ner ? 120 : 60;
+      const startTimer = setTimeout(() => {
+        // Bez tego mostek "wisiałby" do restartu programu: kolejne wywołanie AI uruchomi go od nowa.
+        this.dead = true;
+        this.child.kill();
+        reject(new Error(tr('polanon nie wystartował w ciągu {seconds} s', { seconds: startSeconds })));
+      }, startSeconds * 1000);
       createInterface({ input: this.child.stdout }).on('line', (line) => {
         let msg: any;
         try {
@@ -129,6 +189,7 @@ class Bridge {
         }
         if ('ready' in msg) {
           clearTimeout(startTimer);
+          if (!msg.ready) this.dead = true;
           return msg.ready ? resolve() : reject(new Error(msg.error));
         }
         const p = this.pending.get(msg.id);

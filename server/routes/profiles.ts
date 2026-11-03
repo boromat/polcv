@@ -34,15 +34,18 @@ profilesRouter.get('/profiles/:pid', async (req, res) => {
 });
 
 profilesRouter.put('/profiles/:pid', async (req, res) => {
-  const existing = await store.getProfile(req.params.pid);
-  const parsed = ProfileSchema.safeParse({ ...existing, ...req.body, id: existing.id, createdAt: existing.createdAt });
-  if (!parsed.success) throw new HttpError(400, tr('Niepoprawne dane profilu: {field} {problem}', { field: parsed.error.issues[0]?.path.join('.') ?? '', problem: parsed.error.issues[0]?.message ?? '' }));
-  const next = parsed.data;
-  // Zamaskowany klucz z formularza = bez zmian.
-  if (next.apiKey === maskKey(existing.apiKey)) next.apiKey = existing.apiKey;
-  next.files = existing.files;
-  next.photo = existing.photo;
-  res.json(publicProfile(await store.saveProfile(next)));
+  // Pod blokadą pliku: pliki i zdjęcie bierzemy z aktualnej wersji, nie sprzed chwili.
+  const saved = await store.updateProfile(req.params.pid, (existing) => {
+    const parsed = ProfileSchema.safeParse({ ...existing, ...req.body, id: existing.id, createdAt: existing.createdAt });
+    if (!parsed.success) throw new HttpError(400, tr('Niepoprawne dane profilu: {field} {problem}', { field: parsed.error.issues[0]?.path.join('.') ?? '', problem: parsed.error.issues[0]?.message ?? '' }));
+    const next = parsed.data;
+    // Zamaskowany klucz z formularza = bez zmian.
+    if (next.apiKey === maskKey(existing.apiKey)) next.apiKey = existing.apiKey;
+    next.files = existing.files;
+    next.photo = existing.photo;
+    return next;
+  });
+  res.json(publicProfile(saved));
 });
 
 profilesRouter.delete('/profiles/:pid', async (req, res) => {
@@ -63,8 +66,10 @@ profilesRouter.post('/profiles/:pid/import', upload.single('cv'), async (req, re
   await fs.mkdir(dir, { recursive: true });
   const stored = `${Date.now()}_${original.replace(/[^\w.\-]+/g, '_')}`;
   await fs.writeFile(path.join(dir, stored), file.buffer);
-  profile.files.push({ name: stored, original, uploadedAt: nowIso() });
-  await store.saveProfile(profile);
+  // Odczyt pliku CV chwilę trwa - dopisujemy plik do aktualnego profilu, a nie do kopii sprzed odczytu.
+  await store.updateProfile(profile.id, (p) => {
+    p.files.push({ name: stored, original, uploadedAt: nowIso() });
+  });
 
   const isEmpty = !profile.experience.length && !profile.education.length && !profile.projects.length && !profile.skills.length;
   const proposal: ProfileExtract = isEmpty
@@ -106,17 +111,20 @@ profilesRouter.post('/profiles/:pid/photo', upload.single('photo'), async (req, 
   if (!file) throw new HttpError(400, tr('Nie wybrano zdjęcia.'));
   const ext = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp' }[file.mimetype];
   if (!ext) throw new HttpError(400, tr('Zdjęcie musi być w formacie JPG, PNG lub WEBP.'));
-  if (profile.photo) await fs.rm(path.join(store.profileDir(profile.id), profile.photo), { force: true });
-  profile.photo = `photo${ext}`;
-  await fs.writeFile(path.join(store.profileDir(profile.id), profile.photo), file.buffer);
-  res.json(publicProfile(await store.saveProfile(profile)));
+  const saved = await store.updateProfile(profile.id, async (p) => {
+    if (p.photo) await fs.rm(path.join(store.profileDir(p.id), p.photo), { force: true });
+    p.photo = `photo${ext}`;
+    await fs.writeFile(path.join(store.profileDir(p.id), p.photo), file.buffer);
+  });
+  res.json(publicProfile(saved));
 });
 
 profilesRouter.delete('/profiles/:pid/photo', async (req, res) => {
-  const profile = await store.getProfile(req.params.pid);
-  if (profile.photo) await fs.rm(path.join(store.profileDir(profile.id), profile.photo), { force: true });
-  profile.photo = '';
-  res.json(publicProfile(await store.saveProfile(profile)));
+  const saved = await store.updateProfile(req.params.pid, async (p) => {
+    if (p.photo) await fs.rm(path.join(store.profileDir(p.id), p.photo), { force: true });
+    p.photo = '';
+  });
+  res.json(publicProfile(saved));
 });
 
 profilesRouter.get('/profiles/:pid/photo', async (req, res) => {

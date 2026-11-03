@@ -9,6 +9,10 @@ import { applicationsRouter } from './routes/applications';
 import { careerRouter } from './routes/career';
 import { closeBrowser } from './cv/browser';
 import { langMiddleware, tr } from './i18n';
+import { hostGuard } from './security';
+
+// Jedna nieobsłużona obietnica (np. błąd w tle) nie może wyłączyć całego programu - tylko ją zapisujemy.
+process.on('unhandledRejection', (e) => console.error('Nieobsłużony błąd (program działa dalej):', e));
 
 const PORT = Number(process.env.PORT || 3000);
 // Domyślnie tylko ten komputer; CV_HOST=0.0.0.0 udostępnia w sieci lokalnej.
@@ -17,6 +21,8 @@ const HOST = process.env.CV_HOST || '127.0.0.1';
 const app = express();
 app.use(express.json({ limit: '5mb' }));
 app.use('/api', langMiddleware);
+// Tylko zapytania pod localhost i z tej samej strony - opis w security.ts (CV_HOST, CV_ALLOWED_HOSTS).
+app.use('/api', hostGuard);
 
 app.use('/api', settingsRouter, profilesRouter, applicationsRouter, careerRouter);
 

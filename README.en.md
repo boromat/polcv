@@ -69,7 +69,9 @@ $0.05–0.15. The Settings page lists the models and shows what you have spent.
 ## Privacy
 
 - Profiles, CVs, postings and the API key live in the `data/` folder next to the app, never in
-  this repository. The server listens on `127.0.0.1` only.
+  this repository. The server listens on `127.0.0.1` only, the API answers only requests sent to
+  `localhost` (other names go in `CV_ALLOWED_HOSTS`), and requests that change data from other
+  websites are refused.
 - The profile and posting text are sent to OpenRouter and the model you pick, and nothing else
   leaves your machine (apart from fetching the postings you link).
 - **Optional: [polanon](https://github.com/boromat/polanon).** If Python 3.11+ and

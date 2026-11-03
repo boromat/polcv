@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import * as store from '../storage/store';
+import { HttpError } from '../storage/store';
 import { checkKey, listModels } from '../llm/openrouter';
 import { activeSearchers, localPortalNames } from '../jobs/search';
-import { installPolanon, polanonStatus } from '../privacy/polanon';
+import { checkPythonPath, installPolanon, polanonStatus } from '../privacy/polanon';
 import type { Settings } from '../../shared/schemas';
 import { tr } from '../i18n';
 
@@ -31,7 +32,12 @@ settingsRouter.put('/settings', async (req, res) => {
   if (typeof jobSearch === 'boolean') patch.jobSearch = jobSearch;
   if (typeof maskPii === 'boolean') patch.maskPii = maskPii;
   if (typeof maskPiiNer === 'boolean') patch.maskPiiNer = maskPiiNer;
-  if (typeof pythonPath === 'string') patch.pythonPath = pythonPath.trim();
+  if (typeof pythonPath === 'string') {
+    // Program uruchamia tę ścieżkę - dopuszczamy tylko prawdziwego Pythona na tym komputerze.
+    const checked = checkPythonPath(pythonPath);
+    if (!checked.ok) throw new HttpError(400, checked.error);
+    patch.pythonPath = checked.path;
+  }
   res.json(await view(await store.saveSettings(patch)));
 });
 

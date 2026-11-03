@@ -55,7 +55,7 @@ Przy domyślnych modelach (Claude Sonnet do pisania i oceny, Claude Haiku do ana
 ## Jak używać
 
 1. **Profile** → utwórz profil (np. swoje imię).
-2. **Mój profil** → wgraj swoje obecne CV (PDF/DOCX). AI wypełni formularz - sprawdź dane i kliknij **Zapisz profil**. Im więcej szczegółów (projekty, kursy, liczby), tym lepsze CV.
+2. **Mój profil** → wgraj swoje obecne CV (PDF/DOCX). AI wypełni formularz - sprawdź dane (zmiany zapisują się same). Im więcej szczegółów (projekty, kursy, liczby), tym lepsze CV.
 3. **Nowe CV** → wklej link do ogłoszenia. Jeśli strona nie da się pobrać, wklej tekst ogłoszenia.
 4. Odpowiedz na pytania o brakujące wymagania (albo je pomiń) → **Napisz CV**.
 5. W edytorze:
@@ -141,3 +141,5 @@ npm run typecheck
 - `shared/schemas.ts` - wspólne schematy danych (zod), z których powstają też schematy JSON dla AI.
 
 Serwer nasłuchuje tylko na `127.0.0.1`. Żeby udostępnić go w sieci domowej, ustaw `CV_HOST=0.0.0.0` (wtedy każdy w tej sieci widzi Twoje dane).
+
+API odpowiada tylko pod `localhost`, `127.0.0.1` i `[::1]` (z `CV_HOST` także pod adresami IP i nazwą tego komputera), a zapytania zmieniające dane z obcych stron dostają odmowę. Jeśli otwierasz PolCV pod inną nazwą, dopisz ją po przecinku w `CV_ALLOWED_HOSTS`, np. `CV_ALLOWED_HOSTS=polcv.lan`.

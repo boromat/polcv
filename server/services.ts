@@ -1,7 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { nanoid } from 'nanoid';
-import type { Application, CvContent, CvVersion, GapAnswer, Profile, TemplateId } from '../shared/schemas';
+import type { Application, CvContent, CvVersion, ExtraFact, GapAnswer, Profile, TemplateId } from '../shared/schemas';
 import * as store from './storage/store';
 import { HttpError, newId, nowIso } from './storage/store';
 import { fetchPosting } from './jobs/fetchPosting';
@@ -15,8 +16,8 @@ import { decideLanguage, decidePhoto, decideRodo } from './cv/rodo';
 import { photoDataUri, renderCvHtml, renderLetterHtml, type RenderMode } from './cv/render';
 import { htmlToPdf } from './cv/pdf';
 import { buildReport } from './ats/score';
-import { countPhrase, tokenize } from './ats/keywords';
-import { tr } from './i18n';
+import { countPhrase, normalize, tokenize } from './ats/keywords';
+import { tr, withLang } from './i18n';
 
 const ctxOf = (app: Application, task: string) => ({ profileId: app.profileId, applicationId: app.id, task });
 
@@ -63,38 +64,78 @@ export async function runGapAnalysis(profileId: string, appId: string): Promise<
   if (!app.posting) throw new HttpError(409, tr('Najpierw trzeba przeanalizować ogłoszenie.'));
   const profile = await store.getProfile(profileId);
   const gap = await gapQuestions(profile, app.posting, ctxOf(app, 'pytania o braki'));
-  app.gap = { questions: gap.questions, covered: gap.covered, answers: [] };
-  return store.saveApplication(app);
+  return store.updateApplication(profileId, appId, (a) => {
+    a.gap = { questions: gap.questions, covered: gap.covered, answers: [] };
+  });
 }
 
-/** Odpowiedzi trafiają do profilu (extraFacts), żeby kolejne CV już ich nie pytały. */
+/** Stałe id faktu z odpowiedzi: ta sama aplikacja i to samo wymaganie to zawsze ten sam fakt w profilu. */
+export const answerFactId = (appId: string, requirement: string) =>
+  `gap-${appId}-${createHash('sha1').update(normalize(requirement)).digest('hex').slice(0, 10)}`;
+
+/**
+ * Odpowiedzi trafiają do profilu (extraFacts), żeby kolejne CV już ich nie pytały.
+ * Ponowne wysłanie (np. kolejne "Napisz CV") podmienia wcześniejszy fakt zamiast dopisywać kopię.
+ */
 export async function saveAnswers(profileId: string, appId: string, answers: GapAnswer[]): Promise<Application> {
   const app = await store.getApplication(profileId, appId);
-  const profile = await store.getProfile(profileId);
-  const source = tr('Odpowiedź przy aplikacji: {title} – {company}', { title: app.posting?.title ?? '', company: app.posting?.company ?? '' }).trim();
+  const params = { title: app.posting?.title ?? '', company: app.posting?.company ?? '' };
+  const sourceText = () => tr('Odpowiedź przy aplikacji: {title} – {company}', params).trim();
+  const source = sourceText();
+  // Starsze wersje dawały faktom losowe id - rozpoznajemy je po źródle (w obu językach) i temacie.
+  const legacySources = new Set([source, withLang('pl', sourceText), withLang('en', sourceText)]);
+
+  const byId = new Map<string, ExtraFact | null>();
+  const topicToId = new Map<string, string>();
   for (const a of answers) {
-    if (!a.has && !a.answer.trim()) continue;
-    profile.extraFacts.push({
-      id: newId(),
-      topic: a.requirement,
-      has: a.has,
-      answer: a.has ? a.answer.trim() : a.answer.trim() || tr('Nie znam / nie mam doświadczenia.'),
-      source,
-      date: nowIso().slice(0, 10),
+    const id = answerFactId(appId, a.requirement);
+    topicToId.set(normalize(a.requirement), id);
+    byId.set(
+      id,
+      !a.has && !a.answer.trim()
+        ? null // "nie" bez opisu: nic nie zapisujemy, a wcześniejsza odpowiedź na to pytanie znika
+        : {
+            id,
+            topic: a.requirement,
+            has: a.has,
+            answer: a.has ? a.answer.trim() : a.answer.trim() || tr('Nie znam / nie mam doświadczenia.'),
+            source,
+            date: nowIso().slice(0, 10),
+          },
+    );
+  }
+
+  if (byId.size) {
+    await store.updateProfile(profileId, (profile) => {
+      const legacy = (f: ExtraFact) => !f.id.startsWith('gap-') && legacySources.has(f.source);
+      const keyOf = (f: ExtraFact) => (byId.has(f.id) ? f.id : legacy(f) ? topicToId.get(normalize(f.topic)) : undefined);
+      const placed = new Set<string>();
+      const kept: ExtraFact[] = [];
+      for (const f of profile.extraFacts) {
+        const key = keyOf(f);
+        if (!key) {
+          kept.push(f);
+          continue;
+        }
+        // Nowa odpowiedź trafia w miejsce pierwszej starej, kolejne kopie znikają.
+        const next = byId.get(key);
+        if (next && !placed.has(key)) kept.push(next);
+        placed.add(key);
+      }
+      for (const [key, next] of byId) if (next && !placed.has(key)) kept.push(next);
+      profile.extraFacts = kept;
     });
   }
-  await store.saveProfile(profile);
-  app.gap = { ...(app.gap ?? { questions: [], covered: [] }), answers };
-  return store.saveApplication(app);
+
+  // Odpowiedzi zostają też przy aplikacji (do ponownego wypełnienia formularza); nowsza odpowiedź na pytanie zastępuje starszą.
+  return store.updateApplication(profileId, appId, (a) => {
+    const posted = new Set(answers.map((x) => x.questionId));
+    const prev = (a.gap?.answers ?? []).filter((x) => !posted.has(x.questionId));
+    a.gap = { ...(a.gap ?? { questions: [], covered: [] }), answers: [...prev, ...answers] };
+  });
 }
 
 // ---------- CV ----------
-
-/** Kolejny numer wersji po najwyższej istniejącej (użytkownik mógł wrócić do starszej). */
-async function nextVersion(profileId: string, appId: string): Promise<number> {
-  const versions = await store.listVersions(profileId, appId);
-  return versions.reduce((m, v) => Math.max(m, v.version), 0) + 1;
-}
 
 /** Unikalne id dla tekstów (decyzje o sugestiach są przypięte do id). */
 function withFreshIds(c: CvContent): CvContent {
@@ -119,8 +160,9 @@ export async function generate(profileId: string, appId: string, language?: 'pl'
   const photo = decidePhoto(app.posting, lang, !!profile.photo);
   const rodo = decideRodo(app.posting, lang);
   const t = nowIso();
-  const cv: CvVersion = {
-    version: await nextVersion(profileId, appId),
+  // Numer: kolejny po najwyższej istniejącej wersji (użytkownik mógł wrócić do starszej).
+  const cv = await store.addVersion(profileId, appId, (version) => ({
+    version,
     createdAt: t,
     updatedAt: t,
     origin: 'generated',
@@ -130,11 +172,12 @@ export async function generate(profileId: string, appId: string, language?: 'pl'
     photo: photo.include,
     photoReason: photo.reason,
     rodo,
-  };
-  await store.saveVersion(profileId, appId, cv);
-  app.currentVersion = cv.version;
-  if (app.status === 'szkic') app.status = 'przygotowane';
-  await store.saveApplication(app);
+  }));
+  // Aplikacja z dysku, a nie sprzed generowania - status czy notatka zmienione w międzyczasie zostają.
+  await store.updateApplication(profileId, appId, (a) => {
+    a.currentVersion = cv.version;
+    if (a.status === 'szkic') a.status = 'przygotowane';
+  });
   return cv;
 }
 
@@ -150,9 +193,9 @@ export async function updateVersion(profileId: string, appId: string, v: number,
 
 export async function setCurrentVersion(profileId: string, appId: string, v: number): Promise<Application> {
   await store.getVersion(profileId, appId, v);
-  const app = await store.getApplication(profileId, appId);
-  app.currentVersion = v;
-  return store.saveApplication(app);
+  return store.updateApplication(profileId, appId, (a) => {
+    a.currentVersion = v;
+  });
 }
 
 async function renderCv(profile: Profile, cv: CvVersion, mode: RenderMode): Promise<string> {
@@ -175,6 +218,8 @@ export async function versionPdf(profileId: string, appId: string, v: number) {
 export async function evaluate(profileId: string, appId: string, v: number) {
   const app = await store.getApplication(profileId, appId);
   if (!app.posting) throw new HttpError(409, tr('Brak przeanalizowanego ogłoszenia.'));
+  // Czas sprzed odczytu CV: poprawka zapisana w trakcie oceny oznaczy raport jako nieaktualny.
+  const startedAt = nowIso();
   const [profile, cv] = await Promise.all([store.getProfile(profileId), store.getVersion(profileId, appId, v)]);
   const { text, pages } = await htmlToPdf(await renderCv(profile, cv, 'pdf'));
 
@@ -187,7 +232,7 @@ export async function evaluate(profileId: string, appId: string, v: number) {
     if (e instanceof HttpError && [400, 401, 402, 503].includes(e.status)) throw e;
     aiError = e.message || tr('Nie udało się uzyskać oceny AI.');
   }
-  const report = buildReport({ version: v, pdfText: text, pages, cv: applyDecisions(cv), profile, posting: app.posting, review, aiError });
+  const report = { ...buildReport({ version: v, pdfText: text, pages, cv: applyDecisions(cv), profile, posting: app.posting, review, aiError }), createdAt: startedAt };
   await store.saveReport(profileId, appId, report);
   return report;
 }
@@ -202,11 +247,10 @@ export async function improve(profileId: string, appId: string): Promise<CvVersi
   const content = withFreshIds(await improveCv(profile, app.posting, applyDecisions(current), report, ctxOf(app, 'poprawa CV')));
   content.language = current.content.language;
   const t = nowIso();
-  const version = await nextVersion(profileId, appId);
-  const cv: CvVersion = { ...current, version, createdAt: t, updatedAt: t, origin: 'improved', content, decisions: {} };
-  await store.saveVersion(profileId, appId, cv);
-  app.currentVersion = cv.version;
-  await store.saveApplication(app);
+  const cv = await store.addVersion(profileId, appId, (version) => ({ ...current, version, createdAt: t, updatedAt: t, origin: 'improved', content, decisions: {} }));
+  await store.updateApplication(profileId, appId, (a) => {
+    a.currentVersion = cv.version;
+  });
   return cv;
 }
 
@@ -270,11 +314,12 @@ export async function exportPdf(profileId: string, appId: string): Promise<Appli
   const { pdf } = await htmlToPdf(await renderCv(profile, cv, 'pdf'));
   const name = [profile.contact.fullName || profile.displayName, 'CV', shortCompany(app.posting?.company ?? ''), app.posting?.title].filter(Boolean).map((x) => fileSafe(String(x))).filter(Boolean).join('_');
   const file = `${name || 'CV'}.pdf`;
-  if (app.pdfFile && app.pdfFile !== file) await fs.rm(path.join(store.appDir(profileId, appId), app.pdfFile), { force: true });
-  await fs.writeFile(path.join(store.appDir(profileId, appId), file), pdf);
-  app.pdfFile = file;
-  if (app.status === 'szkic' || app.status === 'przygotowane') app.status = 'wysłane';
-  return store.saveApplication(app);
+  return store.updateApplication(profileId, appId, async (a) => {
+    if (a.pdfFile && a.pdfFile !== file) await fs.rm(path.join(store.appDir(profileId, appId), a.pdfFile), { force: true });
+    await fs.writeFile(path.join(store.appDir(profileId, appId), file), pdf);
+    a.pdfFile = file;
+    if (a.status === 'szkic' || a.status === 'przygotowane') a.status = 'wysłane';
+  });
 }
 
 // ---------- Dodatki ----------
@@ -286,8 +331,9 @@ export async function makeInterviewPrep(profileId: string, appId: string) {
   const { text } = await versionPdf(profileId, appId, app.currentVersion);
   const prep = await interviewPrep(profile, app.posting, text, ctxOf(app, 'przygotowanie do rozmowy'));
   await store.saveInterviewPrep(profileId, appId, prep);
-  app.hasInterviewPrep = true;
-  await store.saveApplication(app);
+  await store.updateApplication(profileId, appId, (a) => {
+    a.hasInterviewPrep = true;
+  });
   return prep;
 }
 
@@ -299,8 +345,9 @@ export async function makeCoverLetter(profileId: string, appId: string) {
   const lang = cv?.content.language ?? decideLanguage(app.posting);
   const letter = await coverLetter(profile, app.posting, lang, ctxOf(app, 'list motywacyjny'));
   await store.saveCoverLetter(profileId, appId, letter);
-  app.hasCoverLetter = true;
-  await store.saveApplication(app);
+  await store.updateApplication(profileId, appId, (a) => {
+    a.hasCoverLetter = true;
+  });
   return letter;
 }
 
