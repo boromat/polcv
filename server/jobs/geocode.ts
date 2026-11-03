@@ -37,7 +37,9 @@ async function lookup(city: string, key: string): Promise<Point | null> {
   try {
     const url = `https://nominatim.openstreetmap.org/search?${new URLSearchParams({ city, country: 'Polska', format: 'json', limit: '1' })}`;
     const res = await fetch(url, { headers: { 'User-Agent': APP_UA }, signal: AbortSignal.timeout(10_000) });
-    const [hit] = res.ok ? ((await res.json()) as { lat: string; lon: string }[]) : [];
+    // 429, 403, 503 to chwilowa odmowa, nie brak miasta - nie zapamiętujemy jej.
+    if (!res.ok) return null;
+    const [hit] = (await res.json()) as { lat: string; lon: string }[];
     c[key] = hit ? { lat: Number(hit.lat), lon: Number(hit.lon) } : null;
   } catch {
     return null; // błąd sieci nie trafia do pamięci - spróbujemy następnym razem

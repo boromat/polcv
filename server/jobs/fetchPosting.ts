@@ -3,12 +3,15 @@ import { parseHTML } from 'linkedom';
 import { Readability } from '@mozilla/readability';
 import { HttpError } from '../storage/store';
 import { withPage } from '../cv/browser';
+import { pdfToText } from '../cv/importCv';
 import { tr } from '../i18n';
 
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36';
 const MAX_CHARS = 18_000;
 const MIN_USEFUL = 600;
+/** PDF to sama treść ogłoszenia, bez menu strony - wystarczy mniej tekstu. Mniej zwykle oznacza skan. */
+const MIN_PDF = 200;
 
 export interface FetchedPosting {
   text: string;
@@ -118,6 +121,16 @@ function looksBlocked(status: number, html: string): boolean {
   return /just a moment|attention required|access denied|cf-chl-|verify you are human|enable javascript and cookies/.test(head);
 }
 
+const isPdf = (buf: Uint8Array) => Buffer.from(buf.subarray(0, 1024)).includes('%PDF-');
+/** Strona albo zwykły tekst; brak nagłówka traktujemy jak HTML. */
+const isTextual = (type: string) => !type || /html|xml|^text\//.test(type);
+
+/** Ogłoszenie jako PDF: tekst z pliku, tak jak przy wgrywaniu CV. */
+async function pdfPostingText(buf: Uint8Array): Promise<string> {
+  const { text } = await pdfToText(buf).catch(() => ({ text: '' }));
+  return text.replace(/[ \t]+/g, ' ').replace(/ *\n */g, '\n').replace(/\n{3,}/g, '\n\n').trim().slice(0, MAX_CHARS);
+}
+
 /** Łączy dane strukturalne z treścią strony (klauzula RODO bywa tylko w treści). */
 function combine(html: string): string {
   const ld = jsonLdToText(html);
@@ -135,20 +148,39 @@ export async function fetchPosting(rawUrl: string): Promise<FetchedPosting> {
   }
   if (!/^https?:$/.test(url.protocol)) throw new HttpError(400, tr('Obsługiwane są tylko linki http(s).'));
 
+  const pasteText = () =>
+    new HttpError(
+      422,
+      tr('Nie udało się pobrać treści ogłoszenia z tego linku (strona mogła zablokować pobieranie). Skopiuj tekst ogłoszenia i wklej go w pole poniżej.'),
+    );
+
   // 1–2. Zwykłe pobranie: JSON-LD + główna treść.
+  let fileText: string | null = null; // link prowadzi do pliku, nie do strony
   try {
     const res = await fetch(url, {
       headers: { 'User-Agent': UA, 'Accept-Language': 'pl-PL,pl;q=0.9,en;q=0.8', Accept: 'text/html,application/xhtml+xml' },
       redirect: 'follow',
       signal: AbortSignal.timeout(20_000),
     });
-    const html = await res.text();
-    if (res.ok && !looksBlocked(res.status, html)) {
-      const text = combine(html);
-      if (text.length >= MIN_USEFUL) return { text, method: jsonLdToText(html) ? 'json-ld' : 'html' };
+    const buf = new Uint8Array(await res.arrayBuffer());
+    const type = (res.headers.get('content-type') ?? '').toLowerCase();
+    // PDF czytamy jak wgrane CV; innych plików (obrazki, DOCX) nie wysyłamy do AI jako tekstu.
+    if (res.ok && (type.includes('application/pdf') || isPdf(buf))) fileText = await pdfPostingText(buf);
+    else if (res.ok && !isTextual(type)) fileText = '';
+    else {
+      const html = new TextDecoder().decode(buf);
+      if (res.ok && !looksBlocked(res.status, html)) {
+        const text = combine(html);
+        if (text.length >= MIN_USEFUL) return { text, method: jsonLdToText(html) ? 'json-ld' : 'html' };
+      }
     }
   } catch {
     /* spróbujemy przeglądarką */
+  }
+  if (fileText !== null) {
+    // Przeglądarka nic tu nie pomoże (plik by się tylko pobrał), więc od razu prosimy o wklejenie tekstu.
+    if (fileText.length >= MIN_PDF) return { text: fileText, method: 'pdf' };
+    throw pasteText();
   }
 
   // 3. Strony renderowane JavaScriptem - prawdziwa przeglądarka (bez obchodzenia zabezpieczeń).
@@ -166,8 +198,5 @@ export async function fetchPosting(rawUrl: string): Promise<FetchedPosting> {
     /* koniec możliwości */
   }
 
-  throw new HttpError(
-    422,
-    tr('Nie udało się pobrać treści ogłoszenia z tego linku (strona mogła zablokować pobieranie). Skopiuj tekst ogłoszenia i wklej go w pole poniżej.'),
-  );
+  throw pasteText();
 }

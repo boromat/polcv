@@ -50,6 +50,7 @@ export const profile: Record<string, string> = {
     'Optional. For each posting the app decides whether to include it (Polish postings: yes, foreign ones: no).',
   'Zdjęcie profilowe': 'Profile photo',
   'Brak zdjęcia': 'No photo',
+  'Zapisuję zdjęcie…': 'Saving the photo…',
   'Zmień zdjęcie': 'Change photo',
   'Dodaj zdjęcie': 'Add photo',
   'Kim jesteś': 'About you',

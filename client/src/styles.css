@@ -6,13 +6,16 @@
   --border-strong: #cdd2db;
   --text: #1b1d22;
   --muted: #5d6370;
-  --faint: #8a909c;
+  /* min. 4.5:1 na białym, tle strony i --accent-soft (drobny tekst 12-13 px) */
+  --faint: #666d7a;
   --accent: #2f5bea;
   --accent-hover: #2449c4;
   --accent-soft: #eaf0ff;
   --good: #1f8a4c;
   --good-soft: #e6f6ec;
   --warn: #b26b00;
+  /* tekst na --warn-soft: --warn ma tam tylko 3.9:1; --warn zostaje dla pasków, pierścienia i obramowań */
+  --warn-text: #8a5300;
   --warn-soft: #fff4dc;
   --bad: #c8322f;
   --bad-soft: #fdeceb;
@@ -60,7 +63,12 @@ p { margin: 0; }
 .profile-switch select { max-width: 200px; }
 @media (max-width: 720px) {
   .topbar { flex-wrap: wrap; gap: 8px 12px; padding: 8px 16px; }
-  .topbar .nav { order: 3; width: 100%; flex-wrap: nowrap; overflow-x: auto; }
+  /* Linki zawijają się do drugiej linii zamiast chować się za przewijaniem w bok; wyższy pasek nie jest
+     przyklejony, żeby nie zabierał telefonu. Wybór profilu mieści się obok PL|EN (długa nazwa jest ucinana). */
+  .topbar { position: static; }
+  .topbar .nav { order: 3; width: 100%; flex-wrap: wrap; }
+  .nav a { padding: 6px 9px; }
+  .profile-switch select { max-width: 140px; }
   .profile-switch .faint { display: none; }
   .container { padding: 16px 16px 48px; }
 }
@@ -121,7 +129,7 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent-soft
 
 .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
 .badge.good { background: var(--good-soft); color: var(--good); border-color: #b9e2c7; }
-.badge.warn { background: var(--warn-soft); color: var(--warn); border-color: #f3d99a; }
+.badge.warn { background: var(--warn-soft); color: var(--warn-text); border-color: #f3d99a; }
 .badge.bad { background: var(--bad-soft); color: var(--bad); border-color: #f4c0bd; }
 .badge.accent { background: var(--accent-soft); color: var(--accent); border-color: #c9d6ff; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -170,19 +178,22 @@ table.table { width: 100%; border-collapse: collapse; }
 .table tr.clickable:hover td { background: var(--surface-2); }
 
 /* ---------- Zakładki ---------- */
-.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 16px; overflow-x: auto; }
-.tabs button { font: inherit; font-weight: 600; color: var(--muted); background: none; border: none; padding: 10px 14px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+/* Linia pod zakładkami jako cień wewnętrzny: podkreślenie aktywnej zakładki leży na niej bez ujemnego marginesu,
+   który przy overflow-x dawał zbędny pionowy pasek przewijania. */
+.tabs { display: flex; gap: 2px; box-shadow: inset 0 -1px 0 var(--border); margin-bottom: 16px; overflow-x: auto; overflow-y: hidden; }
+.tabs button { font: inherit; font-weight: 600; color: var(--muted); background: none; border: none; padding: 10px 14px; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
 .tabs button:hover { color: var(--text); }
 .tabs button.active { color: var(--accent); border-bottom-color: var(--accent); }
 
 /* ---------- Edytor CV ---------- */
 .editor-split { display: grid; grid-template-columns: minmax(380px, 1fr) minmax(0, 1.12fr); gap: 16px; align-items: start; }
-.editor-form { display: flex; flex-direction: column; gap: 12px; max-height: calc(100vh - 210px); overflow-y: auto; padding-right: 4px; }
-.preview-pane { position: sticky; top: 70px; }
-.preview-frame { width: 100%; height: calc(100vh - 230px); min-height: 520px; border: 1px solid var(--border); border-radius: var(--radius); background: #e9ebef; }
+/* Formularz rośnie razem ze stroną (jeden pasek przewijania, także na niskim ekranie laptopa),
+   a podgląd jest przyklejony pod paskiem u góry i zajmuje resztę wysokości okna. */
+.editor-form { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.preview-pane { position: sticky; top: 66px; }
+.preview-frame { width: 100%; height: calc(100vh - 124px); min-height: 360px; border: 1px solid var(--border); border-radius: var(--radius); background: #e9ebef; }
 @media (max-width: 1000px) {
   .editor-split { grid-template-columns: 1fr; }
-  .editor-form { max-height: none; }
   .preview-pane { position: static; }
 }
 .entry-card { border: 1px solid var(--border); border-radius: 8px; padding: 10px; background: var(--surface-2); display: flex; flex-direction: column; gap: 8px; }
@@ -224,6 +235,7 @@ table.table { width: 100%; border-collapse: collapse; }
 .empty { text-align: center; padding: 40px 20px; color: var(--muted); display: flex; flex-direction: column; gap: 12px; align-items: center; }
 .dropzone { border: 2px dashed var(--border-strong); border-radius: var(--radius); padding: 22px; text-align: center; background: var(--surface-2); cursor: pointer; }
 .dropzone:hover, .dropzone.over { border-color: var(--accent); background: var(--accent-soft); }
+.dropzone:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .new-item { box-shadow: 0 0 0 2px #9fdcb5; }
 details > summary { cursor: pointer; font-weight: 600; }
 .qa { border-left: 3px solid var(--accent); padding: 6px 0 6px 12px; display: flex; flex-direction: column; gap: 6px; }

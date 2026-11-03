@@ -73,10 +73,13 @@ function ChatPanel({
     endRef.current?.scrollIntoView({ block: 'nearest' });
   }, [career.chat.length, sending, error]);
 
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const tooLong = draft.length > MAX_MESSAGE;
   const send = () => {
     if (!draft.trim() || sending || tooLong) return;
     onSend(draft);
+    // Po kliknięciu „Wyślij” kursor wraca do pola, żeby od razu pisać dalej.
+    inputRef.current?.focus();
   };
   // Ostatnia wiadomość od kandydata bez odpowiedzi = poprzednia próba się nie udała.
   const unanswered = !sending && career.chat.at(-1)?.role === 'user';
@@ -111,7 +114,9 @@ function ChatPanel({
         <div ref={endRef} />
       </div>
       <div className="chat-input">
+        {/* Pole zostaje aktywne, gdy doradca pisze (wyłączone traciło fokus); wysłanie i tak czeka na odpowiedź. */}
         <textarea
+          ref={inputRef}
           rows={2}
           value={draft}
           placeholder={t('Napisz odpowiedź… (Enter - wyślij, Shift+Enter - nowa linia)')}
@@ -122,7 +127,6 @@ function ChatPanel({
               send();
             }
           }}
-          disabled={sending}
           autoFocus
         />
         <button className="btn primary" onClick={send} disabled={sending || !draft.trim() || tooLong}>
@@ -431,7 +435,10 @@ export function CareerPage() {
       return '';
     }
   });
+  // Aktualny szkic także w trakcie czekania na doradcę (pole jest wtedy aktywne).
+  const draftRef = useRef(draft);
   const setDraft = (t: string) => {
+    draftRef.current = t;
     setDraftState(t);
     try {
       if (t) localStorage.setItem(draftKey, t);
@@ -461,7 +468,9 @@ export function CareerPage() {
       if (fresh) setCareer(fresh);
       else setCareer(career);
       if (text && !saved) {
-        setDraft(text);
+        // Tekst dopisany w czasie czekania zostaje pod przywróconą wiadomością.
+        const typed = draftRef.current.trim();
+        setDraft(typed ? `${text}\n${typed}` : text);
         setChatError(
           fresh
             ? t('Wiadomość nie została wysłana ({error}). Tekst jest z powrotem w polu poniżej - spróbuj wysłać ponownie.', { error: e.message })

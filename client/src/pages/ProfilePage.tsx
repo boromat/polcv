@@ -129,6 +129,9 @@ export function ProfilePage() {
   const savedRev = useRef(0);
   const chain = useRef(Promise.resolve());
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // Ids odpowiedzi (extraFacts), które formularz już widział. Serwer zachowa te, których nie zna
+  // (np. dopisane w tym czasie przez doradcę kariery), a usunięte tutaj usunie.
+  const knownFacts = useRef<Set<string>>(new Set());
 
   /** Zmiana formularza bez zapisu (np. dane, które serwer już ma). */
   const local = (fn: (x: Profile) => Profile) => {
@@ -144,13 +147,19 @@ export function ProfilePage() {
     if (!snap || r === queuedRev.current) return chain.current;
     queuedRev.current = r;
     setSaveState('saving');
+    for (const f of snap.extraFacts) knownFacts.current.add(f.id);
+    const body: Profile & { extraFactsBase: string[] } = { ...snap, extraFactsBase: [...knownFacts.current] };
     chain.current = chain.current.then(async () => {
       try {
-        const saved = await api.saveProfile(snap.id, snap);
+        const saved = await api.saveProfile(snap.id, body);
         savedRev.current = Math.max(savedRev.current, r);
-        // Z odpowiedzi bierzemy tylko listę plików (import CV dopisuje plik): użytkownik mógł w tym czasie pisać dalej.
+        // Z odpowiedzi bierzemy tylko listę plików (import CV dopisuje plik) i nowe odpowiedzi z serwera:
+        // użytkownik mógł w tym czasie pisać dalej.
         if (latest.current?.id === snap.id) {
-          latest.current = { ...latest.current, files: saved.files };
+          const cur = latest.current;
+          const fresh = saved.extraFacts.filter((f) => !knownFacts.current.has(f.id) && !cur.extraFacts.some((x) => x.id === f.id));
+          for (const f of fresh) knownFacts.current.add(f.id);
+          latest.current = { ...cur, files: saved.files, extraFacts: [...cur.extraFacts, ...fresh] };
           setP(latest.current);
         }
         if (rev.current === savedRev.current) setSaveState('saved');
@@ -173,6 +182,7 @@ export function ProfilePage() {
       .then((x) => {
         if (!alive) return;
         latest.current = x;
+        knownFacts.current = new Set(x.extraFacts.map((f) => f.id));
         queuedRev.current = savedRev.current = rev.current;
         setP(x);
         setSaveState('idle');
@@ -240,6 +250,8 @@ export function ProfilePage() {
 
   const uploadPhoto = async (file: File) => {
     setError(null);
+    // Serwer zmniejsza duże zdjęcie (ok. 600×750 px), żeby PDF nie ważył kilku MB - to chwilę trwa.
+    setBusy(t('Zapisuję zdjęcie…'));
     try {
       // Po zapisie w toku, żeby zapis formularza nie cofnął zdjęcia na serwerze.
       await flush();
@@ -248,6 +260,8 @@ export function ProfilePage() {
       setPhotoBust(String(Date.now()));
     } catch (e: any) {
       setError(e.message);
+    } finally {
+      setBusy(null);
     }
   };
 
@@ -303,10 +317,19 @@ export function ProfilePage() {
             {t('PDF albo DOCX. Plik zostaje zapisany w profilu, a AI przepisze z niego dane do formularza poniżej.')}
             {!empty && ' ' + t('Nowe informacje zostaną dołączone do obecnego profilu - niczego nie usuwamy.')}
           </p>
+          {/* Pole jak przycisk: Tab, Enter i Spacja otwierają wybór pliku; przeciąganie pliku działa jak dotąd. */}
           <div
             className={`dropzone ${over ? 'over' : ''}`}
             style={{ marginTop: 12 }}
+            role="button"
+            tabIndex={0}
             onClick={() => fileRef.current?.click()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                fileRef.current?.click();
+              }
+            }}
             onDragOver={(e) => {
               e.preventDefault();
               setOver(true);
