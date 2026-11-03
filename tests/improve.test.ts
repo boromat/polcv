@@ -83,12 +83,12 @@ const savedReport = (total: number, ai: AiReview): ((v: CvVersion) => AtsReport)
 
 describe('Popraw automatycznie', () => {
   it('nic do zrobienia: AI nie jest wywoływane, a komunikat mówi, co dopisać w profilu', async () => {
-    const ask = { section: 'experience', find: '', replace: 'Ile postów publikowałaś tygodniowo?', why: 'Skala.', needsUserInput: true };
+    const ask = { section: 'experience', find: '', replace: 'Publikacja N postów tygodniowo', why: 'Ile postów publikujesz tygodniowo?', needsUserInput: true };
     const { pid, aid } = await setup(decided(), savedReport(80, review(8, { fixes: [ask] })));
     const res = await svc.improve(pid, aid);
     expect(sent).toEqual([]);
-    expect(res).toMatchObject({ kept: 'none', version: null, before: 80, after: null, needsInput: ['Ile postów publikowałaś tygodniowo?'] });
-    expect(res.message).toContain('Możesz dopisać w profilu:\n- Ile postów publikowałaś tygodniowo?');
+    expect(res).toMatchObject({ kept: 'none', version: null, before: 80, after: null, needsInput: ['Ile postów publikujesz tygodniowo?'] });
+    expect(res.message).toContain('Możesz dopisać w profilu:\n- Ile postów publikujesz tygodniowo?');
     expect((await store.listVersions(pid, aid)).map((v) => v.version)).toEqual([1]);
   });
 

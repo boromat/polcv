@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { AiReview, AtsReport, CvContent, CvText, CvVersion, JobPosting, Keyword, Profile } from '../shared/schemas';
 import { aliasVariants } from '../server/ats/keywords';
 import { notWorse } from '../server/ats/score';
-import { hasWork, improvePlan, nothingToImprove, planForPrompt, profileSources } from '../server/llm/prompts/improvePlan';
+import { hasWork, improvePlan, nothingToImprove, planForPrompt, profileSources, titleCore } from '../server/llm/prompts/improvePlan';
 import { unverifiedSkills } from '../server/services';
 import { withLang } from '../server/i18n';
 import { blankContent } from './fixtures';
@@ -81,7 +81,7 @@ const report = (ai: AiReview | null, pages = 1, total: number | null = 70): AtsR
 
 const fixes: AiReview['fixes'] = [
   { section: 'summary', find: 'Finance student', replace: 'Finance student targeting sales analysis', why: 'Nazwa stanowiska.', needsUserInput: false },
-  { section: 'experience', find: '', replace: 'Ile raportów tygodniowo przygotowywałaś?', why: 'Skala pracy.', needsUserInput: true },
+  { section: 'experience', find: '', replace: 'Przygotowywanie N raportów tygodniowo', why: 'Ile raportów tygodniowo przygotowujesz? Dopisz to w profilu.', needsUserInput: true },
 ];
 
 describe('plan poprawy CV', () => {
@@ -115,9 +115,18 @@ describe('plan poprawy CV', () => {
       '„Power BI”: w profilu jest tylko na liście umiejętności. Dopisz, gdzie tego używasz (np. w opisie stażu albo projektu), a CV pokaże to jako dowód.',
       '„Python” (wymagane w ogłoszeniu): jeśli to znasz, dopisz w profilu, gdzie i jak tego używasz.', // has=false nic nie potwierdza
       '„komunikatywność”: dopisz w profilu przykład z pracy albo projektu, który to pokazuje.',
-      'Ile raportów tygodniowo przygotowywałaś?',
+      'Ile raportów tygodniowo przygotowujesz? Dopisz to w profilu.',
     ]);
     expect(plan.keep).toEqual(['Excel', 'Power BI', 'SQL']);
+  });
+
+  it('tytuł stanowiska (także bez "Junior" i "(K/M)") nie trafia do pytań ani do planu', () => {
+    const withTitle = { ...posting, title: 'Junior Sales Analyst (K/M)', keywords: [...posting.keywords, kw('Sales Analyst', 'must', 'inne')] };
+    const p = improvePlan(report(review({})), profile, withTitle, cvContent());
+    expect(p.needsInput.join(' ')).not.toContain('Sales Analyst');
+    expect(p.addable.map((a) => a.term)).not.toContain('Sales Analyst');
+    expect(titleCore('Młodszy Analityk Danych Marketingowych (K/M)')).toBe(titleCore('analityk danych marketingowych'));
+    expect(titleCore('Power BI Developer')).not.toBe(titleCore('Power BI'));
   });
 
   it('poprawki bez danych od kandydata, kryteria poniżej 7 bez "achievements" i format', () => {

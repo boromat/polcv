@@ -5,6 +5,7 @@ import {
   findKeyword,
   isSoftSkill,
   looksPolish,
+  normalize,
   scoreKeywords,
   type KeywordSource,
   type KeywordWhere,
@@ -94,6 +95,12 @@ const MAX_TEXT = 300;
 const MAX_QUESTIONS = 8;
 const cut = (s: string) => (s.length > MAX_TEXT ? `${s.slice(0, MAX_TEXT)}…` : s);
 
+// Tytuł bez poziomu i dopisków ("Młodszy Analityk … (K/M)" i "analityk …" to ten sam tytuł).
+const SENIORITY = /(^|\s)(mlodszy|mlodsza|starszy|starsza|junior|senior|mid|regular|stazysta|stazystka|praktykant|praktykantka|intern|trainee)(?=\s|$)/g;
+const GENDER_MARK = /(^|\s)[kmfdnx](\/[kmfdnx])+(?=\s|$)/g;
+export const titleCore = (s: string) =>
+  normalize(s).replace(GENDER_MARK, ' ').replace(SENIORITY, ' ').replace(SENIORITY, ' ').replace(/\s+/g, ' ').trim();
+
 /** Słowo kluczowe z odpowiednikami (aliasy), żeby polski profil potwierdzał angielskie brzmienie. */
 const widened = (kw: Keyword): Keyword => ({ ...kw, synonyms: [...new Set([kw.term, ...kw.synonyms].flatMap(aliasVariants))] });
 
@@ -112,6 +119,8 @@ export function improvePlan(report: AtsReport, profile: Profile, posting: JobPos
   for (const kw of posting.keywords) {
     const inCv = findKeyword(kw, cvSources, cv.language);
     if (inCv) keep.push(inCv.foundAs);
+    // Tytuł stanowiska to nie umiejętność: nie ma czego dopisywać do profilu ani przenosić do punktów.
+    if (titleCore(kw.term) === titleCore(posting.title)) continue;
     if (inCv && inCv.credit >= 1) continue;
     const soft = isSoftSkill(kw);
     const wide = widened(kw);
@@ -149,7 +158,7 @@ export function improvePlan(report: AtsReport, profile: Profile, posting: JobPos
 
   const review = report.ai?.review ?? null;
   const fixes = (review?.fixes ?? []).filter((f) => !f.needsUserInput).map(({ section, find, replace, why }) => ({ section, find, replace, why }));
-  const asks = (review?.fixes ?? []).filter((f) => f.needsUserInput).map((f) => (f.replace.trim() || f.why.trim()));
+  const asks = (review?.fixes ?? []).filter((f) => f.needsUserInput).map((f) => (f.why.trim() || f.replace.trim()));
   const criteria = (review?.criteria ?? [])
     .filter((c) => c.score < 7 && CRITERION_GOAL[c.key])
     .map((c) => ({ key: c.key, score: c.score, comment: c.comment, goal: CRITERION_GOAL[c.key]! }));

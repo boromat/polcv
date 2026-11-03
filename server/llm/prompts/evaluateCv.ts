@@ -17,7 +17,7 @@ Oceń 5 kryteriów w skali 0–10: każde kryterium dokładnie raz, ocena to lic
 "strengths"/"weaknesses": po 2–5 konkretnych punktów ${forUser()}.
 "fixes": 3–8 konkretnych poprawek. "find" = DOKŁADNY fragment z CV (skopiowany znak w znak) albo pusty przy dopisaniu; "replace" = nowa treść w języku CV; "why" ${forUser()}.
 - Styl "replace": punkty CV po polsku formą rzeczownikową ("Przygotowywanie cotygodniowych raportów…", "Budowa dashboardu…"), nigdy w 1. osobie ("Przygotowywałem…", "Zbudowałam…"); po angielsku od czasownika w czasie przeszłym, bez "I" ("Built…", "Prepared…").
-- needsUserInput=false tylko wtedy, gdy poprawkę da się zrobić z tego, co już jest w CV (przeredagowanie, skrót, kolejność, słowa z ogłoszenia potwierdzone treścią). Jeśli wymaga nowych informacji (liczby, wyniki, narzędzia, dane kontaktowe), ustaw needsUserInput=true i w "replace" opisz, o co zapytać kandydata - NIE wymyślaj faktów.
+- needsUserInput=false tylko wtedy, gdy poprawkę da się zrobić z tego, co już jest w CV (przeredagowanie, skrót, kolejność, słowa z ogłoszenia potwierdzone treścią). Jeśli wymaga nowych informacji (liczby, wyniki, narzędzia, dane kontaktowe), ustaw needsUserInput=true; wtedy "why" to jedno krótkie pytanie ${forUser()} zadane wprost kandydatowi, na "Ty" (np. "Czy pracujesz z Meta Ads? Jeśli tak, dopisz w profilu, gdzie i z jakim efektem."), a nie notatka dla rekrutera, a "replace" to przykładowy punkt CV w języku CV z miejscem do uzupełnienia (np. "N raportów tygodniowo") albo pusty - NIE wymyślaj faktów.
 "wouldInterview": czy zaprosiłbyś na rozmowę. "verdict": 1–2 zdania podsumowania ${forUser()}.`;
 
 /** Problemy z kryteriami: każde z 5 dokładnie raz, ocena całkowita 0-10 (inaczej wynik skacze między ocenami). */
