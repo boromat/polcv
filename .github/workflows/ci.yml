@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Tylko odczyt: nic tutaj nie zapisuje do repozytorium.
+permissions:
+  contents: read
+
+# Nowy push na tę samą gałąź sprawia, że poprzednie uruchomienie nie ma już sensu.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Typy, testy i build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Windows, bo większość użytkowników uruchamia PolCV przez start.bat.
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalacja
+        run: npm ci
+
+      # Testy PDF drukują CV przez Chromium i czytają tekst z gotowego pliku, tak jak program.
+      - name: Chromium do PDF
+        run: npx playwright install --with-deps chromium
+
+      - name: Typy
+        run: npm run typecheck
+
+      - name: Testy
+        run: npm test
+
+      - name: Build interfejsu
+        run: npm run build
+
+  polanon:
+    name: Maskowanie danych z polanon
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      # polanon jest opcjonalny: bez niego testy maskowania są pomijane, tutaj idą na prawdziwym pakiecie.
+      - name: Instalacja
+        run: |
+          npm ci
+          pip install polanon
+
+      - name: Testy maskowania
+        run: npx vitest run tests/polanon.test.ts tests/openrouter.test.ts

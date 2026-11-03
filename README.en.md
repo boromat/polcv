@@ -2,6 +2,7 @@
 
 [Polski](README.md) · **English**
 
+[![CI](https://github.com/boromat/polcv/actions/workflows/ci.yml/badge.svg)](https://github.com/boromat/polcv/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **A CV tailored to one job posting - built for the Polish job market.** A local web app for

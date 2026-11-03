@@ -2,6 +2,7 @@
 
 **Polski** · [English](README.en.md)
 
+[![CI](https://github.com/boromat/polcv/actions/workflows/ci.yml/badge.svg)](https://github.com/boromat/polcv/actions/workflows/ci.yml)
 [![Licencja: MIT](https://img.shields.io/badge/licencja-MIT-blue.svg)](LICENSE)
 
 **CV pod konkretne ogłoszenie - zrobione dla polskiego rynku pracy.** Otwarty program na Twój komputer dla studentów i juniorów: z linku do ogłoszenia robi CV pisane pod systemy ATS i ocenę AI-rekrutera. Program jest darmowy; płacisz tylko za użycie AI (zwykle 20–60 gr za CV).

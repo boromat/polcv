@@ -1,0 +1,8 @@
+# Pilnuje aktualnych wersji akcji w CI. Są przypięte do commitu, a wersja jest w komentarzu, żeby
+# przesunięty tag nie zmienił tego, co się uruchamia; Dependabot aktualizuje jedno i drugie.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
