@@ -4,7 +4,7 @@ import type { ApplicationSummary } from '../../../shared/schemas';
 import { api } from '../api';
 import { useApp } from '../ctx';
 import { useT } from '../i18n';
-import { ErrorBox, fmtDate, ScoreBadge, STATUS_LABELS, STATUSES, statusTone, usd } from '../components/ui';
+import { ErrorBox, fmtDate, GoworkLink, ScoreBadge, STATUS_LABELS, STATUSES, statusTone, usd } from '../components/ui';
 
 export function HistoryPage() {
   const { current } = useApp();
@@ -116,7 +116,14 @@ export function HistoryPage() {
                           </div>
                         )}
                       </td>
-                      <td>{a.posting?.company ?? '-'}</td>
+                      <td>
+                        {a.posting?.company || '-'}
+                        {a.posting?.company && (
+                          <div>
+                            <GoworkLink company={a.posting.company} className="faint" />
+                          </div>
+                        )}
+                      </td>
                       <td>
                         <ScoreBadge score={a.score} incomplete={a.scoreIncomplete} />
                       </td>

@@ -77,6 +77,8 @@ Zakładka **Szukaj pracy**:
    - minimalne wynagrodzenie, forma umowy, wymiar etatu, poziom (staż/junior/mid).
 3. **Propozycje i oferty** - AI proponuje 5–8 stanowisk z uzasadnieniem i tym, czego brakuje. Przy każdym są linki **Otwórz wyszukiwanie: pracuj.pl · justjoin.it · nofluffjobs** z frazą, miastem, promieniem i poziomem - otwierasz je sam w przeglądarce, a ciekawą ofertę wklejasz w **Nowe CV**.
 
+Pod nazwą firmy (przy ofertach, w Historii i w aplikacji) jest link **opinie na GoWork**, który otwiera wyszukiwanie opinii o pracodawcy na GoWork.pl. Program niczego z GoWork nie pobiera.
+
 ### Automatyczne wyszukiwanie ofert (domyślnie wyłączone)
 
 W **Ustawieniach** możesz włączyć wyszukiwanie, w którym program sam przeszukuje nofluffjobs (jedyny z tych portali, którego plik `robots.txt` na to pozwala), odrzuca oferty niepasujące do preferencji (seniorzy, zła umowa, za niska stawka), ocenia dopasowanie pozostałych przez AI, a **Zrób CV pod to** od razu zaczyna CV pod wybraną ofertę.
@@ -122,7 +124,7 @@ Kopia zapasowa = skopiowanie folderu `data`.
 
 ## Zastrzeżenia
 
-- PolCV nie jest powiązany z pracuj.pl, justjoin.it, nofluffjobs, OpenRouter ani dostawcami modeli AI - ich nazwy służą tylko do opisu, z czym program współpracuje.
+- PolCV nie jest powiązany z pracuj.pl, justjoin.it, nofluffjobs, GoWork, OpenRouter ani dostawcami modeli AI - ich nazwy służą tylko do opisu, z czym program współpracuje.
 - Za treść CV wysyłanego pracodawcy odpowiadasz Ty. Program oznacza sugestie AI, ale decyzja należy do Ciebie. Wynik 0–100 to symulacja typowych reguł ATS i opinia AI, nie gwarancja.
 - Cudze CV importuj tylko za zgodą tej osoby.
 - Program jest udostępniany „tak jak jest”, bez gwarancji (licencja MIT).

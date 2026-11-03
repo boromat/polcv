@@ -4,7 +4,7 @@ import type { CvVersion, GapAnswer, ImproveResult, TemplateId } from '../../../s
 import { api, type AppDetail, type VersionDetail } from '../api';
 import { useApp } from '../ctx';
 import { plFew, translate, useT } from '../i18n';
-import { Busy, downloadFile, ErrorBox, fmtDate, openWhenReady, ScoreBadge, STATUS_LABELS, STATUSES, usd } from '../components/ui';
+import { Busy, downloadFile, ErrorBox, fmtDate, GoworkLink, openWhenReady, ScoreBadge, STATUS_LABELS, STATUSES, usd } from '../components/ui';
 import { GapStep } from './app/GapStep';
 import { CvEditor, pendingCount } from './app/CvEditor';
 import { ReportView } from './app/ReportView';
@@ -285,6 +285,12 @@ export function ApplicationPage() {
                 <a href={app.url} target="_blank" rel="noreferrer">
                   {t('ogłoszenie')} ↗
                 </a>
+              </>
+            )}
+            {app.posting?.company && (
+              <>
+                {' · '}
+                <GoworkLink company={app.posting.company} />
               </>
             )}
           </p>

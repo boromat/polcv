@@ -88,7 +88,9 @@ $0.05–0.15. The Settings page lists the models and shows what you have spent.
 ## Job portals
 
 The career advisor gives every proposed role search links for pracuj.pl, justjoin.it and
-nofluffjobs: you open them in your own browser, and the app fetches nothing.
+nofluffjobs: you open them in your own browser, and the app fetches nothing. The same goes for the
+**reviews on GoWork** link under every company name (offers, History and the application page): it
+opens a search for employer reviews on GoWork.pl.
 
 An **automated search** that fetches, filters and AI-ranks offers is available for nofluffjobs -
 the one portal whose `robots.txt` allows it. It is **off by default**; switching it on in Settings
@@ -99,7 +101,7 @@ per role. City coordinates for the radius filter come from
 
 ## Disclaimer
 
-- PolCV is not affiliated with pracuj.pl, justjoin.it, nofluffjobs, OpenRouter or any model
+- PolCV is not affiliated with pracuj.pl, justjoin.it, nofluffjobs, GoWork, OpenRouter or any model
   provider; their names are used only to say what the app works with.
 - You are responsible for what you send to employers: the app marks AI suggestions, but it is your
   CV. The score is a simulation of typical ATS rules and an AI opinion, not a promise.

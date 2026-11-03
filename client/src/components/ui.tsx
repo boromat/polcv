@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { goworkSearchUrl } from '../../../shared/gowork';
 import { getLang, useT } from '../i18n';
 
 /** Po tylu sekundach podpowiedź o zwykłym czasie pracy AI przestaje być prawdą. */
@@ -87,6 +88,18 @@ export function ScoreBadge({ score, incomplete = false }: { score: number | null
   if (score == null && incomplete) return <span className="badge warn">{t('ocena niepełna')}</span>;
   if (score == null) return <span className="badge">{t('brak oceny')}</span>;
   return <span className={`badge ${scoreTone(score)}`}>{score}/100</span>;
+}
+
+/** Opinie o firmie na GoWork.pl: link otwiera wyszukiwanie, program nic z GoWork nie pobiera. */
+export function GoworkLink({ company, className }: { company: string; className?: string }) {
+  const { t } = useT();
+  const url = goworkSearchUrl(company);
+  if (!url) return null;
+  return (
+    <a href={url} target="_blank" rel="noreferrer" className={className} title={t('Opinie o firmie na GoWork.pl (wyszukiwanie w Google)')}>
+      {t('opinie na GoWork')} ↗
+    </a>
+  );
 }
 
 export const usd = (n: number) => {

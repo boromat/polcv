@@ -14,6 +14,10 @@ All notable changes to PolCV are recorded here. The format follows
   repository descriptions and READMEs say, and a number that is not in them is dropped. Projects
   already in the profile stay untouched, missing technologies are added as skills, and the GitHub
   link goes into your contact links.
+- **Reviews on GoWork.** Under every company name (career advisor offers, History and the
+  application page) there is a link that opens a search for employer reviews on GoWork.pl. The
+  company's legal form ("sp. z o.o.", "S.A." and the like) is left out of the search, and the app
+  fetches nothing from GoWork.
 
 ### Fixed
 

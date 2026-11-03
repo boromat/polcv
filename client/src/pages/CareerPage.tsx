@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import type { Career, CareerPrefs, JobLead, RoleProposal } from '../../../shared/schemas';
 import { api } from '../api';
 import { useApp } from '../ctx';
-import { Busy, ErrorBox, Field, fmtDate, scoreTone } from '../components/ui';
+import { Busy, ErrorBox, Field, fmtDate, GoworkLink, scoreTone } from '../components/ui';
 import { useT } from '../i18n';
 
 const CONTRACTS = ['umowa o pracę', 'umowa zlecenie', 'B2B', 'staż / praktyki'] as const;
@@ -273,6 +273,11 @@ function OfferRow({ lead, onMakeCv }: { lead: JobLead; onMakeCv: (l: JobLead) =>
         <div className="faint">
           {[lead.company, lead.location, lead.workModes.map((m) => t(m)).join(' / '), lead.contracts.map((c) => t(c)).join(', ')].filter(Boolean).join(' · ')}
         </div>
+        {lead.company && (
+          <div className="small">
+            <GoworkLink company={lead.company} className="faint" />
+          </div>
+        )}
         {lead.salary && <div className="small">{lead.salary}</div>}
         {lead.matchReason && <div className="small muted">{lead.matchReason}</div>}
       </div>

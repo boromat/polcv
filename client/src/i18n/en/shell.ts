@@ -14,4 +14,6 @@ export const shell: Record<string, string> = {
   'Przejdź do Ustawień': 'Go to Settings',
   ', żeby go wkleić.': ' to paste it.',
   'Błąd {status}': 'Error {status}',
+  'opinie na GoWork': 'reviews on GoWork',
+  'Opinie o firmie na GoWork.pl (wyszukiwanie w Google)': 'Company reviews on GoWork.pl (Google search)',
 };
