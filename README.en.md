@@ -10,9 +10,9 @@ students and juniors that writes the CV and scores it the way an ATS and an AI r
 Everything runs on your computer; only the text the AI needs goes out, through
 [OpenRouter](https://openrouter.ai).
 
-![PolCV pasting a posting, asking about gaps in the profile, writing the CV with a live preview and scoring it with Polish keyword inflection](docs/demo.gif)
+![PolCV in English: pasting an English job posting, answering the gap questions, the English CV with a live preview and the ATS report](docs/demo-en.gif)
 
-<sub>Demo on made-up data: the candidate Kacper Nowicki and the Acme Media posting do not exist.</sub>
+<sub>Demo on made-up data with the interface switched to English: the candidate Kacper Nowicki and the Acme Media posting do not exist. The [Polish README](README.md) shows the same flow in Polish.</sub>
 
 What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish application:
 
@@ -21,7 +21,9 @@ What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish applicat
   for word from the posting; the **photo** follows Polish custom and the posting's wishes.
 - **Keywords matched across Polish inflection** - "marketingu", "marketingiem" and "marketing" are
   one word, as they are to an ATS.
-- **A Polish or English CV**, following the language of the posting. The interface is in Polish.
+- **A Polish or English CV**, following the language of the posting. The app itself switches between
+  Polish and English (PL | EN), so it also works for people applying in Poland who are still
+  learning Polish.
 - **A career advisor that knows the local terms:** employment contract (UoP), mandate contract,
   B2B, gross monthly salary, a radius around your city or remote from anywhere in Poland.
 - **Polish personal data kept private** - optionally with [polanon](https://github.com/boromat/polanon),
