@@ -304,6 +304,12 @@ export function SettingsPage() {
           )}
         </div>
       </div>
+      <p className="faint small" style={{ marginTop: 18, textAlign: 'center' }}>
+        PolCV {__APP_VERSION__} ·{' '}
+        <a href="https://github.com/boromat/polcv/blob/main/CHANGELOG.md" target="_blank" rel="noreferrer">
+          {t('Co nowego')}
+        </a>
+      </p>
     </div>
   );
 }

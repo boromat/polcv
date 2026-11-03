@@ -8,6 +8,7 @@ import { profilesRouter } from './routes/profiles';
 import { applicationsRouter } from './routes/applications';
 import { careerRouter } from './routes/career';
 import { closeBrowser } from './cv/browser';
+import { VERSION } from './version';
 import { langMiddleware, tr } from './i18n';
 import { hostGuard } from './security';
 
@@ -44,7 +45,7 @@ if (fs.existsSync(path.join(dist, 'index.html'))) {
 
 const server = app.listen(PORT, HOST, () => {
   const url = `http://localhost:${PORT}`;
-  console.log(`PolCV działa: ${url}  (dane: ${DATA_DIR})`);
+  console.log(`PolCV ${VERSION} działa: ${url}  (dane: ${DATA_DIR})`);
   if (process.env.CV_OPEN_BROWSER === '1') {
     exec(process.platform === 'win32' ? `start "" "${url}"` : process.platform === 'darwin' ? `open ${url}` : `xdg-open ${url}`);
   }

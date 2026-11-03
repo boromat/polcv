@@ -258,4 +258,5 @@ export const profile: Record<string, string> = {
     'It writes a CV for this posting and highlights bolder wording in yellow for you to decide on.',
   'Oceni CV tak, jak ATS i AI-rekruter, i zaproponuje poprawki.':
     'It scores the CV the way an ATS and an AI recruiter would, and suggests improvements.',
+  'Co nowego': 'What is new',
 };
