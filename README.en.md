@@ -7,6 +7,10 @@ students and juniors that writes the CV and scores it the way an ATS and an AI r
 Everything runs on your computer; only the text the AI needs goes out, through
 [OpenRouter](https://openrouter.ai).
 
+![PolCV pasting a posting, asking about gaps in the profile, writing the CV with a live preview and scoring it with Polish keyword inflection](docs/demo.gif)
+
+<sub>Demo on made-up data: the candidate Kacper Nowicki and the Acme Media posting do not exist.</sub>
+
 What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish application:
 
 - **Polish job boards** — reads postings from pracuj.pl, justjoin.it and nofluffjobs.

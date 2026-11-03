@@ -4,6 +4,10 @@
 
 **CV pod konkretne ogłoszenie — zrobione dla polskiego rynku pracy.** Otwarty program na Twój komputer dla studentów i juniorów: z linku do ogłoszenia robi CV pisane pod systemy ATS i ocenę AI-rekrutera. Program jest darmowy; płacisz tylko za użycie AI (zwykle 20–60 gr za CV).
 
+![PolCV: wklejenie ogłoszenia, pytania o braki w profilu, CV z podglądem na żywo i raport ATS z polską odmianą słów kluczowych](docs/demo.gif)
+
+<sub>Demo na fikcyjnych danych: kandydat Kacper Nowicki i ogłoszenie firmy Acme Media nie istnieją.</sub>
+
 Czym różni się od zagranicznych narzędzi (Jobscan, Teal, Rezi):
 
 - **polskie portale** — czyta ogłoszenia z pracuj.pl, justjoin.it i nofluffjobs,
