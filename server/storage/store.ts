@@ -8,7 +8,7 @@ export const DATA_DIR = path.resolve(process.env.CV_DATA_DIR || path.join(proces
 export const newId = () => nanoid(10);
 export const nowIso = () => new Date().toISOString();
 
-/** Identyfikatory trafiają do ścieżek plików — dopuszczamy tylko bezpieczne znaki. */
+/** Identyfikatory trafiają do ścieżek plików - dopuszczamy tylko bezpieczne znaki. */
 function safeId(id: string): string {
   if (!/^[A-Za-z0-9_-]{1,64}$/.test(id)) throw new HttpError(400, 'Nieprawidłowy identyfikator');
   return id;

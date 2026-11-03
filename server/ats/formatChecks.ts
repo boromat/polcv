@@ -15,7 +15,7 @@ export interface FormatCheck {
 const DATE_PATTERNS = [/^\d{2}\.\d{4}$/, /^\d{2}\/\d{4}$/, /^\d{4}$/, /^(obecnie|present|teraz|now)$/i];
 
 /**
- * Kontrole na tekście odczytanym z GOTOWEGO PDF — tak "widzi" CV system ATS.
+ * Kontrole na tekście odczytanym z GOTOWEGO PDF - tak "widzi" CV system ATS.
  */
 export function checkFormat(pdfText: string, pages: number, cv: CvContent, profile: Profile): { score: number; max: number; pages: number; checks: FormatCheck[] } {
   const norm = normalize(pdfText);
@@ -34,7 +34,7 @@ export function checkFormat(pdfText: string, pages: number, cv: CvContent, profi
   add(
     'Imię i nazwisko',
     !!name && norm.includes(normalize(name)),
-    name ? 'Odczytane poprawnie.' : 'Brak imienia i nazwiska w profilu — uzupełnij je.',
+    name ? 'Odczytane poprawnie.' : 'Brak imienia i nazwiska w profilu - uzupełnij je.',
     2,
   );
 
@@ -42,7 +42,7 @@ export function checkFormat(pdfText: string, pages: number, cv: CvContent, profi
   add(
     'Adres e-mail',
     !!email && pdfText.toLowerCase().includes(email.toLowerCase()),
-    email ? 'Odczytany poprawnie.' : 'Brak e-maila w profilu — ATS nie będzie mógł się z Tobą skontaktować.',
+    email ? 'Odczytany poprawnie.' : 'Brak e-maila w profilu - ATS nie będzie mógł się z Tobą skontaktować.',
     2,
   );
 
@@ -79,14 +79,14 @@ export function checkFormat(pdfText: string, pages: number, cv: CvContent, profi
   add(
     'Polskie znaki i kodowanie',
     charsOk,
-    garbled ? 'W tekście są zepsute znaki — ATS może źle odczytać CV.' : charsOk ? 'Znaki odczytane poprawnie.' : 'Nie wykryto polskich znaków w CV po polsku.',
+    garbled ? 'W tekście są zepsute znaki - ATS może źle odczytać CV.' : charsOk ? 'Znaki odczytane poprawnie.' : 'Nie wykryto polskich znaków w CV po polsku.',
     2,
   );
 
   add(
     'Długość CV',
     pages <= 1,
-    pages <= 1 ? 'Jedna strona — idealnie dla studenta/juniora.' : `${pages} strony — dla juniora najlepiej skrócić do jednej.`,
+    pages <= 1 ? 'Jedna strona - idealnie dla studenta/juniora.' : `${pages} strony - dla juniora najlepiej skrócić do jednej.`,
     3,
     pages === 2 ? 0.5 : undefined,
   );
@@ -106,7 +106,7 @@ export function checkFormat(pdfText: string, pages: number, cv: CvContent, profi
   // Sam rok (gdy miesiąc nieznany) i "obecnie" pasują do każdego formatu; niespójne jest mieszanie MM.RRRR z MM/RRRR.
   const kinds = new Set(dateParts.map((d) => DATE_PATTERNS.findIndex((p) => p.test(d))).filter((i) => i === 0 || i === 1));
   const datesOk = !dateParts.some((d) => DATE_PATTERNS.every((p) => !p.test(d))) && kinds.size <= 1;
-  add('Spójny format dat', datesOk, datesOk ? 'Daty w jednym formacie.' : 'Daty są zapisane w różnych formatach — ujednolić np. do MM.RRRR.', 1);
+  add('Spójny format dat', datesOk, datesOk ? 'Daty w jednym formacie.' : 'Daty są zapisane w różnych formatach - ujednolić np. do MM.RRRR.', 1);
 
   const score = Math.round(checks.reduce((s, c) => s + (c.ok ? c.weight : c.partial ? c.weight * c.partial : 0), 0));
   return { score, max: FORMAT_MAX, pages, checks: checks.map(({ partial, ...c }) => c) };

@@ -18,13 +18,13 @@ async function loadCache(): Promise<Record<string, Point | null>> {
 }
 
 /**
- * Współrzędne miasta z OpenStreetMap (Nominatim) — potrzebne, bo nofluffjobs nie ma filtra promienia.
+ * Współrzędne miasta z OpenStreetMap (Nominatim) - potrzebne, bo nofluffjobs nie ma filtra promienia.
  * Wysyłana jest tylko nazwa miasta; wynik trafia do pamięci podręcznej (jedno zapytanie na miasto).
  */
 export async function geocodeCity(city: string): Promise<Point | null> {
   const key = normalize(city);
   if (!key) return null;
-  // Kilka wyszukiwań naraz pyta o to samo miasto — do Nominatim idzie jedno zapytanie.
+  // Kilka wyszukiwań naraz pyta o to samo miasto - do Nominatim idzie jedno zapytanie.
   if (!inflight.has(key)) inflight.set(key, lookup(city, key).finally(() => inflight.delete(key)));
   return inflight.get(key)!;
 }
@@ -40,7 +40,7 @@ async function lookup(city: string, key: string): Promise<Point | null> {
     const [hit] = res.ok ? ((await res.json()) as { lat: string; lon: string }[]) : [];
     c[key] = hit ? { lat: Number(hit.lat), lon: Number(hit.lon) } : null;
   } catch {
-    return null; // błąd sieci nie trafia do pamięci — spróbujemy następnym razem
+    return null; // błąd sieci nie trafia do pamięci - spróbujemy następnym razem
   }
   await fs.mkdir(DATA_DIR, { recursive: true });
   await fs.writeFile(cacheFile(), JSON.stringify(c, null, 1), 'utf8');

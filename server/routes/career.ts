@@ -7,7 +7,7 @@ import * as career from '../career';
 export const careerRouter = Router();
 
 const base = '/profiles/:pid/career';
-// Długi opis doświadczenia to cenny materiał dla doradcy — limit chroni tylko przed przypadkowym wklejeniem całych dokumentów.
+// Długi opis doświadczenia to cenny materiał dla doradcy - limit chroni tylko przed przypadkowym wklejeniem całych dokumentów.
 const MAX_MESSAGE = 15_000;
 
 careerRouter.get(base, async (req, res) => {

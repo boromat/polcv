@@ -2,7 +2,7 @@ import { chromium, type Browser, type Page } from 'playwright';
 
 let browserPromise: Promise<Browser> | null = null;
 
-/** Jedna współdzielona instancja Chromium — start trwa ~1 s, więc trzymamy ją otwartą. */
+/** Jedna współdzielona instancja Chromium - start trwa ~1 s, więc trzymamy ją otwartą. */
 function getBrowser(): Promise<Browser> {
   if (!browserPromise) {
     browserPromise = chromium.launch({ headless: true }).catch((e) => {

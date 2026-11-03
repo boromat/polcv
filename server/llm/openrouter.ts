@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { appendUsage, getProfile, getSettings, HttpError, nowIso } from '../storage/store';
 import { maskForAi, profileTerms, TOKENS_NOTE } from '../privacy/polanon';
+import { plainDashes } from './strings';
 
 const API = 'https://openrouter.ai/api/v1';
 
@@ -19,7 +20,13 @@ export interface CallOptions<T> {
   ctx: LlmContext;
   temperature?: number;
   maxTokens?: number;
+  /** Model przepisuje cudzy tekst (ogłoszenie, wgrane CV): interpunkcja zostaje taka, jak w oryginale. */
+  verbatim?: boolean;
 }
+
+const DASH_NOTE = `
+
+W tekstach nie używaj długiego myślnika (—). Zamiast niego wstaw przecinek, dwukropek, nawias albo zwykły myślnik (-).`;
 
 /** Klucz z profilu ma pierwszeństwo przed globalnym (żeby kolega płacił za swoje). */
 async function resolveKey(profileId: string): Promise<string> {
@@ -36,7 +43,7 @@ async function resolveKey(profileId: string): Promise<string> {
 
 /**
  * Tryb strict wymaga, by każdy obiekt miał additionalProperties:false i wszystkie
- * pola w `required` — dopinamy to rekurencyjnie na schemacie z zoda.
+ * pola w `required` - dopinamy to rekurencyjnie na schemacie z zoda.
  */
 export function toStrictJsonSchema(schema: z.ZodType): Record<string, unknown> {
   const js = z.toJSONSchema(schema, { target: 'draft-7', unrepresentable: 'any' }) as any;
@@ -129,8 +136,8 @@ async function chat(key: string, body: Record<string, unknown>, attempt = 0): Pr
 
 /**
  * Wywołanie modelu, które zwraca obiekt zgodny ze schematem zoda.
- * Maks. 3 zapytania: po błędzie walidacji — prośba o poprawkę; po zapętleniu/ucięciu
- * lub pustej odpowiedzi — nowa próba od zera z inną temperaturą (tańsze modele potrafią
+ * Maks. 3 zapytania: po błędzie walidacji - prośba o poprawkę; po zapętleniu/ucięciu
+ * lub pustej odpowiedzi - nowa próba od zera z inną temperaturą (tańsze modele potrafią
  * się zapętlić w trybie JSON, a odsyłanie im tych śmieci nic nie daje).
  */
 export async function callJson<T>(opts: CallOptions<T>): Promise<T> {
@@ -145,9 +152,9 @@ export async function callJson<T>(opts: CallOptions<T>): Promise<T> {
     : null;
   const user = masked?.text ?? opts.user;
 
-  let system = `${opts.system}${masked ? TOKENS_NOTE : ''}
+  let system = `${opts.system}${masked ? TOKENS_NOTE : ''}${opts.verbatim ? '' : DASH_NOTE}
 
-Zwróć WYŁĄCZNIE jeden obiekt JSON zgodny z podanym schematem — bez komentarzy i bez bloków markdown.`;
+Zwróć WYŁĄCZNIE jeden obiekt JSON zgodny z podanym schematem, bez komentarzy i bez bloków markdown.`;
   let useSchema = true;
   let requireParams = true;
 
@@ -187,7 +194,7 @@ Zwróć WYŁĄCZNIE jeden obiekt JSON zgodny z podanym schematem — bez komenta
         // 400 o response_format = model w ogóle nie zna schematu.
         if (requireParams && e.status === 404) requireParams = false;
         else {
-          // Model w ogóle nie obsługuje json_schema — opisujemy schemat w promptcie.
+          // Model w ogóle nie obsługuje json_schema - opisujemy schemat w promptcie.
           useSchema = false;
           system += `
 
@@ -216,7 +223,10 @@ ${JSON.stringify(jsonSchema)}`;
   let lastBroken = false;
   for (let attempt = 1; attempt <= 3; attempt++) {
     const parsed = tryParse(res);
-    if (parsed.ok) return masked ? masked.restore(parsed.data) : parsed.data;
+    if (parsed.ok) {
+      const data = masked ? await masked.restore(parsed.data) : parsed.data;
+      return opts.verbatim ? data : plainDashes(data);
+    }
     lastBroken = !res.content.trim() || res.finishReason === 'length';
     console.warn(
       `[AI] ${opts.schemaName}: odrzucona odpowiedź ${attempt}/3 (${res.model}, finish=${res.finishReason || '?'}, ${res.tokensOut} tok.): ${parsed.error.slice(0, 300)}`,

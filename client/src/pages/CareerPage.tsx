@@ -18,7 +18,7 @@ const LEVELS: Record<RoleProposal['seniority'], { pracuj: string; justjoin: stri
   mid: { pracuj: '17,4', justjoin: 'mid', nofluff: 'junior,mid' },
 };
 
-/** Linki do wyszukiwarek portali z frazą, miastem i poziomem — otwiera je kandydat, program niczego nie pobiera. */
+/** Linki do wyszukiwarek portali z frazą, miastem i poziomem - otwiera je kandydat, program niczego nie pobiera. */
 function portalLinks(role: RoleProposal, prefs: CareerPrefs) {
   const phrase = role.keywords[0] || role.title;
   const q = encodeURIComponent(phrase);
@@ -104,7 +104,7 @@ function ChatPanel({
         <textarea
           rows={2}
           value={draft}
-          placeholder="Napisz odpowiedź… (Enter — wyślij, Shift+Enter — nowa linia)"
+          placeholder="Napisz odpowiedź… (Enter - wyślij, Shift+Enter - nowa linia)"
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -121,7 +121,7 @@ function ChatPanel({
       </div>
       {draft.length > MAX_MESSAGE * 0.8 && (
         <p className={`small ${tooLong ? 'bad-ic' : 'faint'}`} style={{ marginTop: -6 }}>
-          {draft.length} / {MAX_MESSAGE} znaków{tooLong ? ' — skróć wiadomość albo podziel ją na dwie.' : ''}
+          {draft.length} / {MAX_MESSAGE} znaków{tooLong ? ' - skróć wiadomość albo podziel ją na dwie.' : ''}
         </p>
       )}
       <p className="faint">
@@ -136,7 +136,7 @@ function PrefsPanel({ prefs, onSave }: { prefs: CareerPrefs; onSave: (p: CareerP
   const [rolesText, setRolesText] = useState(prefs.targetRoles.join(', '));
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
-  // Doradca aktualizuje preferencje w trakcie rozmowy — pokazujemy je, o ile nie ma niezapisanych zmian.
+  // Doradca aktualizuje preferencje w trakcie rozmowy - pokazujemy je, o ile nie ma niezapisanych zmian.
   useEffect(() => {
     if (dirty) return;
     setDraft(prefs);
@@ -187,7 +187,7 @@ function PrefsPanel({ prefs, onSave }: { prefs: CareerPrefs; onSave: (p: CareerP
           </select>
         </Field>
       </div>
-      {draft.remote && <p className="faint" style={{ marginTop: -6 }}>Praca zdalna jest szukana w całej Polsce — niezależnie od miasta.</p>}
+      {draft.remote && <p className="faint" style={{ marginTop: -6 }}>Praca zdalna jest szukana w całej Polsce - niezależnie od miasta.</p>}
       <div className="grid2">
         <Field label="Min. wynagrodzenie (zł brutto / mies.)" hint="0 = bez wymagań. Oferty bez podanej kwoty zostają.">
           <input type="text" inputMode="numeric" value={draft.salaryMin || ''} onChange={(e) => set({ salaryMin: Number(e.target.value.replace(/\D/g, '')) || 0 })} placeholder="np. 5000" />
@@ -293,7 +293,7 @@ function RoleCard({
   const [showWeak, setShowWeak] = useState(false);
   const [showExcluded, setShowExcluded] = useState(false);
   const all = offers?.items ?? [];
-  // Słabo dopasowane (poniżej 30%) chowamy — wyszukiwarki zwracają też oferty luźno związane z frazą.
+  // Słabo dopasowane (poniżej 30%) chowamy - wyszukiwarki zwracają też oferty luźno związane z frazą.
   const weak = all.filter((l) => l.match != null && l.match < WEAK_MATCH);
   const items = showWeak ? all : all.filter((l) => l.match == null || l.match >= WEAK_MATCH);
   const shown = showAll ? items : items.slice(0, 6);
@@ -339,7 +339,7 @@ function RoleCard({
         <div className="stack" style={{ gap: 8 }}>
           <div className="faint">
             Sprawdzono {offers.scanned} ofert, pasuje do Twoich preferencji: {all.length}
-            {weak.length > 0 && !showWeak ? ` (w tym ${weak.length} słabo dopasowanych — ukryte)` : ''}. Wyszukano {fmtDate(offers.fetchedAt)}.
+            {weak.length > 0 && !showWeak ? ` (w tym ${weak.length} słabo dopasowanych - ukryte)` : ''}. Wyszukano {fmtDate(offers.fetchedAt)}.
             {stats.length > 0 && <> Odrzucone: {stats.map(([k, v]) => `${k} ${v}`).join(', ')}.</>}
           </div>
           {offers.errors.map((e) => (
@@ -348,7 +348,7 @@ function RoleCard({
           {items.length === 0 && (
             <div className="callout info small">
               Brak ofert spełniających wszystkie Twoje preferencje.
-              {excluded.length > 0 ? ' Poniżej są dopasowane oferty, które odpadły przez filtry — może warto je poluzować.' : ' Spróbuj zwiększyć promień, dopuścić pracę zdalną albo inne formy umowy.'}
+              {excluded.length > 0 ? ' Poniżej są dopasowane oferty, które odpadły przez filtry - może warto je poluzować.' : ' Spróbuj zwiększyć promień, dopuścić pracę zdalną albo inne formy umowy.'}
             </div>
           )}
           {shown.map((l) => (
@@ -436,7 +436,7 @@ export function CareerPage() {
     try {
       setCareer(await api.careerChat(pid, message));
     } catch (e: any) {
-      // Serwer zapisuje wiadomość przed zapytaniem AI — sprawdzamy, czy do niego dotarła.
+      // Serwer zapisuje wiadomość przed zapytaniem AI - sprawdzamy, czy do niego dotarła.
       const fresh = await api.career(pid).catch(() => null);
       const saved = !!fresh && fresh.chat.at(-1)?.role === 'user' && fresh.chat.at(-1)?.content === text;
       if (fresh) setCareer(fresh);
@@ -445,8 +445,8 @@ export function CareerPage() {
         setDraft(text);
         setChatError(
           fresh
-            ? `Wiadomość nie została wysłana (${e.message}). Tekst jest z powrotem w polu poniżej — spróbuj wysłać ponownie.`
-            : 'Brak połączenia z programem — sprawdź, czy okno start.bat jest otwarte. Twój tekst jest z powrotem w polu poniżej.',
+            ? `Wiadomość nie została wysłana (${e.message}). Tekst jest z powrotem w polu poniżej - spróbuj wysłać ponownie.`
+            : 'Brak połączenia z programem - sprawdź, czy okno start.bat jest otwarte. Twój tekst jest z powrotem w polu poniżej.',
         );
       } else setChatError(`Doradca nie odpowiedział: ${e.message}`);
     } finally {
@@ -483,7 +483,7 @@ export function CareerPage() {
     } finally {
       setBusy(null);
     }
-    // Od razu szukamy ofert dla wszystkich stanowisk — wyniki pojawiają się kolejno.
+    // Od razu szukamy ofert dla wszystkich stanowisk - wyniki pojawiają się kolejno.
     if (roles.length && canSearch) await searchAll(roles);
   };
 
@@ -505,7 +505,7 @@ export function CareerPage() {
   };
 
   const searchAll = async (roles: RoleProposal[] = career?.proposals?.roles ?? []) => {
-    // Po dwa stanowiska naraz — szybciej, a portale nie dostają zbyt wielu zapytań jednocześnie.
+    // Po dwa stanowiska naraz - szybciej, a portale nie dostają zbyt wielu zapytań jednocześnie.
     const queue = [...roles];
     await Promise.all([0, 1].map(async () => {
       while (queue.length) await searchOffers(queue.shift()!.id);
@@ -533,7 +533,7 @@ export function CareerPage() {
       <div className="page-head">
         <div>
           <h1>Szukaj pracy</h1>
-          <p className="sub">Porozmawiaj z doradcą AI o tym, czego szukasz — potem dostaniesz propozycje stanowisk z gotowymi linkami do wyszukiwania na pracuj.pl, justjoin.it i nofluffjobs.</p>
+          <p className="sub">Porozmawiaj z doradcą AI o tym, czego szukasz - potem dostaniesz propozycje stanowisk z gotowymi linkami do wyszukiwania na pracuj.pl, justjoin.it i nofluffjobs.</p>
         </div>
         <button className="btn primary" onClick={proposals} disabled={sending}>
           {career.proposals ? 'Zaproponuj stanowiska od nowa' : 'Pokaż propozycje pracy'}
@@ -587,7 +587,7 @@ export function CareerPage() {
             <div className="card empty">
               <h2>Jeszcze nie ma propozycji</h2>
               <p style={{ maxWidth: 520 }}>
-                Najlepiej najpierw porozmawiaj z doradcą (kilka minut), ale propozycje możesz wygenerować w każdej chwili — na podstawie profilu i preferencji.
+                Najlepiej najpierw porozmawiaj z doradcą (kilka minut), ale propozycje możesz wygenerować w każdej chwili - na podstawie profilu i preferencji.
               </p>
               <button className="btn primary lg" onClick={proposals}>
                 Pokaż propozycje pracy

@@ -42,7 +42,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (id) localStorage.setItem(KEY, id);
       else localStorage.removeItem(KEY);
     } catch {
-      /* brak dostępu do localStorage — wybór działa do odświeżenia */
+      /* brak dostępu do localStorage - wybór działa do odświeżenia */
     }
   };
 

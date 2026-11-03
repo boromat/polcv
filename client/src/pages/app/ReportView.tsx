@@ -59,7 +59,7 @@ export function ReportView({
     <div className="stack lg">
       {stale && (
         <div className="callout warn row between">
-          <span>CV zmieniło się od ostatniej oceny — wynik może być nieaktualny.</span>
+          <span>CV zmieniło się od ostatniej oceny - wynik może być nieaktualny.</span>
           <button className="btn sm" onClick={onEvaluate}>
             Oceń ponownie
           </button>
@@ -74,7 +74,7 @@ export function ReportView({
             </div>
             <div className="stack" style={{ gap: 6 }}>
               <h2>Ocena łączna</h2>
-              {!r.ai && <span className="badge warn" style={{ alignSelf: 'flex-start' }}>niepełna — bez oceny AI</span>}
+              {!r.ai && <span className="badge warn" style={{ alignSelf: 'flex-start' }}>niepełna - bez oceny AI</span>}
               {review && (
                 <span className={`badge ${verdictTone}`} style={{ alignSelf: 'flex-start' }}>
                   AI-rekruter: {review.wouldInterview === 'tak' || review.wouldInterview === 'raczej tak' ? 'zaprosiłby na rozmowę' : 'raczej nie zaprosiłby'} ({review.wouldInterview})
@@ -85,7 +85,7 @@ export function ReportView({
           </div>
           <div className="stack">
             <Meter label="Słowa kluczowe ATS" value={r.keywords.score} max={r.keywords.max} hint="Czy CV zawiera słowa, których szuka filtr ATS." />
-            <Meter label="Format i czytelność dla ATS" value={r.format.score} max={r.format.max} hint="Sprawdzone na gotowym PDF — tak, jak czyta go ATS." />
+            <Meter label="Format i czytelność dla ATS" value={r.format.score} max={r.format.max} hint="Sprawdzone na gotowym PDF - tak, jak czyta go ATS." />
             {r.ai ? (
               <Meter label="Ocena AI-rekrutera" value={r.ai.score} max={r.ai.max} hint="Jak oceniłby Cię automatyczny screening AI." />
             ) : (
@@ -128,7 +128,7 @@ export function ReportView({
               ))}
             </div>
             <p className="faint" style={{ marginTop: 6 }}>
-              Jeśli coś z tej listy znasz, dopisz to w profilu albo w edytorze — wtedy CV dostanie te punkty. Jeśli nie znasz, nie dopisuj.
+              Jeśli coś z tej listy znasz, dopisz to w profilu albo w edytorze - wtedy CV dostanie te punkty. Jeśli nie znasz, nie dopisuj.
             </p>
           </div>
         )}
@@ -145,7 +145,7 @@ export function ReportView({
             <li key={c.name}>
               <span className={`ic ${c.ok ? 'ok-ic' : 'bad-ic'}`}>{c.ok ? '✓' : '✕'}</span>
               <span>
-                <b>{c.name}</b> — <span className="muted">{c.detail}</span>
+                <b>{c.name}</b> - <span className="muted">{c.detail}</span>
               </span>
             </li>
           ))}

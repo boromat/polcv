@@ -11,7 +11,7 @@ STRUKTURA:
 - "summary": 2–4 zdania dopasowane do ogłoszenia: kim jest kandydat (np. student kierunku X), 3–4 najważniejsze dopasowane umiejętności, jeden konkretny dowód (projekt/osiągnięcie), co wnosi na tym stanowisku. Bez "Ja", bez frazesów. Też obiekt z statusem fact/suggested.
 - "sectionOrder": kolejność sekcji od najważniejszej dla TEGO ogłoszenia. Dla studenta/juniora z małym doświadczeniem zwykle: summary, projects lub experience (co jest trafniejsze), education, skills, certificates, languages, interests. Pomiń sekcje, które byłyby puste.
 - "experience" i "projects": wybierz pozycje trafne dla ogłoszenia; mniej trafne skróć do 1 punktu albo pomiń, jeśli brakuje miejsca. "dates" w formacie ${lang === 'pl' ? '"MM.RRRR – MM.RRRR" albo "MM.RRRR – obecnie"' : '"MM/YYYY – MM/YYYY" albo "MM/YYYY – present"'}. "sourceId" = id pozycji z profilu.
-- "skills": 2–4 grupy z nazwami w języku CV (np. ${lang === 'pl' ? '"Narzędzia", "Umiejętności techniczne", "Kompetencje"' : '"Tools", "Technical skills", "Soft skills"'}). TYLKO umiejętności z profilu lub z extraFacts has=true; najpierw te z ogłoszenia; łącznie maks. ~15 pozycji. Każda pozycja to krótka nazwa (1–4 słowa), bez nawiasów z wyjaśnieniami — dowody umiejętności należą do punktów doświadczenia, nie do listy.
+- "skills": 2–4 grupy z nazwami w języku CV (np. ${lang === 'pl' ? '"Narzędzia", "Umiejętności techniczne", "Kompetencje"' : '"Tools", "Technical skills", "Soft skills"'}). TYLKO umiejętności z profilu lub z extraFacts has=true; najpierw te z ogłoszenia; łącznie maks. ~15 pozycji. Każda pozycja to krótka nazwa (1–4 słowa), bez nawiasów z wyjaśnieniami - dowody umiejętności należą do punktów doświadczenia, nie do listy.
 - "education": szczegóły tylko trafne (kierunek, specjalizacja, ważne przedmioty/projekty, średnia jeśli wysoka).
 - "certificates", "languages": z profilu; w "languages" poziom w skali CEFR, jeśli znany.
 - "interests": maks. 3 krótkie pozycje z profilu, tylko jeśli pomagają (inaczej pusta lista).
@@ -43,8 +43,8 @@ POPRAWA NA PODSTAWIE RAPORTU:
 Dostajesz obecną wersję CV i raport z oceny (brakujące słowa kluczowe, problemy z formatem, uwagi AI-rekrutera z poprawkami).
 - Wprowadź poprawki z raportu, które NIE wymagają nowych informacji od kandydata (needsUserInput=false).
 - Brakujące słowa kluczowe dodaj tylko wtedy, gdy profil lub extraFacts (has=true) potwierdza, że kandydat to zna. W przeciwnym razie pomiń i wymień je w "notes".
-- Pozycje obecnego CV ze statusem "fact" zostały już zaakceptowane przez kandydata — zachowaj ich sens. Pozycje "suggested" możesz poprawić.
-- CV MUSI nadal zmieścić się na jednej stronie (łącznie maks. ~480 słów). Nie wydłużaj go: jeśli coś dopisujesz, skróć albo usuń coś mniej trafnego. Jeśli raport wskazuje 2 strony — skróć.
+- Pozycje obecnego CV ze statusem "fact" zostały już zaakceptowane przez kandydata - zachowaj ich sens. Pozycje "suggested" możesz poprawić.
+- CV MUSI nadal zmieścić się na jednej stronie (łącznie maks. ~480 słów). Nie wydłużaj go: jeśli coś dopisujesz, skróć albo usuń coś mniej trafnego. Jeśli raport wskazuje 2 strony - skróć.
 - Zachowaj język i strukturę. Zwróć CAŁE CV.`;
 
 export async function improveCv(

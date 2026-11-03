@@ -71,7 +71,7 @@ export function NewApplicationPage() {
           <ol className="muted" style={{ margin: '10px 0 0', paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
             <li>AI wyciągnie z ogłoszenia wymagania i słowa kluczowe, których szuka system ATS.</li>
             <li>Porówna je z Twoim profilem i zapyta o to, czego w nim brakuje.</li>
-            <li>Napisze CV pod to ogłoszenie — odważniejsze sformułowania zaznaczy na żółto do Twojej decyzji.</li>
+            <li>Napisze CV pod to ogłoszenie - odważniejsze sformułowania zaznaczy na żółto do Twojej decyzji.</li>
             <li>Oceni CV tak, jak ATS i AI-rekruter, i zaproponuje poprawki.</li>
           </ol>
         </div>

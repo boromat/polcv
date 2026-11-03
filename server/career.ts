@@ -13,7 +13,7 @@ export async function chat(profileId: string, message: string): Promise<Career> 
   const career = await store.getCareer(profileId);
   const text = message.trim();
   if (text) {
-    // Zapisujemy od razu — jeśli AI zawiedzie, wiadomość kandydata nie przepadnie.
+    // Zapisujemy od razu - jeśli AI zawiedzie, wiadomość kandydata nie przepadnie.
     career.chat.push({ role: 'user', content: text, at: nowIso() });
     await store.saveCareer(profileId, career);
   } else if (career.chat.length && career.chat.at(-1)!.role === 'assistant') {
@@ -29,7 +29,7 @@ export async function chat(profileId: string, message: string): Promise<Career> 
   career.summary = turn.summary || career.summary;
   career.done = turn.done;
 
-  // Konkretne informacje o doświadczeniu trafiają do profilu — wykorzystają je kolejne CV.
+  // Konkretne informacje o doświadczeniu trafiają do profilu - wykorzystają je kolejne CV.
   const known = new Set(profile.extraFacts.map((f) => normalize(f.topic)));
   const fresh = turn.newFacts.filter((f) => f.topic.trim() && f.answer.trim() && !known.has(normalize(f.topic)));
   if (fresh.length) {
@@ -74,16 +74,16 @@ export async function findOffers(profileId: string, roleId: string): Promise<Car
   }
   const [profile, career] = await Promise.all([store.getProfile(profileId), store.getCareer(profileId)]);
   const role = career.proposals?.roles.find((r) => r.id === roleId);
-  if (!role) throw new HttpError(404, 'Nie ma takiej propozycji — wygeneruj propozycje ponownie.');
+  if (!role) throw new HttpError(404, 'Nie ma takiej propozycji - wygeneruj propozycje ponownie.');
 
   const { kept, excluded, stats, errors, scanned } = await searchRole(role, career.prefs);
-  // Najpierw oferty z frazą w tytule, potem najnowsze — do oceny AI trafia ograniczona liczba.
+  // Najpierw oferty z frazą w tytule, potem najnowsze - do oceny AI trafia ograniczona liczba.
   const words = [...role.keywords, role.title].flatMap((k) => normalize(k).split(' ')).filter((w) => w.length > 3);
   const relevance = (t: string) => words.filter((w) => normalize(t).includes(w.slice(0, 5))).length;
   const pick = (list: typeof kept, n: number) =>
     list.sort((a, b) => relevance(b.title) - relevance(a.title) || b.publishedAt.localeCompare(a.publishedAt)).slice(0, n);
   const items = pick(kept, MAX_RANKED);
-  // Odrzucone przez preferencje też oceniamy — kandydat może zdecydować, że np. B2B jednak wchodzi w grę.
+  // Odrzucone przez preferencje też oceniamy - kandydat może zdecydować, że np. B2B jednak wchodzi w grę.
   const extra = pick(excluded, MAX_EXCLUDED);
   const toRank = [...items, ...extra];
 
@@ -100,7 +100,7 @@ export async function findOffers(profileId: string, roleId: string): Promise<Car
       }
     } catch (e: any) {
       if (e instanceof HttpError && [400, 401, 402, 503].includes(e.status)) throw e;
-      errors.push('Nie udało się ocenić dopasowania ofert przez AI — pokazuję je bez oceny.');
+      errors.push('Nie udało się ocenić dopasowania ofert przez AI - pokazuję je bez oceny.');
     }
     const byMatch = (a: (typeof kept)[number], b: (typeof kept)[number]) => (b.match ?? -1) - (a.match ?? -1);
     items.sort(byMatch);

@@ -19,6 +19,7 @@ export async function extractProfile(cvText: string, ctx: { profileId: string })
   return callJson({
     schema: ProfileExtractSchema,
     schemaName: 'profile',
+    verbatim: true,
     tier: 'fast',
     temperature: 0,
     maxTokens: 7000,
@@ -41,6 +42,7 @@ export async function mergeProfile(existing: Profile, cvText: string, ctx: { pro
   return callJson({
     schema: ProfileExtractSchema,
     schemaName: 'profile',
+    verbatim: true,
     tier: 'fast',
     temperature: 0,
     maxTokens: 7000,

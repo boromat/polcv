@@ -23,7 +23,7 @@ function Suggestion({ t, focus, onDecide }: { t: CvText; focus: boolean; onDecid
       </div>
       <div className="row">
         <button className="btn sm primary" onClick={() => onDecide('accepted')}>
-          To prawda — zostaw
+          To prawda - zostaw
         </button>
         <button className="btn sm" onClick={() => onDecide('rejected')}>
           Użyj bezpiecznej wersji
@@ -111,7 +111,7 @@ export function CvEditor({
           <div>
             <h3>Do Twojej decyzji ({pending.length})</h3>
             <p className="faint">
-              Te sformułowania są odważniejsze niż fakty w profilu (na podglądzie na żółto). Zostaw je tylko, jeśli są prawdziwe — na rozmowie mogą o nie zapytać.
+              Te sformułowania są odważniejsze niż fakty w profilu (na podglądzie na żółto). Zostaw je tylko, jeśli są prawdziwe - na rozmowie mogą o nie zapytać.
             </p>
           </div>
           {pending.map((t) => (
@@ -144,7 +144,7 @@ export function CvEditor({
           <input type="checkbox" checked={cv.photo} disabled={!hasPhoto} onChange={(e) => onPatch({ photo: e.target.checked })} /> Zdjęcie w CV
         </label>
         <p className="faint" style={{ marginTop: -6 }}>
-          {hasPhoto ? cv.photoReason : 'Profil nie ma zdjęcia — dodasz je w zakładce Mój profil.'}
+          {hasPhoto ? cv.photoReason : 'Profil nie ma zdjęcia - dodasz je w zakładce Mój profil.'}
         </p>
         <label className="check">
           <input type="checkbox" checked={cv.rodo.include} onChange={(e) => onPatch({ rodo: { ...cv.rodo, include: e.target.checked } })} /> Klauzula RODO

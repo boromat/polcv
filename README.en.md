@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**A CV tailored to one job posting — built for the Polish job market.** A local web app for
+**A CV tailored to one job posting - built for the Polish job market.** A local web app for
 students and juniors that writes the CV and scores it the way an ATS and an AI recruiter would.
 Everything runs on your computer; only the text the AI needs goes out, through
 [OpenRouter](https://openrouter.ai).
@@ -15,15 +15,15 @@ Everything runs on your computer; only the text the AI needs goes out, through
 
 What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish application:
 
-- **Polish job boards** — reads postings from pracuj.pl, justjoin.it and nofluffjobs.
+- **Polish job boards** - reads postings from pracuj.pl, justjoin.it and nofluffjobs.
 - **The GDPR (RODO) consent clause** Polish employers expect, added automatically or copied word
   for word from the posting; the **photo** follows Polish custom and the posting's wishes.
-- **Keywords matched across Polish inflection** — "marketingu", "marketingiem" and "marketing" are
+- **Keywords matched across Polish inflection** - "marketingu", "marketingiem" and "marketing" are
   one word, as they are to an ATS.
 - **A Polish or English CV**, following the language of the posting. The interface is in Polish.
 - **A career advisor that knows the local terms:** employment contract (UoP), mandate contract,
   B2B, gross monthly salary, a radius around your city or remote from anywhere in Poland.
-- **Polish personal data kept private** — optionally with [polanon](https://github.com/boromat/polanon),
+- **Polish personal data kept private** - optionally with [polanon](https://github.com/boromat/polanon),
   which masks Polish names in every grammatical case, PESEL, NIP and more before anything reaches
   the model.
 
@@ -38,7 +38,7 @@ What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish applicat
    bolder wording is marked yellow and needs your approval before the PDF can be exported.
 4. **Scores it 0–100:** keywords (40 pts, computed locally with Polish inflection and synonyms),
    ATS readability (20 pts, checked on text extracted back from the generated PDF) and an AI
-   recruiter review (40 pts) with concrete fixes — plus an *Improve automatically* button.
+   recruiter review (40 pts) with concrete fixes - plus an *Improve automatically* button.
 5. **Exports a one-page PDF** with selectable text from three ATS-safe templates, keeps a history
    of applications with statuses, and on request prepares you for the interview or drafts a cover
    letter.
@@ -74,7 +74,7 @@ $0.05–0.15. The Settings page lists the models and shows what you have spent.
   e-mail, phone, address, company names and profile links as tokens such as `<OSOBA_1>` before
   any text reaches the model, and put the originals back into its answer. The Settings page can
   install it for you. PolCV works the same without it; when masking is on but polanon is not
-  working, nothing is sent at all. Masking is pseudonymisation, not anonymisation — see polanon's
+  working, nothing is sent at all. Masking is pseudonymisation, not anonymisation - see polanon's
   threat model.
 
 ## Job portals
@@ -82,7 +82,7 @@ $0.05–0.15. The Settings page lists the models and shows what you have spent.
 The career advisor gives every proposed role search links for pracuj.pl, justjoin.it and
 nofluffjobs: you open them in your own browser, and the app fetches nothing.
 
-An **automated search** that fetches, filters and AI-ranks offers is available for nofluffjobs —
+An **automated search** that fetches, filters and AI-ranks offers is available for nofluffjobs -
 the one portal whose `robots.txt` allows it. It is **off by default**; switching it on in Settings
 means you accept responsibility for using it in line with the portal's terms, for personal use and
 at a modest pace. The app identifies itself as `PolCV/1.0` and makes only a handful of requests
@@ -96,7 +96,7 @@ per role. City coordinates for the radius filter come from
 - You are responsible for what you send to employers: the app marks AI suggestions, but it is your
   CV. The score is a simulation of typical ATS rules and an AI opinion, not a promise.
 - Only import other people's CVs with their consent.
-- Provided "as is", without warranty — see [LICENSE](LICENSE).
+- Provided "as is", without warranty - see [LICENSE](LICENSE).
 
 ## Development
 
@@ -108,11 +108,11 @@ npm test           # vitest: keywords, GDPR logic, PDF round trip, AI client, se
 npm run typecheck
 ```
 
-- `server/` — Express API: posting fetchers and job search (`jobs/`), prompts (`llm/prompts/`),
+- `server/` - Express API: posting fetchers and job search (`jobs/`), prompts (`llm/prompts/`),
   templates and PDF (`cv/`), ATS scoring (`ats/`), polanon bridge (`privacy/`), JSON storage
   (`storage/`).
-- `client/` — React interface.
-- `shared/schemas.ts` — zod schemas shared by both sides; the JSON schemas sent to the model are
+- `client/` - React interface.
+- `shared/schemas.ts` - zod schemas shared by both sides; the JSON schemas sent to the model are
   generated from them.
 
 Tests that need polanon are skipped when it is not installed.

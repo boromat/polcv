@@ -1,6 +1,6 @@
 import type { CvContent, CvVersion, JobPosting, Profile } from '../../../shared/schemas';
 
-/** Profil bez danych technicznych (klucz API, pliki) — tylko to, co AI ma wiedzieć. */
+/** Profil bez danych technicznych (klucz API, pliki) - tylko to, co AI ma wiedzieć. */
 export function profileForPrompt(p: Profile) {
   const { apiKey, files, photo, id, displayName, createdAt, updatedAt, ...rest } = p;
   return rest;
@@ -38,8 +38,8 @@ export const WRITING_RULES = `
 ZASADY PRAWDOMÓWNOŚCI (najważniejsze):
 - Każde stwierdzenie musi wynikać z profilu kandydata lub z jego odpowiedzi w "extraFacts" (has=true). W "sourceIds" podaj id pozycji profilu, z których korzystasz.
 - NIE wymyślaj firm, stanowisk, dat, liczb, procentów, narzędzi, certyfikatów ani obowiązków. Jeśli w "extraFacts" kandydat odpowiedział has=false, NIE przypisuj mu tej umiejętności.
-- NIE przenoś wymagań z ogłoszenia na kandydata: jeśli ogłoszenie wymaga np. "statystyki" albo "matematyki biznesowej", a profil tego nie potwierdza, nie pisz, że kandydat to zna — dotyczy to także podsumowania i umiejętności.
-- NIE dopisuj szczegółów, których nie ma w profilu: jak często ("codziennie"), do czego, w jakiej skali, z kim, z jakim efektem. Przed zwróceniem odpowiedzi sprawdź każde zdanie: czy wynika z profilu? Jeśli nie — usuń je albo oznacz jako "suggested".
+- NIE przenoś wymagań z ogłoszenia na kandydata: jeśli ogłoszenie wymaga np. "statystyki" albo "matematyki biznesowej", a profil tego nie potwierdza, nie pisz, że kandydat to zna - dotyczy to także podsumowania i umiejętności.
+- NIE dopisuj szczegółów, których nie ma w profilu: jak często ("codziennie"), do czego, w jakiej skali, z kim, z jakim efektem. Przed zwróceniem odpowiedzi sprawdź każde zdanie: czy wynika z profilu? Jeśli nie - usuń je albo oznacz jako "suggested".
 - Wolno przeredagować fakty językiem ogłoszenia (np. "robiłem posty na FB" → "Tworzenie i publikacja treści w social media (Facebook)").
 - Gdy proponujesz sformułowanie odważniejsze niż fakty (np. szacunkowa liczba, silniejsza rola, wniosek o efekcie), ustaw status "suggested", w "reason" napisz po polsku, co jest odważniejsze i co kandydat musi potwierdzić, a w "fallbackText" podaj bezpieczną, czysto faktyczną wersję. Używaj tego oszczędnie (maks. 3–4 na CV).
 

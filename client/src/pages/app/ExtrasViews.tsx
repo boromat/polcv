@@ -68,7 +68,7 @@ export function InterviewView({ pid, app, run }: { pid: string; app: Application
   }, [app.id, app.hasInterviewPrep]);
 
   const make = () =>
-    run('Przygotowuję pytania i odpowiedzi na rozmowę…', async () => setPrep(await api.makeInterview(pid, app.id)), 'Analizuję ogłoszenie, Twoje CV i profil — to potrwa około minuty.');
+    run('Przygotowuję pytania i odpowiedzi na rozmowę…', async () => setPrep(await api.makeInterview(pid, app.id)), 'Analizuję ogłoszenie, Twoje CV i profil - to potrwa około minuty.');
 
   if (!prep) {
     return (

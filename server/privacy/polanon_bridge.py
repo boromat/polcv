@@ -23,7 +23,7 @@ def profile_guard(terms: list[dict]):
     """Strażnik z danymi kandydata z profilu: maskuje je zawsze, także tam, gdzie reguły ich nie widzą.
 
     Reguły polanonu nie rozpoznają np. nazwiska w linku (linkedin.com/in/jan-kowalski) ani imienia
-    spoza listy polskich imion — dane z profilu są znane, więc maskujemy je dosłownie.
+    spoza listy polskich imion - dane z profilu są znane, więc maskujemy je dosłownie.
     """
     from polanon import Guard, Span
 
@@ -74,7 +74,7 @@ def main() -> int:
         return fail(f"brak spaCy albo modelu pl_core_news_md ({exc})")
     options = {}
     if ner:
-        # Model językowy oznacza "Google Ads" czy "Python" jako nazwy własne — te zostają czytelne.
+        # Model językowy oznacza "Google Ads" czy "Python" jako nazwy własne - te zostają czytelne.
         from polanon import WELL_KNOWN_NAMES, Allowlist
 
         options["allowlist"] = Allowlist(WELL_KNOWN_NAMES)

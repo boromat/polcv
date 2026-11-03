@@ -44,14 +44,14 @@ const server = app.listen(PORT, HOST, () => {
 server.on('error', (e: NodeJS.ErrnoException) => {
   if (e.code === 'EADDRINUSE') {
     console.error(
-      `\nPort ${PORT} jest zajęty — PolCV prawdopodobnie już działa w innym oknie.\n` +
+      `\nPort ${PORT} jest zajęty - PolCV prawdopodobnie już działa w innym oknie.\n` +
         `Zamknij tamto okno (albo otwórz http://localhost:${PORT}) i uruchom start.bat ponownie.\n`,
     );
     process.exit(1);
   }
   throw e;
 });
-// Generowanie CV potrafi trwać ponad minutę — nie ucinamy długich zapytań.
+// Generowanie CV potrafi trwać ponad minutę - nie ucinamy długich zapytań.
 server.requestTimeout = 0;
 server.headersTimeout = 0;
 

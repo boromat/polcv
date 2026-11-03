@@ -4,7 +4,7 @@ import path from 'node:path';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 
-// Osobny, tymczasowy folder danych — store czyta CV_DATA_DIR przy imporcie.
+// Osobny, tymczasowy folder danych - store czyta CV_DATA_DIR przy imporcie.
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'polcv-test-'));
 process.env.CV_DATA_DIR = dir;
 
@@ -58,12 +58,12 @@ describe('klient OpenRouter', () => {
     expect(sent[1].temperature).not.toBe(sent[0].temperature);
   });
 
-  it('po 3 nieudanych próbach — zrozumiały błąd', async () => {
+  it('po 3 nieudanych próbach - zrozumiały błąd', async () => {
     replies = [ok('x', 0, 'length'), ok('x', 0, 'length'), ok('x', 0, 'length')];
     await expect(call()).rejects.toThrow(/zapętlił się/);
   });
 
-  it('gdy żaden dostawca nie wymusza schematu — najpierw bez require_parameters', async () => {
+  it('gdy żaden dostawca nie wymusza schematu - najpierw bez require_parameters', async () => {
     replies = [{ status: 404, body: { error: { code: 404, message: 'No endpoints found that can handle the requested parameters.' } } }, ok('{"name":"D","score":4}')];
     expect(await call()).toEqual({ name: 'D', score: 4 });
     expect(sent[1].provider).toBeUndefined();
@@ -96,5 +96,17 @@ describe('klient OpenRouter', () => {
     const { readUsage } = await import('../server/storage/store');
     const usage = await readUsage();
     expect(usage.at(-1)).toMatchObject({ task: 'test', model: 'test/model', cost: 0.0123 });
+  });
+
+  it('długi myślnik od modelu zamienia na zwykły, ale tekst przepisywany dosłownie zostawia', async () => {
+    replies = [ok('{"name":"Raporty w Power BI — co tydzień","score":1}')];
+    expect(await call()).toEqual({ name: 'Raporty w Power BI - co tydzień', score: 1 });
+    expect(sent[0].messages[0].content).toContain('nie używaj długiego myślnika');
+
+    const { callJson } = await import('../server/llm/openrouter');
+    replies = [ok('{"name":"Klauzula — dosłownie z ogłoszenia","score":1}')];
+    const verbatim = await callJson({ schema: Schema, schemaName: 'test', system: 's', user: 'u', tier: 'fast', verbatim: true, ctx: { profileId: '', task: 'test' } });
+    expect(verbatim.name).toBe('Klauzula — dosłownie z ogłoszenia');
+    expect(sent[1].messages[0].content).not.toContain('długiego myślnika');
   });
 });

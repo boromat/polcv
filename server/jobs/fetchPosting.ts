@@ -64,7 +64,7 @@ function findJobPostings(node: unknown, out: Record<string, unknown>[] = []): Re
   return out;
 }
 
-/** Dane JobPosting ze schema.org — pracuj.pl, justjoin.it i nofluffjobs je publikują. */
+/** Dane JobPosting ze schema.org - pracuj.pl, justjoin.it i nofluffjobs je publikują. */
 export function jsonLdToText(html: string): string {
   const $ = cheerio.load(html);
   const postings: Record<string, unknown>[] = [];
@@ -150,7 +150,7 @@ export async function fetchPosting(rawUrl: string): Promise<FetchedPosting> {
     /* spróbujemy przeglądarką */
   }
 
-  // 3. Strony renderowane JavaScriptem — prawdziwa przeglądarka (bez obchodzenia zabezpieczeń).
+  // 3. Strony renderowane JavaScriptem - prawdziwa przeglądarka (bez obchodzenia zabezpieczeń).
   try {
     const html = await withPage(async (page) => {
       await page.setExtraHTTPHeaders({ 'Accept-Language': 'pl-PL,pl;q=0.9' });

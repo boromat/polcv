@@ -4,11 +4,12 @@ import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 
-// Osobny, tymczasowy folder danych — store czyta CV_DATA_DIR przy imporcie.
+// Osobny, tymczasowy folder danych - store czyta CV_DATA_DIR przy imporcie.
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'polcv-polanon-'));
 process.env.CV_DATA_DIR = dir;
 
-const { collectStrings, polanonStatus, replaceStrings } = await import('../server/privacy/polanon');
+const { polanonStatus } = await import('../server/privacy/polanon');
+const { collectStrings, replaceStrings } = await import('../server/llm/strings');
 const store = await import('../server/storage/store');
 
 // polanon jest opcjonalny: testy z prawdziwym pakietem idą tylko tam, gdzie jest zainstalowany.
@@ -48,7 +49,7 @@ describe.skipIf(!withPolanon)('maskowanie przez polanon', () => {
 
   beforeAll(async () => {
     await store.saveSettings({ apiKey: 'sk-test-key', maskPii: true });
-    // "Model" odsyła tokeny, które dostał — tak jak prawdziwy, który pisze CV z danych kandydata.
+    // "Model" odsyła tokeny, które dostał - tak jak prawdziwy, który pisze CV z danych kandydata.
     vi.stubGlobal('fetch', async (_url: string, init: any) => {
       const body = JSON.parse(init.body);
       sent.push(body);
@@ -79,7 +80,7 @@ describe.skipIf(!withPolanon)('maskowanie przez polanon', () => {
 
   it('dane z profilu są maskowane zawsze: link z nazwiskiem i imię spoza polskiej listy', async () => {
     const { maskForAi } = await import('../server/privacy/polanon');
-    const text = 'Olena Shevchenko, https://www.linkedin.com/in/olena-shevchenko-example/ — junior QA, linkedin.com/in/olena-shevchenko-example';
+    const text = 'Olena Shevchenko, https://www.linkedin.com/in/olena-shevchenko-example/ - junior QA, linkedin.com/in/olena-shevchenko-example';
     const masked = await maskForAi(text, { ...store.DEFAULT_SETTINGS, maskPii: true }, [
       { type: 'PERSON', text: 'Olena Shevchenko' },
       { type: 'LINK', text: 'https://linkedin.com/in/olena-shevchenko-example' },

@@ -18,12 +18,12 @@ export interface RodoDecision {
 /** Klauzula RODO: dosłowna z ogłoszenia > standardowa (PL) > brak (oferta zagraniczna po angielsku). */
 export function decideRodo(posting: Pick<JobPosting, 'rodoClause' | 'mentionsFutureRecruitment' | 'companyIsInternational'>, lang: 'pl' | 'en'): RodoDecision {
   const own = posting.rodoClause.trim();
-  if (own) return { include: true, text: own, reason: 'Ogłoszenie podaje własną treść klauzuli — wklejono ją dosłownie.' };
+  if (own) return { include: true, text: own, reason: 'Ogłoszenie podaje własną treść klauzuli - wklejono ją dosłownie.' };
   if (lang === 'en' && posting.companyIsInternational) {
-    return { include: false, text: '', reason: 'Firma zagraniczna i CV po angielsku — klauzula RODO nie jest zwyczajowo wymagana.' };
+    return { include: false, text: '', reason: 'Firma zagraniczna i CV po angielsku - klauzula RODO nie jest zwyczajowo wymagana.' };
   }
   if (lang === 'en') {
-    return { include: true, text: RODO_STANDARD_EN, reason: 'Polska firma, CV po angielsku — dodano klauzulę w wersji angielskiej.' };
+    return { include: true, text: RODO_STANDARD_EN, reason: 'Polska firma, CV po angielsku - dodano klauzulę w wersji angielskiej.' };
   }
   const text = posting.mentionsFutureRecruitment ? `${RODO_STANDARD} ${RODO_FUTURE}` : RODO_STANDARD;
   return {
@@ -31,7 +31,7 @@ export function decideRodo(posting: Pick<JobPosting, 'rodoClause' | 'mentionsFut
     text,
     reason: posting.mentionsFutureRecruitment
       ? 'Standardowa klauzula + zgoda na przyszłe rekrutacje (ogłoszenie o nią prosi).'
-      : 'Polska oferta bez własnej klauzuli — dodano standardową klauzulę RODO.',
+      : 'Polska oferta bez własnej klauzuli - dodano standardową klauzulę RODO.',
   };
 }
 
@@ -45,12 +45,12 @@ export function decidePhoto(
   if (posting.photoPreference === 'unwanted') return { include: false, reason: 'Ogłoszenie prosi o CV bez zdjęcia.' };
   if (posting.photoPreference === 'wanted') return { include: true, reason: 'Ogłoszenie prosi o zdjęcie.' };
   if (lang === 'en' || posting.companyIsInternational) {
-    return { include: false, reason: 'Oferta zagraniczna/anglojęzyczna — tam CV zwykle są bez zdjęcia.' };
+    return { include: false, reason: 'Oferta zagraniczna/anglojęzyczna - tam CV zwykle są bez zdjęcia.' };
   }
-  return { include: true, reason: 'Polska oferta — zdjęcie jest tu zwyczajowe.' };
+  return { include: true, reason: 'Polska oferta - zdjęcie jest tu zwyczajowe.' };
 }
 
-/** Język CV: wymóg z ogłoszenia, a jeśli go nie ma — język ogłoszenia. */
+/** Język CV: wymóg z ogłoszenia, a jeśli go nie ma - język ogłoszenia. */
 export function decideLanguage(posting: Pick<JobPosting, 'cvLanguageRequired' | 'language'>): 'pl' | 'en' {
   if (posting.cvLanguageRequired !== 'any') return posting.cvLanguageRequired;
   return posting.language;

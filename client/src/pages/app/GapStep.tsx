@@ -35,12 +35,12 @@ export function GapStep({
         <div className="card">
           <h2>Kilka pytań, zanim napiszę CV</h2>
           <p className="muted small" style={{ marginTop: 4 }}>
-            Ogłoszenie wymaga rzeczy, których nie ma w Twoim profilu. Jeśli coś znasz — napisz krótko, gdzie i w jaki sposób, a trafi to do CV.
+            Ogłoszenie wymaga rzeczy, których nie ma w Twoim profilu. Jeśli coś znasz - napisz krótko, gdzie i w jaki sposób, a trafi to do CV.
             Odpowiedzi zapiszą się w profilu, więc przy kolejnych ogłoszeniach nie będę pytać ponownie. Możesz też pominąć pytanie.
           </p>
         </div>
         {questions.length === 0 && (
-          <div className="callout good">Twój profil pokrywa wymagania z ogłoszenia — nie mam dodatkowych pytań.</div>
+          <div className="callout good">Twój profil pokrywa wymagania z ogłoszenia - nie mam dodatkowych pytań.</div>
         )}
         {questions.map((q, i) => {
           const a = answers[q.id];
@@ -88,13 +88,13 @@ export function GapStep({
               <select value={template} onChange={(e) => setTemplate(e.target.value as TemplateId)}>
                 {TEMPLATES.map((t) => (
                   <option key={t.id} value={t.id}>
-                    {t.name} — {t.desc}
+                    {t.name} - {t.desc}
                   </option>
                 ))}
               </select>
             </Field>
           </div>
-          {missingDetail && <div className="callout warn small">Przy odpowiedziach „Tak” dopisz krótko szczegóły — bez nich AI nie będzie miało czego wpisać do CV.</div>}
+          {missingDetail && <div className="callout warn small">Przy odpowiedziach „Tak” dopisz krótko szczegóły - bez nich AI nie będzie miało czego wpisać do CV.</div>}
           <div className="row" style={{ justifyContent: 'flex-end' }}>
             <button className="btn primary lg" onClick={submit}>
               Napisz CV →

@@ -320,7 +320,7 @@ export const SettingsSchema = z.object({
   apiKey: z.string(),
   mainModel: z.string(),
   fastModel: z.string(),
-  /** Automatyczne wyszukiwanie ofert na portalach — wyłączone, dopóki użytkownik świadomie go nie włączy. */
+  /** Automatyczne wyszukiwanie ofert na portalach - wyłączone, dopóki użytkownik świadomie go nie włączy. */
   jobSearch: z.boolean(),
   /** Maskowanie danych osobowych przez polanon (opcjonalny pakiet Pythona) przed wysłaniem do AI. */
   maskPii: z.boolean(),
@@ -362,7 +362,7 @@ export type ApplicationStatus = (typeof ApplicationStatuses)[number];
 export type Settings = z.infer<typeof SettingsSchema>;
 export type UsageEntry = z.infer<typeof UsageEntrySchema>;
 
-/** Wpis historii z dołączonym kosztem i wynikiem — zwracany przez /api/applications. */
+/** Wpis historii z dołączonym kosztem i wynikiem - zwracany przez /api/applications. */
 export type ApplicationSummary = Application & { costUsd: number; score: number | null };
 
 // ---------- Doradca kariery ----------
@@ -445,7 +445,7 @@ export const CareerSchema = z.object({
     z.object({
       fetchedAt: z.string(),
       items: z.array(JobLeadSchema),
-      /** Oferty odrzucone tylko przez umowę/wynagrodzenie/etat — do pokazania na życzenie. */
+      /** Oferty odrzucone tylko przez umowę/wynagrodzenie/etat - do pokazania na życzenie. */
       excluded: z.array(JobLeadSchema).default([]),
       /** Ile ofert odpadło z jakiego powodu. */
       stats: z.record(z.string(), z.number()).default({}),

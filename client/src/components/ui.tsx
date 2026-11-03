@@ -11,7 +11,7 @@ export function Busy({ message, hint }: { message: string; hint?: string }) {
       <div className="busy-box">
         <div className="spinner" />
         <h3>{message}</h3>
-        <p className="muted small">{hint ?? 'AI pracuje — zwykle trwa to 15–60 sekund.'}</p>
+        <p className="muted small">{hint ?? 'AI pracuje - zwykle trwa to 15–60 sekund.'}</p>
         <p className="faint">{sec} s</p>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import type { CvVersion, JobPosting, Profile } from '../shared/schemas';
 
-// Fikcyjna osoba i ogłoszenie — tylko do testów.
+// Fikcyjna osoba i ogłoszenie - tylko do testów.
 
 export const profile: Profile = {
   id: 'testprofile',

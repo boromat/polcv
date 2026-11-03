@@ -85,7 +85,7 @@ describe('kontrole formatu', () => {
 
   it('nagłówek liczy się tylko jako osobna linia', () => {
     const order: typeof base = { ...base, sectionOrder: ['summary', 'experience', 'education'] };
-    // "Wykształcenie" występuje w treści przed nagłówkiem "Doświadczenie zawodowe" — kolejność ma nadal przejść.
+    // "Wykształcenie" występuje w treści przed nagłówkiem "Doświadczenie zawodowe" - kolejność ma nadal przejść.
     // Zawinięta linia "wykształcenie." (z kropką) przed nagłówkiem też nie może być wzięta za nagłówek.
     const t = text(['Podsumowanie', 'Student ze stażem, a także', 'wykształcenie.', 'Doświadczenie zawodowe', 'Staż', 'Wykształcenie', 'UE Kraków', 'x'.repeat(300)].join('\n'));
     const r = checkFormat(t, 1, order, profile);

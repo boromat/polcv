@@ -3,10 +3,11 @@ import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import type { Profile, Settings } from '../../shared/schemas';
 import { HttpError } from '../storage/store';
+import { collectStrings, replaceStrings } from '../llm/strings';
 
 /**
  * Opcjonalne maskowanie danych osobowych przez polanon (pakiet Pythona, `pip install polanon`).
- * Bez Pythona i bez polanonu program działa normalnie — maskowanie po prostu jest niedostępne.
+ * Bez Pythona i bez polanonu program działa normalnie - maskowanie po prostu jest niedostępne.
  * Gdy jest włączone, a nie działa, nic nie wychodzi do AI (lepiej błąd niż dane wysłane jawnie).
  */
 
@@ -76,7 +77,7 @@ async function findPython(pythonPath: string): Promise<Found> {
       }
       return { ...info, cmd, command: cmd.join(' '), error: info.polanon ? '' : 'Pakiet polanon nie jest zainstalowany.' };
     } catch {
-      /* to nie nasz skrypt odpowiedział — próbujemy dalej */
+      /* to nie nasz skrypt odpowiedział - próbujemy dalej */
     }
   }
   const error = old ? `polanon wymaga Pythona 3.11 lub nowszego (${old}).` : 'Nie znaleziono Pythona 3.11+.';
@@ -198,7 +199,7 @@ function getBridge(settings: Settings): Promise<Bridge> {
 
 export const TOKENS_NOTE = `
 
-Dane osobowe w treści są zastąpione tokenami w nawiasach ostrych, np. <OSOBA_1>, <EMAIL_1>, <TELEFON_1>, <LINK_1>, <FIRMA_1>. Traktuj token jak prawdziwą, podaną wartość (np. imię i nazwisko są w CV). Gdy jej potrzebujesz, przepisz token dokładnie tak, jak jest zapisany — bez odmiany, bez zmian liter i bez spacji w środku. Nie twórz nowych tokenów.`;
+Dane osobowe w treści są zastąpione tokenami w nawiasach ostrych, np. <OSOBA_1>, <EMAIL_1>, <TELEFON_1>, <LINK_1>, <FIRMA_1>. Traktuj token jak prawdziwą, podaną wartość (np. imię i nazwisko są w CV). Gdy jej potrzebujesz, przepisz token dokładnie tak, jak jest zapisany - bez odmiany, bez zmian liter i bez spacji w środku. Nie twórz nowych tokenów.`;
 
 export interface Masked {
   text: string;
@@ -217,7 +218,7 @@ export interface ProfileTerm {
   text: string;
 }
 
-/** Dane kandydata, które polanon ma maskować zawsze — także w linkach i przy nazwiskach spoza listy polskich imion. */
+/** Dane kandydata, które polanon ma maskować zawsze - także w linkach i przy nazwiskach spoza listy polskich imion. */
 export function profileTerms(profile: Profile | null): ProfileTerm[] {
   if (!profile) return [];
   const c = profile.contact;
@@ -257,20 +258,4 @@ export async function maskForAi(text: string, settings: Settings, terms: Profile
       return replaceStrings(value, restored[Symbol.iterator]());
     },
   };
-}
-
-/** Wszystkie teksty w strukturze JSON, w stałej kolejności (tej samej co w replaceStrings). */
-export function collectStrings(value: unknown, out: string[]): void {
-  if (typeof value === 'string') out.push(value);
-  else if (Array.isArray(value)) value.forEach((v) => collectStrings(v, out));
-  else if (value && typeof value === 'object') Object.values(value).forEach((v) => collectStrings(v, out));
-}
-
-export function replaceStrings<T>(value: T, next: Iterator<string>): T {
-  if (typeof value === 'string') return next.next().value as T;
-  if (Array.isArray(value)) return value.map((v) => replaceStrings(v, next)) as T;
-  if (value && typeof value === 'object') {
-    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, replaceStrings(v, next)])) as T;
-  }
-  return value;
 }

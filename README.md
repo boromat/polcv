@@ -4,7 +4,7 @@
 
 [![Licencja: MIT](https://img.shields.io/badge/licencja-MIT-blue.svg)](LICENSE)
 
-**CV pod konkretne ogłoszenie — zrobione dla polskiego rynku pracy.** Otwarty program na Twój komputer dla studentów i juniorów: z linku do ogłoszenia robi CV pisane pod systemy ATS i ocenę AI-rekrutera. Program jest darmowy; płacisz tylko za użycie AI (zwykle 20–60 gr za CV).
+**CV pod konkretne ogłoszenie - zrobione dla polskiego rynku pracy.** Otwarty program na Twój komputer dla studentów i juniorów: z linku do ogłoszenia robi CV pisane pod systemy ATS i ocenę AI-rekrutera. Program jest darmowy; płacisz tylko za użycie AI (zwykle 20–60 gr za CV).
 
 ![PolCV: wklejenie ogłoszenia, pytania o braki w profilu, CV z podglądem na żywo i raport ATS z polską odmianą słów kluczowych](docs/demo.gif)
 
@@ -12,29 +12,29 @@
 
 Czym różni się od zagranicznych narzędzi (Jobscan, Teal, Rezi):
 
-- **polskie portale** — czyta ogłoszenia z pracuj.pl, justjoin.it i nofluffjobs,
+- **polskie portale** - czyta ogłoszenia z pracuj.pl, justjoin.it i nofluffjobs,
 - **klauzula RODO** dodawana automatycznie (albo dosłownie ta z ogłoszenia), **zdjęcie** według polskich zwyczajów i wymagań oferty,
-- **słowa kluczowe z polską odmianą** — „marketingu”, „marketingiem” i „marketing” to dla programu to samo słowo, tak jak dla ATS,
-- **CV po polsku albo po angielsku** — w języku ogłoszenia,
+- **słowa kluczowe z polską odmianą** - „marketingu”, „marketingiem” i „marketing” to dla programu to samo słowo, tak jak dla ATS,
+- **CV po polsku albo po angielsku** - w języku ogłoszenia,
 - **doradca kariery** zna polskie realia: UoP / zlecenie / B2B, wynagrodzenie brutto, praca w promieniu od miasta albo zdalnie z całej Polski,
-- **polskie dane osobowe pod ochroną** — opcjonalnie z [polanon](https://github.com/boromat/polanon), który maskuje imiona w każdym przypadku, PESEL, NIP i inne, zanim cokolwiek trafi do AI.
+- **polskie dane osobowe pod ochroną** - opcjonalnie z [polanon](https://github.com/boromat/polanon), który maskuje imiona w każdym przypadku, PESEL, NIP i inne, zanim cokolwiek trafi do AI.
 
 Jak to działa:
 
 1. wklejasz link do ogłoszenia (pracuj.pl, justjoin.it, nofluffjobs i inne),
 2. AI wyciąga z niego wymagania i słowa kluczowe, których szukają systemy ATS,
 3. dopytuje o rzeczy, których brakuje w Twoim profilu (odpowiedzi zapamiętuje),
-4. pisze CV pod to ogłoszenie — bez zmyślania; odważniejsze sformułowania zaznacza na żółto do Twojej decyzji,
+4. pisze CV pod to ogłoszenie - bez zmyślania; odważniejsze sformułowania zaznacza na żółto do Twojej decyzji,
 5. ocenia CV jak system ATS i AI-rekruter (wynik 0–100) i umie je automatycznie poprawić,
 6. zapisuje PDF i historię aplikacji ze statusami; na życzenie przygotowuje do rozmowy i pisze list motywacyjny.
 
-Wszystkie dane zostają na Twoim komputerze, w folderze `data`. Do AI (przez OpenRouter) wysyłana jest tylko treść profilu i ogłoszenia — a jeśli chcesz, z danymi osobowymi zamienionymi na tokeny (zob. [Ochrona danych osobowych](#ochrona-danych-osobowych-polanon--opcjonalnie)).
+Wszystkie dane zostają na Twoim komputerze, w folderze `data`. Do AI (przez OpenRouter) wysyłana jest tylko treść profilu i ogłoszenia - a jeśli chcesz, z danymi osobowymi zamienionymi na tokeny (zob. [Ochrona danych osobowych](#ochrona-danych-osobowych-polanon--opcjonalnie)).
 
 ## Uruchomienie (Windows)
 
 1. Zainstaluj **Node.js LTS** ze strony <https://nodejs.org> (jeśli jeszcze go nie masz).
 2. Kliknij dwukrotnie **`start.bat`**.
-   - Za pierwszym razem program instaluje swoje części i pobiera przeglądarkę Chromium (ok. 150 MB) — to trwa kilka minut.
+   - Za pierwszym razem program instaluje swoje części i pobiera przeglądarkę Chromium (ok. 150 MB) - to trwa kilka minut.
    - Potem sam otworzy się adres <http://localhost:3000>.
 3. Okno z czarnym tłem musi być otwarte, dopóki korzystasz z programu. Zamknięcie go wyłącza program.
 
@@ -54,26 +54,26 @@ Przy domyślnych modelach (Claude Sonnet do pisania i oceny, Claude Haiku do ana
 ## Jak używać
 
 1. **Profile** → utwórz profil (np. swoje imię).
-2. **Mój profil** → wgraj swoje obecne CV (PDF/DOCX). AI wypełni formularz — sprawdź dane i kliknij **Zapisz profil**. Im więcej szczegółów (projekty, kursy, liczby), tym lepsze CV.
+2. **Mój profil** → wgraj swoje obecne CV (PDF/DOCX). AI wypełni formularz - sprawdź dane i kliknij **Zapisz profil**. Im więcej szczegółów (projekty, kursy, liczby), tym lepsze CV.
 3. **Nowe CV** → wklej link do ogłoszenia. Jeśli strona nie da się pobrać, wklej tekst ogłoszenia.
 4. Odpowiedz na pytania o brakujące wymagania (albo je pomiń) → **Napisz CV**.
 5. W edytorze:
-   - zdecyduj o **żółtych** fragmentach („To prawda — zostaw” albo „Użyj bezpiecznej wersji”),
-   - popraw tekst, jeśli chcesz — podgląd odświeża się na bieżąco (czerwona linia = koniec strony),
+   - zdecyduj o **żółtych** fragmentach („To prawda - zostaw” albo „Użyj bezpiecznej wersji”),
+   - popraw tekst, jeśli chcesz - podgląd odświeża się na bieżąco (czerwona linia = koniec strony),
    - zakładka **Raport** pokazuje wynik i konkretne poprawki; **Popraw automatycznie** tworzy nową wersję i ocenia ją ponownie.
-6. **Pobierz PDF** — plik zapisuje się też w historii. Status zmieniaj w **Historii** (Wysłane → Rozmowa → Oferta…).
+6. **Pobierz PDF** - plik zapisuje się też w historii. Status zmieniaj w **Historii** (Wysłane → Rozmowa → Oferta…).
 7. Gdy dostaniesz zaproszenie: otwórz aplikację → zakładka **Rozmowa** → **Przygotuj mnie do rozmowy**.
 
 ## Szukaj pracy (doradca kariery)
 
 Zakładka **Szukaj pracy**:
 
-1. **Rozmowa** — doradca AI zadaje pytania po kolei: jakiej pracy szukasz, co konkretnie było Twoim zadaniem (dopytuje o szczegóły), gdzie i na jakich warunkach chcesz pracować. Rozmowa jest zapamiętywana — możesz wrócić później. Konkretne informacje o doświadczeniu trafiają do profilu (kolejne CV je wykorzystają).
-2. **Czego szukasz** — panel z preferencjami, który doradca wypełnia w trakcie rozmowy; możesz go zmienić ręcznie:
+1. **Rozmowa** - doradca AI zadaje pytania po kolei: jakiej pracy szukasz, co konkretnie było Twoim zadaniem (dopytuje o szczegóły), gdzie i na jakich warunkach chcesz pracować. Rozmowa jest zapamiętywana - możesz wrócić później. Konkretne informacje o doświadczeniu trafiają do profilu (kolejne CV je wykorzystają).
+2. **Czego szukasz** - panel z preferencjami, który doradca wypełnia w trakcie rozmowy; możesz go zmienić ręcznie:
    - praca **stacjonarna/hybrydowa** w promieniu (10–100 km) od wybranego miasta,
    - praca **zdalna** z całej Polski,
    - minimalne wynagrodzenie, forma umowy, wymiar etatu, poziom (staż/junior/mid).
-3. **Propozycje i oferty** — AI proponuje 5–8 stanowisk z uzasadnieniem i tym, czego brakuje. Przy każdym są linki **Otwórz wyszukiwanie: pracuj.pl · justjoin.it · nofluffjobs** z frazą, miastem, promieniem i poziomem — otwierasz je sam w przeglądarce, a ciekawą ofertę wklejasz w **Nowe CV**.
+3. **Propozycje i oferty** - AI proponuje 5–8 stanowisk z uzasadnieniem i tym, czego brakuje. Przy każdym są linki **Otwórz wyszukiwanie: pracuj.pl · justjoin.it · nofluffjobs** z frazą, miastem, promieniem i poziomem - otwierasz je sam w przeglądarce, a ciekawą ofertę wklejasz w **Nowe CV**.
 
 ### Automatyczne wyszukiwanie ofert (domyślnie wyłączone)
 
@@ -81,46 +81,46 @@ W **Ustawieniach** możesz włączyć wyszukiwanie, w którym program sam przesz
 
 Włączając je, bierzesz na siebie korzystanie zgodne z regulaminem portalu: tylko na własny użytek i z umiarem. Program przedstawia się jako `PolCV/1.0` i wysyła kilka zapytań na stanowisko. Współrzędne miast do filtra promienia pochodzą z OpenStreetMap Nominatim (© autorzy OpenStreetMap) i są zapamiętywane lokalnie. Oferty bez podanego wynagrodzenia nie są odrzucane przez filtr kwoty.
 
-## Ochrona danych osobowych (polanon) — opcjonalnie
+## Ochrona danych osobowych (polanon) - opcjonalnie
 
 [polanon](https://github.com/boromat/polanon) to osobny, darmowy pakiet Pythona. Gdy jest zainstalowany, w **Ustawieniach → Ochrona danych osobowych** możesz włączyć maskowanie: zanim tekst trafi do AI, imię i nazwisko, e-mail, telefon, adres, nazwy firm i linki z profilu zamieniane są na tokeny (np. `<OSOBA_1>`), a w odpowiedzi AI program wstawia prawdziwe wartości z powrotem. Model widzi tylko tokeny.
 
 - Potrzebny jest Python 3.11+ (<https://www.python.org/downloads/>, zaznacz „Add python.exe to PATH”). Sam polanon zainstalujesz przyciskiem w Ustawieniach albo poleceniem `py -m pip install polanon`.
-- Bez Pythona i polanonu PolCV działa normalnie — to tylko dodatkowa ochrona.
+- Bez Pythona i polanonu PolCV działa normalnie - to tylko dodatkowa ochrona.
 - Gdy maskowanie jest włączone, a polanon przestanie działać, program **nic nie wyśle** do AI i pokaże błąd.
 - To pseudonimizacja, nie pełna anonimizacja: nie każdy szczegół da się wykryć (np. nazwa uczelni). Dokładniej działa z modelem spaCy: `py -m pip install "polanon[ner]"` i `py -m spacy download pl_core_news_md`.
 
 ## Udostępnianie koledze
 
-**Na tym samym komputerze:** kolega tworzy własny profil (lista profili w prawym górnym rogu). W jego profilu można wkleić jego własny klucz OpenRouter — wtedy płaci za siebie.
+**Na tym samym komputerze:** kolega tworzy własny profil (lista profili w prawym górnym rogu). W jego profilu można wkleić jego własny klucz OpenRouter - wtedy płaci za siebie.
 
-**Na jego komputerze:** skopiuj cały folder programu **bez folderów `data` i `node_modules`** (np. spakuj do ZIP). Kolega instaluje Node.js i uruchamia `start.bat`. Folder `data` zawiera Twoje CV i dane osobowe — nie wysyłaj go nikomu.
+**Na jego komputerze:** skopiuj cały folder programu **bez folderów `data` i `node_modules`** (np. spakuj do ZIP). Kolega instaluje Node.js i uruchamia `start.bat`. Folder `data` zawiera Twoje CV i dane osobowe - nie wysyłaj go nikomu.
 
 ## Gdzie są moje dane
 
 Folder `data` obok programu:
 
-- `settings.json` — klucz OpenRouter, wybrane modele i przełączniki (wyszukiwanie, maskowanie),
-- `geocache.json` — zapamiętane współrzędne miast (do filtra promienia),
-- `profiles/<id>/profile.json` — profil, `files/` — wgrane CV, zdjęcie,
-- `profiles/<id>/career.json` — rozmowa z doradcą, preferencje, propozycje i znalezione oferty,
-- `profiles/<id>/applications/<id>/` — ogłoszenie, wersje CV, raporty, zapisany PDF,
-- `usage.jsonl` — historia kosztów AI.
+- `settings.json` - klucz OpenRouter, wybrane modele i przełączniki (wyszukiwanie, maskowanie),
+- `geocache.json` - zapamiętane współrzędne miast (do filtra promienia),
+- `profiles/<id>/profile.json` - profil, `files/` - wgrane CV, zdjęcie,
+- `profiles/<id>/career.json` - rozmowa z doradcą, preferencje, propozycje i znalezione oferty,
+- `profiles/<id>/applications/<id>/` - ogłoszenie, wersje CV, raporty, zapisany PDF,
+- `usage.jsonl` - historia kosztów AI.
 
 Kopia zapasowa = skopiowanie folderu `data`.
 
 ## Gdy coś nie działa
 
-- **„Brak klucza OpenRouter”** — wklej klucz w Ustawieniach.
-- **„Brak środków na koncie OpenRouter”** — doładuj konto na openrouter.ai.
-- **Link z ogłoszeniem się nie pobiera** — kliknij „Link nie działa? Wklej treść ogłoszenia”, zaznacz całą stronę ogłoszenia (Ctrl+A), skopiuj i wklej.
-- **„Z tego pliku nie da się odczytać tekstu”** — Twoje CV jest skanem/obrazkiem. Zapisz je ponownie jako PDF z Worda albo Google Docs.
-- **Okno `start.bat` zamyka się od razu** — uruchom je ponownie i przeczytaj komunikat; zwykle brakuje Node.js.
-- **Port 3000 zajęty** — zamknij inne okno PolCV albo ustaw inny port: w `start.bat` przed `call npm start` dopisz `set PORT=3001`.
+- **„Brak klucza OpenRouter”** - wklej klucz w Ustawieniach.
+- **„Brak środków na koncie OpenRouter”** - doładuj konto na openrouter.ai.
+- **Link z ogłoszeniem się nie pobiera** - kliknij „Link nie działa? Wklej treść ogłoszenia”, zaznacz całą stronę ogłoszenia (Ctrl+A), skopiuj i wklej.
+- **„Z tego pliku nie da się odczytać tekstu”** - Twoje CV jest skanem/obrazkiem. Zapisz je ponownie jako PDF z Worda albo Google Docs.
+- **Okno `start.bat` zamyka się od razu** - uruchom je ponownie i przeczytaj komunikat; zwykle brakuje Node.js.
+- **Port 3000 zajęty** - zamknij inne okno PolCV albo ustaw inny port: w `start.bat` przed `call npm start` dopisz `set PORT=3001`.
 
 ## Zastrzeżenia
 
-- PolCV nie jest powiązany z pracuj.pl, justjoin.it, nofluffjobs, OpenRouter ani dostawcami modeli AI — ich nazwy służą tylko do opisu, z czym program współpracuje.
+- PolCV nie jest powiązany z pracuj.pl, justjoin.it, nofluffjobs, OpenRouter ani dostawcami modeli AI - ich nazwy służą tylko do opisu, z czym program współpracuje.
 - Za treść CV wysyłanego pracodawcy odpowiadasz Ty. Program oznacza sugestie AI, ale decyzja należy do Ciebie. Wynik 0–100 to symulacja typowych reguł ATS i opinia AI, nie gwarancja.
 - Cudze CV importuj tylko za zgodą tej osoby.
 - Program jest udostępniany „tak jak jest”, bez gwarancji (licencja MIT).
@@ -135,8 +135,8 @@ npm test           # testy: słowa kluczowe, RODO, PDF w obie strony, klient AI,
 npm run typecheck
 ```
 
-- `server/` — Express: pobieranie ogłoszeń i wyszukiwanie (`jobs/`), prompty AI (`llm/prompts/`), szablony i PDF (`cv/`), ocena ATS (`ats/`), mostek do polanonu (`privacy/`), zapis plików (`storage/`).
-- `client/` — interfejs React.
-- `shared/schemas.ts` — wspólne schematy danych (zod), z których powstają też schematy JSON dla AI.
+- `server/` - Express: pobieranie ogłoszeń i wyszukiwanie (`jobs/`), prompty AI (`llm/prompts/`), szablony i PDF (`cv/`), ocena ATS (`ats/`), mostek do polanonu (`privacy/`), zapis plików (`storage/`).
+- `client/` - interfejs React.
+- `shared/schemas.ts` - wspólne schematy danych (zod), z których powstają też schematy JSON dla AI.
 
 Serwer nasłuchuje tylko na `127.0.0.1`. Żeby udostępnić go w sieci domowej, ustaw `CV_HOST=0.0.0.0` (wtedy każdy w tej sieci widzi Twoje dane).

@@ -92,7 +92,7 @@ export function HistoryPage() {
                     <tr key={a.id} className="clickable" onClick={() => nav(`/app/${a.id}`)}>
                       <td className="nowrap">{fmtDate(a.createdAt)}</td>
                       <td>
-                        <b>{a.posting?.title ?? '—'}</b>
+                        <b>{a.posting?.title ?? '-'}</b>
                         {a.url && (
                           <div>
                             <a href={a.url} target="_blank" rel="noreferrer" className="faint" onClick={(e) => e.stopPropagation()}>
@@ -101,7 +101,7 @@ export function HistoryPage() {
                           </div>
                         )}
                       </td>
-                      <td>{a.posting?.company ?? '—'}</td>
+                      <td>{a.posting?.company ?? '-'}</td>
                       <td>
                         <ScoreBadge score={a.score} />
                       </td>

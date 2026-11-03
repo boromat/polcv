@@ -31,7 +31,7 @@ export async function createApplication(profileId: string, url: string, pastedTe
     rawText = fetched.text;
     fetchMethod = fetched.method;
   }
-  if (rawText.length < 200) throw new HttpError(400, 'Treść ogłoszenia jest za krótka — wklej całe ogłoszenie.');
+  if (rawText.length < 200) throw new HttpError(400, 'Treść ogłoszenia jest za krótka - wklej całe ogłoszenie.');
 
   const t = nowIso();
   const app: Application = {
@@ -182,7 +182,7 @@ export async function evaluate(profileId: string, appId: string, v: number) {
   try {
     review = await evaluateCv(text, app.posting, ctxOf(app, 'ocena AI-rekrutera'));
   } catch (e: any) {
-    // Brak klucza / zły klucz / brak środków / niedziałające maskowanie — przerywamy, żeby nie pokazać zawyżonego, niepełnego wyniku.
+    // Brak klucza / zły klucz / brak środków / niedziałające maskowanie - przerywamy, żeby nie pokazać zawyżonego, niepełnego wyniku.
     if (e instanceof HttpError && [400, 401, 402, 503].includes(e.status)) throw e;
     aiError = e.message || 'Nie udało się uzyskać oceny AI.';
   }
@@ -209,7 +209,7 @@ export async function improve(profileId: string, appId: string): Promise<CvVersi
   return cv;
 }
 
-/** Umiejętności z CV, których nie da się znaleźć w profilu — ostrzeżenie dla kandydata. */
+/** Umiejętności z CV, których nie da się znaleźć w profilu - ostrzeżenie dla kandydata. */
 export function unverifiedSkills(cv: CvVersion, profile: Profile): string[] {
   const facts = profile.extraFacts.filter((f) => f.has).map((f) => `${f.topic} ${f.answer}`);
   const source = [

@@ -10,10 +10,10 @@ Zasady:
 - Dla niepokrytych wymagań zadaj krótkie, konkretne pytanie po polsku, na "Ty". Pytanie ma wydobyć materiał do CV: czy kandydat to zna, gdzie tego używał (praca, studia, projekt, kurs), co konkretnie zrobił i z jakim efektem.
 - Nie pytaj o rzeczy, których nie da się uczciwie wpisać w CV, ani o oczywistości. Przy wymaganym wykształceniu/stażu, którego kandydat nie ma, możesz zapytać, czy jest w trakcie lub ma coś pokrewnego.
 - Maksymalnie 8 pytań: najpierw obowiązkowe, potem mile widziane. "hint" to krótka podpowiedź, co warto napisać (np. "Podaj nazwę kursu albo projektu i swoje zadania w nim").
-- Formułuj pytania i podpowiedzi bez form zależnych od płci — także bez zapisów typu "miałeś(-aś)" czy "robiłeś/aś". Zamiast czasu przeszłego w 2. osobie pytaj w teraźniejszym albo bezosobowo: "Czy masz doświadczenie z…?", "Gdzie i jak tego używasz?", "Jak wyglądał ten projekt i co z niego wynikło?", "Podaj, gdzie to było (staż, projekt, kurs)".
+- Formułuj pytania i podpowiedzi bez form zależnych od płci - także bez zapisów typu "miałeś(-aś)" czy "robiłeś/aś". Zamiast czasu przeszłego w 2. osobie pytaj w teraźniejszym albo bezosobowo: "Czy masz doświadczenie z…?", "Gdzie i jak tego używasz?", "Jak wyglądał ten projekt i co z niego wynikło?", "Podaj, gdzie to było (staż, projekt, kurs)".
 - "id" pytań: q1, q2, …`;
 
-// Słowa z rodzajem w 2. osobie ("robiłeś", "miałaś") i zapisy typu "miałeś(-aś)" — model czasem je wstawia mimo zasad,
+// Słowa z rodzajem w 2. osobie ("robiłeś", "miałaś") i zapisy typu "miałeś(-aś)" - model czasem je wstawia mimo zasad,
 // więc taka odpowiedź nie przechodzi walidacji i wraca do poprawki.
 const GENDERED = /(?<!\p{L})\p{L}+ł(?:eś|aś)(?!\p{L})|\(-?a[śs]?\)|\/-?a[śs]?(?!\p{L})/giu;
 

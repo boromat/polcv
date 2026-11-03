@@ -3,7 +3,7 @@ dist/
 data/
 *.log
 
-# Lokalne dodatki — zostają tylko na tym komputerze (np. wyszukiwanie na pracuj.pl i justjoin.it)
+# Lokalne dodatki - zostają tylko na tym komputerze (np. wyszukiwanie na pracuj.pl i justjoin.it)
 server/jobs/local/
 tests/local/
 .claude/

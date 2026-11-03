@@ -11,7 +11,7 @@ function ModelSelect({ value, models, onChange }: { value: string; models: Model
       {!inList && <option value={value}>{value} (niedostępny na liście)</option>}
       {sorted.map((m) => (
         <option key={m.id} value={m.id}>
-          {m.id} — {m.promptPrice.toFixed(2)} $ / {m.completionPrice.toFixed(2)} $ za 1M tokenów
+          {m.id} - {m.promptPrice.toFixed(2)} $ / {m.completionPrice.toFixed(2)} $ za 1M tokenów
         </option>
       ))}
     </select>
@@ -34,7 +34,7 @@ function JobSearchCard({ settings, onSave }: { settings: SettingsView; onSave: (
         <span className={`badge ${settings.jobSearch ? 'good' : ''}`}>{settings.jobSearch ? 'włączone' : 'wyłączone'}</span>
       </div>
       <p className="muted small">
-        W zakładce <i>Szukaj pracy</i> przy każdym proponowanym stanowisku są linki do wyszukiwarek portali — otwierasz je sam w przeglądarce. Po włączeniu
+        W zakładce <i>Szukaj pracy</i> przy każdym proponowanym stanowisku są linki do wyszukiwarek portali - otwierasz je sam w przeglądarce. Po włączeniu
         tej opcji program dodatkowo sam przeszukuje portale ({settings.searchPortals.join(', ')}), odrzuca oferty niepasujące do Twoich preferencji i ocenia
         resztę przez AI.
       </p>
@@ -104,11 +104,11 @@ function PrivacyCard({ settings, onSave }: { settings: SettingsView; onSave: (p:
       <p className="muted small">
         <a href="https://github.com/boromat/polanon" target="_blank" rel="noreferrer">polanon</a> to osobny, darmowy pakiet Pythona. Zanim tekst trafi do AI, zamienia
         imię i nazwisko, e-mail, telefon, adres czy nazwy firm na tokeny (np. <code>&lt;OSOBA_1&gt;</code>), a w odpowiedzi wstawia prawdziwe wartości z
-        powrotem. Działa na Twoim komputerze — model AI widzi tylko tokeny. Bez polanonu PolCV działa normalnie.
+        powrotem. Działa na Twoim komputerze - model AI widzi tylko tokeny. Bez polanonu PolCV działa normalnie.
       </p>
       {broken && (
         <div className="callout error small">
-          Maskowanie jest włączone, ale polanon nie działa — AI nie dostanie żadnych danych, dopóki tego nie naprawisz albo nie wyłączysz maskowania.
+          Maskowanie jest włączone, ale polanon nie działa - AI nie dostanie żadnych danych, dopóki tego nie naprawisz albo nie wyłączysz maskowania.
         </div>
       )}
       {!status ? (
@@ -153,7 +153,7 @@ function PrivacyCard({ settings, onSave }: { settings: SettingsView; onSave: (p:
             </p>
           )}
           <p className="faint small">
-            To pseudonimizacja, a nie pełna anonimizacja — nie każdy szczegół da się wykryć (np. nazwa uczelni bez modelu spaCy zostaje czytelna).
+            To pseudonimizacja, a nie pełna anonimizacja - nie każdy szczegół da się wykryć (np. nazwa uczelni bez modelu spaCy zostaje czytelna).
           </p>
         </div>
       )}

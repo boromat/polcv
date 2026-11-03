@@ -118,7 +118,7 @@ export function ApplicationPage() {
       const cv = await api.improve(pid, aid);
       await evaluateAndReload(cv.version, step);
       const after = (await api.version(pid, aid, cv.version)).report?.total ?? null;
-      setNotice(before != null && after != null ? `Nowa wersja CV: wynik ${before} → ${after}.` : 'Gotowe — powstała nowa wersja CV.');
+      setNotice(before != null && after != null ? `Nowa wersja CV: wynik ${before} → ${after}.` : 'Gotowe - powstała nowa wersja CV.');
       setTab('report');
     });
   };
@@ -130,7 +130,7 @@ export function ApplicationPage() {
       await api.exportPdf(pid, aid);
       await loadDetail();
       window.location.href = api.downloadUrl(pid, aid);
-      setNotice('PDF zapisany w historii i pobrany. Status zmieniono na „Wysłane” — zmień go, jeśli CV nie zostało jeszcze wysłane.');
+      setNotice('PDF zapisany w historii i pobrany. Status zmieniono na „Wysłane” - zmień go, jeśli CV nie zostało jeszcze wysłane.');
     });
 
   const switchVersion = (v: number) =>
@@ -258,7 +258,7 @@ export function ApplicationPage() {
                 <select value={app.currentVersion} onChange={(e) => switchVersion(Number(e.target.value))} style={{ width: 'auto' }}>
                   {detail.versions.map((v) => (
                     <option key={v.version} value={v.version}>
-                      v{v.version} — {v.origin === 'improved' ? 'poprawiona' : 'wygenerowana'}
+                      v{v.version} - {v.origin === 'improved' ? 'poprawiona' : 'wygenerowana'}
                       {v.score != null ? ` (${v.score}/100)` : ''}
                     </option>
                   ))}

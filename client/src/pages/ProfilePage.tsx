@@ -6,7 +6,7 @@ import { Busy, ErrorBox, Field, LazyText } from '../components/ui';
 
 const rid = () => Math.random().toString(36).slice(2, 12);
 
-/** Lista jako tekst "jedna pozycja w linii" — zatwierdzana po wyjściu z pola. */
+/** Lista jako tekst "jedna pozycja w linii" - zatwierdzana po wyjściu z pola. */
 function LinesField({ value, onChange, rows = 3, placeholder }: { value: string[]; onChange: (v: string[]) => void; rows?: number; placeholder?: string }) {
   return (
     <LazyText
@@ -185,7 +185,7 @@ export function ProfilePage() {
       <div className="page-head">
         <div>
           <h1>Mój profil</h1>
-          <p className="sub">Wszystko, co o Tobie wie program. AI wybiera z tego to, co pasuje do danego ogłoszenia — im więcej szczegółów, tym lepsze CV.</p>
+          <p className="sub">Wszystko, co o Tobie wie program. AI wybiera z tego to, co pasuje do danego ogłoszenia - im więcej szczegółów, tym lepsze CV.</p>
         </div>
         <div className="row">
           {dirty && <span className="badge warn">niezapisane zmiany</span>}
@@ -203,7 +203,7 @@ export function ProfilePage() {
           <h2>{empty ? 'Krok 1: wgraj swoje obecne CV' : 'Wgraj nowsze CV'}</h2>
           <p className="muted small" style={{ marginTop: 4 }}>
             PDF albo DOCX. Plik zostaje zapisany w profilu, a AI przepisze z niego dane do formularza poniżej.
-            {!empty && ' Nowe informacje zostaną dołączone do obecnego profilu — niczego nie usuwamy.'}
+            {!empty && ' Nowe informacje zostaną dołączone do obecnego profilu - niczego nie usuwamy.'}
           </p>
           <div
             className={`dropzone ${over ? 'over' : ''}`}
@@ -273,7 +273,7 @@ export function ProfilePage() {
           <div className="card-head">
             <div>
               <h2>Zdjęcie</h2>
-              <p className="faint">Opcjonalne. Program sam zdecyduje przy każdym ogłoszeniu, czy je dodać (polskie oferty — tak, zagraniczne — nie).</p>
+              <p className="faint">Opcjonalne. Program sam zdecyduje przy każdym ogłoszeniu, czy je dodać (polskie oferty - tak, zagraniczne - nie).</p>
             </div>
           </div>
           <div className="row">
@@ -313,7 +313,7 @@ export function ProfilePage() {
         <div className="card">
           <h2>Kim jesteś</h2>
           <div className="stack" style={{ marginTop: 12 }}>
-            <Field label="Nagłówek" hint="Np. „Student informatyki, 3. rok” — AI i tak dopasuje go do każdego ogłoszenia.">
+            <Field label="Nagłówek" hint="Np. „Student informatyki, 3. rok” - AI i tak dopasuje go do każdego ogłoszenia.">
               <input type="text" value={p.headline} onChange={(e) => set({ headline: e.target.value })} />
             </Field>
             <Field label="Krótko o sobie">
@@ -324,7 +324,7 @@ export function ProfilePage() {
 
         <ListSection
           title="Doświadczenie"
-          hint="Praca, staże, praktyki, wolontariat, zlecenia. Wpisz wszystko — AI wybierze to, co pasuje."
+          hint="Praca, staże, praktyki, wolontariat, zlecenia. Wpisz wszystko - AI wybierze to, co pasuje."
           items={p.experience}
           newIds={newIds}
           addLabel="Pozycja"
