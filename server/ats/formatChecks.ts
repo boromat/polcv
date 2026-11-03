@@ -141,14 +141,7 @@ export function checkFormat(
     2,
   );
 
-  const dateParts = [...cv.experience.map((e) => e.dates), ...cv.projects.map((p) => p.dates), ...cv.education.map((e) => e.dates)]
-    .filter(Boolean)
-    .flatMap((d) => d.split(/\s*[–-]\s*/))
-    .map((d) => d.trim())
-    .filter(Boolean);
-  // Sam rok (gdy miesiąc nieznany) i "obecnie" pasują do każdego formatu; niespójne jest mieszanie MM.RRRR z MM/RRRR.
-  const kinds = new Set(dateParts.map((d) => DATE_PATTERNS.findIndex((p) => p.test(d))).filter((i) => i === 0 || i === 1));
-  const datesOk = !dateParts.some((d) => DATE_PATTERNS.every((p) => !p.test(d))) && kinds.size <= 1;
+  const datesOk = datesConsistent(cv);
   add(
     tr('Spójny format dat'),
     datesOk,
@@ -159,6 +152,18 @@ export function checkFormat(
   const penalty = checks.reduce((s, c) => s + (c.ok ? 0 : c.weight * (c.partial ?? 1)), 0);
   const score = Math.max(0, Math.round(FORMAT_MAX - penalty));
   return { score, max: FORMAT_MAX, pages, checks: checks.map(({ partial, ...c }) => ({ ...c, weight: c.weight * (partial ?? 1) })) };
+}
+
+/** Daty doświadczenia, projektów i edukacji w jednym formacie. */
+export function datesConsistent(cv: CvContent): boolean {
+  const dateParts = [...cv.experience.map((e) => e.dates), ...cv.projects.map((p) => p.dates), ...cv.education.map((e) => e.dates)]
+    .filter(Boolean)
+    .flatMap((d) => d.split(/\s*[–-]\s*/))
+    .map((d) => d.trim())
+    .filter(Boolean);
+  // Sam rok (gdy miesiąc nieznany) i "obecnie" pasują do każdego formatu; niespójne jest mieszanie MM.RRRR z MM/RRRR.
+  const kinds = new Set(dateParts.map((d) => DATE_PATTERNS.findIndex((p) => p.test(d))).filter((i) => i === 0 || i === 1));
+  return !dateParts.some((d) => DATE_PATTERNS.every((p) => !p.test(d))) && kinds.size <= 1;
 }
 
 function hasContent(cv: CvContent, k: SectionKey): boolean {

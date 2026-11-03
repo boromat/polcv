@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { CvContentSchema, type CvContent, type CvText, type Profile } from '../shared/schemas';
+import { CvContentSchema, type CvContent, type CvText, type Keyword, type Profile } from '../shared/schemas';
 import {
   checkedCvSchema,
+  checkedImproveSchema,
   cvDate,
   cvDateRange,
   firstPersonVerb,
   groundCv,
   knownNumbers,
+  lostKeywordIssues,
   numberFinder,
   sourceIssues,
   styleIssues,
@@ -253,5 +255,31 @@ describe('liczby spoza profilu', () => {
     const [b1, b2] = groundCv(withBullets(s, ok), profile, { lang: 'pl' }).experience[0].bullets;
     expect(b1).toMatchObject({ status: 'suggested', reason: 'Silniejsza rola', text: 'Kierowanie pracą 15 wolontariuszy', fallbackText: 'Koordynacja pracy wolontariuszy' });
     expect(b2).toEqual(ok);
+  });
+});
+
+describe('słowa kluczowe przy poprawie', () => {
+  const keywords: Keyword[] = [
+    { term: 'Instagram', synonyms: [], importance: 'must', category: 'narzędzie' },
+    { term: 'social media', synonyms: ['media społecznościowe'], importance: 'must', category: 'umiejętność' },
+    { term: 'Google Ads', synonyms: [], importance: 'nice', category: 'narzędzie' },
+  ];
+  const current = cv(); // Instagram w punkcie, social media w podsumowaniu, Google Ads brak
+
+  it('przeniesione albo innym synonimem: w porządku; usunięte: wraca do modelu', () => {
+    const moved = cv({ summary: text('Student marketingu, media społecznościowe i Instagram.'), experience: [{ ...cv().experience[0], bullets: [] }] });
+    expect(lostKeywordIssues(moved, current, keywords)).toEqual([]);
+    const lost = withBullets(text('Prowadzenie profilu firmy'));
+    const issues = lostKeywordIssues(lost, current, keywords);
+    expect(issues).toHaveLength(1);
+    expect(issues[0].message).toContain('Brakuje słowa kluczowego „Instagram”, które było w obecnym CV (sekcje: experience)');
+  });
+
+  it('schemat poprawy zgłasza zgubione słowo jak inne błędy', () => {
+    const lost = withBullets(text('Prowadzenie profilu firmy'));
+    const r = checkedImproveSchema(profile, 'pl', current, keywords).safeParse(lost);
+    expect(r.success).toBe(false);
+    expect(z.prettifyError(r.error!)).toContain('„Instagram”');
+    expect(checkedImproveSchema(profile, 'pl', current, keywords).safeParse(current).success).toBe(true);
   });
 });

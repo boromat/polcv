@@ -377,6 +377,21 @@ export type UsageEntry = z.infer<typeof UsageEntrySchema>;
 /** Wpis historii z dołączonym kosztem i wynikiem - zwracany przez /api/applications. */
 export type ApplicationSummary = Application & { costUsd: number; score: number | null; scoreIncomplete: boolean };
 
+/** Wynik "Popraw automatycznie" - zwracany przez /improve. */
+export interface ImproveResult {
+  /** 'new' = nowa wersja jest bieżąca; 'old' = wyszła gorzej, bieżąca została poprzednia; 'none' = nie było czego poprawić bez nowych informacji */
+  kept: 'new' | 'old' | 'none';
+  /** numer nowej wersji (zapisanej także przy 'old'); null przy 'none' */
+  version: number | null;
+  /** świeży wynik wersji sprzed poprawy i wynik nowej; null = ocena niepełna albo brak nowej wersji */
+  before: number | null;
+  after: number | null;
+  /** co kandydat może dopisać w profilu, żeby podnieść wynik (w języku interfejsu) */
+  needsInput: string[];
+  /** komunikat przy 'none' */
+  message: string;
+}
+
 // ---------- Doradca kariery ----------
 
 export const ContractTypes = ['umowa o pracę', 'umowa zlecenie', 'B2B', 'staż / praktyki'] as const;

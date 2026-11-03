@@ -7,6 +7,7 @@ import type {
   CoverLetter,
   CvVersion,
   GapAnswer,
+  ImproveResult,
   InterviewPrep,
   Profile,
   ProfileExtract,
@@ -131,7 +132,7 @@ export const api = {
   answers: (pid: string, aid: string, answers: GapAnswer[]) => req<Application>('POST', `${A(pid, aid)}/answers`, { answers }),
   generate: (pid: string, aid: string, opts: { language?: 'pl' | 'en'; template?: TemplateId } = {}) =>
     req<CvVersion>('POST', `${A(pid, aid)}/generate`, opts),
-  improve: (pid: string, aid: string) => req<CvVersion>('POST', `${A(pid, aid)}/improve`),
+  improve: (pid: string, aid: string) => req<ImproveResult>('POST', `${A(pid, aid)}/improve`),
   version: (pid: string, aid: string, v: number) => req<VersionDetail>('GET', `${A(pid, aid)}/versions/${v}`),
   saveVersion: (pid: string, aid: string, v: number, patch: Partial<Pick<CvVersion, 'content' | 'decisions' | 'template' | 'photo' | 'rodo'>>) =>
     req<{ cv: CvVersion; pending: number }>('PUT', `${A(pid, aid)}/versions/${v}`, patch),

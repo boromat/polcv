@@ -182,6 +182,65 @@ export function countPhrase(textTokens: string[], phrase: string, lang: MatchLan
   return Math.min(...parts.map((words) => countWords(textTokens, words, lang)));
 }
 
+// ---------- Te same nazwy po polsku i po angielsku ----------
+
+/** Polskie i angielskie nazwy tych samych funkcji Excela: profil bywa po polsku, a CV po angielsku. */
+const ALIAS_GROUPS = [
+  ['WYSZUKAJ.PIONOWO', 'VLOOKUP'],
+  ['WYSZUKAJ.POZIOMO', 'HLOOKUP'],
+  ['X.WYSZUKAJ', 'XLOOKUP'],
+  ['JEŻELI', 'IF'],
+  ['SUMA.JEŻELI', 'SUMIF'],
+  ['SUMA.WARUNKÓW', 'SUMIFS'],
+  ['LICZ.JEŻELI', 'COUNTIF'],
+  ['LICZ.WARUNKI', 'COUNTIFS'],
+  ['tabele przestawne', 'pivot tables', 'PivotTable'],
+  ['wykresy przestawne', 'pivot charts', 'PivotChart'],
+  ['formatowanie warunkowe', 'conditional formatting'],
+];
+const ALIAS_WORDS = ALIAS_GROUPS.map((g) => g.map((p) => normalize(p).split(' ')));
+
+/** Pozycja słów `part` w `words` (z odmianą); -1, gdy ich nie ma. */
+function wordsAt(words: string[], part: string[]): number {
+  for (let i = 0; i + part.length <= words.length; i++) {
+    if (part.every((w, j) => tokenMatches(words[i + j], w))) return i;
+  }
+  return -1;
+}
+
+/**
+ * Fraza i jej odpowiedniki: "WYSZUKAJ.PIONOWO" = "VLOOKUP", "tabele przestawne" = "pivot tables",
+ * "MS Excel" = "Microsoft Excel" = "Excel". Tylko do sprawdzania profilu: wynik CV liczy dosłowne brzmienie, jak ATS.
+ */
+export function aliasVariants(phrase: string): string[] {
+  const out = new Set([phrase]);
+  const ms = /^(?:ms|microsoft)\s+(.+)$/i.exec(phrase.trim());
+  if (ms) {
+    out.add(`MS ${ms[1]}`);
+    out.add(`Microsoft ${ms[1]}`);
+    if (/\p{L}/u.test(ms[1])) out.add(ms[1]); // "Microsoft 365" to nie samo "365"
+  }
+  // Zamiana wewnątrz frazy tylko dla jednej części (bez list i nawiasów).
+  if (tokenize(phrase).includes(BREAK)) return [...out];
+  const words = normalize(phrase).split(' ').filter(Boolean);
+  ALIAS_WORDS.forEach((group, g) => {
+    group.forEach((member, i) => {
+      const at = wordsAt(words, member);
+      if (at < 0) return;
+      group.forEach((other, j) => {
+        if (j === i) return;
+        // Cała fraza to alias: zostaje oryginalny zapis ("WYSZUKAJ.PIONOWO"), inaczej zamiana w środku frazy.
+        if (member.length === words.length) out.add(ALIAS_GROUPS[g][j]);
+        else out.add([...words.slice(0, at), ...other, ...words.slice(at + member.length)].join(' '));
+      });
+    });
+  });
+  return [...out];
+}
+
+/** Tekst z polskimi znakami: po polsku dopasowujemy z odmianą. */
+export const looksPolish = (s: string) => /[ąćęłńóśźż]/i.test(s);
+
 // ---------- Słowa kluczowe w sekcjach CV ----------
 
 export type KeywordWhere = (typeof KeywordWhereKeys)[number];

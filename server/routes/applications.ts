@@ -115,13 +115,13 @@ applicationsRouter.post(`${base}/:aid/improve`, async (req, res) => {
 applicationsRouter.get(`${base}/:aid/versions/:v`, async (req, res) => {
   const { pid, aid } = req.params;
   const v = num(req.params.v);
-  const [cv, report, profile] = await Promise.all([store.getVersion(pid, aid, v), store.getReport(pid, aid, v), store.getProfile(pid)]);
+  const [cv, report, profile, app] = await Promise.all([store.getVersion(pid, aid, v), store.getReport(pid, aid, v), store.getProfile(pid), store.getApplication(pid, aid)]);
   res.json({
     cv,
     report: honestReport(report),
     reportStale: !!report && report.createdAt < cv.updatedAt,
     pending: svc.pendingSuggestions(cv),
-    unverifiedSkills: svc.unverifiedSkills(cv, profile),
+    unverifiedSkills: svc.unverifiedSkills(cv, profile, app.posting),
   });
 });
 

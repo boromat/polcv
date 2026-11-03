@@ -1,4 +1,5 @@
-import { CvContentSchema, type CvContent, type CvText, type JobPosting, type Profile } from '../../../shared/schemas';
+import { CvContentSchema, type CvContent, type CvText, type JobPosting, type Keyword, type Profile } from '../../../shared/schemas';
+import { cvKeywordSources, findKeyword } from '../../ats/keywords';
 import { tr } from '../../i18n';
 import { profileForPrompt } from './common';
 
@@ -92,6 +93,31 @@ export function sourceIssues(c: CvContent, profile: Profile): CvIssue[] {
 export function checkedCvSchema(profile: Profile, lang: Lang) {
   return CvContentSchema.superRefine((c, ctx) => {
     for (const issue of [...styleIssues(c, lang), ...sourceIssues(c, profile)]) ctx.addIssue({ code: 'custom', ...issue });
+  });
+}
+
+// ---------- Słowa kluczowe przy poprawie ----------
+
+/** Słowa kluczowe ogłoszenia, które obecne CV ma, a nowa wersja zgubiła (można je przenieść, ale nie usunąć). */
+export function lostKeywordIssues(next: CvContent, current: CvContent, keywords: Keyword[]): CvIssue[] {
+  const before = cvKeywordSources(current);
+  const after = cvKeywordSources(next);
+  return keywords.flatMap((kw) => {
+    const was = findKeyword(kw, before, current.language);
+    if (!was || findKeyword(kw, after, current.language)) return [];
+    return [{
+      path: [],
+      message: `Brakuje słowa kluczowego „${was.foundAs}”, które było w obecnym CV (sekcje: ${was.where.join(', ')}). Przywróć je tam, gdzie jest prawdziwe: możesz je przenieść albo przeredagować zdanie, ale nie usuwaj go z CV.`,
+    }];
+  });
+}
+
+/** Schemat poprawionego CV: jak checkedCvSchema, a do tego nie wolno zgubić słów kluczowych obecnej wersji. */
+export function checkedImproveSchema(profile: Profile, lang: Lang, current: CvContent, keywords: Keyword[]) {
+  return CvContentSchema.superRefine((c, ctx) => {
+    for (const issue of [...styleIssues(c, lang), ...sourceIssues(c, profile), ...lostKeywordIssues(c, current, keywords)]) {
+      ctx.addIssue({ code: 'custom', ...issue });
+    }
   });
 }
 

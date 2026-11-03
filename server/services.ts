@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { nanoid } from 'nanoid';
-import type { Application, CvContent, CvVersion, ExtraFact, GapAnswer, Profile, TemplateId } from '../shared/schemas';
+import type { Application, CvContent, CvVersion, ExtraFact, GapAnswer, ImproveResult, JobPosting, Profile, TemplateId } from '../shared/schemas';
 import * as store from './storage/store';
 import { HttpError, newId, nowIso } from './storage/store';
 import { fetchPosting } from './jobs/fetchPosting';
@@ -12,11 +12,13 @@ import { generateCv, improveCv } from './llm/prompts/generateCv';
 import { evaluateCv } from './llm/prompts/evaluateCv';
 import { coverLetter, interviewPrep } from './llm/prompts/extras';
 import { applyDecisions } from './llm/prompts/common';
+import { factTexts } from './llm/prompts/cvChecks';
+import { hasWork, improvePlan, nothingToImprove } from './llm/prompts/improvePlan';
 import { decideLanguage, decidePhoto, decideRodo } from './cv/rodo';
 import { photoDataUri, renderCvHtml, renderLetterHtml, withoutPending, type RenderMode } from './cv/render';
 import { htmlToPdf } from './cv/pdf';
-import { buildReport } from './ats/score';
-import { countPhrase, normalize, tokenize } from './ats/keywords';
+import { buildReport, honestReport, notWorse } from './ats/score';
+import { aliasVariants, countPhrase, looksPolish, normalize, tokenize } from './ats/keywords';
 import { tr, withLang } from './i18n';
 
 const ctxOf = (app: Application, task: string) => ({ profileId: app.profileId, applicationId: app.id, task });
@@ -153,7 +155,9 @@ export async function generate(profileId: string, appId: string, language?: 'pl'
   if (!app.posting) throw new HttpError(409, tr('Brak przeanalizowanego ogłoszenia.'));
   const profile = await store.getProfile(profileId);
   const lang = language ?? decideLanguage(app.posting);
-  const content = withFreshIds(await generateCv(profile, app.posting, lang, ctxOf(app, 'pisanie CV')));
+  // Liczby z potwierdzonych tekstów wcześniejszych wersji tej aplikacji (np. zaakceptowanych sugestii) nie wracają jako sugestie.
+  const confirmed = (await store.listVersions(profileId, appId)).flatMap((v) => factTexts(applyDecisions(v)));
+  const content = withFreshIds(await generateCv(profile, app.posting, lang, ctxOf(app, 'pisanie CV'), confirmed));
   content.language = lang;
 
   const prev = app.currentVersion ? await store.getVersion(profileId, appId, app.currentVersion).catch(() => null) : null;
@@ -251,25 +255,41 @@ export async function evaluate(profileId: string, appId: string, v: number) {
   return report;
 }
 
-export async function improve(profileId: string, appId: string): Promise<CvVersion> {
+/**
+ * Poprawa według planu z raportu. Nowa wersja zostaje bieżącą tylko wtedy, gdy nie wypadła gorzej; gorsza jest zapisana
+ * na liście wersji. Bez niczego do poprawienia AI nie jest wywoływane, a kandydat dostaje listę tego, co może dopisać.
+ */
+export async function improve(profileId: string, appId: string): Promise<ImproveResult> {
   const app = await store.getApplication(profileId, appId);
   if (!app.posting || !app.currentVersion) throw new HttpError(409, tr('Najpierw wygeneruj CV.'));
   const current = await store.getVersion(profileId, appId, app.currentVersion);
   let report = await store.getReport(profileId, appId, current.version);
   if (!report || report.createdAt < current.updatedAt) report = await evaluate(profileId, appId, current.version);
   const profile = await store.getProfile(profileId);
-  const content = withFreshIds(await improveCv(profile, app.posting, applyDecisions(current), report, ctxOf(app, 'poprawa CV')));
+  const base = applyDecisions(current);
+  const plan = improvePlan(report, profile, app.posting, base);
+  const before = honestReport(report)?.total ?? null;
+  if (!hasWork(plan)) return { kept: 'none', version: null, before, after: null, needsInput: plan.needsInput, message: nothingToImprove(plan) };
+
+  const content = withFreshIds(await improveCv(profile, app.posting, base, plan, ctxOf(app, 'poprawa CV')));
   content.language = current.content.language;
   const t = nowIso();
   const cv = await store.addVersion(profileId, appId, (version) => ({ ...current, version, createdAt: t, updatedAt: t, origin: 'improved', content, decisions: {} }));
-  await store.updateApplication(profileId, appId, (a) => {
-    a.currentVersion = cv.version;
-  });
-  return cv;
+  const next = await evaluate(profileId, appId, cv.version);
+  const better = notWorse(next, report);
+  if (better) {
+    await store.updateApplication(profileId, appId, (a) => {
+      a.currentVersion = cv.version;
+    });
+  }
+  return { kept: better ? 'new' : 'old', version: cv.version, before, after: honestReport(next)?.total ?? null, needsInput: plan.needsInput, message: '' };
 }
 
-/** Umiejętności z CV, których nie da się znaleźć w profilu - ostrzeżenie dla kandydata. */
-export function unverifiedSkills(cv: CvVersion, profile: Profile): string[] {
+/**
+ * Umiejętności z CV, których nie da się znaleźć w profilu - ostrzeżenie dla kandydata. Odpowiedniki się liczą:
+ * aliasy ("VLOOKUP" = "WYSZUKAJ.PIONOWO", "Microsoft Excel" = "MS Excel") oraz term i synonimy słowa kluczowego ogłoszenia.
+ */
+export function unverifiedSkills(cv: CvVersion, profile: Profile, posting: JobPosting | null = null): string[] {
   const facts = profile.extraFacts.filter((f) => f.has).map((f) => `${f.topic} ${f.answer}`);
   const source = [
     ...profile.skills.map((s) => s.name),
@@ -284,15 +304,23 @@ export function unverifiedSkills(cv: CvVersion, profile: Profile): string[] {
   const tokens = tokenize(source);
   // CV po angielsku z polskiego profilu: zwykłe słowa ("Teamwork") są tłumaczeniami, więc
   // sprawdzamy tylko nazwy techniczne (wielkie litery w środku, cyfry, znaki typu C++/CI/CD).
-  const profileIsPolish = /[ąćęłńóśźż]/i.test(source);
+  const profileIsPolish = looksPolish(source);
   const technical = (s: string) => /\d|[+#/.]|\S[A-Z]|\s[A-Z]/.test(s);
+  const keywords = posting?.keywords ?? [];
+  // Pozycja = słowo kluczowe ogłoszenia, gdy to ta sama fraza co jego term albo synonim (w obie strony).
+  const equivalents = (base: string): string[] => {
+    const t = tokenize(base);
+    const same = (v: string) => !!v.trim() && countPhrase(t, v) > 0 && countPhrase(tokenize(v), base) > 0;
+    const fromPosting = keywords.filter((k) => [k.term, ...k.synonyms].some(same)).flatMap((k) => [k.term, ...k.synonyms]);
+    return [...new Set([base, ...fromPosting].flatMap(aliasVariants))];
+  };
   return cv.content.skills
     .flatMap((g) => g.items)
     .filter((item) => {
       const base = item.replace(/\s*\(.*?\)\s*/g, ' ').trim(); // "Power BI (raporty)" → "Power BI"
       if (!base) return false;
       if (cv.content.language === 'en' && profileIsPolish && !technical(base)) return false;
-      return countPhrase(tokens, base) === 0;
+      return equivalents(base).every((v) => countPhrase(tokens, v) === 0);
     });
 }
 

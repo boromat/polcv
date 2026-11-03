@@ -134,7 +134,7 @@ export function ReportView({
           </div>
         </div>
         <div className="row" style={{ marginTop: 16, justifyContent: 'flex-end' }}>
-          <span className="faint">{t('AI wprowadzi poprawki, które nie wymagają nowych informacji, i oceni CV jeszcze raz.')}</span>
+          <span className="faint">{t('AI wprowadzi poprawki, które nie wymagają nowych informacji, oceni nową wersję i zostawi lepszą.')}</span>
           <button className="btn primary" onClick={onImprove} disabled={pending > 0} title={pending > 0 ? t('Najpierw zdecyduj o żółtych sugestiach') : ''}>
             {t('Popraw automatycznie')}
           </button>

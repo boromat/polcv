@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import type { CvVersion, GapAnswer, TemplateId } from '../../../shared/schemas';
+import type { CvVersion, GapAnswer, ImproveResult, TemplateId } from '../../../shared/schemas';
 import { api, type AppDetail, type VersionDetail } from '../api';
 import { useApp } from '../ctx';
 import { translate, useT } from '../i18n';
@@ -174,16 +174,35 @@ export function ApplicationPage() {
     });
   };
 
-  const improve = () => {
-    const before = vd?.report?.total ?? null;
-    run(t('Poprawiam CV na podstawie raportu…'), async (step) => {
-      const cv = await api.improve(pid, aid);
-      await evaluateAndReload(cv.version, step);
-      const after = (await api.version(pid, aid, cv.version)).report?.total ?? null;
-      setNotice(before != null && after != null ? t('Nowa wersja CV: wynik {from} → {to}.', { from: before, to: after }) : t('Gotowe - powstała nowa wersja CV.'));
-      setTab('report');
-    });
+  /** Komunikat po poprawie: wyniki ze świeżej oceny serwera, przed i po. */
+  const improveNotice = (r: ImproveResult) => {
+    if (r.kept === 'none') return r.message;
+    const { before: from, after: to } = r;
+    let text: string;
+    if (r.kept === 'new') text = from != null && to != null ? t('Nowa wersja CV: wynik {from} → {to}.', { from, to }) : t('Gotowe - powstała nowa wersja CV.');
+    else if (from != null && to != null) text = t('Nowa wersja wyszła gorzej ({to} < {from}) - zostawiam poprzednią. Możesz ją podejrzeć w wyborze wersji.', { from, to });
+    else if (from != null) text = t('Nowa wersja nie dostała pełnej oceny AI - zostawiam poprzednią ({from}). Możesz ją podejrzeć w wyborze wersji.', { from });
+    else text = t('Nowa wersja nie wypadła lepiej - zostawiam poprzednią. Możesz ją podejrzeć w wyborze wersji.');
+    if (!r.needsInput.length) return text;
+    return [text, t('Żeby podnieść wynik bardziej, możesz dopisać w profilu:'), ...r.needsInput.map((q) => `- ${q}`)].join('\n');
   };
+
+  const improve = () =>
+    run(
+      t('Poprawiam CV na podstawie raportu…'),
+      async () => {
+        // Nowa wersja mogła się zapisać, nawet jeśli jej ocena się nie udała - lista wersji ma ją pokazać.
+        const res = await api.improve(pid, aid).catch(async (e) => {
+          await loadDetail().catch(() => null);
+          throw e;
+        });
+        const d = await loadDetail();
+        await loadVersion(d.application.currentVersion);
+        setNotice(improveNotice(res));
+        setTab('report');
+      },
+      t('AI poprawia CV według raportu, a potem program ocenia nową wersję i zostawia lepszą. To zwykle 1–2 minuty.'),
+    );
 
   const evaluate = () => run(t('Oceniam CV…'), async (step) => evaluateAndReload(app.currentVersion, step));
 
@@ -304,7 +323,7 @@ export function ApplicationPage() {
 
       <div className="stack">
         <ErrorBox error={error} onClose={() => setError(null)} />
-        {notice && <div className="callout good row between"><span>{notice}</span><button className="icon-btn" onClick={() => setNotice(null)}>✕</button></div>}
+        {notice && <div className="callout good row between"><span style={{ whiteSpace: 'pre-line' }}>{notice}</span><button className="icon-btn" onClick={() => setNotice(null)}>✕</button></div>}
 
         {!app.posting && <div className="callout error">{t('Nie udało się przeanalizować ogłoszenia. Usuń tę aplikację i spróbuj ponownie.')}</div>}
 

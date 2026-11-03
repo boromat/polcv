@@ -72,3 +72,16 @@ export function buildReport(args: {
 
 /** Starsze raporty bez oceny AI mają wynik przeskalowany do 100 - pokazujemy je jako niepełne. */
 export const honestReport = (r: AtsReport | null): AtsReport | null => (r && !r.ai && r.total !== null ? { ...r, total: null } : r);
+
+/**
+ * Czy nowa wersja wypadła co najmniej tak dobrze jak poprzednia. Dwa pełne wyniki: porównanie wyników;
+ * pełna ocena wygrywa z niepełną; dwie niepełne: słowa kluczowe i format.
+ */
+export function notWorse(next: AtsReport, prev: AtsReport): boolean {
+  const a = honestReport(next)!;
+  const b = honestReport(prev)!;
+  if (a.total !== null && b.total !== null) return a.total >= b.total;
+  if (b.total !== null) return false;
+  if (a.total !== null) return true;
+  return a.keywords.score + a.format.score >= b.keywords.score + b.format.score;
+}

@@ -108,6 +108,19 @@ export const EN: Record<string, string> = {
   // llm/prompts/cvChecks.ts
   'Liczba spoza profilu ({numbers}) - potwierdź albo odrzuć.': 'A number that is not in your profile ({numbers}). Confirm or reject it.',
 
+  // llm/prompts/improvePlan.ts: co kandydat może dopisać w profilu
+  '„{term}” (wymagane w ogłoszeniu): jeśli to znasz, dopisz w profilu, gdzie i jak tego używasz.':
+    '"{term}" (required in the job posting): if you know it, add to your profile where and how you use it.',
+  '„{term}”: w profilu jest tylko na liście umiejętności. Dopisz, gdzie tego używasz (np. w opisie stażu albo projektu), a CV pokaże to jako dowód.':
+    '"{term}": your profile only has it in the skills list. Add where you use it (e.g. in an internship or project description) and the CV will show it as evidence.',
+  '„{term}”: dopisz w profilu przykład z pracy albo projektu, który to pokazuje.': '"{term}": add an example from work or a project to your profile that shows it.',
+  'Konkretne efekty: dopisz w profilu wyniki swojej pracy (liczby, skala, co powstało), jeśli je znasz.':
+    'Concrete results: add the results of your work to your profile (numbers, scale, what you produced) if you know them.',
+  'Raport nie wskazuje niczego, co AI mogłoby jeszcze poprawić, więc nowa wersja nie powstała.':
+    'The report shows nothing more the AI could improve, so no new version was created.',
+  'Bez nowych informacji AI nie poprawi już tego CV, więc nowa wersja nie powstała. Możesz dopisać w profilu:':
+    'Without new information the AI cannot improve this CV any further, so no new version was created. You can add this to your profile:',
+
   // privacy/polanon.ts (stan i błędy pokazywane w Ustawieniach)
   '{command} to Python {version}': '{command} is Python {version}',
   'Pakiet polanon nie jest zainstalowany.': 'The polanon package is not installed.',

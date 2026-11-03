@@ -14,6 +14,15 @@ export const application: Record<string, string> = {
   'Poprawiam CV na podstawie raportu…': 'Improving the CV based on the report…',
   'Nowa wersja CV: wynik {from} → {to}.': 'New CV version: score {from} → {to}.',
   'Gotowe - powstała nowa wersja CV.': 'Done, a new CV version has been created.',
+  'Nowa wersja wyszła gorzej ({to} < {from}) - zostawiam poprzednią. Możesz ją podejrzeć w wyborze wersji.':
+    'The new version scored lower ({to} < {from}), so the previous one stays current. You can still view it in the version picker.',
+  'Nowa wersja nie dostała pełnej oceny AI - zostawiam poprzednią ({from}). Możesz ją podejrzeć w wyborze wersji.':
+    'The new version did not get a full AI score, so the previous one ({from}) stays current. You can still view it in the version picker.',
+  'Nowa wersja nie wypadła lepiej - zostawiam poprzednią. Możesz ją podejrzeć w wyborze wersji.':
+    'The new version did not score better, so the previous one stays current. You can still view it in the version picker.',
+  'Żeby podnieść wynik bardziej, możesz dopisać w profilu:': 'To raise the score further, you can add this to your profile:',
+  'AI poprawia CV według raportu, a potem program ocenia nową wersję i zostawia lepszą. To zwykle 1–2 minuty.':
+    'The AI improves the CV based on the report, then the app scores the new version and keeps the better one. This usually takes 1-2 minutes.',
   'Oceniam CV…': 'Scoring the CV…',
   'Zapisuję PDF…': 'Saving the PDF…',
   'PDF zapisany w historii i pobrany. Status zmieniono na „Wysłane” - zmień go, jeśli CV nie zostało jeszcze wysłane.':
@@ -166,7 +175,7 @@ export const application: Record<string, string> = {
   'Ocena AI-rekrutera': 'AI recruiter score',
   'Jak oceniłby Cię automatyczny screening AI.': 'How an automated AI screening would rate you.',
   'Ocena AI nie powiodła się:': 'AI scoring failed:',
-  'AI wprowadzi poprawki, które nie wymagają nowych informacji, i oceni CV jeszcze raz.': 'The AI will make the fixes that need no new information and score the CV again.',
+  'AI wprowadzi poprawki, które nie wymagają nowych informacji, oceni nową wersję i zostawi lepszą.': 'The AI will make the fixes that need no new information, score the new version and keep the better one.',
   'Najpierw zdecyduj o 1 żółtej sugestii w edytorze.': 'First decide on the yellow suggestion in the editor.',
   'Najpierw zdecyduj o {n} żółtych sugestiach w edytorze.': 'First decide on the {n} yellow suggestions in the editor.',
   'Słowa kluczowe z ogłoszenia': 'Keywords from the job posting',

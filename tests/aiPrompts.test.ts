@@ -12,6 +12,7 @@ process.env.CV_DATA_DIR = dir;
 const { callJson } = await import('../server/llm/openrouter');
 const { evaluateCv, reviewProblems } = await import('../server/llm/prompts/evaluateCv');
 const { generateCv, improveCv } = await import('../server/llm/prompts/generateCv');
+const { improvePlan } = await import('../server/llm/prompts/improvePlan');
 const { parsePosting, withoutLevel, withoutLevels } = await import('../server/llm/prompts/parsePosting');
 const store = await import('../server/storage/store');
 
@@ -157,17 +158,61 @@ describe('pisanie i poprawa CV', () => {
     expect(lastUserMessage(1)).toContain('Pozycja „Projekt X” ma sourceId "zmyslony"');
   });
 
+  const report = (ai: AtsReport['ai'] = null): AtsReport => ({
+    createdAt: '', version: 1, total: null,
+    keywords: { score: 0, max: 40, matched: [], missing: [], stuffing: [] },
+    format: { score: 20, max: 20, pages: 1, checks: [] },
+    ai, aiError: '',
+  });
+
   it('przy poprawie liczby z zaakceptowanych punktów zostają faktami', async () => {
     const current = content(['Obsługa 40 zgłoszeń dziennie']);
-    const report: AtsReport = {
-      createdAt: '', version: 1, total: null,
-      keywords: { score: 0, max: 40, matched: [], missing: [], stuffing: [] },
-      format: { score: 20, max: 20, pages: 1, checks: [] },
-      ai: null, aiError: '',
-    };
     replies = [{ content: JSON.stringify(content(['Obsługa 40 zgłoszeń dziennie', 'Wsparcie 12 kampanii'])) }];
-    const cv = await improveCv(profile, posting, current, report, ctx);
+    const cv = await improveCv(profile, posting, current, improvePlan(report(), profile, posting, current), ctx);
     expect(cv.experience[0].bullets.map((b) => b.status)).toEqual(['fact', 'suggested']);
+  });
+
+  it('poprawa dostaje plan zamiast raportu, a fakty wolno przeredagować', async () => {
+    const withRaporty = { ...posting, keywords: [{ term: 'raporty z kampanii', synonyms: [], importance: 'must' as const, category: 'umiejętność' as const }] };
+    const current = content(['Wsparcie działu marketingu']);
+    const r = report({ score: 20, max: 40, review: review([...full.slice(0, 2), ['summary_fit', 5], ...full.slice(3)]) });
+    const plan = improvePlan(r, profile, withRaporty, current);
+    replies = [{ content: JSON.stringify(content(['Przygotowywanie raportów z kampanii'])) }];
+    await improveCv(profile, withRaporty, current, plan, ctx);
+    const system = sent[0].messages[0].content as string;
+    const user = sent[0].messages[1].content as string;
+    const planPart = user.slice(user.indexOf('PLAN POPRAWEK'));
+    expect(system).toContain('także ze statusem "fact"');
+    expect(system).toContain('Nie dopisuj nowych faktów');
+    expect(system).toContain('ZAWSZE formą rzeczownikową');
+    expect(system).not.toContain('zachowaj ich sens. Pozycje "suggested"');
+    expect(user).not.toContain('RAPORT:');
+    // Słowo kluczowe z brzmieniem i miejscem z profilu, słabe kryterium z celem.
+    expect(planPart).toContain('"term": "raporty z kampanii"');
+    expect(planPart).toContain('"profileText": "Przygotowywałem raporty z kampanii"');
+    expect(planPart).toContain('doświadczenie „Stażysta ds. marketingu, Firma Testowa Sp. z o.o.” (id exp1)');
+    expect(planPart).toContain('"key": "summary_fit"');
+    expect(planPart).not.toContain('needsInput');
+  });
+
+  it('nowa wersja nie może zgubić słowa kluczowego, które obecne CV już ma', async () => {
+    const withRaporty = { ...posting, keywords: [{ term: 'raporty', synonyms: [], importance: 'must' as const, category: 'umiejętność' as const }] };
+    const current = content(['Przygotowywanie raportów z kampanii']);
+    const plan = improvePlan(report(), profile, withRaporty, current);
+    expect(plan.keep).toEqual(['raporty']);
+    replies = [{ content: JSON.stringify(content(['Wsparcie kampanii marketingowych'])) }, { content: JSON.stringify(content(['Raporty z kampanii marketingowych'])) }];
+    const cv = await improveCv(profile, withRaporty, current, plan, ctx);
+    expect(lastUserMessage(1)).toContain('Brakuje słowa kluczowego „raporty”');
+    expect(cv.experience[0].bullets[0].text).toBe('Raporty z kampanii marketingowych');
+  });
+
+  it('nowe CV: liczby z potwierdzonych tekstów wcześniejszych wersji zostają faktami', async () => {
+    const written = JSON.stringify(content(['Obsługa 40 zgłoszeń dziennie']));
+    replies = [{ content: written }, { content: written }];
+    const fresh = await generateCv(profile, posting, 'pl', ctx);
+    const again = await generateCv(profile, posting, 'pl', ctx, ['Obsługa 40 zgłoszeń dziennie']);
+    expect(fresh.experience[0].bullets[0].status).toBe('suggested');
+    expect(again.experience[0].bullets[0].status).toBe('fact');
   });
 });
 
