@@ -47,6 +47,8 @@ What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish applicat
    letter.
 6. **Career advisor (optional):** a chat that learns what you are looking for, proposes roles you
    have a real chance at, and gives you ready-made search links for job portals.
+7. **Projects from GitHub (optional):** enter your GitHub username on the profile page and the AI
+   adds your public repositories as projects, using only facts from their descriptions and READMEs.
 
 ## Quick start
 
@@ -73,7 +75,8 @@ $0.05–0.15. The Settings page lists the models and shows what you have spent.
   `localhost` (other names go in `CV_ALLOWED_HOSTS`), and requests that change data from other
   websites are refused.
 - The profile and posting text are sent to OpenRouter and the model you pick, and nothing else
-  leaves your machine (apart from fetching the postings you link).
+  leaves your machine (apart from fetching the postings you link, and reading your public GitHub
+  repositories when you import projects from them).
 - **Optional: [polanon](https://github.com/boromat/polanon).** If Python 3.11+ and
   `pip install polanon` are available, *Ustawienia → Ochrona danych osobowych* can mask your name,
   e-mail, phone, address, company names and profile links as tokens such as `<OSOBA_1>` before

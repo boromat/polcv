@@ -6,6 +6,15 @@ All notable changes to PolCV are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Projects from GitHub.** On *Mój profil*, enter a GitHub username or profile link and the app
+  reads your public repositories (the 10 most recently updated, forks skipped) and adds them as
+  projects with a short description, technologies, dates and a link. The AI writes only what the
+  repository descriptions and READMEs say, and a number that is not in them is dropped. Projects
+  already in the profile stay untouched, missing technologies are added as skills, and the GitHub
+  link goes into your contact links.
+
 ## [1.0.1] - 2026-11-03
 
 ### Added

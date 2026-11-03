@@ -36,6 +36,27 @@ export const profile: Record<string, string> = {
   'PDF, DOCX lub TXT, do 12 MB': 'PDF, DOCX or TXT, up to 12 MB',
   'Wgrane pliki: {files}': 'Uploaded files: {files}',
 
+  // ProfilePage: projekty z GitHuba
+  'nowe z GitHuba': 'new from GitHub',
+  'Projekty z GitHuba': 'Projects from GitHub',
+  'Wpisz nazwę użytkownika albo link do profilu. Program czyta tylko publiczne repozytoria (bez forków, do 10 ostatnio zmienianych), a do profilu trafiają wyłącznie fakty z ich opisów i plików README. Istniejących projektów nie zmieniamy.':
+    'Enter your username or profile link. The app reads public repositories only (no forks, up to the 10 most recently updated), and only facts from their descriptions and README files go into your profile. Projects you already have stay unchanged.',
+  'Nazwa użytkownika albo link do profilu na GitHubie': 'GitHub username or profile link',
+  'Dodaj projekty z GitHuba': 'Add projects from GitHub',
+  'Czytam projekty z GitHuba…': 'Reading your projects from GitHub…',
+  'Nie udało się zapisać zmian w profilu, więc projekty z GitHuba nie zostały dodane. Spróbuj ponownie.':
+    'Your profile changes could not be saved, so the GitHub projects were not added. Please try again.',
+  '1 projekt': '1 project',
+  '{n} projekty': '{n} projects',
+  '{n} projektów': '{n} projects',
+  '1 umiejętność': '1 skill',
+  '{n} umiejętności': '{n} skills',
+  'Dodano {projects} i {skills} z GitHuba.': 'Added {projects} and {skills} from GitHub.',
+  'Dodano {projects} z GitHuba.': 'Added {projects} from GitHub.',
+  'Nowe pozycje są oznaczone na zielono - sprawdź je.': 'New entries are marked in green, so check them.',
+  'Wszystkie projekty z GitHuba są już w profilu - nie ma nic nowego do dodania.':
+    'All your GitHub projects are already in your profile, so there is nothing new to add.',
+
   // ProfilePage: dane kontaktowe, zdjęcie, o sobie
   'Dane kontaktowe': 'Contact details',
   'Imię i nazwisko': 'Full name',
@@ -224,6 +245,7 @@ export const profile: Record<string, string> = {
   'doradca kariery - ocena ofert': 'career advisor - scoring postings',
   'import CV': 'CV import',
   'aktualizacja profilu z CV': 'profile update from CV',
+  'projekty z GitHuba': 'projects from GitHub',
   'analiza ogłoszenia': 'posting analysis',
   'pytania o braki': 'gap questions',
   'pisanie CV': 'CV writing',

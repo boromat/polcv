@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { Profile } from '../../../shared/schemas';
+import { githubUserFromLinks } from '../../../shared/github';
 import { api } from '../api';
 import { useApp } from '../ctx';
 import { Busy, ErrorBox, Field, LazyText } from '../components/ui';
-import { useT } from '../i18n';
+import { plFew, useT } from '../i18n';
 
 const rid = () => Math.random().toString(36).slice(2, 12);
 
@@ -41,6 +42,7 @@ function ListSection<T extends { id: string }>({
   make,
   render,
   newIds,
+  newLabel,
   addLabel,
 }: {
   title: string;
@@ -50,6 +52,8 @@ function ListSection<T extends { id: string }>({
   make: () => T;
   render: (item: T, set: (patch: Partial<T>) => void) => ReactNode;
   newIds: Set<string>;
+  /** plakietka przy nowych pozycjach, np. „nowe z CV” */
+  newLabel: string;
   addLabel: string;
 }) {
   const { t } = useT();
@@ -74,7 +78,7 @@ function ListSection<T extends { id: string }>({
         {items.length === 0 && <p className="faint">{t('Brak pozycji.')}</p>}
         {items.map((it, i) => (
           <div key={it.id} className={`entry-card ${newIds.has(it.id) ? 'new-item' : ''}`}>
-            {newIds.has(it.id) && <span className="badge good" style={{ alignSelf: 'flex-start' }}>{t('nowe z CV')}</span>}
+            {newIds.has(it.id) && <span className="badge good" style={{ alignSelf: 'flex-start' }}>{newLabel}</span>}
             {render(it, (patch) => onChange(items.map((x) => (x.id === it.id ? { ...x, ...patch } : x))))}
             <div className="row" style={{ justifyContent: 'flex-end' }}>
               <button className="icon-btn" disabled={i === 0} onClick={() => move(i, -1)} title={t('W górę')}>↑</button>
@@ -116,6 +120,10 @@ export function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
+  // Skąd są nowe pozycje (plakietka przy nich).
+  const [newFrom, setNewFrom] = useState<'cv' | 'github'>('cv');
+  // Pole GitHuba; null = jeszcze nieruszone, podpowiadamy konto z linków w profilu.
+  const [github, setGithub] = useState<string | null>(null);
   const [photoBust, setPhotoBust] = useState('');
   const [over, setOver] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -183,6 +191,7 @@ export function ProfilePage() {
         if (!alive) return;
         latest.current = x;
         knownFacts.current = new Set(x.extraFacts.map((f) => f.id));
+        setGithub(null);
         queuedRev.current = savedRev.current = rev.current;
         setP(x);
         setSaveState('idle');
@@ -236,10 +245,60 @@ export function ProfilePage() {
       set(proposal);
       flush();
       setNewIds(new Set(newIds));
+      setNewFrom('cv');
       setInfo(
         mode === 'new'
           ? t('AI wypełniło profil na podstawie CV i zapisało go. Sprawdź dane i popraw, co trzeba.')
           : t('AI połączyło nowe CV z profilem i zapisało zmiany. Nowe pozycje są oznaczone na zielono - sprawdź je.'),
+      );
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const githubInput = github ?? githubUserFromLinks(p.contact.links);
+
+  const importGithub = async () => {
+    const username = githubInput.trim();
+    if (!username || busy) return;
+    setError(null);
+    setInfo(null);
+    setBusy(t('Czytam projekty z GitHuba…'));
+    try {
+      // Serwer dopisuje projekty do zapisanego profilu, więc najpierw zapisujemy ręczne zmiany.
+      await flush();
+      if (rev.current !== savedRev.current) throw new Error(t('Nie udało się zapisać zmian w profilu, więc projekty z GitHuba nie zostały dodane. Spróbuj ponownie.'));
+      const { profile: saved, added, newIds: ids } = await api.importGithub(p.id, username);
+      const cur = latest.current;
+      if (!cur || cur.id !== saved.id) return;
+      if (rev.current === savedRev.current) {
+        // Serwer już zapisał profil: jego wersja staje się stanem formularza, więc następny autozapis nie cofnie projektów.
+        for (const f of saved.extraFacts) knownFacts.current.add(f.id);
+        latest.current = saved;
+        setP(saved);
+        setSaveState('saved');
+      } else {
+        // Zmiany wpisane w trakcie importu zostają: dokładamy do nich nowe pozycje i zapisujemy całość.
+        const fresh = new Set(ids);
+        set({
+          projects: [...cur.projects, ...saved.projects.filter((x) => fresh.has(x.id))],
+          skills: [...cur.skills, ...saved.skills.filter((x) => fresh.has(x.id))],
+          contact: { ...cur.contact, links: [...cur.contact.links, ...saved.contact.links.filter((l) => !cur.contact.links.some((x) => x.url === l.url))] },
+        });
+      }
+      reloadProfiles().catch(() => {});
+      setNewIds(new Set(ids));
+      setNewFrom('github');
+      const n = added.projects.length;
+      const k = added.skills.length;
+      const projects = n === 1 ? t('1 projekt') : plFew(n) ? t('{n} projekty', { n }) : t('{n} projektów', { n });
+      const skills = k === 1 ? t('1 umiejętność') : t('{n} umiejętności', { n: k });
+      setInfo(
+        !n
+          ? t('Wszystkie projekty z GitHuba są już w profilu - nie ma nic nowego do dodania.')
+          : `${k ? t('Dodano {projects} i {skills} z GitHuba.', { projects, skills }) : t('Dodano {projects} z GitHuba.', { projects })} ${t('Nowe pozycje są oznaczone na zielono - sprawdź je.')}`,
       );
     } catch (e: any) {
       setError(e.message);
@@ -293,6 +352,7 @@ export function ProfilePage() {
     );
 
   const empty = !p.experience.length && !p.education.length && !p.skills.length;
+  const newLabel = newFrom === 'github' ? t('nowe z GitHuba') : t('nowe z CV');
 
   return (
     <div className="container" style={{ maxWidth: 900 }}>
@@ -357,6 +417,35 @@ export function ProfilePage() {
             }}
           />
           {p.files.length > 0 && <p className="faint" style={{ marginTop: 8 }}>{t('Wgrane pliki: {files}', { files: p.files.map((f) => f.original).join(', ') })}</p>}
+        </div>
+
+        <div className="card">
+          <h2>{t('Projekty z GitHuba')}</h2>
+          <p className="muted small" style={{ marginTop: 4 }}>
+            {t('Wpisz nazwę użytkownika albo link do profilu. Program czyta tylko publiczne repozytoria (bez forków, do 10 ostatnio zmienianych), a do profilu trafiają wyłącznie fakty z ich opisów i plików README. Istniejących projektów nie zmieniamy.')}
+          </p>
+          <form
+            className="row"
+            style={{ marginTop: 12 }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              importGithub();
+            }}
+          >
+            <input
+              type="text"
+              style={{ flex: 1, minWidth: 200 }}
+              value={githubInput}
+              onChange={(e) => setGithub(e.target.value)}
+              placeholder="github.com/jan-kowalski"
+              aria-label={t('Nazwa użytkownika albo link do profilu na GitHubie')}
+              autoComplete="off"
+              spellCheck={false}
+            />
+            <button type="submit" className="btn" disabled={!githubInput.trim() || !!busy}>
+              {t('Dodaj projekty z GitHuba')}
+            </button>
+          </form>
         </div>
 
         <div className="card">
@@ -442,6 +531,7 @@ export function ProfilePage() {
           hint={t('Praca, staże, praktyki, wolontariat, zlecenia. Wpisz wszystko - AI wybierze to, co pasuje.')}
           items={p.experience}
           newIds={newIds}
+          newLabel={newLabel}
           addLabel={t('Pozycja')}
           onChange={(experience) => set({ experience })}
           make={() => ({ id: rid(), kind: 'praca' as const, role: '', company: '', location: '', start: '', end: '', current: false, description: '', achievements: [] })}
@@ -472,6 +562,7 @@ export function ProfilePage() {
           hint={t('Studenckie, własne, z kół naukowych, hackathony. Dla juniora to często najmocniejsza część CV.')}
           items={p.projects}
           newIds={newIds}
+          newLabel={newLabel}
           addLabel={t('Projekt')}
           onChange={(projects) => set({ projects })}
           make={() => ({ id: rid(), name: '', role: '', start: '', end: '', description: '', technologies: [], link: '', achievements: [] })}
@@ -497,6 +588,7 @@ export function ProfilePage() {
           title={t('Wykształcenie')}
           items={p.education}
           newIds={newIds}
+          newLabel={newLabel}
           addLabel={t('Szkoła')}
           onChange={(education) => set({ education })}
           make={() => ({ id: rid(), school: '', degree: '', field: '', start: '', end: '', current: false, details: '' })}
@@ -517,6 +609,7 @@ export function ProfilePage() {
           title={t('Umiejętności')}
           items={p.skills}
           newIds={newIds}
+          newLabel={newLabel}
           addLabel={t('Umiejętność')}
           onChange={(skills) => set({ skills })}
           make={() => ({ id: rid(), name: '', category: 'techniczne' as const, level: '' })}
@@ -537,6 +630,7 @@ export function ProfilePage() {
           title={t('Języki obce')}
           items={p.languages}
           newIds={newIds}
+          newLabel={newLabel}
           addLabel={t('Język')}
           onChange={(languages) => set({ languages })}
           make={() => ({ id: rid(), name: '', level: '' })}
@@ -552,6 +646,7 @@ export function ProfilePage() {
           title={t('Certyfikaty, kursy, szkolenia')}
           items={p.certificates}
           newIds={newIds}
+          newLabel={newLabel}
           addLabel={t('Pozycja')}
           onChange={(certificates) => set({ certificates })}
           make={() => ({ id: rid(), kind: 'kurs' as const, name: '', issuer: '', date: '' })}

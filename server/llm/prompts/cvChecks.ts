@@ -36,7 +36,7 @@ export function firstPersonVerb(text: string): string | null {
   return words.find((w) => PAST_PERSONAL.test(w.toLowerCase()) && !NOUNS_LEM.has(w.toLowerCase())) ?? null;
 }
 
-const STARTS_WITH_I = /^[^\p{L}]*I(?:\s|['’](?:m|ve|d)(?!\p{L}))/u;
+export const STARTS_WITH_I = /^[^\p{L}]*I(?:\s|['’](?:m|ve|d)(?!\p{L}))/u;
 
 const bulletsOf = (c: CvContent) => [
   ...c.experience.flatMap((e, i) => e.bullets.map((b, j) => ({ b, path: ['experience', i, 'bullets', j] }))),

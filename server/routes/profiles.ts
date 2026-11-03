@@ -8,6 +8,7 @@ import { HttpError, newId, nowIso } from '../storage/store';
 import { cvFileToText } from '../cv/importCv';
 import { withPage } from '../cv/browser';
 import { extractProfile, mergeProfile } from '../llm/prompts/extractProfile';
+import { importGithub } from '../services';
 import { maskKey } from './settings';
 import { tr } from '../i18n';
 
@@ -115,6 +116,12 @@ profilesRouter.post('/profiles/:pid/import', upload.single('cv'), async (req, re
     certificates: fix(proposal.certificates),
   };
   res.json({ mode: isEmpty ? 'new' : 'merge', proposal: fixed, newIds });
+});
+
+/** Projekty z publicznego GitHuba: zapis od razu (istniejące projekty zostają), formularz bierze zwrócony profil jako swój stan. */
+profilesRouter.post('/profiles/:pid/github', async (req, res) => {
+  const result = await importGithub(String(req.params.pid), String(req.body?.username ?? ''));
+  res.json({ ...result, profile: publicProfile(result.profile) });
 });
 
 /** Zdjęcie trafia do PDF w całości, więc zdjęcie z telefonu (kilka MB) zmniejszamy do ok. 600×750 px. */

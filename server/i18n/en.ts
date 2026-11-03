@@ -73,6 +73,21 @@ export const EN: Record<string, string> = {
   'Nie udało się pobrać treści ogłoszenia z tego linku (strona mogła zablokować pobieranie). Skopiuj tekst ogłoszenia i wklej go w pole poniżej.':
     'Could not fetch the job posting from this link (the site may have blocked it). Copy the posting text and paste it into the field below.',
 
+  // cv/github.ts, services.ts: projekty z GitHuba
+  'Podaj nazwę użytkownika z GitHuba albo link do profilu, np. github.com/jan-kowalski.':
+    'Enter a GitHub username or a profile link, e.g. github.com/jan-kowalski.',
+  'Na GitHubie nie ma użytkownika „{user}”. Sprawdź nazwę albo link do profilu.': 'There is no GitHub user "{user}". Check the username or the profile link.',
+  '„{user}” to organizacja, a nie konto osoby. Podaj swoją nazwę użytkownika z GitHuba.':
+    '"{user}" is an organisation, not a personal account. Enter your own GitHub username.',
+  'Użytkownik {user} nie ma na GitHubie publicznych projektów (forki pomijamy).': 'The GitHub user {user} has no public projects (forks are skipped).',
+  'GitHub chwilowo ogranicza liczbę zapytań bez logowania (60 na godzinę). Spróbuj ponownie o {time} (za ok. {min} min).':
+    'GitHub is limiting requests made without signing in (60 per hour). Try again at {time} (in about {min} min).',
+  'GitHub chwilowo ogranicza liczbę zapytań bez logowania. Spróbuj ponownie za godzinę.':
+    'GitHub is limiting requests made without signing in. Try again in an hour.',
+  'Brak połączenia z GitHubem ({reason}). Sprawdź internet i spróbuj ponownie.':
+    'Could not connect to GitHub ({reason}). Check your internet connection and try again.',
+  'GitHub odpowiedział kodem {status}. Spróbuj ponownie za chwilę.': 'GitHub responded with status {status}. Try again in a moment.',
+
   // cv/rodo.ts: wyjaśnienia decyzji o klauzuli i zdjęciu (sama klauzula idzie za językiem CV)
   'Ogłoszenie podaje własną treść klauzuli - wklejono ją dosłownie.': 'The job posting gives its own clause wording, so it was copied word for word.',
   'Firma zagraniczna i CV po angielsku - klauzula RODO nie jest zwyczajowo wymagana.':

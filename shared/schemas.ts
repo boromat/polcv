@@ -392,6 +392,15 @@ export interface ImproveResult {
   message: string;
 }
 
+/** Wynik "Dodaj projekty z GitHuba" - zwracany przez /github. Profil jest już zapisany. */
+export interface GithubImportResult {
+  profile: Profile;
+  /** nazwy dopisanych projektów i umiejętności (puste = nic nowego) */
+  added: { projects: string[]; skills: string[] };
+  /** id nowych pozycji, do wyróżnienia w formularzu */
+  newIds: string[];
+}
+
 // ---------- Doradca kariery ----------
 
 export const ContractTypes = ['umowa o pracę', 'umowa zlecenie', 'B2B', 'staż / praktyki'] as const;

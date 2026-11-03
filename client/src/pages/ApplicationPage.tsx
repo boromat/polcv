@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import type { CvVersion, GapAnswer, ImproveResult, TemplateId } from '../../../shared/schemas';
 import { api, type AppDetail, type VersionDetail } from '../api';
 import { useApp } from '../ctx';
-import { translate, useT } from '../i18n';
+import { plFew, translate, useT } from '../i18n';
 import { Busy, downloadFile, ErrorBox, fmtDate, openWhenReady, ScoreBadge, STATUS_LABELS, STATUSES, usd } from '../components/ui';
 import { GapStep } from './app/GapStep';
 import { CvEditor, pendingCount } from './app/CvEditor';
@@ -12,9 +12,6 @@ import { InterviewView, LetterView, PostingView } from './app/ExtrasViews';
 
 type Tab = 'cv' | 'report' | 'posting' | 'interview' | 'letter';
 type Patch = Partial<Pick<CvVersion, 'content' | 'decisions' | 'template' | 'photo' | 'rodo'>>;
-
-// Polska odmiana liczebników: 2-4 (oprócz 12-14) bierze formę "strony", reszta "stron".
-const plFew = (n: number) => n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20);
 
 /** Porównanie odpowiedzi bez względu na kolejność kluczy w obiektach. */
 const answersKey = (list: GapAnswer[]) => JSON.stringify(list.map((a) => [a.questionId, a.has, a.answer]));

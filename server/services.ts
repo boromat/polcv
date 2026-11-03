@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { nanoid } from 'nanoid';
-import type { Application, CvContent, CvVersion, ExtraFact, GapAnswer, ImproveResult, JobPosting, Profile, TemplateId } from '../shared/schemas';
+import type { Application, CvContent, CvVersion, ExtraFact, GapAnswer, GithubImportResult, ImproveResult, JobPosting, Profile, TemplateId } from '../shared/schemas';
 import * as store from './storage/store';
 import { HttpError, newId, nowIso } from './storage/store';
 import { fetchPosting } from './jobs/fetchPosting';
@@ -19,6 +19,8 @@ import { photoDataUri, renderCvHtml, renderLetterHtml, withoutPending, type Rend
 import { htmlToPdf } from './cv/pdf';
 import { buildReport, honestReport, notWorse } from './ats/score';
 import { aliasVariants, countPhrase, looksPolish, normalize, tokenize } from './ats/keywords';
+import { fetchGithub, githubProject, knownRepo, mergeGithubProjects, parseGithubUser, type GithubMerge } from './cv/github';
+import { describeGithubRepos, profileLanguage } from './llm/prompts/githubProjects';
 import { tr, withLang } from './i18n';
 
 const ctxOf = (app: Application, task: string) => ({ profileId: app.profileId, applicationId: app.id, task });
@@ -327,6 +329,30 @@ export function unverifiedSkills(cv: CvVersion, profile: Profile, posting: JobPo
 export function pendingSuggestions(cv: CvVersion): number {
   const all = [cv.content.summary, ...cv.content.experience.flatMap((e) => e.bullets), ...cv.content.projects.flatMap((p) => p.bullets)];
   return all.filter((t) => t.status === 'suggested' && !cv.decisions[t.id]).length;
+}
+
+// ---------- Projekty z GitHuba ----------
+
+/**
+ * Publiczne repozytoria z GitHuba → projekty w profilu. Dopisuje tylko nowe projekty (istniejących nie zmienia),
+ * brakujące technologie jako umiejętności i link do konta. Zapis od razu, na świeżo odczytanym profilu (bezpieczny przy autozapisie).
+ */
+export async function importGithub(profileId: string, input: string): Promise<GithubImportResult> {
+  const login = parseGithubUser(input);
+  if (!login) throw new HttpError(400, tr('Podaj nazwę użytkownika z GitHuba albo link do profilu, np. github.com/jan-kowalski.'));
+  const profile = await store.getProfile(profileId);
+  // Repozytoria, które już są w profilu, nie idą do AI (mniej zapytań do GitHuba i taniej).
+  const data = await fetchGithub(login, knownRepo(profile));
+  const lang = profileLanguage(profile);
+  const texts = await describeGithubRepos(data, lang, { profileId, task: 'projekty z GitHuba' });
+  const now = Date.now();
+  const projects = data.repos.map((r, i) => githubProject(r, texts[i], lang, now));
+  let merged!: GithubMerge;
+  const saved = await store.updateProfile(profileId, (cur) => {
+    merged = mergeGithubProjects(cur, projects, data.login);
+    return merged.profile;
+  });
+  return { profile: saved, added: merged.added, newIds: merged.newIds };
 }
 
 // ---------- Eksport ----------

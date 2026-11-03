@@ -26,6 +26,9 @@ if (typeof document !== 'undefined') document.documentElement.lang = current;
 /** Język interfejsu poza komponentami (zapytania do serwera, formatowanie dat). */
 export const getLang = (): Lang => current;
 
+/** Polska odmiana liczebników: 2-4 (oprócz 12-14) bierze formę "strony", reszta "stron". */
+export const plFew = (n: number) => n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20);
+
 export function translate(text: string, params?: Params): string {
   const base = current === 'en' ? (EN[text] ?? text) : text;
   return params ? base.replace(/\{(\w+)\}/g, (m, k: string) => (k in params ? String(params[k]) : m)) : base;

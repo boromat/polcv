@@ -7,6 +7,7 @@ import type {
   CoverLetter,
   CvVersion,
   GapAnswer,
+  GithubImportResult,
   ImproveResult,
   InterviewPrep,
   Profile,
@@ -112,6 +113,7 @@ export const api = {
     fd.append('cv', file);
     return req<{ mode: 'new' | 'merge'; proposal: ProfileExtract; newIds: string[] }>('POST', `${P(pid)}/import`, fd);
   },
+  importGithub: (pid: string, username: string) => req<GithubImportResult>('POST', `${P(pid)}/github`, { username }),
   uploadPhoto: (pid: string, file: File) => {
     const fd = new FormData();
     fd.append('photo', file);
