@@ -1,0 +1,3 @@
+* text=auto eol=lf
+# cmd.exe źle czyta pliki .bat z uniksowymi końcami linii
+*.bat text eol=crlf
