@@ -1,5 +1,7 @@
 # PolCV
 
+[Polski](README.md) · **English**
+
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **A CV tailored to one job posting — built for the Polish job market.** A local web app for
@@ -24,8 +26,6 @@ What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish applicat
 - **Polish personal data kept private** — optionally with [polanon](https://github.com/boromat/polanon),
   which masks Polish names in every grammatical case, PESEL, NIP and more before anything reaches
   the model.
-
-> Po polsku: [README.md](README.md).
 
 ## What it does
 

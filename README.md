@@ -1,5 +1,7 @@
 # PolCV
 
+**Polski** · [English](README.en.md)
+
 [![Licencja: MIT](https://img.shields.io/badge/licencja-MIT-blue.svg)](LICENSE)
 
 **CV pod konkretne ogłoszenie — zrobione dla polskiego rynku pracy.** Otwarty program na Twój komputer dla studentów i juniorów: z linku do ogłoszenia robi CV pisane pod systemy ATS i ocenę AI-rekrutera. Program jest darmowy; płacisz tylko za użycie AI (zwykle 20–60 gr za CV).
@@ -27,8 +29,6 @@ Jak to działa:
 6. zapisuje PDF i historię aplikacji ze statusami; na życzenie przygotowuje do rozmowy i pisze list motywacyjny.
 
 Wszystkie dane zostają na Twoim komputerze, w folderze `data`. Do AI (przez OpenRouter) wysyłana jest tylko treść profilu i ogłoszenia — a jeśli chcesz, z danymi osobowymi zamienionymi na tokeny (zob. [Ochrona danych osobowych](#ochrona-danych-osobowych-polanon--opcjonalnie)).
-
-> English: [README.en.md](README.en.md). Licencja: [MIT](LICENSE).
 
 ## Uruchomienie (Windows)
 
