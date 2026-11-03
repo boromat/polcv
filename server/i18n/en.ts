@@ -105,6 +105,9 @@ export const EN: Record<string, string> = {
   'limit {amount} $': 'limit {amount} USD',
   'Klucz działa. Zużyto {used} $ ({limit}).': 'The key works. Used so far: {used} USD ({limit}).',
 
+  // llm/prompts/cvChecks.ts
+  'Liczba spoza profilu ({numbers}) - potwierdź albo odrzuć.': 'A number that is not in your profile ({numbers}). Confirm or reject it.',
+
   // privacy/polanon.ts (stan i błędy pokazywane w Ustawieniach)
   '{command} to Python {version}': '{command} is Python {version}',
   'Pakiet polanon nie jest zainstalowany.': 'The polanon package is not installed.',

@@ -1,6 +1,7 @@
-import { CvContentSchema, type CvContent, type JobPosting, type Profile, type AtsReport } from '../../../shared/schemas';
+import type { CvContent, JobPosting, Profile, AtsReport } from '../../../shared/schemas';
 import { callJson, type LlmContext } from '../openrouter';
 import { json, postingForPrompt, profileForPrompt, today, writingRules, forUser } from './common';
+import { checkedCvSchema, factTexts, groundCv, numberedNames } from './cvChecks';
 
 const SYSTEM = (lang: 'pl' | 'en') => `Jesteś doświadczonym rekruterem i ekspertem od CV przechodzących przez systemy ATS oraz automatyczną ocenę AI. Piszesz CV kandydata (student/junior) dopasowane do konkretnego ogłoszenia.
 
@@ -27,8 +28,8 @@ export async function generateCv(
   lang: 'pl' | 'en',
   ctx: LlmContext,
 ): Promise<CvContent> {
-  return callJson({
-    schema: CvContentSchema,
+  const content = await callJson({
+    schema: checkedCvSchema(profile, lang),
     schemaName: 'cv',
     tier: 'main',
     temperature: 0.4,
@@ -37,6 +38,7 @@ export async function generateCv(
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nNapisz CV (language="${lang}").`,
     ctx,
   });
+  return groundCv(content, profile, { lang, names: numberedNames(posting) });
 }
 
 const IMPROVE_EXTRA = `
@@ -45,6 +47,7 @@ Dostajesz obecną wersję CV i raport z oceny (brakujące słowa kluczowe, probl
 - Wprowadź poprawki z raportu, które NIE wymagają nowych informacji od kandydata (needsUserInput=false).
 - Brakujące słowa kluczowe dodaj tylko wtedy, gdy profil lub extraFacts (has=true) potwierdza, że kandydat to zna. W przeciwnym razie pomiń i wymień je w "notes".
 - Pozycje obecnego CV ze statusem "fact" zostały już zaakceptowane przez kandydata - zachowaj ich sens. Pozycje "suggested" możesz poprawić.
+- Punkty obecnego CV w 1. osobie ("Przygotowywałem…") przepisz formą rzeczownikową ("Przygotowywanie…"), zachowując ich sens.
 - CV MUSI nadal zmieścić się na jednej stronie (łącznie maks. ~480 słów). Nie wydłużaj go: jeśli coś dopisujesz, skróć albo usuń coś mniej trafnego. Jeśli raport wskazuje 2 strony - skróć.
 - Zachowaj język i strukturę. Zwróć CAŁE CV.`;
 
@@ -61,14 +64,17 @@ export async function improveCv(
     failedFormatChecks: report.format.checks.filter((c) => !c.ok).map((c) => `${c.name}: ${c.detail}`),
     recruiter: report.ai?.review ?? null,
   };
-  return callJson({
-    schema: CvContentSchema,
+  const lang = current.language;
+  const content = await callJson({
+    schema: checkedCvSchema(profile, lang),
     schemaName: 'cv',
     tier: 'main',
     temperature: 0.3,
     maxTokens: 10_000,
-    system: SYSTEM(current.language) + IMPROVE_EXTRA,
+    system: SYSTEM(lang) + IMPROVE_EXTRA,
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nOBECNE CV:\n${json(current)}\n\nRAPORT:\n${json(reportForPrompt)}\n\nZwróć poprawione CV.`,
     ctx,
   });
+  // Liczby z punktów, które kandydat już zaakceptował, są potwierdzone.
+  return groundCv(content, profile, { lang, confirmed: factTexts(current), names: numberedNames(posting) });
 }

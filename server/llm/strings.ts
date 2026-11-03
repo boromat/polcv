@@ -23,3 +23,28 @@ export function plainDashes<T>(value: T): T {
   collectStrings(value, texts);
   return replaceStrings(value, texts.map((t) => t.replace(/[ \t]*—[ \t]*/g, ' - '))[Symbol.iterator]());
 }
+
+/** Zamykający znak bez pary w tekście - resztka składni JSON ("…i efekty.}"). */
+function orphanCloser(s: string, ch: string): boolean {
+  if (ch === '}') return !s.includes('{');
+  if (ch === ']') return !s.includes('[');
+  // Cudzysłów: nieparzysta liczba "; przy „…" albo “…" zostawiamy, bo to może być zamknięcie cytatu.
+  return (s.match(/"/g)?.length ?? 0) % 2 === 1 && !/[„“]/.test(s);
+}
+
+function cleanTailText(t: string): string {
+  let s = t;
+  for (;;) {
+    const m = /([}\]"])\s*$/.exec(s);
+    if (!m || !orphanCloser(s, m[1])) break;
+    s = s.slice(0, m.index);
+  }
+  return s === t ? t : s.trimEnd();
+}
+
+/** Usuwa z końca tekstów od modelu zabłąkane "}", "]" i '"', które nie mają otwierającej pary. */
+export function cleanTail<T>(value: T): T {
+  const texts: string[] = [];
+  collectStrings(value, texts);
+  return replaceStrings(value, texts.map(cleanTailText)[Symbol.iterator]());
+}

@@ -1,0 +1,297 @@
+import { CvContentSchema, type CvContent, type CvText, type JobPosting, type Profile } from '../../../shared/schemas';
+import { tr } from '../../i18n';
+import { profileForPrompt } from './common';
+
+// Kontrole CV od modelu: część wraca do poprawki (checkedCvSchema), resztę poprawiamy w kodzie (groundCv).
+
+type Lang = 'pl' | 'en';
+
+export interface CvIssue {
+  path: (string | number)[];
+  message: string;
+}
+
+// ---------- Punkty w 1. osobie ----------
+
+/** Rzeczowniki w narzędniku, które też kończą się na -łem ("Kierowanie zespołem", "Współpraca z działem"). */
+const NOUNS_LEM = new Set([
+  'działem', 'wydziałem', 'oddziałem', 'przydziałem', 'rozdziałem', 'podziałem', 'udziałem', 'kanałem', 'materiałem', 'zapałem',
+  'kapitałem', 'sygnałem', 'potencjałem', 'ideałem', 'upałem', 'kryształem', 'ciałem', 'generałem', 'zespołem', 'kołem', 'stołem',
+  'kościołem', 'aniołem', 'popiołem', 'dołem', 'czołem', 'szczegółem', 'dziełem', 'pomysłem', 'przemysłem', 'zmysłem', 'namysłem',
+  'hasłem', 'rzemiosłem', 'krzesłem', 'wiosłem', 'masłem', 'posłem', 'źródłem', 'mydłem', 'godłem', 'skrzydłem', 'siodłem', 'pudłem',
+  'węzłem', 'tłem', 'światłem', 'wiertłem', 'tyłem', 'michałem', 'pawłem', 'rafałem',
+]);
+
+// Czas przeszły w 1. (albo 2.) osobie: "zbudowałem", "stworzyłam", "zacząłem", "zrobiłeś". Samo "l" pomijamy: "portalem", "Excelem".
+const PAST_PERSONAL = /ł(?:em|am|eś|aś)$/u;
+
+/** Czasownik w 1. osobie czasu przeszłego wśród dwóch pierwszych słów ("Samodzielnie zbudowałem…"); null, gdy go nie ma. */
+export function firstPersonVerb(text: string): string | null {
+  const words = text
+    .replace(/^[^\p{L}]+/u, '')
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w.replace(/[^\p{L}]+$/u, ''));
+  return words.find((w) => PAST_PERSONAL.test(w.toLowerCase()) && !NOUNS_LEM.has(w.toLowerCase())) ?? null;
+}
+
+const STARTS_WITH_I = /^[^\p{L}]*I(?:\s|['’](?:m|ve|d)(?!\p{L}))/u;
+
+const bulletsOf = (c: CvContent) => [
+  ...c.experience.flatMap((e, i) => e.bullets.map((b, j) => ({ b, path: ['experience', i, 'bullets', j] }))),
+  ...c.projects.flatMap((p, i) => p.bullets.map((b, j) => ({ b, path: ['projects', i, 'bullets', j] }))),
+];
+
+/** Punkty po polsku w 1. osobie i punkty po angielsku od "I" (także w wersji bezpiecznej, bo po odrzuceniu sugestii trafia do CV). */
+export function styleIssues(c: CvContent, lang: Lang): CvIssue[] {
+  const out: CvIssue[] = [];
+  for (const { b, path } of bulletsOf(c)) {
+    for (const field of ['text', 'fallbackText'] as const) {
+      const t = b[field];
+      if (!t.trim()) continue;
+      if (lang === 'pl') {
+        const verb = firstPersonVerb(t);
+        if (verb) {
+          out.push({
+            path: [...path, field],
+            message: `Punkt w 1. osobie („${verb}”). Pisz formą rzeczownikową, np. „Przygotowywanie cotygodniowych raportów…”, „Budowa dashboardu…”, także gdy profil jest napisany w 1. osobie.`,
+          });
+        }
+      } else if (STARTS_WITH_I.test(t)) {
+        out.push({ path: [...path, field], message: 'Punkt zaczyna się od "I". Zacznij od czasownika w czasie przeszłym, bez "I", np. "Built…", "Prepared…".' });
+      }
+    }
+  }
+  return out;
+}
+
+// ---------- Pozycje spoza profilu ----------
+
+/** Id pozycji profilu, na których może się opierać wpis w CV (bez odpowiedzi "nie mam" z extraFacts). */
+function profileIds(p: Profile): Set<string> {
+  return new Set([...p.experience, ...p.projects, ...p.education, ...p.certificates, ...p.extraFacts.filter((f) => f.has)].map((x) => x.id));
+}
+
+/** Doświadczenie, projekty i edukacja w CV muszą wskazywać istniejącą pozycję profilu. */
+export function sourceIssues(c: CvContent, profile: Profile): CvIssue[] {
+  const ids = profileIds(profile);
+  const entries = [
+    ...c.experience.map((e, i) => ({ path: ['experience', i, 'sourceId'], id: e.sourceId, label: [e.role, e.company].filter(Boolean).join(', ') })),
+    ...c.projects.map((p, i) => ({ path: ['projects', i, 'sourceId'], id: p.sourceId, label: p.name })),
+    ...c.education.map((e, i) => ({ path: ['education', i, 'sourceId'], id: e.sourceId, label: [e.school, e.field].filter(Boolean).join(', ') })),
+  ];
+  return entries
+    .filter((e) => !ids.has(e.id))
+    .map((e) => ({
+      path: e.path,
+      message: `Pozycja „${e.label}” ma sourceId "${e.id}", którego nie ma w profilu. Wpisz "id" pozycji z PROFILU KANDYDATA, na której opiera się ten wpis, albo usuń pozycję, jeśli profil jej nie zawiera.`,
+    }));
+}
+
+/** Schemat CV dla modelu: punkty w 1. osobie i wpisy spoza profilu wracają do poprawki. Schemat JSON się nie zmienia. */
+export function checkedCvSchema(profile: Profile, lang: Lang) {
+  return CvContentSchema.superRefine((c, ctx) => {
+    for (const issue of [...styleIssues(c, lang), ...sourceIssues(c, profile)]) ctx.addIssue({ code: 'custom', ...issue });
+  });
+}
+
+// ---------- Firmy i daty z profilu ----------
+
+/** Data z profilu ("RRRR-MM" albo "RRRR") w zapisie CV: "MM.RRRR" / "MM/YYYY"; null, gdy zapis jest nietypowy. */
+export function cvDate(value: string, lang: Lang): string | null {
+  const v = value.trim();
+  if (!v) return '';
+  const sep = lang === 'pl' ? '.' : '/';
+  const ym = /^(\d{4})-(\d{1,2})(?:-\d{1,2})?$/.exec(v);
+  const my = /^(\d{1,2})[./-](\d{4})$/.exec(v);
+  const [year, month] = ym ? [ym[1], ym[2]] : my ? [my[2], my[1]] : [/^\d{4}$/.test(v) ? v : '', ''];
+  if (!year) return null;
+  if (!month) return year;
+  return Number(month) >= 1 && Number(month) <= 12 ? `${month.padStart(2, '0')}${sep}${year}` : null;
+}
+
+/** Zakres jak w promptcie: "MM.RRRR – MM.RRRR" / "MM.RRRR – obecnie" (po angielsku "MM/YYYY – present"); null = zostaje zapis modelu. */
+export function cvDateRange(start: string, end: string, current: boolean, lang: Lang): string | null {
+  const s = cvDate(start, lang);
+  const e = current ? (lang === 'pl' ? 'obecnie' : 'present') : cvDate(end, lang);
+  if (s === null || e === null) return null;
+  if (!s) return current ? '' : e;
+  return e ? `${s} – ${e}` : s;
+}
+
+// ---------- Liczby spoza profilu ----------
+
+// Samodzielna liczba (nie "GA4" ani "B2B"): 15, 1 200, 10.000, 3,5, 12.05.2023, 2022/2023.
+const NUMBER = /(?<![\p{L}\p{N}_])(?:\d{1,3}(?:[ \u00a0.,]\d{3})+(?!\d)|\d+(?:[.,:/]\d+)*)/gu;
+
+/** Wartości do porównania: "1 200" → 1200, "3,5" → 3.5, inne zapisy ("12.05.2023") → każda grupa cyfr osobno. */
+function values(token: string): string[] {
+  if (/^\d{1,3}(?:[ \u00a0.,]\d{3})+$/.test(token)) return [String(Number(token.replace(/\D/g, '')))];
+  const dec = /^(\d+)[.,](\d{1,2})$/.exec(token);
+  if (dec) return [String(Number(`${dec[1]}.${dec[2]}`))];
+  return token.split(/[.,:/]/).map((d) => String(Number(d)));
+}
+
+/** Liczby z tekstów; dla pewności także cyfry wewnątrz nazw ("GA4" potwierdza "Google Analytics 4"). */
+export function knownNumbers(texts: string[]): Set<string> {
+  const known = new Set<string>();
+  for (const t of texts) {
+    for (const m of t.matchAll(NUMBER)) values(m[0]).forEach((v) => known.add(v));
+    for (const m of t.matchAll(/\d+/g)) known.add(String(Number(m[0])));
+  }
+  return known;
+}
+
+/** Teksty profilu, z których CV może brać liczby: bez kontaktu, id i odpowiedzi "nie mam" z extraFacts. */
+export function profileTexts(p: Profile): string[] {
+  const { contact, extraFacts, ...rest } = profileForPrompt(p);
+  const out: string[] = [];
+  const walk = (v: unknown): void => {
+    if (typeof v === 'string') out.push(v);
+    else if (Array.isArray(v)) v.forEach(walk);
+    else if (v && typeof v === 'object') Object.entries(v).forEach(([k, x]) => k !== 'id' && walk(x));
+  };
+  walk(rest);
+  for (const f of extraFacts) if (f.has) out.push(f.topic, f.answer);
+  return out;
+}
+
+/** Nazwy z liczbą ze słów kluczowych ogłoszenia ("Office 365", "Python 3") - to nie są ilości. */
+export function numberedNames(posting: JobPosting): string[] {
+  return posting.keywords.flatMap((k) => [k.term, ...k.synonyms]).filter((n) => /\d/.test(n) && n.trim().length > 1);
+}
+
+const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+interface Hit {
+  index: number;
+  token: string;
+}
+
+/** Wyszukiwarka nieznanych liczb w tekście (pozycje jak w oryginale). */
+export function numberFinder(known: Set<string>, names: string[] = []) {
+  const list = names.map((n) => n.trim()).filter(Boolean).sort((a, b) => b.length - a.length);
+  const namesRe = list.length ? new RegExp(`(?<![\\p{L}\\p{N}])(?:${list.map(esc).join('|')})(?![\\p{L}\\p{N}]|[.,]\\d)`, 'giu') : null;
+  return (text: string): Hit[] => {
+    const masked = namesRe ? text.replace(namesRe, (m) => ' '.repeat(m.length)) : text;
+    return [...masked.matchAll(NUMBER)].filter((m) => values(m[0]).some((v) => !known.has(v))).map((m) => ({ index: m.index, token: m[0] }));
+  };
+}
+
+const QUALIFIER = /(?:(?<!\p{L})(?:ok\.|około|ponad|blisko|prawie|niemal|nawet|aż|średnio|about|around|approximately|over|nearly|almost|more than|up to)\s*|~\s*)$/iu;
+const CHANGE = /(?<!\p{L})(?:o|by|of)\s+$/iu;
+const UNIT = /^\+?(?:\s?(?:%|proc\.|procent\p{L}*|zł|pln|eur|usd|tys\.|mln|mld|k|x|h)(?!\p{L})){0,2}/iu;
+// Po usunięciu liczby zostałoby "w miesiące", "przez lata", "do osób", "razy w tygodniu" - takich nie ruszamy.
+const BAD_BEFORE = /(?<!\p{L})(?:w|we|przez|po|przed|od|do|in|for|within|after|during)\s+$/iu;
+const TIME_AFTER =
+  /^\s*(?:raz\p{L}*|times?|dni\p{L}*|dzień|tydzień|tygodni\p{L}*|miesiąc\p{L}*|miesięc\p{L}*|lat\p{L}*|rok\p{L}*|godzin\p{L}*|minut\p{L}*|days?|weeks?|months?|years?|hours?|minutes?)(?!\p{L})/iu;
+const PREP_END = /(?<!\p{L})(?:w|we|z|ze|do|na|o|od|po|przy|przez|przed|za|u|dla|i|oraz|lub|a|in|on|at|to|of|for|by|with|from|and|or)\s*$/iu;
+
+/** Usuwa jedną liczbę z kwalifikatorem i jednostką ("o ok. 30%"); null, gdy zdanie by się rozsypało. */
+function cutNumber(s: string, hit: Hit): string | null {
+  let start = hit.index;
+  let end = hit.index + hit.token.length;
+  if (/^\.\s*\p{Ll}/u.test(s.slice(end))) return null; // liczebnik porządkowy: "3. roku"
+  const unit = UNIT.exec(s.slice(end))?.[0] ?? '';
+  end += unit.length;
+  const rest = s.slice(end);
+  if (TIME_AFTER.test(rest)) return null;
+  start -= QUALIFIER.exec(s.slice(0, start))?.[0].length ?? 0;
+  // "o 30%" znika razem z liczbą, ale "o 5 osób" bez liczby by się rozsypało.
+  const change = CHANGE.exec(s.slice(0, start))?.[0] ?? '';
+  if (change && !/[^\s+]/.test(unit)) return null;
+  start -= change.length;
+  const before = s.slice(0, start);
+  if (!before.trim() || BAD_BEFORE.test(before)) return null;
+  // Przyimek bez dalszego ciągu: "przy 12.05.2023" → "przy".
+  if (PREP_END.test(before) && !/^\s*\p{L}/u.test(rest)) return null;
+  return before + rest;
+}
+
+function tidy(s: string, original: string): string {
+  let t = s
+    .replace(/\(\s*\)/g, '')
+    .replace(/\s+/g, ' ')
+    .replace(/\s+([,.;:!?)])/g, '$1')
+    .replace(/([,;:])(?=[,.;:])/g, '')
+    .trim()
+    .replace(/[\s,;:–-]+$/u, '');
+  if (/[.!?]$/.test(original.trim()) && !/[.!?]$/.test(t)) t += original.trim().slice(-1);
+  if (/^\p{Lu}/u.test(original.trim())) t = t.charAt(0).toUpperCase() + t.slice(1);
+  return t;
+}
+
+/** Bezpieczna wersja tekstu bez nieznanych liczb, gdy da się ją prosto uzyskać; inaczej ''. */
+export function withoutNumbers(text: string, find: (s: string) => Hit[]): string {
+  // Kilka zdań: zostają te bez nieznanych liczb.
+  const sentences = text.split(/(?<=[.!?])\s+(?=\p{Lu})/u);
+  const clean = sentences.filter((x) => !find(x).length);
+  let s = text;
+  if (sentences.length > 1 && clean.length) s = clean.join(' ');
+  else {
+    // Nawias z liczbą ("(ok. 30 osób)") i dalsze człony zdania z liczbą (", co zwiększyło zasięg o 40%").
+    s = s.replace(/\s*\([^()]*\)/g, (m) => (find(m).length ? '' : m));
+    const parts = s.split(/(?=,\s|;\s|:\s|\s[-–]\s)/u);
+    s = [parts[0], ...parts.slice(1).filter((p) => !find(p).length)].join('');
+    // Od końca, żeby pozycje wcześniejszych liczb zostały aktualne.
+    for (const hit of find(s).reverse()) {
+      const next = cutNumber(s, hit);
+      if (next === null) return '';
+      s = next;
+    }
+  }
+  const out = tidy(s, text);
+  return out.split(' ').length >= 2 && !find(out).length && out !== text.trim() ? out : '';
+}
+
+/** Teksty CV, które kandydat już potwierdził (status "fact"). */
+export function factTexts(c: CvContent): string[] {
+  return [c.summary, ...c.experience.flatMap((e) => e.bullets), ...c.projects.flatMap((p) => p.bullets)].filter((t) => t.status === 'fact').map((t) => t.text);
+}
+
+export interface GroundOptions {
+  lang: Lang;
+  /** Teksty, których liczby kandydat już potwierdził (np. zaakceptowane punkty poprawianego CV). */
+  confirmed?: string[];
+  /** Nazwy z liczbą, które nie są ilością (zob. numberedNames). */
+  names?: string[];
+}
+
+/**
+ * Fakty z profilu zamiast słów modelu: firma i daty doświadczenia, daty edukacji. Liczba, której nie ma w profilu
+ * (ani w extraFacts z has=true), zmienia fakt w sugestię do potwierdzenia, z wersją bez tej liczby, jeśli da się ją prosto uzyskać.
+ */
+export function groundCv(c: CvContent, profile: Profile, opts: GroundOptions): CvContent {
+  const exp = new Map(profile.experience.map((e) => [e.id, e]));
+  const edu = new Map(profile.education.map((e) => [e.id, e]));
+  const find = numberFinder(knownNumbers([...profileTexts(profile), ...(opts.confirmed ?? [])]), opts.names);
+
+  const check = (t: CvText): CvText => {
+    if (t.status === 'fact') {
+      const hits = find(t.text);
+      if (!hits.length) return t;
+      const numbers = [...new Set(hits.map((h) => h.token + (/^\s?%/.test(t.text.slice(h.index + h.token.length)) ? '%' : '')))].join(', ');
+      return { ...t, status: 'suggested', reason: tr('Liczba spoza profilu ({numbers}) - potwierdź albo odrzuć.', { numbers }), fallbackText: withoutNumbers(t.text, find) };
+    }
+    // Wersja bezpieczna po odrzuceniu sugestii staje się faktem, więc też nie może mieć zmyślonej liczby.
+    if (t.fallbackText && find(t.fallbackText).length) return { ...t, fallbackText: withoutNumbers(t.fallbackText, find) };
+    return t;
+  };
+
+  return {
+    ...c,
+    summary: check(c.summary),
+    experience: c.experience.map((e) => {
+      const src = exp.get(e.sourceId);
+      if (!src) return { ...e, bullets: e.bullets.map(check) };
+      const dates = cvDateRange(src.start, src.end, src.current, opts.lang);
+      return { ...e, company: src.company.trim(), dates: dates ?? e.dates, bullets: e.bullets.map(check) };
+    }),
+    projects: c.projects.map((p) => ({ ...p, bullets: p.bullets.map(check) })),
+    education: c.education.map((e) => {
+      const src = edu.get(e.sourceId);
+      const dates = src ? cvDateRange(src.start, src.end, src.current, opts.lang) : null;
+      return dates === null ? e : { ...e, dates };
+    }),
+  };
+}

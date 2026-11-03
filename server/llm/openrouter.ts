@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { appendUsage, getProfile, getSettings, HttpError, nowIso } from '../storage/store';
 import { maskForAi, profileTerms, TOKENS_NOTE } from '../privacy/polanon';
-import { plainDashes } from './strings';
+import { cleanTail, plainDashes } from './strings';
 import { tr } from '../i18n';
 
 const API = 'https://openrouter.ai/api/v1';
@@ -23,6 +23,8 @@ export interface CallOptions<T> {
   maxTokens?: number;
   /** Model przepisuje cudzy tekst (ogłoszenie, wgrane CV): interpunkcja zostaje taka, jak w oryginale. */
   verbatim?: boolean;
+  /** Temperatura nowej próby od zera (po zapętleniu albo drugiej odrzuconej odpowiedzi); domyślnie 0.5 przy niskiej temperaturze, inaczej 0.2. */
+  retryTemperature?: number;
 }
 
 const DASH_NOTE = `
@@ -219,14 +221,14 @@ ${JSON.stringify(jsonSchema)}`;
     }
   };
 
-  const freshTemp = temperature < 0.3 ? 0.5 : 0.2;
+  const freshTemp = opts.retryTemperature ?? (temperature < 0.3 ? 0.5 : 0.2);
   let res = await send([], temperature);
   let lastBroken = false;
   for (let attempt = 1; attempt <= 3; attempt++) {
     const parsed = tryParse(res);
     if (parsed.ok) {
       const data = masked ? await masked.restore(parsed.data) : parsed.data;
-      return opts.verbatim ? data : plainDashes(data);
+      return opts.verbatim ? data : cleanTail(plainDashes(data));
     }
     lastBroken = !res.content.trim() || res.finishReason === 'length';
     console.warn(

@@ -54,7 +54,8 @@ ZASADY ATS:
 
 ZASADY PISANIA:
 - Punkty zaczynaj od czynności, schemat: co zrobiono + jak/czym + efekt (liczba tylko, jeśli jest w profilu). Maks. ~25 słów na punkt, 2–5 punktów na pozycję, najtrafniejsze na górze.
-- Po polsku: jeśli w profilu kandydat pisze formami z rodzajem ("zrealizowałem"/"zrealizowałam"), zachowaj ten sam rodzaj; jeśli nie wiadomo, używaj form rzeczownikowych ("Realizacja…", "Przygotowanie…"). Nie zgaduj płci na podstawie imienia.
-- Po angielsku: czasowniki w czasie przeszłym (Built, Led, Analysed), bez zaimków.
+- Po polsku punkty ZAWSZE formą rzeczownikową: "Przygotowywanie cotygodniowych raportów…", "Budowa dashboardu…", "Współpraca z działem marketingu…". Nigdy w 1. osobie ("Przygotowywałem…", "Samodzielnie zbudowałam…") - także wtedy, gdy profil jest tak napisany: "Prowadziłam profil na Instagramie" → "Prowadzenie profilu na Instagramie".
+- Rodzaj z profilu stosuj tylko w nazwach stanowisk ("Stażystka", "Asystent"). Nie zgaduj płci na podstawie imienia.
+- Po angielsku: punkty zaczynaj od czasownika w czasie przeszłym (Built, Led, Analysed), bez "I" i bez innych zaimków.
 - Unikaj pustych frazesów ("kreatywny, komunikatywny, sumienny") bez dowodu w treści.
 `;
