@@ -65,6 +65,7 @@ Przy domyślnych modelach (Claude Sonnet do pisania i oceny, Claude Haiku do ana
    - zakładka **Raport** pokazuje wynik i konkretne poprawki; brakujące słowo kluczowe, które znasz, kliknij i napisz, gdzie tego używasz, a przy poprawkach „wymaga Twoich danych” kliknij **Uzupełnij**; odpowiedzi trafiają do profilu, a **Popraw automatycznie** tworzy nową wersję i ocenia ją ponownie.
 6. **Pobierz PDF** - plik zapisuje się też w historii. Status zmieniaj w **Historii** (Wysłane → Rozmowa → Oferta…).
 7. Gdy dostaniesz zaproszenie: otwórz aplikację → zakładka **Rozmowa** → **Przygotuj mnie do rozmowy**.
+8. Chcesz uzupełnić braki? Zakładka **Kursy i certyfikaty** (gdy CV jest gotowe) podpowiada, które kursy i certyfikaty najbardziej pomogą w tej rekrutacji, z czasem nauki, kosztem i linkiem do wyszukania.
 
 ## Szukaj pracy (doradca kariery)
 

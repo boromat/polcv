@@ -8,9 +8,9 @@ import { Busy, downloadFile, ErrorBox, fmtDate, GoworkLink, openWhenReady, Score
 import { GapStep } from './app/GapStep';
 import { CvEditor, pendingCount } from './app/CvEditor';
 import { ReportView } from './app/ReportView';
-import { InterviewView, LetterView, PostingView } from './app/ExtrasViews';
+import { CoursesView, InterviewView, LetterView, PostingView } from './app/ExtrasViews';
 
-type Tab = 'cv' | 'report' | 'posting' | 'interview' | 'letter';
+type Tab = 'cv' | 'report' | 'posting' | 'interview' | 'letter' | 'courses';
 type Patch = Partial<Pick<CvVersion, 'content' | 'decisions' | 'template' | 'photo' | 'rodo'>>;
 
 /** Porównanie odpowiedzi bez względu na kolejność kluczy w obiektach. */
@@ -417,6 +417,7 @@ export function ApplicationPage() {
                   ['posting', t('Ogłoszenie')],
                   ['interview', t('Rozmowa')],
                   ['letter', t('List motywacyjny')],
+                  ['courses', t('Kursy i certyfikaty')],
                 ] as [Tab, string][]
               ).map(([k, label]) => (
                 <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)} role="tab" aria-selected={tab === k}>
@@ -452,6 +453,7 @@ export function ApplicationPage() {
             )}
             {tab === 'posting' && <PostingView app={app} />}
             {tab === 'interview' && <InterviewView key={app.id} pid={pid} app={app} run={(m, fn, h) => run(m, async () => { await fn(); await loadDetail(); }, h)} />}
+            {tab === 'courses' && <CoursesView key={app.id} pid={pid} app={app} run={(m, fn, h) => run(m, async () => { await fn(); await loadDetail(); }, h)} />}
             {tab === 'letter' && <LetterView key={app.id} pid={pid} app={app} run={(m, fn, h) => run(m, async () => { await fn(); await loadDetail(); }, h)} />}
           </>
         )}

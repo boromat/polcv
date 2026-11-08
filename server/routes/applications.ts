@@ -179,6 +179,14 @@ applicationsRouter.post(`${base}/:aid/interview`, async (req, res) => {
   res.json(await svc.makeInterviewPrep(req.params.pid, req.params.aid));
 });
 
+applicationsRouter.get(`${base}/:aid/courses`, async (req, res) => {
+  res.json(await store.getCourses(req.params.pid, req.params.aid));
+});
+
+applicationsRouter.post(`${base}/:aid/courses`, async (req, res) => {
+  res.json(await svc.makeCourses(req.params.pid, req.params.aid));
+});
+
 applicationsRouter.get(`${base}/:aid/letter`, async (req, res) => {
   res.json(await store.getCoverLetter(req.params.pid, req.params.aid));
 });

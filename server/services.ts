@@ -10,7 +10,7 @@ import { parsePosting } from './llm/prompts/parsePosting';
 import { gapQuestions } from './llm/prompts/gapQuestions';
 import { generateCv, improveCv, shortenCv } from './llm/prompts/generateCv';
 import { evaluateCv } from './llm/prompts/evaluateCv';
-import { coverLetter, interviewPrep } from './llm/prompts/extras';
+import { courseAdvice, coverLetter, interviewPrep } from './llm/prompts/extras';
 import { applyDecisions } from './llm/prompts/common';
 import { factTexts } from './llm/prompts/cvChecks';
 import { hasWork, improvePlan, nothingToImprove } from './llm/prompts/improvePlan';
@@ -57,6 +57,7 @@ export async function createApplication(profileId: string, url: string, pastedTe
     pdfFile: '',
     hasInterviewPrep: false,
     hasCoverLetter: false,
+    hasCourses: false,
   };
   app.posting = await parsePosting(rawText, app.url, ctxOf(app, 'analiza ogłoszenia'));
   return store.saveApplication(app);
@@ -462,6 +463,20 @@ export async function makeInterviewPrep(profileId: string, appId: string) {
     a.hasInterviewPrep = true;
   });
   return prep;
+}
+
+/** Kursy i certyfikaty pod to ogłoszenie: na kliknięcie, gdy CV już jest (braki z ostatniej oceny pomagają wybrać). */
+export async function makeCourses(profileId: string, appId: string) {
+  const app = await store.getApplication(profileId, appId);
+  if (!app.posting || !app.currentVersion) throw new HttpError(409, tr('Najpierw wygeneruj CV.'));
+  const [profile, report] = await Promise.all([store.getProfile(profileId), store.getReport(profileId, appId, app.currentVersion)]);
+  const missing = (report?.keywords.missing ?? []).map((k) => k.term);
+  const advice = await courseAdvice(profile, app.posting, missing, ctxOf(app, 'kursy i certyfikaty'));
+  await store.saveCourses(profileId, appId, advice);
+  await store.updateApplication(profileId, appId, (a) => {
+    a.hasCourses = true;
+  });
+  return advice;
 }
 
 export async function makeCoverLetter(profileId: string, appId: string) {

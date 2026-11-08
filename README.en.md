@@ -45,8 +45,8 @@ What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish applicat
    missing keyword you know, or *Fill in* on a fix that needs your input, and the answer goes to
    your profile; facts you correct in the editor are saved to the profile too.
 5. **Exports a one-page PDF** with selectable text from three ATS-safe templates, keeps a history
-   of applications with statuses, and on request prepares you for the interview or drafts a cover
-   letter.
+   of applications with statuses, and on request prepares you for the interview, drafts a cover
+   letter or suggests the courses and certificates that would help most for that posting.
 6. **Career advisor (optional):** a chat that learns what you are looking for, proposes roles you
    have a real chance at, and gives you ready-made search links for job portals.
 7. **Projects from GitHub (optional):** enter your GitHub username on the profile page and the AI

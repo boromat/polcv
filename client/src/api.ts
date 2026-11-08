@@ -10,6 +10,7 @@ import type {
   GithubImportResult,
   ImproveResult,
   InterviewPrep,
+  CourseAdvice,
   Profile,
   ProfileExtract,
   TemplateId,
@@ -158,6 +159,8 @@ export const api = {
 
   interview: (pid: string, aid: string) => req<InterviewPrep | null>('GET', `${A(pid, aid)}/interview`),
   makeInterview: (pid: string, aid: string) => req<InterviewPrep>('POST', `${A(pid, aid)}/interview`),
+  courses: (pid: string, aid: string) => req<CourseAdvice | null>('GET', `${A(pid, aid)}/courses`),
+  makeCourses: (pid: string, aid: string) => req<CourseAdvice>('POST', `${A(pid, aid)}/courses`),
   letter: (pid: string, aid: string) => req<CoverLetter | null>('GET', `${A(pid, aid)}/letter`),
   makeLetter: (pid: string, aid: string) => req<CoverLetter>('POST', `${A(pid, aid)}/letter`),
   saveLetter: (pid: string, aid: string, l: CoverLetter) => req<CoverLetter>('PUT', `${A(pid, aid)}/letter`, l),

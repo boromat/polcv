@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { nanoid } from 'nanoid';
-import type { Application, CvVersion, Profile, Settings, UsageEntry, AtsReport, InterviewPrep, CoverLetter, Career } from '../../shared/schemas';
+import type { Application, CvVersion, Profile, Settings, UsageEntry, AtsReport, InterviewPrep, CoverLetter, CourseAdvice, Career } from '../../shared/schemas';
 import { tr } from '../i18n';
 
 export const DATA_DIR = path.resolve(process.env.CV_DATA_DIR || path.join(process.cwd(), 'data'));
@@ -296,6 +296,8 @@ export const getInterviewPrep = (pid: string, aid: string) => readJson<Interview
 export const saveInterviewPrep = (pid: string, aid: string, d: InterviewPrep) => writeJson(path.join(appDir(pid, aid), 'interview.json'), d);
 export const getCoverLetter = (pid: string, aid: string) => readJson<CoverLetter>(path.join(appDir(pid, aid), 'letter.json'));
 export const saveCoverLetter = (pid: string, aid: string, d: CoverLetter) => writeJson(path.join(appDir(pid, aid), 'letter.json'), d);
+export const getCourses = (pid: string, aid: string) => readJson<CourseAdvice>(path.join(appDir(pid, aid), 'courses.json'));
+export const saveCourses = (pid: string, aid: string, d: CourseAdvice) => writeJson(path.join(appDir(pid, aid), 'courses.json'), d);
 
 // ---------- Doradca kariery ----------
 

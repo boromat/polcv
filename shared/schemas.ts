@@ -299,6 +299,23 @@ export const InterviewPrepSchema = z.object({
   weakSpots: z.array(z.object({ issue: z.string(), howToAddress: z.string() })),
 });
 
+export const CourseCosts = ['bezpłatny', 'płatny', 'częściowo płatny'] as const;
+
+export const CourseAdviceSchema = z.object({
+  overview: z.string().describe('2-3 zdania: od czego zacząć, gdy jest mało czasu'),
+  items: z.array(z.object({
+    name: z.string().describe('oficjalna nazwa kursu lub certyfikatu'),
+    provider: z.string().describe('wydawca albo platforma'),
+    kind: z.enum(['kurs', 'certyfikat']),
+    importance: z.enum(['must', 'nice']),
+    covers: z.array(z.string()).describe('wymagania z ogłoszenia, które pokrywa'),
+    why: z.string(),
+    cost: z.enum(CourseCosts),
+    time: z.string().describe('realistyczny czas nauki'),
+  })),
+  alreadyCovered: z.array(z.string()).describe('wymagania, które profil już potwierdza'),
+});
+
 export const CoverLetterSchema = z.object({
   language: z.enum(['pl', 'en']),
   greeting: z.string(),
@@ -326,6 +343,8 @@ export const ApplicationSchema = z.object({
   pdfFile: z.string(),
   hasInterviewPrep: z.boolean(),
   hasCoverLetter: z.boolean(),
+  /** Starsze aplikacje nie mają tego pola. */
+  hasCourses: z.boolean().optional(),
 });
 
 export const SettingsSchema = z.object({
@@ -369,6 +388,7 @@ export type AiReview = z.infer<typeof AiReviewSchema>;
 export type AtsReport = z.infer<typeof AtsReportSchema>;
 export type InterviewPrep = z.infer<typeof InterviewPrepSchema>;
 export type CoverLetter = z.infer<typeof CoverLetterSchema>;
+export type CourseAdvice = z.infer<typeof CourseAdviceSchema>;
 export type Application = z.infer<typeof ApplicationSchema>;
 export type ApplicationStatus = (typeof ApplicationStatuses)[number];
 export type Settings = z.infer<typeof SettingsSchema>;

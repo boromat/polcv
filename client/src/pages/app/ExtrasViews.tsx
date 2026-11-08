@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Application, CoverLetter, InterviewPrep } from '../../../../shared/schemas';
+import type { Application, CourseAdvice, CoverLetter, InterviewPrep } from '../../../../shared/schemas';
 import { api } from '../../api';
 import { ErrorBox, LazyText } from '../../components/ui';
 import { useT } from '../../i18n';
@@ -217,6 +217,96 @@ export function InterviewView({ pid, app, run }: { pid: string; app: Application
           ))}
         </ul>
       </div>
+    </div>
+  );
+}
+
+/** Wyszukiwanie kursu: AI nie podaje linków (mogłoby je zmyślić), więc link buduje program. */
+const courseSearchUrl = (name: string, provider: string) => `https://www.google.com/search?q=${encodeURIComponent(`${name} ${provider}`.trim())}`;
+
+export function CoursesView({ pid, app, run }: { pid: string; app: Application; run: (msg: string, fn: () => Promise<void>, hint?: string) => void }) {
+  const { t } = useT();
+  const saved = useSaved<CourseAdvice>(!!app.hasCourses, () => api.courses(pid, app.id));
+  const advice = saved.data;
+
+  const make = () => {
+    if (advice && !confirm(t('Przygotować propozycje od nowa? Obecna lista zostanie zastąpiona.'))) return;
+    run(
+      t('Szukam kursów i certyfikatów pod to ogłoszenie…'),
+      async () => saved.setData(await api.makeCourses(pid, app.id)),
+      t('Porównuję wymagania z ogłoszenia z Twoim profilem - to zwykle kilkanaście sekund.'),
+    );
+  };
+
+  // Koszt i rodzaj to wartości z ustalonego zbioru (dane), tłumaczymy tylko napis.
+  const costs: Record<string, string> = { bezpłatny: t('bezpłatny'), płatny: t('płatny'), 'częściowo płatny': t('częściowo płatny') };
+  const kinds: Record<string, string> = { kurs: t('kurs'), certyfikat: t('certyfikat') };
+
+  if (!advice && (saved.loading || saved.error)) return <LoadState title={t('Kursy i certyfikaty')} loading={saved.loading} error={saved.error} retry={saved.retry} />;
+  if (!advice) {
+    return (
+      <div className="card empty">
+        <h2>{t('Kursy i certyfikaty')}</h2>
+        <p style={{ maxWidth: 520 }}>
+          {t('AI porówna wymagania z ogłoszenia z Twoim profilem i zaproponuje kursy i certyfikaty, które najbardziej pomogą w tej rekrutacji: najpierw te, które uzupełniają wymagania obowiązkowe.')}
+        </p>
+        <button className="btn primary lg" onClick={make}>
+          {t('Zaproponuj kursy i certyfikaty')}
+        </button>
+      </div>
+    );
+  }
+
+  const ordered = [...advice.items].sort((a, b) => Number(b.importance === 'must') - Number(a.importance === 'must'));
+  return (
+    <div className="stack lg">
+      <div className="card stack">
+        <div className="row between">
+          <h2>{t('Kursy i certyfikaty')}</h2>
+          <button className="btn sm" onClick={make}>
+            {t('Wygeneruj od nowa')}
+          </button>
+        </div>
+        <p>{advice.overview}</p>
+      </div>
+      {ordered.map((c, i) => (
+        <div key={i} className="card stack" style={{ gap: 8 }}>
+          <div className="row between" style={{ alignItems: 'flex-start' }}>
+            <div className="stack" style={{ gap: 2 }}>
+              <b>{c.name}</b>
+              {c.provider && <span className="faint">{c.provider}</span>}
+            </div>
+            <a href={courseSearchUrl(c.name, c.provider)} target="_blank" rel="noreferrer" className="small" style={{ whiteSpace: 'nowrap' }}>
+              {t('Szukaj')} ↗
+            </a>
+          </div>
+          <div className="chips">
+            <span className={`badge ${c.importance === 'must' ? 'bad' : 'warn'}`}>{c.importance === 'must' ? t('wymagane') : t('mile widziane')}</span>
+            <span className="badge">{kinds[c.kind] ?? c.kind}</span>
+            <span className={`badge ${c.cost === 'bezpłatny' ? 'good' : ''}`}>{costs[c.cost] ?? c.cost}</span>
+            {c.time && <span className="badge">{c.time}</span>}
+          </div>
+          <p className="small">{c.why}</p>
+          {c.covers.length > 0 && (
+            <span className="faint small">
+              {t('Pokrywa:')} {c.covers.join(', ')}
+            </span>
+          )}
+        </div>
+      ))}
+      {advice.alreadyCovered.length > 0 && (
+        <div className="card stack" style={{ gap: 6 }}>
+          <h3>{t('Tego nie musisz uzupełniać')}</h3>
+          <div className="chips">
+            {advice.alreadyCovered.map((x, i) => (
+              <span key={i} className="badge good">
+                ✓ {x}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      <p className="faint small">{t('Nazwy, ceny i terminy sprawdź na stronie wydawcy - AI mogło coś pomylić albo kurs mógł się zmienić. Ukończony kurs dopisz w profilu, a kolejne CV go wykorzystają.')}</p>
     </div>
   );
 }
