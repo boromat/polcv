@@ -426,7 +426,7 @@ const fileSafe = (s: string) =>
     .replace(/^_+|_+$/g, '')
     .slice(0, 40);
 
-/** "CLOUDFIDE Spółka z ograniczoną odpowiedzialnością" → "CLOUDFIDE" (krótsza nazwa pliku). */
+/** "PRZYKŁADOWA FIRMA Spółka z ograniczoną odpowiedzialnością" → "PRZYKŁADOWA FIRMA" (krótsza nazwa pliku). */
 export const shortCompany = (s: string) =>
   s
     .replace(/(?:,\s*|\s+)(sp[óo]łka\s+z\s+ograniczon\S+\s+odpowiedzialno\S+|sp\.?\s*z\s*o\.?\s*o\.?|sp[óo]łka\s+akcyjna|s\.?\s*a\.?|sp\.?\s*k\.?|sp\.?\s*j\.?|gmbh|ltd\.?|inc\.?|llc)\s*$/i, '')

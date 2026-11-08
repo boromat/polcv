@@ -374,7 +374,7 @@ describe('kontrole formatu', () => {
   });
 
   it('krótka nazwa firmy w nazwie pliku', () => {
-    expect(shortCompany('CLOUDFIDE SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ')).toBe('CLOUDFIDE');
+    expect(shortCompany('PRZYKŁADOWA FIRMA SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ')).toBe('PRZYKŁADOWA FIRMA');
     expect(shortCompany('Alfasigma Polska Sp. z o.o.')).toBe('Alfasigma Polska');
     expect(shortCompany('Przykład S.A.')).toBe('Przykład');
     expect(shortCompany('Mimosa')).toBe('Mimosa');

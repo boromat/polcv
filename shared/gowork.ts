@@ -2,7 +2,7 @@
 const LEGAL_FORM =
   /(?<![\p{L}\d])(sp[óo]łka\s+(z\s+ograniczon[aą]\s+odpowiedzialno[sś]ci[aą]|z\s+o\.\s*o\.?|akcyjna|komandytow[oa](-akcyjna)?|jawna|cywilna|partnerska)|sp\.\s*z\s*o\.\s*o\.?|sp\.\s*[kj]\.?|s\.\s*k\.\s*a\.?|s\.\s*[ac]\.?|sa|gmbh|ltd\.?|inc\.?|llc)(?![\p{L}\d])/giu;
 
-/** Nazwa firmy bez formy prawnej i cudzysłowów, np. "Cloudfide" z "CLOUDFIDE SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ". */
+/** Nazwa firmy bez formy prawnej i cudzysłowów, np. "PRZYKŁADOWA FIRMA" z "PRZYKŁADOWA FIRMA SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ". */
 export function companyCore(name: string): string {
   const core = name
     .replace(LEGAL_FORM, ' ')

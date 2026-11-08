@@ -3,9 +3,9 @@ import { companyCore, goworkSearchUrl } from '../shared/gowork';
 
 describe('opinie na GoWork', () => {
   it.each([
-    ['CLOUDFIDE SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ', 'CLOUDFIDE'],
-    ['Comarch S.A.', 'Comarch'],
-    ['Orange Polska SA', 'Orange Polska'],
+    ['PRZYKŁADOWA FIRMA SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ', 'PRZYKŁADOWA FIRMA'],
+    ['Lipowy Gaj S.A.', 'Lipowy Gaj'],
+    ['Zielony Ogród Polska SA', 'Zielony Ogród Polska'],
     ['Netguru S.A', 'Netguru'],
     ['Allegro.pl sp. z o.o.', 'Allegro.pl'],
     ['Kowalski i Wspólnicy Sp. z o.o. Sp. k.', 'Kowalski i Wspólnicy'],
@@ -23,9 +23,9 @@ describe('opinie na GoWork', () => {
   });
 
   it('link prowadzi do wyszukiwania na gowork.pl, a bez nazwy firmy go nie ma', () => {
-    const url = new URL(goworkSearchUrl('Comarch S.A.'));
+    const url = new URL(goworkSearchUrl('Lipowy Gaj S.A.'));
     expect(url.hostname).toBe('www.google.com');
-    expect(url.searchParams.get('q')).toBe('Comarch site:gowork.pl');
+    expect(url.searchParams.get('q')).toBe('Lipowy Gaj site:gowork.pl');
     expect(goworkSearchUrl('')).toBe('');
     expect(goworkSearchUrl('   ')).toBe('');
   });
