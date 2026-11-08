@@ -104,6 +104,16 @@ describe('dopasowanie do jednej strony', () => {
     expect(fill).toBeLessThanOrEqual(1);
   });
 
+  it('gdy najmniejsza czcionka nie wystarcza, węższe marginesy (nie poniżej 10 mm) i dalej jedna strona', async () => {
+    const html = longer(9);
+    const fit = (await fitIn(html)) as { scale: number; fill: number; margins: number[] };
+    expect(fit.scale).toBeCloseTo(8.6 / 9.8, 2);
+    expect(fit.margins.every((m) => m >= 10)).toBe(true);
+    expect(fit.margins[0]).toBeLessThan(13); // "modern" ma zwykle 13 mm u góry
+    const { pages } = await htmlToPdf(html);
+    expect(pages).toBe(1);
+  });
+
   it('czcionka nie schodzi poniżej minimum, a za długie CV zgłasza, o ile wystaje', async () => {
     const { pages, fill } = await htmlToPdf(longer(14));
     expect(pages).toBe(2);

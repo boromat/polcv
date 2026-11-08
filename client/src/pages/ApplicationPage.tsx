@@ -204,6 +204,22 @@ export function ApplicationPage() {
 
   const evaluate = () => run(t('Oceniam CV…'), async (step) => evaluateAndReload(app.currentVersion, step));
 
+  const shorten = () =>
+    run(
+      t('Skracam CV do jednej strony…'),
+      async () => {
+        const { cv } = await api.shorten(pid, aid, app.currentVersion);
+        const d = await loadDetail();
+        await loadVersion(d.application.currentVersion);
+        setNotice(
+          cv
+            ? t('AI skróciło CV: to nowa wersja {v}, a poprzednia zostaje na liście wersji.', { v: cv.version })
+            : t('To CV mieści się już na jednej stronie.'),
+        );
+      },
+      t('AI skraca najmniej trafne punkty i zostawia słowa kluczowe z ogłoszenia. To zwykle kilkanaście sekund.'),
+    );
+
   const exportPdf = () =>
     run(t('Zapisuję PDF…'), async () => {
       await api.exportPdf(pid, aid);
@@ -365,6 +381,11 @@ export function ApplicationPage() {
                 <ScoreBadge score={vd.report?.total} incomplete={!!vd.report && vd.report.total == null} />
                 {vd.reportStale && <span className="badge warn">{t('ocena nieaktualna')}</span>}
                 {pages != null && tab === 'cv' && <span className={`badge ${pages > 1 ? 'warn' : ''}`}>{pagesLabel(pages)}</span>}
+                {pages != null && pages > 1 && tab === 'cv' && (
+                  <button className="btn sm" onClick={shorten} title={t('AI skróci to CV tak, żeby zmieściło się na jednej stronie A4. Obecna wersja zostanie na liście.')}>
+                    {t('Skróć do 1 strony')}
+                  </button>
+                )}
               </div>
               <div className="row">
                 <button className="btn ghost sm" onClick={regenerate}>

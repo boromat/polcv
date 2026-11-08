@@ -40,10 +40,11 @@ All notable changes to PolCV are recorded here. The format follows
   parameters a model supports and stops sending a temperature to models that ignore it, so providers
   that enforce the answer format are found again.
 - CVs fit on one A4 page again. When the text runs a little over, the template shrinks the font and
-  spacing (never below 8.6 pt) in the preview, the PDF and the score alike. When even that is not
-  enough, the AI shortens the new CV once by as much as it runs over, keeping the posting's
-  keywords. The prompt also asks for a shorter CV from the start (about 300-420 words, one-line
-  points).
+  spacing (never below 8.6 pt), then the margins (never below 10 mm), in the preview, the PDF and
+  the score alike. When even that is not enough, the AI shortens the new CV once by as much as it
+  runs over, keeping the posting's keywords. An older version that still spills over has a
+  *Shorten to 1 page* button next to its page count. The prompt also asks for a shorter CV from the
+  start (about 300-420 words, one-line points).
 
 ## [1.0.1] - 2026-11-03
 

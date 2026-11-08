@@ -143,6 +143,10 @@ applicationsRouter.put(`${base}/:aid/versions/:v`, async (req, res) => {
   res.json({ cv, pending: svc.pendingSuggestions(cv), profileUpdates });
 });
 
+applicationsRouter.post(`${base}/:aid/versions/:v/shorten`, async (req, res) => {
+  res.json({ cv: await svc.shortenVersion(req.params.pid, req.params.aid, num(req.params.v)) });
+});
+
 applicationsRouter.post(`${base}/:aid/versions/:v/evaluate`, async (req, res) => {
   res.json(await svc.evaluate(req.params.pid, req.params.aid, num(req.params.v)));
 });

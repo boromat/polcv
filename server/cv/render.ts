@@ -144,7 +144,7 @@ li { margin-top: 0.5mm; padding-left: 0.6mm; }
 p { margin: 0; }
 .skills-row { margin-top: 0.6mm; }
 .skills-row b { font-weight: 600; }
-.rodo { margin-top: 5mm; font-size: 7.4pt; line-height: 1.3; color: #66666c; break-inside: avoid; }
+.rodo { margin-top: calc(5mm * var(--fit)); font-size: calc(7.4pt * var(--fit)); line-height: 1.3; color: #66666c; break-inside: avoid; }
 mark.suggested { background: #ffe58f; border-bottom: 2px solid #f5a623; color: inherit; padding: 0 1px; cursor: pointer; }
 mark.suggested.focus { outline: 2px solid #f5a623; }
 `;
@@ -153,6 +153,8 @@ mark.suggested.focus { outline: 2px solid #f5a623; }
 const FONT_PT: Record<TemplateId, number> = { classic: 10.6, modern: 9.8, compact: 9.3 };
 /** Drobniej tekst robi się nieczytelny: dalej czcionki nie zmniejszamy, resztę skraca AI. */
 const MIN_FONT_PT = 8.6;
+/** Węższych marginesów nie robimy: tekst przy krawędzi kartki wygląda na upchnięty. */
+const MIN_MARGIN_MM = 10;
 
 const TEMPLATE_CSS: Record<TemplateId, string> = {
   classic: `
@@ -191,18 +193,24 @@ const MARGINS: Record<TemplateId, [number, number, number]> = {
 
 function docHtml(template: TemplateId, lang: 'pl' | 'en', title: string, body: string, mode: RenderMode, extraHead = ''): string {
   const [mt, ms, mb] = MARGINS[template];
-  const pageCss = `@page { size: A4; margin: ${mt}mm ${ms}mm ${mb}mm; } :root { --m-top: ${mt}mm; --m-side: ${ms}mm; --m-bottom: ${mb}mm; }`;
+  const pageCss = (t: number, side: number, b: number) =>
+    `@page { size: A4; margin: ${t}mm ${side}mm ${b}mm; } :root { --m-top: ${t}mm; --m-side: ${side}mm; --m-bottom: ${b}mm; }`;
   const minFit = Math.min(1, MIN_FONT_PT / FONT_PT[template]);
-  // Treść trochę dłuższa niż strona: zmniejszamy tekst i odstępy (--fit), aż zmieści się na jednej kartce.
-  // Zwraca skalę i zapełnienie strony (powyżej 1 = nie mieści się nawet przy najmniejszej czcionce).
+  // Treść trochę dłuższa niż strona: najpierw mniejszy tekst i odstępy (--fit), a gdy czcionka jest już najmniejsza,
+  // węższe marginesy. Zwraca skalę i zapełnienie strony (powyżej 1 = nie mieści się nawet wtedy).
   const fitter = `<script>
 window.__cvFit=function(){
-  var s=document.querySelector('.sheet'), root=document.documentElement; if(!s) return null;
-  var mm=s.offsetWidth/210, avail=297-${mt}-${mb}-1;
-  function used(){ var end=0; Array.prototype.forEach.call(s.children,function(ch){ if(!ch.classList.contains('page-guide')) end=Math.max(end, ch.offsetTop+ch.offsetHeight); }); return end/mm-${mt}; }
+  var s=document.querySelector('.sheet'), root=document.documentElement, page=document.getElementById('page-css'); if(!s||!page) return null;
+  var mm=s.offsetWidth/210, m;
+  function margins(t,side,b){ m=[t,side,b]; window.__cvMargins=[t,b];
+    page.textContent='@page { size: A4; margin: '+t+'mm '+side+'mm '+b+'mm; } :root { --m-top: '+t+'mm; --m-side: '+side+'mm; --m-bottom: '+b+'mm; }'; }
+  function used(){ var end=0; Array.prototype.forEach.call(s.children,function(ch){ if(!ch.classList.contains('page-guide')) end=Math.max(end, ch.offsetTop+ch.offsetHeight); }); return end/mm-m[0]; }
+  function avail(){ return 297-m[0]-m[2]-1; }
+  margins(${mt},${ms},${mb});
   var k=1; root.style.setProperty('--fit','1');
-  while(used()>avail && k>${minFit}){ k=Math.max(${minFit}, Math.round((k-0.01)*1000)/1000); root.style.setProperty('--fit',String(k)); }
-  return { scale:k, fill:used()/avail };
+  while(used()>avail() && k>${minFit}){ k=Math.max(${minFit}, Math.round((k-0.01)*1000)/1000); root.style.setProperty('--fit',String(k)); }
+  while(used()>avail() && Math.max(m[0],m[1],m[2])>${MIN_MARGIN_MM}){ margins(Math.max(${MIN_MARGIN_MM},m[0]-1), Math.max(${MIN_MARGIN_MM},m[1]-1), Math.max(${MIN_MARGIN_MM},m[2]-1)); }
+  return { scale:k, fill:used()/avail(), margins:m };
 };
 </script>`;
   const guide =
@@ -214,7 +222,7 @@ window.__cvFit=function(){
     var s=document.querySelector('.sheet'); if(!s) return;
     document.querySelectorAll('.page-guide').forEach(function(g){g.remove();});
     window.__cvFit();
-    var mm=s.offsetWidth/210, top=${mt}*mm, contentH=(297-${mt}-${mb})*mm;
+    var m=window.__cvMargins||[${mt},${mb}], mm=s.offsetWidth/210, top=m[0]*mm, contentH=(297-m[0]-m[1])*mm;
     var end=0;
     Array.prototype.forEach.call(s.children,function(ch){ if(!ch.classList.contains('page-guide')) end=Math.max(end, ch.offsetTop+ch.offsetHeight); });
     var n=1;
@@ -231,7 +239,7 @@ window.__cvFit=function(){
 </script>`
       : '';
   return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><title>${esc(title)}</title>
-<style>${fontCss(FONT_PKGS[template].pkg)}${pageCss}${BASE_CSS}${TEMPLATE_CSS[template]}</style>${extraHead}</head>
+<style>${fontCss(FONT_PKGS[template].pkg)}${BASE_CSS}${TEMPLATE_CSS[template]}</style><style id="page-css">${pageCss(mt, ms, mb)}</style>${extraHead}</head>
 <body><div class="sheet">${body}</div>${fitter}${guide}</body></html>`;
 }
 

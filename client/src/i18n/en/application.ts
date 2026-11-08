@@ -272,4 +272,10 @@ export const application: Record<string, string> = {
   'Wpisz te dane, np. liczby, skalę albo efekt.': 'Enter the data, e.g. numbers, scale or the result.',
   'Poprawki oznaczone „wymaga Twoich danych” potrzebują informacji, których AI nie zna (np. liczb). Kliknij „Uzupełnij”: odpowiedź trafi do profilu i do następnej poprawki.': 'Fixes marked "needs your input" need information the AI does not have (such as numbers). Click "Fill in": the answer goes to your profile and into the next improvement.',
   'Zapisano też w profilu: {what}.': 'Also saved to your profile: {what}.',
+  'Skracam CV do jednej strony…': 'Shortening the CV to one page…',
+  'AI skróciło CV: to nowa wersja {v}, a poprzednia zostaje na liście wersji.': 'The AI shortened the CV: this is new version {v}, and the previous one stays in the version list.',
+  'To CV mieści się już na jednej stronie.': 'This CV already fits on one page.',
+  'AI skraca najmniej trafne punkty i zostawia słowa kluczowe z ogłoszenia. To zwykle kilkanaście sekund.': 'The AI shortens the least relevant points and keeps the keywords from the posting. This usually takes 10-20 seconds.',
+  'AI skróci to CV tak, żeby zmieściło się na jednej stronie A4. Obecna wersja zostanie na liście.': 'The AI will shorten this CV to fit on one A4 page. The current version stays in the list.',
+  'Skróć do 1 strony': 'Shorten to 1 page',
 };

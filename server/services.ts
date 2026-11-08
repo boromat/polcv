@@ -248,6 +248,25 @@ async function fitToPage(profile: Profile, app: Application, draft: CvVersion, c
   return content;
 }
 
+/**
+ * "Skróć do 1 strony" przy istniejącej wersji: AI skraca ją raz, a skrócona zostaje nową, bieżącą wersją
+ * (poprzednia zostaje na liście). null, gdy CV już mieści się na stronie.
+ */
+export async function shortenVersion(profileId: string, appId: string, v: number): Promise<CvVersion | null> {
+  const app = await store.getApplication(profileId, appId);
+  if (!app.posting) throw new HttpError(409, tr('Brak przeanalizowanego ogłoszenia.'));
+  const [profile, current] = await Promise.all([store.getProfile(profileId), store.getVersion(profileId, appId, v)]);
+  const base = applyDecisions(current);
+  const content = await fitToPage(profile, app, { ...current, content: base, decisions: {} }, factTexts(base));
+  if (content === base) return null;
+  const t = nowIso();
+  const cv = await store.addVersion(profileId, appId, (version) => ({ ...current, version, createdAt: t, updatedAt: t, origin: 'improved', content, decisions: {} }));
+  await store.updateApplication(profileId, appId, (a) => {
+    a.currentVersion = cv.version;
+  });
+  return cv;
+}
+
 export async function previewHtml(profileId: string, appId: string, v: number): Promise<string> {
   const [profile, cv] = await Promise.all([store.getProfile(profileId), store.getVersion(profileId, appId, v)]);
   return renderCv(profile, cv, 'preview');

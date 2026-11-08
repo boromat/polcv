@@ -82,4 +82,27 @@ describe('CV na jedną stronę', () => {
     expect(cv.content.summary.text).not.toContain('ZA-DŁUGIE');
     expect((await store.getApplication(pid, aid)).currentVersion).toBe(cv.version);
   });
+
+  it('"Skróć do 1 strony": skrócona wersja jest nowa i bieżąca, poprzednia zostaje', async () => {
+    const { pid, aid } = await setup();
+    // Wersja sprzed poprawki: zapisana bez skracania.
+    const long = await store.addVersion(pid, aid, (version) => ({ ...structuredClone(fixtures.cv), version, content: longCv() }));
+    replies = [JSON.stringify(fixtures.cv.content)];
+    const short = await svc.shortenVersion(pid, aid, long.version);
+    expect(short).not.toBeNull();
+    expect(sent).toHaveLength(1);
+    expect(sent[0].messages[0].content).toContain('SKRACANIE DO JEDNEJ STRONY');
+    expect(short!.content.summary.text).not.toContain('ZA-DŁUGIE');
+    expect((await store.getApplication(pid, aid)).currentVersion).toBe(short!.version);
+    expect((await store.getVersion(pid, aid, long.version)).content.summary.text).toContain('ZA-DŁUGIE');
+  });
+
+  it('"Skróć do 1 strony" przy CV, które się mieści: bez AI i bez nowej wersji', async () => {
+    const { pid, aid } = await setup();
+    replies = [JSON.stringify(fixtures.cv.content)];
+    const cv = await svc.generate(pid, aid);
+    sent.length = 0;
+    expect(await svc.shortenVersion(pid, aid, cv.version)).toBeNull();
+    expect(sent).toHaveLength(0);
+  });
 });
