@@ -8,7 +8,7 @@ import { HttpError, newId, nowIso } from './storage/store';
 import { fetchPosting } from './jobs/fetchPosting';
 import { parsePosting } from './llm/prompts/parsePosting';
 import { gapQuestions } from './llm/prompts/gapQuestions';
-import { generateCv, improveCv } from './llm/prompts/generateCv';
+import { generateCv, improveCv, shortenCv } from './llm/prompts/generateCv';
 import { evaluateCv } from './llm/prompts/evaluateCv';
 import { coverLetter, interviewPrep } from './llm/prompts/extras';
 import { applyDecisions } from './llm/prompts/common';
@@ -159,26 +159,28 @@ export async function generate(profileId: string, appId: string, language?: 'pl'
   const lang = language ?? decideLanguage(app.posting);
   // Liczby z potwierdzonych tekstów wcześniejszych wersji tej aplikacji (np. zaakceptowanych sugestii) nie wracają jako sugestie.
   const confirmed = (await store.listVersions(profileId, appId)).flatMap((v) => factTexts(applyDecisions(v)));
-  const content = withFreshIds(await generateCv(profile, app.posting, lang, ctxOf(app, 'pisanie CV'), confirmed));
-  content.language = lang;
+  const written = withFreshIds(await generateCv(profile, app.posting, lang, ctxOf(app, 'pisanie CV'), confirmed));
+  written.language = lang;
 
   const prev = app.currentVersion ? await store.getVersion(profileId, appId, app.currentVersion).catch(() => null) : null;
   const photo = decidePhoto(app.posting, lang, !!profile.photo);
   const rodo = decideRodo(app.posting, lang);
   const t = nowIso();
-  // Numer: kolejny po najwyższej istniejącej wersji (użytkownik mógł wrócić do starszej).
-  const cv = await store.addVersion(profileId, appId, (version) => ({
-    version,
+  const draft: CvVersion = {
+    version: 0,
     createdAt: t,
     updatedAt: t,
     origin: 'generated',
-    content,
+    content: written,
     decisions: {},
     template: template ?? prev?.template ?? 'modern',
     photo: photo.include,
     photoReason: photo.reason,
     rodo,
-  }));
+  };
+  const content = await fitToPage(profile, app, draft, confirmed);
+  // Numer: kolejny po najwyższej istniejącej wersji (użytkownik mógł wrócić do starszej).
+  const cv = await store.addVersion(profileId, appId, (version) => ({ ...draft, version, content }));
   // Aplikacja z dysku, a nie sprzed generowania - status czy notatka zmienione w międzyczasie zostają.
   await store.updateApplication(profileId, appId, (a) => {
     a.currentVersion = cv.version;
@@ -207,6 +209,18 @@ export async function setCurrentVersion(profileId: string, appId: string, v: num
 async function renderCv(profile: Profile, cv: CvVersion, mode: RenderMode): Promise<string> {
   const photo = photoDataUri(store.profileDir(profile.id), profile.photo);
   return renderCvHtml(cv, profile, photo, mode);
+}
+
+/**
+ * CV, które nawet przy najmniejszej czcionce nie mieści się na stronie A4, AI skraca raz o tyle, ile wystaje.
+ * Zwraca treść do zapisania: bez zmian, gdy CV się mieści.
+ */
+async function fitToPage(profile: Profile, app: Application, draft: CvVersion, confirmed: string[]): Promise<CvContent> {
+  const { pages, fill } = await htmlToPdf(await renderCv(profile, draft, 'pdf'));
+  if (pages <= 1) return draft.content;
+  const content = withFreshIds(await shortenCv(profile, app.posting!, draft.content, fill ?? 1.2, ctxOf(app, 'skracanie CV'), confirmed));
+  content.language = draft.content.language;
+  return content;
 }
 
 export async function previewHtml(profileId: string, appId: string, v: number): Promise<string> {
@@ -273,8 +287,9 @@ export async function improve(profileId: string, appId: string): Promise<Improve
   const before = honestReport(report)?.total ?? null;
   if (!hasWork(plan)) return { kept: 'none', version: null, before, after: null, needsInput: plan.needsInput, message: nothingToImprove(plan) };
 
-  const content = withFreshIds(await improveCv(profile, app.posting, base, plan, ctxOf(app, 'poprawa CV')));
-  content.language = current.content.language;
+  const improved = withFreshIds(await improveCv(profile, app.posting, base, plan, ctxOf(app, 'poprawa CV')));
+  improved.language = current.content.language;
+  const content = await fitToPage(profile, app, { ...current, content: improved, decisions: {} }, factTexts(base));
   const t = nowIso();
   const cv = await store.addVersion(profileId, appId, (version) => ({ ...current, version, createdAt: t, updatedAt: t, origin: 'improved', content, decisions: {} }));
   const next = await evaluate(profileId, appId, cv.version);

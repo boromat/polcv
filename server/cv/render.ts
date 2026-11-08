@@ -114,6 +114,7 @@ function bulletsHtml(items: CvText[], decisions: CvVersion['decisions'], mode: R
 // ---------- CSS szablonów ----------
 
 const BASE_CSS = `
+:root { --fit: 1; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 body { font-family: var(--font), Arial, sans-serif; font-size: var(--fs); line-height: 1.38; color: #1d1d1f; background: #fff; }
@@ -129,7 +130,7 @@ h1.name { font-size: var(--fs-name); font-weight: 700; line-height: 1.1; letter-
 .headline { font-size: calc(var(--fs) * 1.12); font-weight: 600; margin-top: 1.2mm; }
 .contact { margin-top: 1.8mm; font-size: calc(var(--fs) * 0.95); }
 .contact .sep { color: #9a9aa0; padding: 0 .35em; }
-img.photo { width: 28mm; height: 35mm; object-fit: cover; border-radius: 2px; flex-shrink: 0; }
+img.photo { width: calc(28mm * var(--fit)); height: calc(35mm * var(--fit)); object-fit: cover; border-radius: 2px; flex-shrink: 0; }
 section { margin-top: var(--gap); }
 h2 { font-size: calc(var(--fs) * 1.08); font-weight: 700; break-after: avoid; margin-bottom: 1.6mm; }
 .entry { break-inside: avoid; margin-top: 2mm; }
@@ -148,28 +149,33 @@ mark.suggested { background: #ffe58f; border-bottom: 2px solid #f5a623; color: i
 mark.suggested.focus { outline: 2px solid #f5a623; }
 `;
 
+/** Bazowa wielkość tekstu w szablonach (pt). */
+const FONT_PT: Record<TemplateId, number> = { classic: 10.6, modern: 9.8, compact: 9.3 };
+/** Drobniej tekst robi się nieczytelny: dalej czcionki nie zmniejszamy, resztę skraca AI. */
+const MIN_FONT_PT = 8.6;
+
 const TEMPLATE_CSS: Record<TemplateId, string> = {
   classic: `
-:root { --font: 'Source Sans 3'; --fs: 10.6pt; --fs-name: 22pt; --gap: 4.2mm; }
+:root { --font: 'Source Sans 3'; --fs: calc(${FONT_PT.classic}pt * var(--fit)); --fs-name: calc(22pt * var(--fit)); --gap: calc(4.2mm * var(--fit)); }
 header.cv-header { border-bottom: 1.2px solid #1d1d1f; padding-bottom: 3mm; }
-h2 { letter-spacing: .03em; font-size: 11.2pt; border-bottom: 0.8px solid #b9b9bf; padding-bottom: .8mm; }
+h2 { letter-spacing: .03em; font-size: calc(11.2pt * var(--fit)); border-bottom: 0.8px solid #b9b9bf; padding-bottom: .8mm; }
 `,
   modern: `
-:root { --font: 'Inter'; --fs: 9.8pt; --fs-name: 21pt; --gap: 4.4mm; --accent: #1f4e79; }
+:root { --font: 'Inter'; --fs: calc(${FONT_PT.modern}pt * var(--fit)); --fs-name: calc(21pt * var(--fit)); --gap: calc(4.4mm * var(--fit)); --accent: #1f4e79; }
 h1.name { color: var(--accent); }
 .headline { color: #3a3a40; }
 header.cv-header { padding-bottom: 2.5mm; border-bottom: 2.4px solid var(--accent); }
-h2 { color: var(--accent); font-size: 10.4pt; letter-spacing: .01em; }
+h2 { color: var(--accent); font-size: calc(10.4pt * var(--fit)); letter-spacing: .01em; }
 h2::before { content: ''; display: inline-block; width: 3.2mm; height: 3.2mm; background: var(--accent); border-radius: 1px; margin-right: 2mm; vertical-align: -0.3mm; }
 .entry-head .title { color: #111; }
 li::marker { color: var(--accent); }
 `,
   compact: `
-:root { --font: 'IBM Plex Sans'; --fs: 9.3pt; --fs-name: 18pt; --gap: 3.2mm; }
+:root { --font: 'IBM Plex Sans'; --fs: calc(${FONT_PT.compact}pt * var(--fit)); --fs-name: calc(18pt * var(--fit)); --gap: calc(3.2mm * var(--fit)); }
 body { line-height: 1.3; }
 header.cv-header { border-bottom: 1px solid #1d1d1f; padding-bottom: 2mm; }
-h2 { letter-spacing: .02em; font-size: 10.2pt; border-bottom: 0.6px solid #c3c3c8; padding-bottom: .5mm; margin-bottom: 1.2mm; }
-img.photo { width: 24mm; height: 30mm; }
+h2 { letter-spacing: .02em; font-size: calc(10.2pt * var(--fit)); border-bottom: 0.6px solid #c3c3c8; padding-bottom: .5mm; margin-bottom: 1.2mm; }
+img.photo { width: calc(24mm * var(--fit)); height: calc(30mm * var(--fit)); }
 .entry { margin-top: 1.4mm; }
 ul { margin-top: .4mm; }
 li { margin-top: .2mm; }
@@ -186,6 +192,19 @@ const MARGINS: Record<TemplateId, [number, number, number]> = {
 function docHtml(template: TemplateId, lang: 'pl' | 'en', title: string, body: string, mode: RenderMode, extraHead = ''): string {
   const [mt, ms, mb] = MARGINS[template];
   const pageCss = `@page { size: A4; margin: ${mt}mm ${ms}mm ${mb}mm; } :root { --m-top: ${mt}mm; --m-side: ${ms}mm; --m-bottom: ${mb}mm; }`;
+  const minFit = Math.min(1, MIN_FONT_PT / FONT_PT[template]);
+  // Treść trochę dłuższa niż strona: zmniejszamy tekst i odstępy (--fit), aż zmieści się na jednej kartce.
+  // Zwraca skalę i zapełnienie strony (powyżej 1 = nie mieści się nawet przy najmniejszej czcionce).
+  const fitter = `<script>
+window.__cvFit=function(){
+  var s=document.querySelector('.sheet'), root=document.documentElement; if(!s) return null;
+  var mm=s.offsetWidth/210, avail=297-${mt}-${mb}-1;
+  function used(){ var end=0; Array.prototype.forEach.call(s.children,function(ch){ if(!ch.classList.contains('page-guide')) end=Math.max(end, ch.offsetTop+ch.offsetHeight); }); return end/mm-${mt}; }
+  var k=1; root.style.setProperty('--fit','1');
+  while(used()>avail && k>${minFit}){ k=Math.max(${minFit}, Math.round((k-0.01)*1000)/1000); root.style.setProperty('--fit',String(k)); }
+  return { scale:k, fill:used()/avail };
+};
+</script>`;
   const guide =
     mode === 'preview'
       ? `<script>
@@ -194,6 +213,7 @@ function docHtml(template: TemplateId, lang: 'pl' | 'en', title: string, body: s
   function draw(){
     var s=document.querySelector('.sheet'); if(!s) return;
     document.querySelectorAll('.page-guide').forEach(function(g){g.remove();});
+    window.__cvFit();
     var mm=s.offsetWidth/210, top=${mt}*mm, contentH=(297-${mt}-${mb})*mm;
     var end=0;
     Array.prototype.forEach.call(s.children,function(ch){ if(!ch.classList.contains('page-guide')) end=Math.max(end, ch.offsetTop+ch.offsetHeight); });
@@ -212,7 +232,7 @@ function docHtml(template: TemplateId, lang: 'pl' | 'en', title: string, body: s
       : '';
   return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><title>${esc(title)}</title>
 <style>${fontCss(FONT_PKGS[template].pkg)}${pageCss}${BASE_CSS}${TEMPLATE_CSS[template]}</style>${extraHead}</head>
-<body><div class="sheet">${body}</div>${guide}</body></html>`;
+<body><div class="sheet">${body}</div>${fitter}${guide}</body></html>`;
 }
 
 function headerHtml(profile: Profile, headline: string, photoDataUri: string | null): string {

@@ -17,7 +17,7 @@ STRUKTURA:
 - "education": szczegóły tylko trafne (kierunek, specjalizacja, ważne przedmioty/projekty, średnia jeśli wysoka).
 - "certificates", "languages": z profilu; w "languages" poziom w skali CEFR, jeśli znany.
 - "interests": maks. 3 krótkie pozycje z profilu, tylko jeśli pomagają (inaczej pusta lista).
-- Objętość: cel to JEDNA strona A4 (ok. 350–480 słów łącznie). Lepiej mniej i trafniej.
+- Objętość: CV musi zmieścić się na JEDNEJ stronie A4 razem z nagłówkiem, zdjęciem i klauzulą RODO, czyli łącznie ok. 300-420 słów. Punkt to jedna linia (do ok. 120 znaków), maks. 3 punkty na pozycję. Lepiej mniej i trafniej.
 - "id" każdego obiektu tekstu: dowolny unikalny (np. s1, e1b1).
 - Klauzulę RODO i zdjęcie program dodaje do CV sam, według ogłoszenia: nie wpisuj ich do treści i nie pisz o nich w "notes".
 - "notes": 2–4 zdania ${forUser()} dla kandydata: co podkreślono pod to ogłoszenie i jakich wymagań brakuje (żeby mógł się douczyć lub uzupełnić profil).
@@ -55,7 +55,7 @@ Dostajesz obecną wersję CV i PLAN POPRAWEK wyliczony z raportu oceny. Wprowad�
 - "stuffed": słowa powtórzone za często: zostaw każde maks. 2-3 razy.
 - "keepKeywords": słowa kluczowe, które obecne CV już ma. Każde musi zostać w CV (możesz je przenieść albo przeredagować zdanie).
 - Punkty obecnego CV w 1. osobie ("Przygotowywałem…") przepisz formą rzeczownikową ("Przygotowywanie…"), zachowując ich sens.
-- CV MUSI nadal zmieścić się na jednej stronie (łącznie maks. ~480 słów). Nie wydłużaj go: jeśli coś dopisujesz, skróć albo usuń coś mniej trafnego.
+- CV MUSI nadal zmieścić się na jednej stronie (łącznie maks. ~420 słów). Nie wydłużaj go: jeśli coś dopisujesz, skróć albo usuń coś mniej trafnego.
 - Zachowaj język CV. Zwróć CAŁE CV. W "notes" ${forUser()} napisz krótko, co zmieniono.`;
 
 export async function improveCv(
@@ -78,4 +78,36 @@ export async function improveCv(
   });
   // Liczby z punktów, które kandydat już zaakceptował, są potwierdzone.
   return groundCv(content, profile, { lang, confirmed: factTexts(current), names: numberedNames(posting) });
+}
+
+const SHORTEN_EXTRA = (cut: number) => `
+SKRACANIE DO JEDNEJ STRONY:
+Dostajesz gotowe CV, które nie mieści się na jednej stronie A4 nawet przy zmniejszonej czcionce. Skróć treść o ok. ${cut}%.
+- Najpierw tnij to, co najmniej trafne dla ogłoszenia: mniej ważne projekty i doświadczenie skróć do 1 punktu albo pomiń, długie punkty skróć do jednej linii (do ok. 110 znaków), listę umiejętności ogranicz do 12-15 pozycji (najpierw te z ogłoszenia), podsumowanie do 2-3 zdań.
+- Nie dopisuj niczego nowego. Zachowaj słowa kluczowe z ogłoszenia, a w punktach, które zostają, fakty, "sourceId" i status (fact/suggested).
+- Zachowaj język CV. Zwróć CAŁE CV. Pole "notes" przepisz i dopisz na końcu jedno zdanie ${forUser()}, co skrócono, żeby CV zmieściło się na stronie.`;
+
+/** `fill`: ile strony zajmuje obecne CV przy najmniejszej czcionce (np. 1.1 = 10% za dużo). */
+export async function shortenCv(
+  profile: Profile,
+  posting: JobPosting,
+  current: CvContent,
+  fill: number,
+  ctx: LlmContext,
+  confirmed: string[] = [],
+): Promise<CvContent> {
+  const lang = current.language;
+  // Nagłówek, zdjęcie i klauzula się nie skracają, więc tekstu trzeba uciąć więcej, niż wystaje.
+  const cut = Math.min(40, Math.max(10, Math.ceil((1 - 1 / fill) * 100) + 10));
+  const content = await callJson({
+    schema: checkedImproveSchema(profile, lang, current, posting.keywords),
+    schemaName: 'cv',
+    tier: 'main',
+    temperature: 0.3,
+    maxTokens: 10_000,
+    system: SYSTEM(lang) + SHORTEN_EXTRA(cut),
+    user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nOBECNE CV:\n${json(current)}\n\nSkróć CV, żeby zmieściło się na jednej stronie.`,
+    ctx,
+  });
+  return groundCv(content, profile, { lang, confirmed: [...confirmed, ...factTexts(current)], names: numberedNames(posting) });
 }

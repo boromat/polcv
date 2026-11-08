@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import { renderCvHtml } from '../server/cv/render';
 import { htmlToPdf } from '../server/cv/pdf';
-import { closeBrowser } from '../server/cv/browser';
+import { closeBrowser, withPage } from '../server/cv/browser';
 import { RODO_STANDARD } from '../server/cv/rodo';
 import { checkFormat, withoutClause } from '../server/ats/formatChecks';
 import { applyDecisions } from '../server/llm/prompts/common';
@@ -77,5 +77,43 @@ describe('PDF w obie strony (render → PDF → tekst jak w ATS)', () => {
     const text = raw.replace(/\s+/g, ' ');
     expect(text).toContain('Rozwijanie zasięgu profilu');
     expect(text).not.toContain('o ok. 30%');
+  });
+});
+
+describe('dopasowanie do jednej strony', () => {
+  /** CV z doświadczeniem powtórzonym `n` razy: 8 to trochę za dużo na stronę, 14 to dużo za dużo. */
+  const longer = (n: number) => {
+    const content = structuredClone(cv.content);
+    content.experience = Array.from({ length: n }, () => structuredClone(cv.content.experience)).flat();
+    return renderCvHtml({ ...cv, content, decisions: { b2: 'accepted' } }, profile, null, 'pdf');
+  };
+  const fitIn = (html: string) =>
+    withPage(async (page) => {
+      await page.setContent(html, { waitUntil: 'load' });
+      await page.evaluate(() => document.fonts.ready);
+      return page.evaluate(() => (window as any).__cvFit() as { scale: number; fill: number });
+    });
+
+  it('treść trochę dłuższa niż strona: mniejsza czcionka i jedna strona', async () => {
+    const html = longer(8);
+    const fit = await fitIn(html);
+    expect(fit.scale).toBeLessThan(1);
+    expect(fit.fill).toBeLessThanOrEqual(1);
+    const { pages, fill } = await htmlToPdf(html);
+    expect(pages).toBe(1);
+    expect(fill).toBeLessThanOrEqual(1);
+  });
+
+  it('czcionka nie schodzi poniżej minimum, a za długie CV zgłasza, o ile wystaje', async () => {
+    const { pages, fill } = await htmlToPdf(longer(14));
+    expect(pages).toBe(2);
+    expect(fill).toBeGreaterThan(1);
+    // Najmniejsza skala w szablonie "modern" (9,8 pt) to 8,6 pt.
+    expect((await fitIn(longer(14))).scale).toBeCloseTo(8.6 / 9.8, 2);
+  });
+
+  it('krótkie CV zostaje w pełnym rozmiarze', async () => {
+    const fit = await fitIn(renderCvHtml(cv, profile, null, 'pdf'));
+    expect(fit.scale).toBe(1);
   });
 });
