@@ -8,7 +8,8 @@ import { z } from 'zod';
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'polcv-polanon-'));
 process.env.CV_DATA_DIR = dir;
 
-const { polanonStatus } = await import('../server/privacy/polanon');
+const { polanonStatus, profileTerms, linkHandle, streetParts } = await import('../server/privacy/polanon');
+const { profile } = await import('./fixtures');
 const { collectStrings, replaceStrings } = await import('../server/llm/strings');
 const store = await import('../server/storage/store');
 
@@ -28,6 +29,53 @@ describe('teksty w odpowiedzi AI', () => {
     collectStrings(value, texts);
     expect(texts).toEqual(['x', 'y', 'z']);
     expect(replaceStrings(value, ['X', 'Y', 'Z'][Symbol.iterator]())).toEqual({ a: 'X', list: ['Y', { b: 'Z', n: 3, ok: true, none: null }], empty: [] });
+  });
+});
+
+// Dane FIKCYJNE: ta osoba nie istnieje.
+const kandydat = {
+  ...profile,
+  contact: {
+    fullName: 'Michał Żółtowski',
+    email: 'michal.zoltowski@example.com',
+    phone: '+48 601 234 567',
+    location: 'Kraków, Wrzosowa 12/4',
+    links: [
+      { label: 'GitHub', url: 'https://github.com/mzoltowski' },
+      { label: 'LinkedIn', url: 'https://www.linkedin.com/in/michal-zoltowski-example/' },
+    ],
+  },
+  projects: [
+    { id: 'pr1', name: 'Weather App', role: '', start: '2024', end: '', description: '', technologies: [], link: 'https://mzoltowski.github.io/weather-app', achievements: [] },
+  ],
+};
+
+describe('dane z profilu, które polanon maskuje zawsze', () => {
+  it('login z linku do profilu, także z GitHub Pages', () => {
+    expect(linkHandle('https://github.com/mzoltowski/weather-app')).toBe('mzoltowski');
+    expect(linkHandle('mzoltowski.github.io')).toBe('mzoltowski');
+    expect(linkHandle('https://www.linkedin.com/in/michal-zoltowski-example/')).toBe('michal-zoltowski-example');
+    expect(linkHandle('https://michalzoltowski.example')).toBe('');
+  });
+
+  it('z miejscowości tylko ulica z numerem, miasto zostaje dla AI', () => {
+    expect(streetParts('Kraków, Wrzosowa 12/4')).toEqual(['Wrzosowa 12/4']);
+    expect(streetParts('ul. Wrzosowa 12/4, 31-542 Kraków')).toEqual(['ul. Wrzosowa 12/4']);
+    expect(streetParts('Kraków')).toEqual([]);
+  });
+
+  it('imię i nazwisko, samo nazwisko, ulica, linki i loginy bez powtórzeń', () => {
+    expect(profileTerms(kandydat)).toEqual([
+      { type: 'PERSON', text: 'Michał Żółtowski' },
+      { type: 'PERSON', text: 'Żółtowski' },
+      { type: 'EMAIL', text: 'michal.zoltowski@example.com' },
+      { type: 'PHONE', text: '+48 601 234 567' },
+      { type: 'ADDRESS', text: 'Wrzosowa 12/4' },
+      { type: 'LINK', text: 'https://github.com/mzoltowski' },
+      { type: 'LINK', text: 'https://www.linkedin.com/in/michal-zoltowski-example/' },
+      { type: 'LINK', text: 'mzoltowski' },
+      { type: 'LINK', text: 'michal-zoltowski-example' },
+    ]);
   });
 });
 
@@ -88,6 +136,19 @@ describe.skipIf(!withPolanon)('maskowanie przez polanon', () => {
     expect(masked.text).not.toMatch(/olena|shevchenko/i);
     expect(masked.text).toContain('<LINK_1>');
     expect(masked.text).toContain('junior QA');
+    expect(await masked.restore({ t: masked.text })).toEqual({ t: text });
+  });
+
+  it('login z GitHuba bez linku, nazwisko małymi literami i ulica bez "ul." też', async () => {
+    const { maskForAi } = await import('../server/privacy/polanon');
+    const text = [
+      '{"login": "mzoltowski", "repo": "mzoltowski.github.io"}',
+      'mój github to mzoltowski, pracowałem u ojca w żółtowski transport',
+      '"location": "Kraków, Wrzosowa 12/4"',
+    ].join('\n');
+    const masked = await maskForAi(text, { ...store.DEFAULT_SETTINGS, maskPii: true }, profileTerms(kandydat));
+    expect(masked.text).not.toMatch(/mzoltowski|żółtowski|wrzosowa/i);
+    expect(masked.text).toContain('Kraków');
     expect(await masked.restore({ t: masked.text })).toEqual({ t: text });
   });
 });

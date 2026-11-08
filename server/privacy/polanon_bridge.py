@@ -15,8 +15,10 @@ import json
 import re
 import sys
 
-#: Typy danych kandydata, które PolCV podaje z profilu; LINK to typ własny (token <LINK_1>).
-PROFILE_TYPES = frozenset({"PERSON", "EMAIL", "PHONE", "LINK"})
+#: Typy danych kandydata, które PolCV podaje z profilu. LINK (token <LINK_1>) jest w polanonie
+#: wbudowany od wersji po 0.2.1, a w starszych to typ własny tego strażnika; ADDRESS to ulica z pola
+#: z miejscowością, zapisana bez "ul." i bez kodu pocztowego, której reguły nie rozpoznają.
+PROFILE_TYPES = frozenset({"PERSON", "EMAIL", "PHONE", "LINK", "ADDRESS"})
 
 
 def profile_guard(terms: list[dict]):

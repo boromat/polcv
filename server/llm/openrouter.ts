@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { appendUsage, getProfile, getSettings, HttpError, nowIso } from '../storage/store';
-import { maskForAi, profileTerms, TOKENS_NOTE } from '../privacy/polanon';
+import { maskForAi, profileTerms, TOKENS_NOTE, type ProfileTerm } from '../privacy/polanon';
 import { cleanTail, plainDashes } from './strings';
 import { tr } from '../i18n';
 
@@ -25,6 +25,8 @@ export interface CallOptions<T> {
   verbatim?: boolean;
   /** Temperatura nowej próby od zera (po zapętleniu albo drugiej odrzuconej odpowiedzi); domyślnie 0.5 przy niskiej temperaturze, inaczej 0.2. */
   retryTemperature?: number;
+  /** Dane do maskowania zawsze, których nie ma w profilu, np. login z GitHuba wpisany przy imporcie projektów. */
+  terms?: ProfileTerm[];
 }
 
 const DASH_NOTE = `
@@ -153,7 +155,10 @@ export async function callJson<T>(opts: CallOptions<T>): Promise<T> {
   const temperature = opts.temperature ?? 0.4;
   // Opcjonalnie (polanon): dane osobowe zamienione na tokeny, zanim cokolwiek wyjdzie do OpenRouter.
   const masked = settings.maskPii
-    ? await maskForAi(opts.user, settings, profileTerms(opts.ctx.profileId ? await getProfile(opts.ctx.profileId).catch(() => null) : null))
+    ? await maskForAi(opts.user, settings, [
+        ...profileTerms(opts.ctx.profileId ? await getProfile(opts.ctx.profileId).catch(() => null) : null),
+        ...(opts.terms ?? []).filter((t) => t.text.trim()),
+      ])
     : null;
   const user = masked?.text ?? opts.user;
   const params = await modelParams(model);

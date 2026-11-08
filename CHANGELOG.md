@@ -53,6 +53,12 @@ All notable changes to PolCV are recorded here. The format follows
   "Tworzę…"), instead of the third person ("Zna…", "Tworzy…"). Present tense keeps it free of
   gendered past forms, and a summary in the third person goes back to the model for a fix. Points
   keep the usual noun form ("Tworzenie…").
+- With *Mask personal data* on, more of your own data is masked before it reaches the AI: the
+  GitHub or LinkedIn login from your profile and project links wherever it appears, also without
+  the link (the GitHub import sends it as a JSON field and in repository names), your surname on
+  its own, also in lowercase, and a street with a house number in the location field, while the
+  city stays readable. The GitHub account you import projects from is masked too, even when it is
+  not the one in your profile.
 
 ## [1.0.1] - 2026-11-03
 

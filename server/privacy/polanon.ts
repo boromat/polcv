@@ -312,21 +312,55 @@ const unavailable = (e: any) =>
   );
 
 export interface ProfileTerm {
-  type: 'PERSON' | 'EMAIL' | 'PHONE' | 'LINK';
+  type: 'PERSON' | 'EMAIL' | 'PHONE' | 'LINK' | 'ADDRESS';
   text: string;
 }
 
-/** Dane kandydata, które polanon ma maskować zawsze - także w linkach i przy nazwiskach spoza listy polskich imion. */
+/** Login w linku do profilu: github.com/login/..., login.github.io, linkedin.com/in/login. */
+const HANDLE_IN_LINK = [/(?:github|gitlab)\.com\/([\w.-]+)/i, /\b([a-z0-9-]+)\.(?:github|gitlab)\.io\b/i, /linkedin\.com\/in\/([\w%-]+)/i];
+
+/** Login z linku. Wraca też bez linku: w JSON-ie z GitHuba ("login"), w nazwach repozytoriów, po "@". */
+export function linkHandle(url: string): string {
+  for (const re of HANDLE_IN_LINK) {
+    const handle = re.exec(url)?.[1].replace(/\.+$/, '');
+    if (handle && handle.length >= 3) return handle;
+  }
+  return '';
+}
+
+/** Części pola z miejscowością, w których jest numer domu ("ul. Wrzosowa 12/4"). Miasto i kod z miastem zostają: AI dopasowuje po nich oferty. */
+export function streetParts(location: string): string[] {
+  return location
+    .split(/[,;]/)
+    .map((part) => part.trim())
+    .filter((part) => /\d/.test(part) && !/^\d{2}-\d{3}\b/.test(part));
+}
+
+/**
+ * Dane kandydata, które polanon ma maskować zawsze - także w linkach, przy nazwiskach spoza listy polskich imion
+ * i tam, gdzie reguły ich nie widzą: sam login z GitHuba, samo nazwisko małymi literami, ulica bez "ul." i bez kodu.
+ */
 export function profileTerms(profile: Profile | null): ProfileTerm[] {
   if (!profile) return [];
   const c = profile.contact;
+  const links = [...c.links.map((l) => l.url), ...profile.projects.map((p) => p.link)];
   const terms: ProfileTerm[] = [
     { type: 'PERSON', text: c.fullName },
+    // Każde słowo po imieniu osobno, także małymi literami: "pracowałem u ojca w żółtowski transport".
+    ...c.fullName.trim().split(/\s+/).slice(1).map((text) => ({ type: 'PERSON' as const, text })),
     { type: 'EMAIL', text: c.email },
     { type: 'PHONE', text: c.phone },
+    ...streetParts(c.location).map((text) => ({ type: 'ADDRESS' as const, text })),
     ...c.links.map((l) => ({ type: 'LINK' as const, text: l.url })),
+    ...links.map((url) => ({ type: 'LINK' as const, text: linkHandle(url) })),
   ];
-  return terms.filter((t) => t.text.trim());
+  const seen = new Set<string>();
+  return terms.filter((t) => {
+    const key = `${t.type}|${t.text.trim().toLowerCase()}`;
+    if (!t.text.trim() || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 export async function maskForAi(text: string, settings: Settings, terms: ProfileTerm[] = []): Promise<Masked> {

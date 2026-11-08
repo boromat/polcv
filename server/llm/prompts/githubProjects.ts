@@ -133,6 +133,12 @@ export async function describeGithubRepos(data: GithubData, lang: Lang, ctx: Llm
     system: SYSTEM(lang),
     user: `O AUTORZE:\n${json(author)}\n\nREPOZYTORIA:\n${json(repos)}`,
     ctx,
+    // Konto z GitHuba nie musi być tym z profilu, a login stoi w JSON-ie bez linku, więc polanon by go nie poznał.
+    terms: [
+      { type: 'LINK', text: data.login },
+      { type: 'PERSON', text: data.name },
+      { type: 'LINK', text: data.blog },
+    ],
   });
   return finishProjects(data.repos, res.projects);
 }
