@@ -3,7 +3,7 @@ import * as store from '../storage/store';
 import { HttpError } from '../storage/store';
 import { checkKey, listModels } from '../llm/openrouter';
 import { activeSearchers } from '../jobs/search';
-import { checkPythonPath, installPolanon, polanonStatus } from '../privacy/polanon';
+import { checkPythonPath, installPolanon, polanonStatus, polanonUpdate, type PolanonStatus } from '../privacy/polanon';
 import type { Settings } from '../../shared/schemas';
 import { tr } from '../i18n';
 
@@ -40,12 +40,16 @@ settingsRouter.put('/settings', async (req, res) => {
   res.json(await view(await store.saveSettings(patch)));
 });
 
+// Status z Pythona plus najnowsza wersja z PyPI, żeby Ustawienia mogły zaproponować aktualizację.
+const withUpdate = async (s: PolanonStatus) => ({ ...s, ...(await polanonUpdate(s.polanon)) });
+
 settingsRouter.get('/settings/polanon', async (_req, res) => {
-  res.json(await polanonStatus(await store.getSettings()));
+  res.json(await withUpdate(await polanonStatus(await store.getSettings())));
 });
 
 settingsRouter.post('/settings/polanon/install', async (_req, res) => {
-  res.json(await installPolanon(await store.getSettings()));
+  const r = await installPolanon(await store.getSettings());
+  res.json({ ...r, status: await withUpdate(r.status) });
 });
 
 settingsRouter.post('/settings/check-key', async (req, res) => {

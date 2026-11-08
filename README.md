@@ -89,7 +89,7 @@ Włączając je, bierzesz na siebie korzystanie zgodne z regulaminem portalu: ty
 
 [polanon](https://github.com/boromat/polanon) to osobny, darmowy pakiet Pythona. Gdy jest zainstalowany, w **Ustawieniach → Ochrona danych osobowych** możesz włączyć maskowanie: zanim tekst trafi do AI, imię i nazwisko, e-mail, telefon, adres, nazwy firm i linki z profilu zamieniane są na tokeny (np. `<OSOBA_1>`), a w odpowiedzi AI program wstawia prawdziwe wartości z powrotem. Model widzi tylko tokeny.
 
-- Potrzebny jest Python 3.11+ (<https://www.python.org/downloads/>, zaznacz „Add python.exe to PATH”). Sam polanon zainstalujesz przyciskiem w Ustawieniach albo poleceniem `py -m pip install polanon`.
+- Potrzebny jest Python 3.11+ (<https://www.python.org/downloads/>, zaznacz „Add python.exe to PATH”). Sam polanon zainstalujesz przyciskiem w Ustawieniach albo poleceniem `py -m pip install polanon`. Gdy na PyPI wyjdzie nowsza wersja, Ustawienia to pokażą i zaktualizują go jednym przyciskiem.
 - Bez Pythona i polanonu PolCV działa normalnie - to tylko dodatkowa ochrona.
 - Gdy maskowanie jest włączone, a polanon przestanie działać, program **nic nie wyśle** do AI i pokaże błąd.
 - To pseudonimizacja, nie pełna anonimizacja: nie każdy szczegół da się wykryć (np. nazwa uczelni). Dokładniej działa z modelem spaCy: `py -m pip install "polanon[ner]"` i `py -m spacy download pl_core_news_md`.

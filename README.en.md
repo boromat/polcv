@@ -83,7 +83,8 @@ $0.05–0.15. The Settings page lists the models and shows what you have spent.
   `pip install polanon` are available, *Ustawienia → Ochrona danych osobowych* can mask your name,
   e-mail, phone, address, company names and profile links as tokens such as `<OSOBA_1>` before
   any text reaches the model, and put the originals back into its answer. The Settings page can
-  install it for you. PolCV works the same without it; when masking is on but polanon is not
+  install it for you, and shows when a newer version is on PyPI so you can update it with one
+  click. PolCV works the same without it; when masking is on but polanon is not
   working, nothing is sent at all. Masking is pseudonymisation, not anonymisation - see polanon's
   threat model.
 

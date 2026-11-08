@@ -28,6 +28,10 @@ All notable changes to PolCV are recorded here. The format follows
   technologies, languages, certificates and interests. The title and summary stay in the CV, since
   they are written for one posting, and an English CV made from a Polish profile changes nothing.
   The editor says what it updated.
+- **polanon updates.** Settings show the installed polanon version next to the newest one on PyPI
+  and, when a newer one is out, an *Update to …* button that runs the same `pip install --upgrade
+  polanon` as the install button. The version check asks PyPI's public API only, at most once an
+  hour.
 
 ### Fixed
 

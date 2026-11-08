@@ -202,7 +202,6 @@ export const profile: Record<string, string> = {
   ', potem': ', then',
   'To pseudonimizacja, a nie pełna anonimizacja - nie każdy szczegół da się wykryć (np. nazwa uczelni bez modelu spaCy zostaje czytelna).':
     'This is pseudonymisation, not full anonymisation: not every detail can be detected (e.g. without the spaCy model a university name stays readable).',
-  'Zainstalowano polanon.': 'polanon installed.',
   'Inny Python': 'Use a different Python',
   'np. {path} (puste = wykryj automatycznie)': 'e.g. {path} (leave empty to detect automatically)',
 
@@ -281,4 +280,10 @@ export const profile: Record<string, string> = {
   'Oceni CV tak, jak ATS i AI-rekruter, i zaproponuje poprawki.':
     'It scores the CV the way an ATS and an AI recruiter would, and suggests improvements.',
   'Co nowego': 'What is new',
+  'Zaktualizować polanon do wersji {version}?': 'Update polanon to version {version}?',
+  'dostępna {version}': '{version} available',
+  'aktualna': 'up to date',
+  'Aktualizuję… (do minuty)': 'Updating… (up to a minute)',
+  'Zaktualizuj do {version}': 'Update to {version}',
+  'Gotowe: polanon {version}.': 'Done: polanon {version}.',
 };

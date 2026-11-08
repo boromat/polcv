@@ -57,6 +57,9 @@ export interface PolanonStatus {
   spacy: boolean;
   model: boolean;
   error: string;
+  /** najnowsza wersja na PyPI (null bez sieci) */
+  latest?: string | null;
+  updateAvailable?: boolean;
 }
 
 export interface ModelInfo {

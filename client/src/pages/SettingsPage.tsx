@@ -75,8 +75,10 @@ function PrivacyCard({ settings, onSave }: { settings: SettingsView; onSave: (p:
   };
   useEffect(refresh, []);
 
+  // Instalacja i aktualizacja to to samo polecenie pip; różni się tylko pytanie.
   const install = async () => {
-    if (!confirm(t('Zainstalować polanon z PyPI?') + '\n\n' + t('Program uruchomi: {command}', { command: `${status?.command} -m pip install --upgrade polanon` }))) return;
+    const question = status?.polanon && status.latest ? t('Zaktualizować polanon do wersji {version}?', { version: status.latest }) : t('Zainstalować polanon z PyPI?');
+    if (!confirm(question + '\n\n' + t('Program uruchomi: {command}', { command: `${status?.command} -m pip install --upgrade polanon` }))) return;
     setInstalling(true);
     setInstallLog(null);
     try {
@@ -138,7 +140,17 @@ function PrivacyCard({ settings, onSave }: { settings: SettingsView; onSave: (p:
         <div className="stack" style={{ gap: 8 }}>
           <div className="row" style={{ gap: 6 }}>
             <span className="badge good">polanon {status.polanon}</span>
+            {status.updateAvailable ? (
+              <span className="badge warn">{t('dostępna {version}', { version: status.latest ?? '' })}</span>
+            ) : (
+              status.latest && <span className="badge">{t('aktualna')}</span>
+            )}
             <span className="badge">Python {status.python}</span>
+            {status.updateAvailable && (
+              <button className="btn sm" onClick={install} disabled={installing}>
+                {installing ? t('Aktualizuję… (do minuty)') : t('Zaktualizuj do {version}', { version: status.latest ?? '' })}
+              </button>
+            )}
           </div>
           <label className="check">
             <input type="checkbox" checked={settings.maskPii} onChange={(e) => onSave({ maskPii: e.target.checked })} /> {t('Maskuj dane osobowe przed wysłaniem do AI')}
@@ -163,7 +175,11 @@ function PrivacyCard({ settings, onSave }: { settings: SettingsView; onSave: (p:
           </p>
         </div>
       )}
-      {installLog && <div className={`callout small ${installLog.ok ? 'good' : 'error'}`}>{installLog.ok ? t('Zainstalowano polanon.') : <pre className="pre" style={{ margin: 0 }}>{installLog.output}</pre>}</div>}
+      {installLog && (
+        <div className={`callout small ${installLog.ok ? 'good' : 'error'}`}>
+          {installLog.ok ? t('Gotowe: polanon {version}.', { version: status?.polanon ?? '' }) : <pre className="pre" style={{ margin: 0 }}>{installLog.output}</pre>}
+        </div>
+      )}
       <details className="small">
         <summary className="muted">{t('Inny Python')}</summary>
         <div className="row" style={{ marginTop: 8 }}>

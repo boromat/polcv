@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import type { Profile, Settings } from '../../shared/schemas';
 import { HttpError } from '../storage/store';
 import { collectStrings, replaceStrings } from '../llm/strings';
+import { APP_UA } from '../jobs/http';
 import { tr } from '../i18n';
 
 /**
@@ -140,6 +141,39 @@ async function findPython(pythonPath: string): Promise<Found> {
 export async function polanonStatus(settings: Settings): Promise<PolanonStatus> {
   const { cmd: _cmd, ...status } = await findPython(settings.pythonPath);
   return status;
+}
+
+const PYPI = 'https://pypi.org/pypi/polanon/json';
+let latestCache: { at: number; version: string | null } | null = null;
+
+/** Najnowsza wersja polanonu na PyPI (publiczne API, nic o użytkowniku nie wysyłamy): godzinę w pamięci, bez sieci 5 minut. */
+async function latestPolanon(): Promise<string | null> {
+  if (latestCache && Date.now() - latestCache.at < (latestCache.version ? 3600_000 : 300_000)) return latestCache.version;
+  const version = await fetch(PYPI, { headers: { 'User-Agent': APP_UA }, signal: AbortSignal.timeout(8000) })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((j: any) => (typeof j?.info?.version === 'string' ? j.info.version : null))
+    .catch(() => null);
+  latestCache = { at: Date.now(), version };
+  return version;
+}
+
+/** Czy `latest` jest nowsze niż `installed` ("0.2.1" > "0.1.1"); przy nieczytelnym numerze false. */
+export function isNewer(latest: string, installed: string): boolean {
+  const parse = (v: string) => /^\d+(?:\.\d+)*/.exec(v.trim())?.[0].split('.').map(Number) ?? null;
+  const a = parse(latest);
+  const b = parse(installed);
+  if (!a || !b) return false;
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const d = (a[i] ?? 0) - (b[i] ?? 0);
+    if (d) return d > 0;
+  }
+  return false;
+}
+
+/** Czy na PyPI jest nowszy polanon niż zainstalowany (aktualizacja to ten sam `pip install --upgrade`). */
+export async function polanonUpdate(installed: string | null): Promise<{ latest: string | null; updateAvailable: boolean }> {
+  const latest = await latestPolanon();
+  return { latest, updateAvailable: !!(latest && installed && isNewer(latest, installed)) };
 }
 
 /** `pip install --upgrade polanon` w znalezionym Pythonie (pip sam wybiera instalację dla użytkownika, gdy trzeba). */
