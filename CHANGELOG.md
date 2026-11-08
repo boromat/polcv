@@ -45,6 +45,10 @@ All notable changes to PolCV are recorded here. The format follows
   runs over, keeping the posting's keywords. An older version that still spills over has a
   *Shorten to 1 page* button next to its page count. The prompt also asks for a shorter CV from the
   start (about 300-420 words, one-line points).
+- The Polish CV summary is written in the first person, as the candidate writes it ("Znam…",
+  "Tworzę…"), instead of the third person ("Zna…", "Tworzy…"). Present tense keeps it free of
+  gendered past forms, and a summary in the third person goes back to the model for a fix. Points
+  keep the usual noun form ("Tworzenie…").
 
 ## [1.0.1] - 2026-11-03
 

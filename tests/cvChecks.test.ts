@@ -13,6 +13,7 @@ import {
   numberFinder,
   sourceIssues,
   styleIssues,
+  summaryPersonIssues,
   withoutNumbers,
 } from '../server/llm/prompts/cvChecks';
 import { withLang } from '../server/i18n';
@@ -102,6 +103,30 @@ describe('punkty w 1. osobie', () => {
 
     const en = withBullets(text('I built a dashboard'), text("I'm responsible for reports"), text('Built a dashboard in Power BI'), text('IT support for 3 teams'));
     expect(styleIssues(en, 'en').map((i) => i.path.join('.'))).toEqual(['experience.0.bullets.0.text', 'experience.0.bullets.1.text']);
+  });
+});
+
+describe('podsumowanie pisane przez kandydata', () => {
+  it('wyłapuje 3. osobę i czas przeszły z rodzajem', () => {
+    expect(summaryPersonIssues('Zna Python, n8n i API, a w projektach tworzy prompty. Jest studentem.')).toEqual({ thirdPerson: ['Zna', 'tworzy', 'Jest'], gendered: [] });
+    expect(summaryPersonIssues('Pracowałem w social media i zbudowałam sklep.')).toEqual({ thirdPerson: [], gendered: ['Pracowałem', 'zbudowałam'] });
+  });
+
+  it('przepuszcza 1. osobę w czasie teraźniejszym i zdania bez czasownika', () => {
+    for (const t of [
+      'Student kierunku Technologie kognitywne. Znam Pythona i n8n, tworzę agentów AI i szukam pracy przy wdrożeniach.',
+      'Jestem studentką marketingu. Mam doświadczenie w social media i współpracy z działem sprzedaży.',
+      'Doświadczenie w analizie danych (Excel, Power BI), praca zespołem projektowym.',
+    ]) {
+      expect(summaryPersonIssues(t)).toEqual({ thirdPerson: [], gendered: [] });
+    }
+  });
+
+  it('po polsku podsumowanie w 3. osobie wraca do poprawki (także wersja bezpieczna), po angielsku nie', () => {
+    const c = withBullets();
+    c.summary = { ...c.summary, text: 'Zna Excel i tworzy raporty.', status: 'suggested', fallbackText: 'Posiada wiedzę o Excelu.' };
+    expect(styleIssues(c, 'pl').map((i) => i.path.join('.'))).toEqual(['summary.text', 'summary.fallbackText']);
+    expect(styleIssues(c, 'en')).toEqual([]);
   });
 });
 

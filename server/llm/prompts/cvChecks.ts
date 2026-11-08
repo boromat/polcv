@@ -38,14 +38,51 @@ export function firstPersonVerb(text: string): string | null {
 
 export const STARTS_WITH_I = /^[^\p{L}]*I(?:\s|['’](?:m|ve|d)(?!\p{L}))/u;
 
+// Czasowniki w 3. osobie, którymi model pisze podsumowanie, jakby CV pisał ktoś inny ("Zna Python", "Tworzy prompty").
+const THIRD_PERSON = new Set([
+  'jest', 'zna', 'ma', 'posiada', 'potrafi', 'umie', 'tworzy', 'buduje', 'rozwija', 'projektuje', 'programuje', 'wdraża', 'testuje',
+  'automatyzuje', 'integruje', 'analizuje', 'przygotowuje', 'prowadzi', 'realizuje', 'pracuje', 'studiuje', 'uczy', 'zajmuje',
+  'specjalizuje', 'interesuje', 'wykorzystuje', 'używa', 'stosuje', 'łączy', 'wspiera', 'dba', 'szuka', 'poszukuje', 'chce', 'dąży',
+]);
+
+/** Słowa podsumowania po polsku, które nie pasują do CV pisanego przez kandydata: 3. osoba i czas przeszły z rodzajem. */
+export function summaryPersonIssues(text: string): { thirdPerson: string[]; gendered: string[] } {
+  const words = text.split(/\s+/).map((w) => w.replace(/^[^\p{L}]+|[^\p{L}]+$/gu, '')).filter(Boolean);
+  const lower = (w: string) => w.toLowerCase();
+  return {
+    thirdPerson: [...new Set(words.filter((w) => THIRD_PERSON.has(lower(w))))],
+    gendered: [...new Set(words.filter((w) => PAST_PERSONAL.test(lower(w)) && !NOUNS_LEM.has(lower(w))))],
+  };
+}
+
 const bulletsOf = (c: CvContent) => [
   ...c.experience.flatMap((e, i) => e.bullets.map((b, j) => ({ b, path: ['experience', i, 'bullets', j] }))),
   ...c.projects.flatMap((p, i) => p.bullets.map((b, j) => ({ b, path: ['projects', i, 'bullets', j] }))),
 ];
 
-/** Punkty po polsku w 1. osobie i punkty po angielsku od "I" (także w wersji bezpiecznej, bo po odrzuceniu sugestii trafia do CV). */
+/**
+ * Punkty po polsku w 1. osobie, punkty po angielsku od "I" i podsumowanie po polsku w 3. osobie albo w czasie przeszłym
+ * z rodzajem (wszędzie także w wersji bezpiecznej, bo po odrzuceniu sugestii trafia do CV).
+ */
 export function styleIssues(c: CvContent, lang: Lang): CvIssue[] {
   const out: CvIssue[] = [];
+  if (lang === 'pl') {
+    for (const field of ['text', 'fallbackText'] as const) {
+      const { thirdPerson, gendered } = summaryPersonIssues(c.summary[field]);
+      if (thirdPerson.length) {
+        out.push({
+          path: ['summary', field],
+          message: `Podsumowanie w 3. osobie („${thirdPerson.join('”, „')}”). Kandydat pisze CV o sobie: 1. osoba w czasie teraźniejszym, bez „ja”, np. „Znam…”, „Tworzę…”, „Jestem…”, „Szukam…”.`,
+        });
+      }
+      if (gendered.length) {
+        out.push({
+          path: ['summary', field],
+          message: `Podsumowanie w czasie przeszłym z rodzajem („${gendered.join('”, „')}”). Pisz w czasie teraźniejszym („Tworzę…”, „Rozwijam…”) albo bez czasownika („Doświadczenie w…”), bez zgadywania płci.`,
+        });
+      }
+    }
+  }
   for (const { b, path } of bulletsOf(c)) {
     for (const field of ['text', 'fallbackText'] as const) {
       const t = b[field];
