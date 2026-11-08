@@ -61,8 +61,8 @@ Przy domyślnych modelach (Claude Sonnet do pisania i oceny, Claude Haiku do ana
 4. Odpowiedz na pytania o brakujące wymagania (albo je pomiń) → **Napisz CV**.
 5. W edytorze:
    - zdecyduj o **żółtych** fragmentach („To prawda - zostaw” albo „Użyj bezpiecznej wersji”),
-   - popraw tekst, jeśli chcesz - podgląd odświeża się na bieżąco (czerwona linia = koniec strony),
-   - zakładka **Raport** pokazuje wynik i konkretne poprawki; **Popraw automatycznie** tworzy nową wersję i ocenia ją ponownie.
+   - popraw tekst, jeśli chcesz - podgląd odświeża się na bieżąco (czerwona linia = koniec strony); poprawione fakty (stanowiska, daty, punkty, nowe umiejętności) zapisują się też w profilu,
+   - zakładka **Raport** pokazuje wynik i konkretne poprawki; brakujące słowo kluczowe, które znasz, kliknij i napisz, gdzie tego używasz, a przy poprawkach „wymaga Twoich danych” kliknij **Uzupełnij**; odpowiedzi trafiają do profilu, a **Popraw automatycznie** tworzy nową wersję i ocenia ją ponownie.
 6. **Pobierz PDF** - plik zapisuje się też w historii. Status zmieniaj w **Historii** (Wysłane → Rozmowa → Oferta…).
 7. Gdy dostaniesz zaproszenie: otwórz aplikację → zakładka **Rozmowa** → **Przygotuj mnie do rozmowy**.
 

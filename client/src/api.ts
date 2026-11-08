@@ -81,6 +81,8 @@ export interface AppDetail {
   versions: { version: number; createdAt: string; origin: 'generated' | 'improved'; score: number | null; scoreIncomplete: boolean }[];
   costUsd: number;
   hasPhoto: boolean;
+  /** tematy potwierdzone przy tej aplikacji w profilu (pytania o braki, "mam to" w raporcie) */
+  factTopics: string[];
 }
 
 export interface VersionDetail {
@@ -130,12 +132,13 @@ export const api = {
   deleteApplication: (pid: string, aid: string) => req<{ ok: true }>('DELETE', A(pid, aid)),
   gap: (pid: string, aid: string) => req<Application>('POST', `${A(pid, aid)}/gap`),
   answers: (pid: string, aid: string, answers: GapAnswer[]) => req<Application>('POST', `${A(pid, aid)}/answers`, { answers }),
+  facts: (pid: string, aid: string, facts: { topic: string; answer: string }[]) => req<{ saved: number }>('POST', `${A(pid, aid)}/facts`, { facts }),
   generate: (pid: string, aid: string, opts: { language?: 'pl' | 'en'; template?: TemplateId } = {}) =>
     req<CvVersion>('POST', `${A(pid, aid)}/generate`, opts),
   improve: (pid: string, aid: string) => req<ImproveResult>('POST', `${A(pid, aid)}/improve`),
   version: (pid: string, aid: string, v: number) => req<VersionDetail>('GET', `${A(pid, aid)}/versions/${v}`),
   saveVersion: (pid: string, aid: string, v: number, patch: Partial<Pick<CvVersion, 'content' | 'decisions' | 'template' | 'photo' | 'rodo'>>) =>
-    req<{ cv: CvVersion; pending: number }>('PUT', `${A(pid, aid)}/versions/${v}`, patch),
+    req<{ cv: CvVersion; pending: number; profileUpdates: string[] }>('PUT', `${A(pid, aid)}/versions/${v}`, patch),
   evaluate: (pid: string, aid: string, v: number) => req<AtsReport>('POST', `${A(pid, aid)}/versions/${v}/evaluate`),
   previewUrl: (pid: string, aid: string, v: number, bust: string) => `/api${A(pid, aid)}/versions/${v}/preview?lang=${getLang()}&${bust}`,
   pdfUrl: (pid: string, aid: string, v: number) => `/api${A(pid, aid)}/versions/${v}/pdf?lang=${getLang()}&${Date.now()}`,

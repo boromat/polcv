@@ -183,4 +183,12 @@ export const EN: Record<string, string> = {
   'Spójny format dat': 'Consistent date format',
   'Daty w jednym formacie.': 'All dates use the same format.',
   'Daty są zapisane w różnych formatach - ujednolić np. do MM.RRRR.': 'Dates are written in different formats. Make them consistent, e.g. MM.YYYY.',
+  'doświadczenie „{name}”': 'experience "{name}"',
+  'projekt „{name}”': 'project "{name}"',
+  'wykształcenie „{name}”': 'education "{name}"',
+  'umiejętności: {names}': 'skills: {names}',
+  'języki': 'languages',
+  'certyfikaty': 'certificates',
+  'zainteresowania': 'interests',
+  'Napisz krótko, gdzie i jak tego używasz.': 'Write briefly where and how you use it.',
 };

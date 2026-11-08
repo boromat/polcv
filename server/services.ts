@@ -17,6 +17,7 @@ import { hasWork, improvePlan, nothingToImprove } from './llm/prompts/improvePla
 import { decideLanguage, decidePhoto, decideRodo } from './cv/rodo';
 import { photoDataUri, renderCvHtml, renderLetterHtml, withoutPending, type RenderMode } from './cv/render';
 import { htmlToPdf } from './cv/pdf';
+import { syncCvEdit } from './cv/profileSync';
 import { buildReport, honestReport, notWorse } from './ats/score';
 import { aliasVariants, countPhrase, looksPolish, normalize, tokenize } from './ats/keywords';
 import { fetchGithub, githubProject, knownRepo, mergeGithubProjects, parseGithubUser, type GithubMerge } from './cv/github';
@@ -83,6 +84,29 @@ export const answerFactId = (appId: string, requirement: string) =>
  */
 export async function saveAnswers(profileId: string, appId: string, answers: GapAnswer[]): Promise<Application> {
   const app = await store.getApplication(profileId, appId);
+  await storeAnswerFacts(app, answers);
+
+  // Odpowiedzi zostają też przy aplikacji (do ponownego wypełnienia formularza); nowsza odpowiedź na pytanie zastępuje starszą.
+  return store.updateApplication(profileId, appId, (a) => {
+    const posted = new Set(answers.map((x) => x.questionId));
+    const prev = (a.gap?.answers ?? []).filter((x) => !posted.has(x.questionId));
+    a.gap = { ...(a.gap ?? { questions: [], covered: [] }), answers: [...prev, ...answers] };
+  });
+}
+
+/**
+ * Kandydat potwierdza w raporcie brakujące wymaganie ("mam to") albo uzupełnia dane, o które prosi poprawka.
+ * Zapis jak odpowiedź na pytanie o braki, więc ten sam temat przy tej aplikacji podmienia wcześniejszą odpowiedź.
+ */
+export async function addFacts(profileId: string, appId: string, facts: { topic: string; answer: string }[]): Promise<number> {
+  const app = await store.getApplication(profileId, appId);
+  const answers = facts.filter((f) => f.topic.trim() && f.answer.trim()).map((f) => ({ requirement: f.topic.trim(), has: true, answer: f.answer }));
+  await storeAnswerFacts(app, answers);
+  return answers.length;
+}
+
+async function storeAnswerFacts(app: Application, answers: Pick<GapAnswer, 'requirement' | 'has' | 'answer'>[]): Promise<void> {
+  const appId = app.id;
   const params = { title: app.posting?.title ?? '', company: app.posting?.company ?? '' };
   const sourceText = () => tr('Odpowiedź przy aplikacji: {title} – {company}', params).trim();
   const source = sourceText();
@@ -110,7 +134,7 @@ export async function saveAnswers(profileId: string, appId: string, answers: Gap
   }
 
   if (byId.size) {
-    await store.updateProfile(profileId, (profile) => {
+    await store.updateProfile(app.profileId, (profile) => {
       const legacy = (f: ExtraFact) => !f.id.startsWith('gap-') && legacySources.has(f.source);
       const keyOf = (f: ExtraFact) => (byId.has(f.id) ? f.id : legacy(f) ? topicToId.get(normalize(f.topic)) : undefined);
       const placed = new Set<string>();
@@ -130,13 +154,6 @@ export async function saveAnswers(profileId: string, appId: string, answers: Gap
       profile.extraFacts = kept;
     });
   }
-
-  // Odpowiedzi zostają też przy aplikacji (do ponownego wypełnienia formularza); nowsza odpowiedź na pytanie zastępuje starszą.
-  return store.updateApplication(profileId, appId, (a) => {
-    const posted = new Set(answers.map((x) => x.questionId));
-    const prev = (a.gap?.answers ?? []).filter((x) => !posted.has(x.questionId));
-    a.gap = { ...(a.gap ?? { questions: [], covered: [] }), answers: [...prev, ...answers] };
-  });
 }
 
 // ---------- CV ----------
@@ -189,14 +206,22 @@ export async function generate(profileId: string, appId: string, language?: 'pl'
   return cv;
 }
 
-export async function updateVersion(profileId: string, appId: string, v: number, patch: Partial<Pick<CvVersion, 'content' | 'decisions' | 'template' | 'photo' | 'rodo'>>): Promise<CvVersion> {
+/** `profileUpdates`: co z poprawek w CV trafiło też do profilu (puste, gdy nic). */
+export async function updateVersion(
+  profileId: string,
+  appId: string,
+  v: number,
+  patch: Partial<Pick<CvVersion, 'content' | 'decisions' | 'template' | 'photo' | 'rodo'>>,
+): Promise<{ cv: CvVersion; profileUpdates: string[] }> {
   const cv = await store.getVersion(profileId, appId, v);
   // Zapis bez faktycznej zmiany nie może unieważniać oceny.
   const changed = (Object.keys(patch) as (keyof typeof patch)[]).some((k) => JSON.stringify(patch[k]) !== JSON.stringify(cv[k]));
-  if (!changed) return cv;
+  if (!changed) return { cv, profileUpdates: [] };
   const next: CvVersion = { ...cv, ...patch, version: cv.version, updatedAt: nowIso() };
   await store.saveVersion(profileId, appId, next);
-  return next;
+  let profileUpdates: string[] = [];
+  if (patch.content) await store.updateProfile(profileId, (p) => void (profileUpdates = syncCvEdit(p, cv.content, patch.content!)));
+  return { cv: next, profileUpdates };
 }
 
 export async function setCurrentVersion(profileId: string, appId: string, v: number): Promise<Application> {

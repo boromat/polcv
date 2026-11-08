@@ -18,6 +18,16 @@ All notable changes to PolCV are recorded here. The format follows
   application page) there is a link that opens a search for employer reviews on GoWork.pl. The
   company's legal form ("sp. z o.o.", "S.A." and the like) is left out of the search, and the app
   fetches nothing from GoWork.
+- **"I have this" in the ATS report.** Click a missing keyword (required or nice to have), write
+  briefly where you use it, and the answer is saved to your profile like a gap question answer.
+  *Improve automatically* then works it into the CV.
+- **Fill in data for fixes.** Fixes marked "needs your input" have a *Fill in* button. The answer
+  goes to your profile, and the next *Improve automatically* applies that fix with your data.
+- **CV edits update the profile.** Facts you correct in the editor are saved to your profile too:
+  roles, companies, dates, project names and links, points (as achievements), new skills,
+  technologies, languages, certificates and interests. The title and summary stay in the CV, since
+  they are written for one posting, and an English CV made from a Polish profile changes nothing.
+  The editor says what it updated.
 
 ### Fixed
 

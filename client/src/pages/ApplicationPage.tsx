@@ -57,7 +57,8 @@ export function ApplicationPage() {
     (v: number, p: Patch) => {
       saveChain.current = saveChain.current.then(async () => {
         try {
-          await api.saveVersion(pid, aid, v, p);
+          const { profileUpdates } = await api.saveVersion(pid, aid, v, p);
+          if (profileUpdates?.length) setNotice(translate('Zapisano też w profilu: {what}.', { what: profileUpdates.join(', ') }));
         } catch (e: any) {
           const prev = unsaved.current?.v === v ? unsaved.current.patch : {};
           unsaved.current = { v, patch: { ...prev, ...p }, error: e.message };
@@ -414,7 +415,20 @@ export function ApplicationPage() {
                 </div>
               </div>
             )}
-            {tab === 'report' && <ReportView report={vd.report} stale={vd.reportStale} onEvaluate={evaluate} onImprove={improve} pending={vd.pending} />}
+            {tab === 'report' && (
+              <ReportView
+                report={vd.report}
+                stale={vd.reportStale}
+                onEvaluate={evaluate}
+                onImprove={improve}
+                pending={vd.pending}
+                factTopics={detail.factTopics ?? []}
+                onAddFact={async (topic, answer) => {
+                  await api.facts(pid, aid, [{ topic, answer }]);
+                  await loadDetail();
+                }}
+              />
+            )}
             {tab === 'posting' && <PostingView app={app} />}
             {tab === 'interview' && <InterviewView key={app.id} pid={pid} app={app} run={(m, fn, h) => run(m, async () => { await fn(); await loadDetail(); }, h)} />}
             {tab === 'letter' && <LetterView key={app.id} pid={pid} app={app} run={(m, fn, h) => run(m, async () => { await fn(); await loadDetail(); }, h)} />}

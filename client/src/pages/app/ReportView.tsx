@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import type { AtsReport } from '../../../../shared/schemas';
-import { scoreColor } from '../../components/ui';
+import { ErrorBox, scoreColor } from '../../components/ui';
 import { useT } from '../../i18n';
 
 type T = ReturnType<typeof useT>['t'];
@@ -54,20 +55,72 @@ function Meter({ label, value, max, hint }: { label: string; value: number; max:
   );
 }
 
+/** Odpowiedź kandydata w raporcie: trafia do profilu jako potwierdzony fakt. */
+function FactForm({ question, placeholder, onSave, onCancel }: { question: string; placeholder: string; onSave: (answer: string) => Promise<void>; onCancel: () => void }) {
+  const { t } = useT();
+  const [text, setText] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const save = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await onSave(text.trim());
+    } catch (e: any) {
+      setError(e.message);
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="callout info stack" style={{ marginTop: 8, gap: 8 }}>
+      <b>{question}</b>
+      <textarea rows={2} value={text} onChange={(e) => setText(e.target.value)} placeholder={placeholder} autoFocus aria-label={question} />
+      <ErrorBox error={error} onClose={() => setError(null)} />
+      <div className="row" style={{ justifyContent: 'flex-end', gap: 6 }}>
+        <button className="btn sm" onClick={onCancel} disabled={busy}>
+          {t('Anuluj')}
+        </button>
+        <button className="btn sm primary" onClick={save} disabled={busy || !text.trim()}>
+          {busy ? t('Zapisuję…') : t('Zapisz w profilu')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Pytanie z poprawki "wymaga Twoich danych" (rekruter pisze je w "why"); jak fixQuestion na serwerze. */
+const fixQuestion = (f: { why: string; replace: string }) => f.why.trim() || f.replace.trim();
+
 export function ReportView({
   report,
   stale,
   onEvaluate,
   onImprove,
   pending,
+  factTopics,
+  onAddFact,
 }: {
   report: AtsReport | null;
   stale: boolean;
   onEvaluate: () => void;
   onImprove: () => void;
   pending: number;
+  /** tematy już potwierdzone w profilu przy tej aplikacji */
+  factTopics: string[];
+  onAddFact: (topic: string, answer: string) => Promise<void>;
 }) {
   const { t } = useT();
+  // Otwarty formularz: "kw:<słowo>" albo "fix:<nr poprawki>".
+  const [open, setOpen] = useState<string | null>(null);
+  // Gdzie ostatnio zapisano odpowiedź: tam pokazujemy, co dalej.
+  const [saved, setSaved] = useState<'kw' | 'fix' | null>(null);
+  const inProfile = (topic: string) => factTopics.some((x) => x.trim().toLowerCase() === topic.trim().toLowerCase());
+  const toggle = (key: string) => setOpen((cur) => (cur === key ? null : key));
+  const addFact = async (where: 'kw' | 'fix', topic: string, answer: string) => {
+    await onAddFact(topic, answer);
+    setOpen(null);
+    setSaved(where);
+  };
   if (!report) {
     return (
       <div className="card empty">
@@ -89,6 +142,16 @@ export function ReportView({
   const total = r.total;
   const partial = r.keywords.score + r.format.score;
   const partialMax = r.keywords.max + r.format.max;
+  const openKeyword = r.keywords.missing.find((k) => open === `kw:${k.term}`);
+  const savedNote = (where: 'kw' | 'fix') =>
+    saved === where && (
+    <div className="callout good row between">
+      <span>{t('Zapisane w profilu. Kliknij „Popraw automatycznie”, a AI doda to do CV, oceni nową wersję i zostawi lepszą.')}</span>
+      <button className="btn sm primary" onClick={onImprove} disabled={pending > 0}>
+        {t('Popraw automatycznie')}
+      </button>
+    </div>
+  );
 
   return (
     <div className="stack lg">
@@ -177,17 +240,38 @@ export function ReportView({
           <div>
             <b className="small">{t('Brakujące ({n})', { n: r.keywords.missing.length })}</b>
             <div className="chips" style={{ marginTop: 6 }}>
-              {r.keywords.missing.map((k) => (
-                <span key={k.term} className={`badge ${k.importance === 'must' ? 'bad' : 'warn'}`}>
-                  ✕ {k.term} <span className="faint">({k.importance === 'must' ? t('wymagane') : t('mile widziane')})</span>
-                </span>
-              ))}
+              {r.keywords.missing.map((k) => {
+                const known = inProfile(k.term);
+                return (
+                  <button
+                    key={k.term}
+                    type="button"
+                    className={`badge badge-btn ${known ? 'good' : k.importance === 'must' ? 'bad' : 'warn'}`}
+                    onClick={() => toggle(`kw:${k.term}`)}
+                    aria-expanded={open === `kw:${k.term}`}
+                    title={known ? t('Zapisane w profilu - kliknij, żeby zmienić') : t('Kliknij, jeśli to znasz')}
+                  >
+                    {known ? '✓' : '✕'} {k.term}{' '}
+                    <span className="faint">({known ? t('w profilu') : k.importance === 'must' ? t('wymagane') : t('mile widziane')})</span>
+                  </button>
+                );
+              })}
             </div>
+            {openKeyword && (
+              <FactForm
+                key={openKeyword.term}
+                question={t('Gdzie i jak używasz: {term}?', { term: openKeyword.term })}
+                placeholder={t('Np. projekt na studiach, staż albo kurs i co było Twoim zadaniem.')}
+                onSave={(answer) => addFact('kw', openKeyword.term, answer)}
+                onCancel={() => setOpen(null)}
+              />
+            )}
             <p className="faint" style={{ marginTop: 6 }}>
-              {t('Jeśli coś z tej listy znasz, dopisz to w profilu albo w edytorze - wtedy CV dostanie te punkty. Jeśli nie znasz, nie dopisuj.')}
+              {t('Kliknij słowo, które znasz, i napisz krótko, gdzie tego używasz. Odpowiedź trafi do profilu, a „Popraw automatycznie” doda je do CV. Czego nie znasz, nie dopisuj.')}
             </p>
           </div>
         )}
+        {savedNote('kw')}
         {r.keywords.stuffing.length > 0 && (
           <div className="callout warn small">{t('Za dużo powtórzeń (wygląda na upychanie słów): {terms}.', { terms: r.keywords.stuffing.join(', ') })}</div>
         )}
@@ -250,26 +334,46 @@ export function ReportView({
 
           <div className="card stack">
             <h2>{t('Proponowane poprawki')}</h2>
-            {review.fixes.map((f, i) => (
-              <div key={i} className="fix">
-                <div className="row between">
-                  <span className="badge">{f.section}</span>
-                  {f.needsUserInput && <span className="badge warn">{t('wymaga Twoich danych')}</span>}
-                </div>
-                {f.find && (
-                  <div className="small">
-                    <del>{f.find}</del>
+            {review.fixes.map((f, i) => {
+              const question = fixQuestion(f);
+              const known = f.needsUserInput && inProfile(question);
+              return (
+                <div key={i} className="fix">
+                  <div className="row between">
+                    <span className="badge">{f.section}</span>
+                    {f.needsUserInput && (
+                      <span className="row" style={{ gap: 6 }}>
+                        <span className={`badge ${known ? 'good' : 'warn'}`}>{known ? t('✓ w profilu') : t('wymaga Twoich danych')}</span>
+                        <button className="btn sm" onClick={() => toggle(`fix:${i}`)} aria-expanded={open === `fix:${i}`}>
+                          {known ? t('Zmień') : t('Uzupełnij')}
+                        </button>
+                      </span>
+                    )}
                   </div>
-                )}
-                <div className="small">
-                  <ins>{f.replace}</ins>
+                  {f.find && (
+                    <div className="small">
+                      <del>{f.find}</del>
+                    </div>
+                  )}
+                  <div className="small">
+                    <ins>{f.replace}</ins>
+                  </div>
+                  <span className="faint">{f.why}</span>
+                  {open === `fix:${i}` && (
+                    <FactForm
+                      question={question}
+                      placeholder={t('Wpisz te dane, np. liczby, skalę albo efekt.')}
+                      onSave={(answer) => addFact('fix', question, answer)}
+                      onCancel={() => setOpen(null)}
+                    />
+                  )}
                 </div>
-                <span className="faint">{f.why}</span>
-              </div>
-            ))}
+              );
+            })}
             <p className="faint">
-              {t('Poprawki oznaczone „wymaga Twoich danych” potrzebują informacji, których AI nie zna (np. liczb). Dopisz je w profilu lub w edytorze.')}
+              {t('Poprawki oznaczone „wymaga Twoich danych” potrzebują informacji, których AI nie zna (np. liczb). Kliknij „Uzupełnij”: odpowiedź trafi do profilu i do następnej poprawki.')}
             </p>
+            {savedNote('fix')}
           </div>
         </>
       )}

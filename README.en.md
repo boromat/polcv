@@ -41,7 +41,9 @@ What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish applicat
    bolder wording is marked yellow and needs your approval before the PDF can be exported.
 4. **Scores it 0–100:** keywords (40 pts, computed locally with Polish inflection and synonyms),
    ATS readability (20 pts, checked on text extracted back from the generated PDF) and an AI
-   recruiter review (40 pts) with concrete fixes - plus an *Improve automatically* button.
+   recruiter review (40 pts) with concrete fixes - plus an *Improve automatically* button. Click a
+   missing keyword you know, or *Fill in* on a fix that needs your input, and the answer goes to
+   your profile; facts you correct in the editor are saved to the profile too.
 5. **Exports a one-page PDF** with selectable text from three ATS-safe templates, keeps a history
    of applications with statuses, and on request prepares you for the interview or drafts a cover
    letter.

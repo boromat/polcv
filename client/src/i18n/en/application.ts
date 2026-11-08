@@ -199,16 +199,12 @@ export const application: Record<string, string> = {
   'Znalezione ({n})': 'Found ({n})',
   'Znalezione jako „{term}”': 'Found as "{term}"',
   'Brakujące ({n})': 'Missing ({n})',
-  'Jeśli coś z tej listy znasz, dopisz to w profilu albo w edytorze - wtedy CV dostanie te punkty. Jeśli nie znasz, nie dopisuj.':
-    'If you know something on this list, add it to your profile or in the editor, and the CV will get those points. If you do not know it, do not add it.',
   'Za dużo powtórzeń (wygląda na upychanie słów): {terms}.': 'Too many repetitions (looks like keyword stuffing): {terms}.',
   'Strony: {n}. Kontrole na tekście odczytanym z gotowego pliku PDF.': 'Pages: {n}. Checks run on the text read from the finished PDF file.',
   'Mocne strony': 'Strengths',
   'Słabe strony': 'Weaknesses',
   'Proponowane poprawki': 'Suggested fixes',
   'wymaga Twoich danych': 'needs your input',
-  'Poprawki oznaczone „wymaga Twoich danych” potrzebują informacji, których AI nie zna (np. liczb). Dopisz je w profilu lub w edytorze.':
-    'Fixes marked "needs your input" need information the AI does not have (such as numbers). Add it to your profile or in the editor.',
 
   // ExtrasViews: ogłoszenie
   'wklejony tekst': 'pasted text',
@@ -260,4 +256,20 @@ export const application: Record<string, string> = {
   'Nie udało się zapisać listu: {error}': 'The letter could not be saved: {error}',
   'Pobierz list jako PDF': 'Download the letter as PDF',
   'Podgląd listu': 'Letter preview',
+  'Anuluj': 'Cancel',
+  'Zapisuję…': 'Saving…',
+  'Zapisz w profilu': 'Save to profile',
+  'Zapisane w profilu. Kliknij „Popraw automatycznie”, a AI doda to do CV, oceni nową wersję i zostawi lepszą.': 'Saved to your profile. Click "Improve automatically" and the AI will add it to the CV, score the new version and keep the better one.',
+  'Zapisane w profilu - kliknij, żeby zmienić': 'Saved to your profile - click to change',
+  'Kliknij, jeśli to znasz': 'Click if you know this',
+  'w profilu': 'in profile',
+  'Gdzie i jak używasz: {term}?': 'Where and how do you use {term}?',
+  'Np. projekt na studiach, staż albo kurs i co było Twoim zadaniem.': 'E.g. a university project, an internship or a course, and what your task was.',
+  'Kliknij słowo, które znasz, i napisz krótko, gdzie tego używasz. Odpowiedź trafi do profilu, a „Popraw automatycznie” doda je do CV. Czego nie znasz, nie dopisuj.': 'Click a keyword you know and write briefly where you use it. The answer goes to your profile, and "Improve automatically" adds it to the CV. Do not add what you do not know.',
+  '✓ w profilu': '✓ in profile',
+  'Zmień': 'Change',
+  'Uzupełnij': 'Fill in',
+  'Wpisz te dane, np. liczby, skalę albo efekt.': 'Enter the data, e.g. numbers, scale or the result.',
+  'Poprawki oznaczone „wymaga Twoich danych” potrzebują informacji, których AI nie zna (np. liczb). Kliknij „Uzupełnij”: odpowiedź trafi do profilu i do następnej poprawki.': 'Fixes marked "needs your input" need information the AI does not have (such as numbers). Click "Fill in": the answer goes to your profile and into the next improvement.',
+  'Zapisano też w profilu: {what}.': 'Also saved to your profile: {what}.',
 };

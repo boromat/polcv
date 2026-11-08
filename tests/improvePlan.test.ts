@@ -140,6 +140,17 @@ describe('plan poprawy CV', () => {
     expect(hasWork(plan)).toBe(true);
   });
 
+  it('poprawka "wymaga Twoich danych" z odpowiedzią kandydata w profilu idzie do AI razem z tą odpowiedzią', () => {
+    const answered: Profile = {
+      ...profile,
+      extraFacts: [{ id: 'gap-a1-x', topic: 'Ile raportów tygodniowo przygotowujesz? Dopisz to w profilu.', has: true, answer: '5 raportów sprzedaży tygodniowo', source: '', date: '' }],
+    };
+    const p = improvePlan(report(review({ must_have_match: 8, achievements: 8, clarity: 8 }, fixes)), answered, posting, cvContent());
+    expect(p.fixes.map((f) => f.section)).toEqual(['summary', 'experience']);
+    expect(p.fixes[1].why).toContain('5 raportów sprzedaży tygodniowo');
+    expect(p.needsInput.some((q) => q.startsWith('Ile raportów'))).toBe(false);
+  });
+
   it('dla modelu: bez pytań do kandydata, z listą słów do zachowania', () => {
     const p = planForPrompt(plan);
     expect(p).not.toHaveProperty('needsInput');

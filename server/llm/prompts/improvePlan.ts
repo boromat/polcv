@@ -101,6 +101,9 @@ const GENDER_MARK = /(^|\s)[kmfdnx](\/[kmfdnx])+(?=\s|$)/g;
 export const titleCore = (s: string) =>
   normalize(s).replace(GENDER_MARK, ' ').replace(SENIORITY, ' ').replace(SENIORITY, ' ').replace(/\s+/g, ' ').trim();
 
+/** Pytanie z poprawki "wymaga Twoich danych": rekruter pisze je w "why"; ten sam tekst jest tematem odpowiedzi w profilu. */
+export const fixQuestion = (f: { why: string; replace: string }) => f.why.trim() || f.replace.trim();
+
 /** Słowo kluczowe z odpowiednikami (aliasy), żeby polski profil potwierdzał angielskie brzmienie. */
 const widened = (kw: Keyword): Keyword => ({ ...kw, synonyms: [...new Set([kw.term, ...kw.synonyms].flatMap(aliasVariants))] });
 
@@ -157,8 +160,14 @@ export function improvePlan(report: AtsReport, profile: Profile, posting: JobPos
   }
 
   const review = report.ai?.review ?? null;
-  const fixes = (review?.fixes ?? []).filter((f) => !f.needsUserInput).map(({ section, find, replace, why }) => ({ section, find, replace, why }));
-  const asks = (review?.fixes ?? []).filter((f) => f.needsUserInput).map((f) => (f.why.trim() || f.replace.trim()));
+  // Poprawka "wymaga Twoich danych", na którą kandydat odpowiedział w raporcie, idzie do AI razem z tą odpowiedzią.
+  const answerFor = (question: string) => profile.extraFacts.find((x) => x.has && x.answer.trim() && normalize(x.topic) === normalize(question));
+  const fixes = (review?.fixes ?? []).flatMap(({ section, find, replace, why, needsUserInput }) => {
+    if (!needsUserInput) return [{ section, find, replace, why }];
+    const answer = answerFor(fixQuestion({ why, replace }));
+    return answer ? [{ section, find, replace, why: `${why} Dane od kandydata (extraFacts, id ${answer.id}): ${answer.answer}` }] : [];
+  });
+  const asks = (review?.fixes ?? []).filter((f) => f.needsUserInput && !answerFor(fixQuestion(f))).map(fixQuestion);
   const criteria = (review?.criteria ?? [])
     .filter((c) => c.score < 7 && CRITERION_GOAL[c.key])
     .map((c) => ({ key: c.key, score: c.score, comment: c.comment, goal: CRITERION_GOAL[c.key]! }));

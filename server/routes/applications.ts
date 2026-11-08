@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { Router, type Response } from 'express';
+import { z } from 'zod';
 import { ApplicationStatuses, CoverLetterSchema, CvVersionSchema, GapAnswerSchema, TemplateIds, type ApplicationSummary } from '../../shared/schemas';
 import * as store from '../storage/store';
 import { HttpError } from '../storage/store';
@@ -57,6 +58,8 @@ applicationsRouter.get(`${base}/:aid`, async (req, res) => {
     })),
     costUsd: usage.filter((u) => u.applicationId === aid).reduce((s, u) => s + u.cost, 0),
     hasPhoto: !!profile.photo,
+    // Tematy, które kandydat przy tej aplikacji potwierdził w profilu (pytania o braki, "mam to" w raporcie).
+    factTopics: profile.extraFacts.filter((f) => f.has && f.id === svc.answerFactId(aid, f.topic)).map((f) => f.topic),
   });
 });
 
@@ -95,6 +98,14 @@ applicationsRouter.post(`${base}/:aid/answers`, async (req, res) => {
   res.json(await svc.saveAnswers(req.params.pid, req.params.aid, parsed.data));
 });
 
+// "Mam to" przy brakującym słowie kluczowym i dane do poprawki rekrutera, wpisane w raporcie.
+const FactsSchema = z.array(z.object({ topic: z.string().trim().min(1).max(300), answer: z.string().trim().min(1).max(2000) })).min(1).max(20);
+applicationsRouter.post(`${base}/:aid/facts`, async (req, res) => {
+  const parsed = FactsSchema.safeParse(req.body?.facts);
+  if (!parsed.success) throw new HttpError(400, tr('Napisz krótko, gdzie i jak tego używasz.'));
+  res.json({ saved: await svc.addFacts(req.params.pid, req.params.aid, parsed.data) });
+});
+
 applicationsRouter.post(`${base}/:aid/generate`, async (req, res) => {
   const lang = req.body?.language;
   const template = req.body?.template;
@@ -128,8 +139,8 @@ applicationsRouter.get(`${base}/:aid/versions/:v`, async (req, res) => {
 applicationsRouter.put(`${base}/:aid/versions/:v`, async (req, res) => {
   const parsed = CvVersionSchema.pick({ content: true, decisions: true, template: true, photo: true, rodo: true }).partial().safeParse(req.body ?? {});
   if (!parsed.success) throw new HttpError(400, tr('Niepoprawne dane CV: {field}', { field: parsed.error.issues[0]?.path.join('.') ?? '' }));
-  const cv = await svc.updateVersion(req.params.pid, req.params.aid, num(req.params.v), parsed.data);
-  res.json({ cv, pending: svc.pendingSuggestions(cv) });
+  const { cv, profileUpdates } = await svc.updateVersion(req.params.pid, req.params.aid, num(req.params.v), parsed.data);
+  res.json({ cv, pending: svc.pendingSuggestions(cv), profileUpdates });
 });
 
 applicationsRouter.post(`${base}/:aid/versions/:v/evaluate`, async (req, res) => {
