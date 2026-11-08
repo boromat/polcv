@@ -262,7 +262,17 @@ function PrefsPanel({ prefs, onSave }: { prefs: CareerPrefs; onSave: (p: CareerP
   );
 }
 
-function OfferRow({ lead, onMakeCv }: { lead: JobLead; onMakeCv: (l: JobLead) => void }) {
+/** Ta sama oferta mimo innych parametrów w linku (np. śledzących) albo ukośnika na końcu. */
+const offerKey = (url: string) => {
+  try {
+    const u = new URL(url);
+    return (u.host + u.pathname).toLowerCase().replace(/\/+$/, '');
+  } catch {
+    return url.trim().toLowerCase();
+  }
+};
+
+function OfferRow({ lead, onMakeCv, cvAppId }: { lead: JobLead; onMakeCv: (l: JobLead) => void; cvAppId?: string }) {
   const { t } = useT();
   return (
     <div className="offer">
@@ -283,7 +293,12 @@ function OfferRow({ lead, onMakeCv }: { lead: JobLead; onMakeCv: (l: JobLead) =>
       </div>
       <div className="offer-side">
         <div className="row" style={{ gap: 6, justifyContent: 'flex-end' }}>
-          {lead.excludedBy && <span className="badge warn">{t('poza filtrem: {reason}', { reason: reasonLabel(lead.excludedBy, t) })}</span>}
+          {cvAppId && (
+            <Link to={`/app/${cvAppId}`} className="badge good" title={t('Otwórz aplikację z tym CV')}>
+              ✓ {t('CV już zrobione')}
+            </Link>
+          )}
+          {lead.excludedBy &&<span className="badge warn">{t('poza filtrem: {reason}', { reason: reasonLabel(lead.excludedBy, t) })}</span>}
           {lead.match != null && <span className={`badge ${scoreTone(lead.match)}`}>{lead.match}%</span>}
           <span className="badge">{PORTAL_NAMES[lead.portal]}</span>
         </div>
@@ -303,6 +318,7 @@ function RoleCard({
   searching,
   onSearch,
   onMakeCv,
+  cvApps,
 }: {
   role: RoleProposal;
   prefs: CareerPrefs;
@@ -311,6 +327,8 @@ function RoleCard({
   searching: boolean;
   onSearch: () => void;
   onMakeCv: (l: JobLead) => void;
+  /** link oferty (offerKey) -> id aplikacji, w której zrobiono pod nią CV */
+  cvApps: Map<string, string>;
 }) {
   const { t, lang } = useT();
   const [showAll, setShowAll] = useState(false);
@@ -379,7 +397,7 @@ function RoleCard({
             </div>
           )}
           {shown.map((l) => (
-            <OfferRow key={l.id} lead={l} onMakeCv={onMakeCv} />
+            <OfferRow key={l.id} lead={l} onMakeCv={onMakeCv} cvAppId={cvApps.get(offerKey(l.url))} />
           ))}
           <div className="row">
             {items.length > 6 && (
@@ -398,7 +416,7 @@ function RoleCard({
               <button className="btn ghost sm" style={{ alignSelf: 'flex-start' }} onClick={() => setShowExcluded(!showExcluded)}>
                 {showExcluded ? t('Ukryj oferty poza Twoimi filtrami') : t('Pokaż dopasowane oferty poza Twoimi filtrami ({n})', { n: excluded.length })}
               </button>
-              {(showExcluded || items.length === 0) && excluded.map((l) => <OfferRow key={l.id} lead={l} onMakeCv={onMakeCv} />)}
+              {(showExcluded || items.length === 0) && excluded.map((l) => <OfferRow key={l.id} lead={l} onMakeCv={onMakeCv} cvAppId={cvApps.get(offerKey(l.url))} />)}
             </div>
           )}
         </div>
@@ -419,6 +437,7 @@ export function CareerPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [searching, setSearching] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
+  const [cvApps, setCvApps] = useState<Map<string, string>>(new Map());
   const opened = useRef(false);
 
   useEffect(() => {
@@ -429,6 +448,14 @@ export function CareerPage() {
         if (c.proposals && c.done) setTab('offers');
       })
       .catch((e) => setError(e.message));
+    // Bez listy aplikacji oferty po prostu nie dostaną oznaczenia, więc błąd tu nie przeszkadza.
+    api
+      .applications(pid)
+      .then((apps) => {
+        const sorted = [...apps].filter((a) => a.url).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+        setCvApps(new Map(sorted.map((a) => [offerKey(a.url), a.id])));
+      })
+      .catch(() => {});
   }, [pid]);
 
   // Wpisany tekst przeżywa zmianę zakładki i odświeżenie strony.
@@ -654,6 +681,7 @@ export function CareerPage() {
                   searching={searching.has(r.id)}
                   onSearch={() => searchOffers(r.id)}
                   onMakeCv={makeCv}
+                  cvApps={cvApps}
                 />
               ))}
             </div>

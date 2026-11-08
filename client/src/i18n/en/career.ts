@@ -190,4 +190,6 @@ export const career: Record<string, string> = {
   'Pokaż dopasowane oferty poza Twoimi filtrami ({n})': 'Show matching offers outside your filters ({n})',
   'poza filtrem: {reason}': 'outside your filters: {reason}',
   'Zrób CV pod to': 'Make a CV for this',
+  'CV już zrobione': 'CV already made',
+  'Otwórz aplikację z tym CV': 'Open the application with this CV',
 };

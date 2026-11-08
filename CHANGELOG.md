@@ -6,6 +6,11 @@ All notable changes to PolCV are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- In *Szukaj pracy*, an offer you already made a CV for shows *CV already made*, linking to that
+  application, so it is easy to spot after the offers are refreshed and rearranged.
+
 ## [1.1.0] - 2026-11-08
 
 ### Added
