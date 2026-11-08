@@ -21,10 +21,12 @@ function reasonLabel(reason: string, t: T) {
   return contract ? t('umowa: {list}', { list: contract[1].split(', ').map((c) => t(c)).join(', ') }) : t(reason);
 }
 
+// pracuj.pl: 1 praktykant, 3 asystent, 17 junior, 4 mid. Kod 2 ("pracownik fizyczny") jest przy każdym poziomie,
+// bo tak portal oznacza oferty dla mechaników, spawaczy czy magazynierów, bez podziału na junior i mid.
 const LEVELS: Record<RoleProposal['seniority'], { pracuj: string; justjoin: string; nofluff: string }> = {
-  staż: { pracuj: '1,3', justjoin: 'junior', nofluff: 'trainee,junior' },
-  junior: { pracuj: '1,3,17', justjoin: 'junior', nofluff: 'trainee,junior' },
-  mid: { pracuj: '17,4', justjoin: 'mid', nofluff: 'junior,mid' },
+  staż: { pracuj: '1,2,3', justjoin: 'junior', nofluff: 'trainee,junior' },
+  junior: { pracuj: '1,2,3,17', justjoin: 'junior', nofluff: 'trainee,junior' },
+  mid: { pracuj: '2,17,4', justjoin: 'mid', nofluff: 'junior,mid' },
 };
 
 /** Linki do wyszukiwarek portali z frazą, miastem i poziomem - otwiera je kandydat, program niczego nie pobiera. */

@@ -5,6 +5,11 @@ import { useT } from '../../i18n';
 
 const rid = () => `t${Math.random().toString(36).slice(2, 10)}`;
 const newText = (): CvText => ({ id: rid(), text: '', status: 'fact', reason: '', fallbackText: '', sourceIds: [] });
+// Pozycja dopisana w edytorze: przedrostek "cv-" mówi serwerowi, że to nowa pozycja, którą ma też założyć w profilu.
+const newSourceId = () => `cv-${Math.random().toString(36).slice(2, 10)}`;
+const newExperience = (): CvContent['experience'][number] => ({ sourceId: newSourceId(), role: '', company: '', location: '', dates: '', bullets: [newText()] });
+const newProject = (): CvContent['projects'][number] => ({ sourceId: newSourceId(), name: '', role: '', dates: '', technologies: [], link: '', bullets: [newText()] });
+const newEducation = (): CvContent['education'][number] => ({ sourceId: newSourceId(), school: '', degree: '', field: '', dates: '', details: '' });
 
 type Patch = Partial<Pick<CvVersion, 'content' | 'decisions' | 'template' | 'photo' | 'rodo'>>;
 type Decision = 'accepted' | 'rejected';
@@ -228,6 +233,9 @@ export function CvEditor({
             </div>
           );
         })}
+        <button className="btn sm" style={{ alignSelf: 'flex-start' }} onClick={() => setC({ experience: [...c.experience, newExperience()] })}>
+          {t('+ doświadczenie')}
+        </button>
       </Section>
 
       <Section title={t('Projekty ({n})', { n: c.projects.length })}>
@@ -251,6 +259,9 @@ export function CvEditor({
             </div>
           );
         })}
+        <button className="btn sm" style={{ alignSelf: 'flex-start' }} onClick={() => setC({ projects: [...c.projects, newProject()] })}>
+          {t('+ projekt')}
+        </button>
       </Section>
 
       <Section title={t('Wykształcenie ({n})', { n: c.education.length })}>
@@ -265,9 +276,15 @@ export function CvEditor({
                 <Field label={t('Daty')}><LazyText value={e.dates} onCommit={(dates) => upd({ dates })} /></Field>
               </div>
               <Field label={t('Szczegóły')}><LazyText multiline value={e.details} onCommit={(details) => upd({ details })} /></Field>
+              <button className="btn ghost sm danger" style={{ alignSelf: 'flex-end' }} onClick={() => setC({ education: c.education.filter((_, j) => j !== i) })}>
+                {t('Usuń szkołę z CV')}
+              </button>
             </div>
           );
         })}
+        <button className="btn sm" style={{ alignSelf: 'flex-start' }} onClick={() => setC({ education: [...c.education, newEducation()] })}>
+          {t('+ szkoła')}
+        </button>
       </Section>
 
       <Section title={t('Umiejętności')}>

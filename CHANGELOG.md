@@ -10,6 +10,18 @@ All notable changes to PolCV are recorded here. The format follows
 
 - In *Szukaj pracy*, an offer you already made a CV for shows *CV already made*, linking to that
   application, so it is easy to spot after the offers are refreshed and rearranged.
+- **Add entries in the CV editor.** Experience, Projects and Education have *+ experience*,
+  *+ project* and *+ school* buttons, for example for the company you work at now. As soon as the
+  entry has a role or company (a project its name, a school its name or field), it is also added
+  to your profile, so the next CVs include it.
+
+### Fixed
+
+- The pracuj.pl link under *Otwórz wyszukiwanie* showed no offers for manual trades (mechanic,
+  welder, painter and the like): its level filter allowed only trainee, assistant and junior, while
+  the portal marks these offers as *manual worker*. That level is now included for every seniority.
+- The career advisor no longer leaves remote work on for someone looking for local or manual work,
+  which filled the results with unrelated remote offers.
 
 ## [1.1.0] - 2026-11-08
 

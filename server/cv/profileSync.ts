@@ -51,6 +51,10 @@ function syncBullets(achievements: string[], before: CvText[], after: CvText[]):
   return touched;
 }
 
+/** Pozycja dopisana w edytorze CV przyciskiem "+" (klient nadaje jej taki identyfikator). */
+const isNewEntry = (sourceId: string) => sourceId.startsWith('cv-');
+const factBullets = (bullets: CvText[]) => bullets.filter((b) => b.status === 'fact' && b.text.trim()).map((b) => b.text.trim());
+
 /** Grupa umiejętności z CV → kategoria w profilu. */
 function skillCategory(group: string): Profile['skills'][number]['category'] {
   const g = normalize(group);
@@ -64,7 +68,8 @@ function skillCategory(group: string): Profile['skills'][number]['category'] {
  * Poprawki kandydata w CV, które dotyczą faktów, trafiają też do profilu, żeby kolejne CV ich nie zgubiły:
  * stanowiska, firmy, daty, projekty, punkty, nowe umiejętności, języki, certyfikaty i zainteresowania.
  * Tytuł i podsumowanie są pisane pod ogłoszenie, więc zostają tylko w CV. CV w innym języku niż profil
- * (np. angielskie z polskiego profilu) niczego nie nadpisuje. Zmienia `profile`, zwraca opis tego, co zmieniło.
+ * (np. angielskie z polskiego profilu) niczego nie nadpisuje. Pozycja dopisana w edytorze przyciskiem "+" trafia do profilu
+ * jako nowa, gdy ma już stanowisko albo firmę (projekt: nazwę, szkoła: nazwę albo kierunek). Zmienia `profile`, zwraca opis tego, co zmieniło.
  */
 export function syncCvEdit(profile: Profile, before: CvContent, after: CvContent): string[] {
   if (after.language !== profileLanguage(profile)) return [];
@@ -73,6 +78,23 @@ export function syncCvEdit(profile: Profile, before: CvContent, after: CvContent
   for (const cur of after.experience) {
     const prev = before.experience.find((x) => x.sourceId === cur.sourceId);
     const item = profile.experience.find((e) => e.id === cur.sourceId);
+    if (!item && isNewEntry(cur.sourceId) && (cur.role.trim() || cur.company.trim())) {
+      const dates = parseCvDates(cur.dates);
+      profile.experience.push({
+        id: cur.sourceId,
+        kind: 'praca',
+        role: cur.role.trim(),
+        company: cur.company.trim(),
+        location: cur.location.trim(),
+        start: dates?.start ?? '',
+        end: dates?.end ?? '',
+        current: dates?.current ?? false,
+        description: '',
+        achievements: factBullets(cur.bullets),
+      });
+      changes.push(tr('nowe doświadczenie „{name}”', { name: cur.role.trim() || cur.company.trim() }));
+      continue;
+    }
     if (!prev || !item) continue;
     let touched = false;
     for (const key of ['role', 'company', 'location'] as const) {
@@ -93,6 +115,22 @@ export function syncCvEdit(profile: Profile, before: CvContent, after: CvContent
   for (const cur of after.projects) {
     const prev = before.projects.find((x) => x.sourceId === cur.sourceId);
     const item = profile.projects.find((p) => p.id === cur.sourceId);
+    if (!item && isNewEntry(cur.sourceId) && cur.name.trim()) {
+      const dates = parseCvDates(cur.dates);
+      profile.projects.push({
+        id: cur.sourceId,
+        name: cur.name.trim(),
+        role: cur.role.trim(),
+        start: dates?.start ?? '',
+        end: dates?.end ?? '',
+        description: '',
+        technologies: cur.technologies.map((x) => x.trim()).filter(Boolean),
+        link: cur.link.trim(),
+        achievements: factBullets(cur.bullets),
+      });
+      changes.push(tr('nowy projekt „{name}”', { name: cur.name.trim() }));
+      continue;
+    }
     if (!prev || !item) continue;
     let touched = false;
     for (const key of ['name', 'role', 'link'] as const) {
@@ -119,6 +157,21 @@ export function syncCvEdit(profile: Profile, before: CvContent, after: CvContent
   for (const cur of after.education) {
     const prev = before.education.find((x) => x.sourceId === cur.sourceId);
     const item = profile.education.find((e) => e.id === cur.sourceId);
+    if (!item && isNewEntry(cur.sourceId) && (cur.school.trim() || cur.field.trim())) {
+      const dates = parseCvDates(cur.dates);
+      profile.education.push({
+        id: cur.sourceId,
+        school: cur.school.trim(),
+        degree: cur.degree.trim(),
+        field: cur.field.trim(),
+        start: dates?.start ?? '',
+        end: dates?.end ?? '',
+        current: dates?.current ?? false,
+        details: cur.details.trim(),
+      });
+      changes.push(tr('nowa szkoła „{name}”', { name: cur.school.trim() || cur.field.trim() }));
+      continue;
+    }
     if (!prev || !item) continue;
     let touched = false;
     for (const key of ['school', 'degree', 'field'] as const) {

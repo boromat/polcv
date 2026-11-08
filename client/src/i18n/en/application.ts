@@ -293,4 +293,8 @@ export const application: Record<string, string> = {
   'Pokrywa:': 'Covers:',
   'Tego nie musisz uzupełniać': 'You do not need to fill these gaps',
   'Nazwy, ceny i terminy sprawdź na stronie wydawcy - AI mogło coś pomylić albo kurs mógł się zmienić. Ukończony kurs dopisz w profilu, a kolejne CV go wykorzystają.': 'Check names, prices and dates on the provider\'s site, since the AI may have got something wrong or the course may have changed. Add a finished course to your profile and the next CVs will use it.',
+  '+ doświadczenie': '+ experience',
+  '+ projekt': '+ project',
+  '+ szkoła': '+ school',
+  'Usuń szkołę z CV': 'Remove school from CV',
 };

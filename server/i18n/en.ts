@@ -191,4 +191,7 @@ export const EN: Record<string, string> = {
   'certyfikaty': 'certificates',
   'zainteresowania': 'interests',
   'Napisz krótko, gdzie i jak tego używasz.': 'Write briefly where and how you use it.',
+  'nowe doświadczenie „{name}”': 'new experience "{name}"',
+  'nowy projekt „{name}”': 'new project "{name}"',
+  'nowa szkoła „{name}”': 'new school "{name}"',
 };

@@ -98,6 +98,51 @@ describe('poprawki w CV trafiają do profilu', () => {
     expect(p).toEqual(profile);
   });
 
+  it('doświadczenie dopisane w edytorze przyciskiem "+" trafia do profilu jako nowa pozycja, a potem jest poprawiane', () => {
+    const { p, before, after } = setup();
+    const added = { sourceId: 'cv-abc123', role: '', company: '', location: '', dates: '', bullets: [] };
+    // Pusta pozycja, zanim kandydat cokolwiek wpisze: jeszcze nic w profilu.
+    after.experience.push(added);
+    expect(syncCvEdit(p, before, after)).toEqual([]);
+    expect(p.experience).toHaveLength(1);
+
+    const typed = structuredClone(after);
+    Object.assign(typed.experience[1], {
+      role: 'Mechanik samochodowy',
+      company: 'Serwis Testowy',
+      dates: '03.2026 - obecnie',
+      bullets: [{ id: 'n1', text: 'Wymiana rozrządu i diagnostyka', status: 'fact', reason: '', fallbackText: '', sourceIds: [] }],
+    });
+    expect(syncCvEdit(p, after, typed)).toEqual(['nowe doświadczenie „Mechanik samochodowy”']);
+    expect(p.experience[1]).toMatchObject({
+      id: 'cv-abc123', kind: 'praca', role: 'Mechanik samochodowy', company: 'Serwis Testowy', start: '2026-03', end: '', current: true,
+      achievements: ['Wymiana rozrządu i diagnostyka'],
+    });
+
+    const fixed = structuredClone(typed);
+    fixed.experience[1].location = 'Rzeszów';
+    expect(syncCvEdit(p, typed, fixed)).toEqual(['doświadczenie „Mechanik samochodowy”']);
+    expect(p.experience).toHaveLength(2);
+    expect(p.experience[1].location).toBe('Rzeszów');
+  });
+
+  it('nowy projekt i szkoła z edytora też trafiają do profilu', () => {
+    const { p, before, after } = setup();
+    after.projects.push({ sourceId: 'cv-p1', name: 'Renowacja motocykla', role: '', dates: '', technologies: ['spawanie TIG'], link: '', bullets: [] });
+    after.education.push({ sourceId: 'cv-e1', school: 'Technikum Samochodowe', degree: 'technik', field: 'pojazdy samochodowe', dates: '09.2020 - 06.2024', details: '' });
+    expect(syncCvEdit(p, before, after)).toEqual(['nowy projekt „Renowacja motocykla”', 'nowa szkoła „Technikum Samochodowe”']);
+    expect(p.projects[0]).toMatchObject({ id: 'cv-p1', name: 'Renowacja motocykla', technologies: ['spawanie TIG'] });
+    expect(p.education[1]).toMatchObject({ id: 'cv-e1', school: 'Technikum Samochodowe', start: '2020-09', end: '2024-06' });
+  });
+
+  it('pozycja spoza profilu bez znacznika "cv-" (np. usunięta z profilu) nie jest zakładana od nowa', () => {
+    const { p, before, after } = setup();
+    p.experience = [];
+    after.experience[0].role = 'Asystentka ds. marketingu';
+    expect(syncCvEdit(p, before, after)).toEqual([]);
+    expect(p.experience).toEqual([]);
+  });
+
   it('szczegóły wykształcenia: wypełniają puste pole i przejmują poprawkę tego samego tekstu', () => {
     const { p, before, after } = setup();
     after.education[0].details = 'Średnia 4,8';
