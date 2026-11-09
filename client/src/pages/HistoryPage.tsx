@@ -38,6 +38,22 @@ export function HistoryPage() {
     load();
   };
 
+  const regenerate = async (a: ApplicationSummary) => {
+    if (!confirm(t('Wygenerować CV „{title}” od nowa? Powstanie nowa wersja, a poprzednie zostaną na liście wersji.', { title: a.posting?.title ?? '' }))) return;
+    setSyncing(a.id);
+    setError(null);
+    setNotice(null);
+    try {
+      const cv = await api.generate(current.id, a.id);
+      setNotice(t('„{title}”: nowa wersja CV {v}.', { title: a.posting?.title ?? '', v: cv.version }));
+      await load();
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setSyncing(null);
+    }
+  };
+
   const syncProfile = async (a: ApplicationSummary) => {
     setSyncing(a.id);
     setError(null);
@@ -167,19 +183,29 @@ export function HistoryPage() {
                       </td>
                       <td className="nowrap faint">{usd(a.costUsd)}</td>
                       <td onClick={(e) => e.stopPropagation()} className="nowrap">
-                        {a.profileNews > 0 && (
-                          <button className="btn sm" onClick={() => syncProfile(a)} disabled={syncing !== null} title={t('Dopisz do CV to, co doszło do profilu od tej wersji')}>
-                            {syncing === a.id ? t('Synchronizuję…') : t('Synchronizuj ({n})', { n: newsLabel(a.profileNews) })}
-                          </button>
-                        )}
-                        {a.pdfFile && (
-                          <a className="btn ghost sm" href={api.downloadUrl(current.id, a.id)}>
-                            PDF
-                          </a>
-                        )}
-                        <button className="btn ghost sm danger" onClick={() => remove(a)} aria-label={t('Usuń')}>
-                          {t('Usuń')}
-                        </button>
+                        <div className="stack" style={{ gap: 4, alignItems: 'flex-start' }}>
+                          {syncing === a.id && <span className="faint small">{t('Pracuję…')}</span>}
+                          {a.profileNews > 0 && (
+                            <button className="btn sm" onClick={() => syncProfile(a)} disabled={syncing !== null} title={t('Dopisz do CV to, co doszło do profilu od tej wersji')}>
+                              {t('Synchronizuj ({n})', { n: newsLabel(a.profileNews) })}
+                            </button>
+                          )}
+                          {a.currentVersion > 0 && a.posting && (
+                            <button className="btn ghost sm" onClick={() => regenerate(a)} disabled={syncing !== null} title={t('Napisz to CV od nowa z obecnego profilu')}>
+                              {t('Wygeneruj ponownie')}
+                            </button>
+                          )}
+                          <div className="row" style={{ gap: 4 }}>
+                            {a.pdfFile && (
+                              <a className="btn ghost sm" href={api.downloadUrl(current.id, a.id)}>
+                                PDF
+                              </a>
+                            )}
+                            <button className="btn ghost sm danger" onClick={() => remove(a)} aria-label={t('Usuń')}>
+                              {t('Usuń')}
+                            </button>
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   ))}

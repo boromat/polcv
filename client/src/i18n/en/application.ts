@@ -308,4 +308,9 @@ export const application: Record<string, string> = {
   '„{title}”: nowa wersja CV {v} z rzeczami z profilu.': '"{title}": new CV version {v} with things from your profile.',
   'Synchronizuję…': 'Syncing…',
   'Synchronizuj ({n})': 'Sync ({n})',
+  'Wygenerować CV „{title}” od nowa? Powstanie nowa wersja, a poprzednie zostaną na liście wersji.': 'Write the CV "{title}" again? A new version is created and the previous ones stay in the version list.',
+  '„{title}”: nowa wersja CV {v}.': '"{title}": new CV version {v}.',
+  'Pracuję…': 'Working…',
+  'Napisz to CV od nowa z obecnego profilu': 'Write this CV again from your current profile',
+  'Wygeneruj ponownie': 'Generate again',
 };

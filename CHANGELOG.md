@@ -19,7 +19,8 @@ All notable changes to PolCV are recorded here. The format follows
   added or changed since (from the career advisor chat, gap answers, profile edits or GitHub) and
   asks the AI to work the relevant ones into a new version, kept to one page: new items are added,
   changed ones are updated in place. The previous version stays in the list. Corrections made in
-  the CV editor itself do not come back as changes.
+  the CV editor itself do not come back as changes. *History* also has *Generate again* for every
+  CV, after a confirmation.
 - **How you refer to yourself.** Creating a profile asks for *on*, *ona* or *ono* (it can be changed
   in *Mój profil*). The gap questions and the career advisor address you in the matching Polish
   forms ("wykonywałeś", "wykonywałaś", "wykonywałoś"), and interview answers and cover letters use
