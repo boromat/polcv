@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { nanoid } from 'nanoid';
-import type { Application, CvContent, CvVersion, ExtraFact, GapAnswer, GithubImportResult, ImproveResult, JobPosting, Profile, TemplateId } from '../shared/schemas';
+import type { Application, CvContent, CvVersion, ExtraFact, GapAnswer, GithubImportResult, ImproveOptions, ImproveResult, JobPosting, Profile, TemplateId } from '../shared/schemas';
 import * as store from './storage/store';
 import { HttpError, newId, nowIso } from './storage/store';
 import { fetchPosting } from './jobs/fetchPosting';
@@ -11,11 +11,12 @@ import { gapQuestions } from './llm/prompts/gapQuestions';
 import { generateCv, improveCv, instructCv, shortenCv, syncCv } from './llm/prompts/generateCv';
 import { newsCount, profileEntriesOf, profileIdsOf, profileNews, refreshEntries, refreshSnapshot } from './cv/profileNews';
 import { applyProfileFields, entryUpdates, mergeSync, needsAi, syncRequest } from './cv/syncMerge';
+import { unifyDates } from './cv/improveEdits';
 import { evaluateCv } from './llm/prompts/evaluateCv';
 import { courseAdvice, coverLetter, interviewPrep } from './llm/prompts/extras';
 import { applyDecisions } from './llm/prompts/common';
 import { factTexts } from './llm/prompts/cvChecks';
-import { factEvidence, hasWork, improvePlan, nothingToImprove } from './llm/prompts/improvePlan';
+import { factEvidence, hasWork, improveOptions, improvePlan, selectPlan } from './llm/prompts/improvePlan';
 import { decideLanguage, decidePhoto, decideRodo } from './cv/rodo';
 import { photoDataUri, renderCvHtml, renderLetterHtml, withoutPending, type RenderMode } from './cv/render';
 import { htmlToPdf } from './cv/pdf';
@@ -411,25 +412,58 @@ export async function evaluate(profileId: string, appId: string, v: number) {
   return report;
 }
 
-/**
- * Poprawa według planu z raportu. Nowa wersja zostaje bieżącą tylko wtedy, gdy nie wypadła gorzej; gorsza jest zapisana
- * na liście wersji. Bez niczego do poprawienia AI nie jest wywoływane, a kandydat dostaje listę tego, co może dopisać.
- */
-export async function improve(profileId: string, appId: string): Promise<ImproveResult> {
+/** Bieżąca wersja z aktualnym raportem i planem poprawek; bez aktualnej oceny 409 (kandydat ma najpierw ją zobaczyć). */
+async function currentPlan(profileId: string, appId: string) {
   const app = await store.getApplication(profileId, appId);
   if (!app.posting || !app.currentVersion) throw new HttpError(409, tr('Najpierw wygeneruj CV.'));
   const current = await store.getVersion(profileId, appId, app.currentVersion);
-  let report = await store.getReport(profileId, appId, current.version);
-  if (!report || report.createdAt < current.updatedAt) report = await evaluate(profileId, appId, current.version);
+  const report = await store.getReport(profileId, appId, current.version);
+  if (!report || report.createdAt < current.updatedAt) throw new HttpError(409, tr('CV zmieniło się od ostatniej oceny: najpierw kliknij „Oceń ponownie”, żeby zobaczyć aktualne poprawki.'));
   const profile = await store.getProfile(profileId);
   const base = applyDecisions(current);
-  const plan = improvePlan(report, profile, app.posting, base);
-  const before = honestReport(report)?.total ?? null;
-  if (!hasWork(plan)) return { kept: 'none', version: null, before, after: null, needsInput: plan.needsInput, message: nothingToImprove(plan) };
+  return { app, posting: app.posting, current, report, profile, base, plan: improvePlan(report, profile, app.posting, base) };
+}
 
-  const improved = withFreshIds(await improveCv(profile, app.posting, base, plan, ctxOf(app, 'poprawa CV')));
-  improved.language = current.content.language;
-  const content = await fitToPage(profile, app, { ...current, content: improved, decisions: {} }, factTexts(base));
+/** Lista do wyboru przed "Popraw automatycznie": poprawki rekrutera, słowa kluczowe, kryteria, powtórzenia, format dat. */
+export async function improveChoices(profileId: string, appId: string): Promise<ImproveOptions> {
+  const { plan, report, current } = await currentPlan(profileId, appId);
+  return { options: improveOptions(plan, current.content.language), needsInput: plan.needsInput, pages: report.format.pages };
+}
+
+/**
+ * "Popraw automatycznie" z tym, co kandydat zaznaczył (`items` = id z improveChoices). AI zmienia tylko te miejsca,
+ * format dat program poprawia sam, a reszta CV zostaje bez zmian; CV dłuższego niż strona nie skracamy samodzielnie.
+ * Nowa wersja zostaje bieżącą tylko wtedy, gdy nie wypadła gorzej; gorsza jest zapisana na liście wersji.
+ */
+export async function improve(profileId: string, appId: string, items: string[]): Promise<ImproveResult> {
+  if (!items.length) throw new HttpError(400, tr('Zaznacz, co AI ma poprawić.'));
+  const { app, posting, current, report, profile, base, plan: full } = await currentPlan(profileId, appId);
+  const plan = selectPlan(full, items);
+  const dates = items.includes('dates') && full.format.some((f) => f.id === 'dates');
+  const before = honestReport(report)?.total ?? null;
+  if (!hasWork(plan) && !dates) throw new HttpError(409, tr('Zaznaczonych poprawek nie ma już w raporcie. Odśwież stronę albo oceń CV ponownie.'));
+
+  let content = base;
+  const changes: string[] = [];
+  let notes = '';
+  if (hasWork(plan)) {
+    const r = await improveCv(profile, posting, base, plan, ctxOf(app, 'poprawa CV'), () => `t${nanoid(8)}`);
+    content = r.content;
+    changes.push(...r.changes);
+    notes = r.notes;
+  }
+  if (dates) {
+    const unified = unifyDates(content, profile);
+    if (JSON.stringify(unified) !== JSON.stringify(content)) {
+      content = unified;
+      changes.push(tr('format dat'));
+    }
+  }
+  if (!changes.length) {
+    return { kept: 'none', version: null, before, after: null, needsInput: plan.needsInput, message: notes || tr('AI nie znalazło nic do zmiany w zaznaczonych miejscach, więc nowa wersja nie powstała.') };
+  }
+  content = { ...content, notes: notes || base.notes };
+  const { pages } = await htmlToPdf(await renderCv(profile, { ...current, content, decisions: {} }, 'pdf'));
   const t = nowIso();
   const cv = await store.addVersion(profileId, appId, (version) => ({ ...current, version, createdAt: t, updatedAt: t, origin: 'improved', content, decisions: {} }));
   const next = await evaluate(profileId, appId, cv.version);
@@ -439,7 +473,12 @@ export async function improve(profileId: string, appId: string): Promise<Improve
       a.currentVersion = cv.version;
     });
   }
-  return { kept: better ? 'new' : 'old', version: cv.version, before, after: honestReport(next)?.total ?? null, needsInput: plan.needsInput, message: '' };
+  const message = [
+    tr('Zmienione: {items}.', { items: changes.join(', ') }),
+    notes,
+    pages > 1 ? tr('CV nie mieści się już na jednej stronie: usuń coś w edytorze albo kliknij „Skróć do 1 strony”.') : '',
+  ];
+  return { kept: better ? 'new' : 'old', version: cv.version, before, after: honestReport(next)?.total ?? null, needsInput: plan.needsInput, message: message.filter(Boolean).join('\n') };
 }
 
 /**

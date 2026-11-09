@@ -30,6 +30,8 @@ export function ApplicationPage() {
   const [bust, setBust] = useState(String(Date.now()));
   const [focusId, setFocusId] = useState<string | null>(null);
   const [pages, setPages] = useState<number | null>(null);
+  // Lista wyboru przed "Popraw automatycznie" (w zakładce raportu).
+  const [picker, setPicker] = useState(false);
   const gapStarted = useRef(false);
   const saveChain = useRef(Promise.resolve());
   // Pola CV, których zapis się nie udał (do ponowienia przed akcją AI albo PDF).
@@ -172,7 +174,7 @@ export function ApplicationPage() {
     });
   };
 
-  /** Komunikat po poprawie: wyniki ze świeżej oceny serwera, przed i po. */
+  /** Komunikat po poprawie: wyniki ze świeżej oceny serwera, przed i po, oraz co zmieniono. */
   const improveNotice = (r: ImproveResult) => {
     if (r.kept === 'none') return r.message;
     const { before: from, after: to } = r;
@@ -181,25 +183,33 @@ export function ApplicationPage() {
     else if (from != null && to != null) text = t('Nowa wersja wyszła gorzej ({to} < {from}) - zostawiam poprzednią. Możesz ją podejrzeć w wyborze wersji.', { from, to });
     else if (from != null) text = t('Nowa wersja nie dostała pełnej oceny AI - zostawiam poprzednią ({from}). Możesz ją podejrzeć w wyborze wersji.', { from });
     else text = t('Nowa wersja nie wypadła lepiej - zostawiam poprzednią. Możesz ją podejrzeć w wyborze wersji.');
-    if (!r.needsInput.length) return text;
-    return [text, t('Żeby podnieść wynik bardziej, możesz dopisać w profilu:'), ...r.needsInput.map((q) => `- ${q}`)].join('\n');
+    const lines = [text, r.message].filter(Boolean);
+    if (!r.needsInput.length) return lines.join('\n');
+    return [...lines, t('Żeby podnieść wynik bardziej, możesz dopisać w profilu:'), ...r.needsInput.map((q) => `- ${q}`)].join('\n');
   };
 
-  const improve = () =>
+  /** "Popraw automatycznie": najpierw wybór w raporcie, co AI ma zmienić. */
+  const openImprove = () => {
+    setTab('report');
+    setPicker(true);
+  };
+
+  const improve = (items: string[]) =>
     run(
-      t('Poprawiam CV na podstawie raportu…'),
+      t('Poprawiam zaznaczone miejsca w CV…'),
       async () => {
         // Nowa wersja mogła się zapisać, nawet jeśli jej ocena się nie udała - lista wersji ma ją pokazać.
-        const res = await api.improve(pid, aid).catch(async (e) => {
+        const res = await api.improve(pid, aid, items).catch(async (e) => {
           await loadDetail().catch(() => null);
           throw e;
         });
+        setPicker(false);
         const d = await loadDetail();
         await loadVersion(d.application.currentVersion);
         setNotice(improveNotice(res));
         setTab('report');
       },
-      t('AI poprawia CV według raportu, a potem program ocenia nową wersję i zostawia lepszą. To zwykle 1-2 minuty.'),
+      t('AI zmienia tylko to, co zaznaczysz, a potem program ocenia nową wersję i zostawia lepszą. To zwykle 1-2 minuty.'),
     );
 
   const evaluate = () => run(t('Oceniam CV…'), async (step) => evaluateAndReload(app.currentVersion, step));
@@ -259,6 +269,8 @@ export function ApplicationPage() {
 
   const switchVersion = (v: number) =>
     run(t('Przełączam wersję…'), async () => {
+      // Wybór poprawek dotyczy wersji, dla której go otwarto.
+      setPicker(false);
       await api.patchApplication(pid, aid, { currentVersion: v });
       await loadDetail();
       await loadVersion(v);
@@ -433,7 +445,7 @@ export function ApplicationPage() {
                     {t('Oceń ponownie')}
                   </button>
                 )}
-                <button className="btn sm" onClick={improve} disabled={vd.pending > 0} title={vd.pending > 0 ? decideFirst : ''}>
+                <button className="btn sm" onClick={openImprove} disabled={vd.pending > 0} title={vd.pending > 0 ? decideFirst : ''}>
                   {t('Popraw automatycznie')}
                 </button>
                 <button className="btn sm" onClick={previewPdf}>
@@ -479,6 +491,9 @@ export function ApplicationPage() {
                 report={vd.report}
                 stale={vd.reportStale}
                 onEvaluate={evaluate}
+                picker={picker}
+                onPicker={setPicker}
+                loadOptions={() => api.improveOptions(pid, aid)}
                 onImprove={improve}
                 pending={vd.pending}
                 factTopics={detail.factTopics ?? []}

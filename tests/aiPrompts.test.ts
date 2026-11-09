@@ -165,43 +165,60 @@ describe('pisanie i poprawa CV', () => {
     ai, aiError: '',
   });
 
-  it('przy poprawie liczby z zaakceptowanych punktów zostają faktami', async () => {
+  /** Odpowiedź AI z poprawą: lista zmian, nie całe CV. */
+  const edits = (list: object[]) => ({ content: JSON.stringify({ edits: list.map((e) => ({ sourceIds: [], ...e })), skills: [], notes: 'Zmieniono.' }) });
+  const clarity = { id: 'crit:clarity', key: 'clarity', score: 5, comment: 'Ogólnikowe punkty.', goal: 'Krótkie punkty zaczynające się od czynności.' };
+  let n = 0;
+  const freshId = () => `n${++n}`;
+
+  it('przy poprawie liczby z zaakceptowanych punktów zostają faktami, a nowa liczba spoza profilu jest sugestią', async () => {
     const current = content(['Obsługa 40 zgłoszeń dziennie']);
-    replies = [{ content: JSON.stringify(content(['Obsługa 40 zgłoszeń dziennie', 'Wsparcie 12 kampanii'])) }];
-    const cv = await improveCv(profile, posting, current, improvePlan(report(), profile, posting, current), ctx);
-    expect(cv.experience[0].bullets.map((b) => b.status)).toEqual(['fact', 'suggested']);
+    const plan = { ...improvePlan(report(), profile, posting, current), criteria: [clarity] };
+    replies = [edits([{ item: 'crit:clarity', action: 'add', target: 'exp1', text: 'Wsparcie 12 kampanii', sourceIds: ['exp1'] }])];
+    const { content: cv, changes } = await improveCv(profile, posting, current, plan, ctx, freshId);
+    expect(cv.experience[0].bullets.map((b) => [b.text, b.status])).toEqual([
+      ['Obsługa 40 zgłoszeń dziennie', 'fact'],
+      ['Wsparcie 12 kampanii', 'suggested'],
+    ]);
+    expect(changes).toEqual(['nowy punkt „Wsparcie 12 kampanii”']);
   });
 
-  it('poprawa dostaje plan zamiast raportu, a fakty wolno przeredagować', async () => {
+  it('poprawa dostaje wybrany plan zamiast raportu i zwraca tylko zmiany', async () => {
     const withRaporty = { ...posting, keywords: [{ term: 'raporty z kampanii', synonyms: [], importance: 'must' as const, category: 'umiejętność' as const }] };
     const current = content(['Wsparcie działu marketingu']);
     const r = report({ score: 20, max: 40, review: review([...full.slice(0, 2), ['summary_fit', 5], ...full.slice(3)]) });
     const plan = improvePlan(r, profile, withRaporty, current);
-    replies = [{ content: JSON.stringify(content(['Przygotowywanie raportów z kampanii'])) }];
-    await improveCv(profile, withRaporty, current, plan, ctx);
+    replies = [edits([{ item: 'kw:raporty z kampanii', action: 'replace', target: 'b1', text: 'Przygotowywanie raportów z kampanii' }])];
+    const { content: cv } = await improveCv(profile, withRaporty, current, plan, ctx, freshId);
+    expect(cv.experience[0].bullets[0]).toMatchObject({ id: 'b1', text: 'Przygotowywanie raportów z kampanii' });
+    expect(cv.summary).toEqual(current.summary);
     const system = sent[0].messages[0].content as string;
     const user = sent[0].messages[1].content as string;
     const planPart = user.slice(user.indexOf('PLAN POPRAWEK'));
-    expect(system).toContain('także ze statusem "fact"');
+    expect(system).toContain('Zmień w CV tylko to, czego wymagają te pozycje');
+    expect(system).toContain('Nie zwracasz całego CV, tylko listę zmian');
     expect(system).toContain('Nie dopisuj nowych faktów');
     expect(system).toContain('ZAWSZE formą rzeczownikową');
-    expect(system).not.toContain('zachowaj ich sens. Pozycje "suggested"');
     expect(user).not.toContain('RAPORT:');
-    // Słowo kluczowe z brzmieniem i miejscem z profilu, słabe kryterium z celem.
+    // Słowo kluczowe z brzmieniem i miejscem z profilu, słabe kryterium z celem, każda pozycja z "id".
+    expect(planPart).toContain('"id": "kw:raporty z kampanii"');
     expect(planPart).toContain('"term": "raporty z kampanii"');
     expect(planPart).toContain('"profileText": "Przygotowywałem raporty z kampanii"');
     expect(planPart).toContain('doświadczenie „Stażysta ds. marketingu, Firma Testowa Sp. z o.o.” (id exp1)');
-    expect(planPart).toContain('"key": "summary_fit"');
+    expect(planPart).toContain('"id": "crit:summary_fit"');
     expect(planPart).not.toContain('needsInput');
   });
 
-  it('nowa wersja nie może zgubić słowa kluczowego, które obecne CV już ma', async () => {
+  it('zmiana nie może zgubić słowa kluczowego, które obecne CV już ma', async () => {
     const withRaporty = { ...posting, keywords: [{ term: 'raporty', synonyms: [], importance: 'must' as const, category: 'umiejętność' as const }] };
     const current = content(['Przygotowywanie raportów z kampanii']);
-    const plan = improvePlan(report(), profile, withRaporty, current);
+    const plan = { ...improvePlan(report(), profile, withRaporty, current), criteria: [clarity] };
     expect(plan.keep).toEqual(['raporty']);
-    replies = [{ content: JSON.stringify(content(['Wsparcie kampanii marketingowych'])) }, { content: JSON.stringify(content(['Raporty z kampanii marketingowych'])) }];
-    const cv = await improveCv(profile, withRaporty, current, plan, ctx);
+    replies = [
+      edits([{ item: 'crit:clarity', action: 'replace', target: 'b1', text: 'Wsparcie kampanii marketingowych' }]),
+      edits([{ item: 'crit:clarity', action: 'replace', target: 'b1', text: 'Raporty z kampanii marketingowych' }]),
+    ];
+    const { content: cv } = await improveCv(profile, withRaporty, current, plan, ctx, freshId);
     expect(lastUserMessage(1)).toContain('Brakuje słowa kluczowego „raporty”');
     expect(cv.experience[0].bullets[0].text).toBe('Raporty z kampanii marketingowych');
   });

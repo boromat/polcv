@@ -2,8 +2,9 @@ import type { CvContent, JobPosting, Profile } from '../../../shared/schemas';
 import { callJson, type LlmContext } from '../openrouter';
 import { json, postingForPrompt, profileForPrompt, today, writingRules, forUser, genderForms } from './common';
 import { checkedCvSchema, checkedImproveSchema, factTexts, groundCv, numberedNames } from './cvChecks';
-import { planForPrompt, type ImprovePlan } from './improvePlan';
+import { aiItemIds, planForPrompt, type ImprovePlan } from './improvePlan';
 import type { SyncRequest } from '../../cv/syncMerge';
+import { applyEdits, checkedEditsSchema, keepUntouched } from '../../cv/improveEdits';
 
 const SYSTEM = (lang: 'pl' | 'en', forms: ReturnType<typeof genderForms>) => `Jesteś doświadczonym rekruterem i ekspertem od CV przechodzących przez systemy ATS oraz automatyczną ocenę AI. Piszesz CV kandydata (student/junior) dopasowane do konkretnego ogłoszenia.
 
@@ -46,39 +47,49 @@ export async function generateCv(
 }
 
 const IMPROVE_EXTRA = () => `
-POPRAWA WEDŁUG PLANU:
-Dostajesz obecną wersję CV i PLAN POPRAWEK wyliczony z raportu oceny. Wprowadź wszystko z planu, co da się zrobić zgodnie z prawdą.
-- Każdą pozycję obecnego CV (także ze statusem "fact") możesz przeredagować, skrócić, połączyć z inną albo przenieść wyżej lub niżej, jeśli fakty zostają te same. Nie dopisuj nowych faktów: wszystko musi nadal wynikać z profilu lub z extraFacts (has=true).
+POPRAWA WYBRANYCH RZECZY:
+Kandydat wybrał z raportu oceny, co poprawić: to jest PLAN POPRAWEK, a każda jego pozycja ma "id". Zmień w CV tylko to, czego wymagają te pozycje. Reszta CV zostaje dokładnie taka, jaka jest: kandydat mógł ją napisać sam.
+Nie zwracasz całego CV, tylko listę zmian:
+- "edits" z "action": "replace" = nowy tekst istniejącego punktu ("target" = jego "id"), podsumowania ("summary"), tytułu ("headline") albo szczegółów szkoły ("education:<sourceId>"); "add" = nowy punkt w pozycji doświadczenia lub projektu ("target" = jej "sourceId", w "sourceIds" id z profilu, na których się opiera); "remove" = usunięcie punktu ("target" = jego "id").
+- "skills": umiejętności do dopisania do sekcji umiejętności ("category" = nazwa grupy z CV). Umiejętności nie dopisuj przez "edits".
+- W każdej zmianie "item" = "id" pozycji planu, którą realizuje. Zmieniaj jak najmniej: przy "replace" zostaw resztę zdania bez zmian i nie ruszaj miejsc, których plan nie dotyczy.
+- Nie dopisuj nowych faktów: wszystko musi wynikać z profilu lub z extraFacts (has=true).
 - "addable": słowa kluczowe z ogłoszenia, które profil potwierdza ("profileText" i "where" mówią gdzie). Użyj DOSŁOWNEGO brzmienia z ogłoszenia ("term") w miejscu zgodnym z profilem i zrób to, co mówi "todo". Gdy profil ma inne brzmienie ("profileWording", np. polską nazwę funkcji), możesz podać oba, np. "VLOOKUP (WYSZUKAJ.PIONOWO)".
-- "fixes": poprawki AI-rekrutera ("find" = obecny fragment, "replace" = propozycja). Wprowadź tylko tę część propozycji, która wynika z profilu.
-- "criteria": słabo ocenione kryteria z komentarzem rekrutera i celem ("goal").
-- "format": problemy z formatem do usunięcia.
+- "fixes": poprawki AI-rekrutera ("find" = obecny fragment, "replace" = propozycja). Wprowadź tylko tę część propozycji, która wynika z profilu; "userData" to dane od kandydata do tej poprawki.
+- "criteria": słabo ocenione kryteria z komentarzem rekrutera i celem ("goal"): popraw tylko fragmenty, których dotyczy komentarz.
 - "stuffed": słowa powtórzone za często: zostaw każde maks. 2-3 razy.
-- "keepKeywords": słowa kluczowe, które obecne CV już ma. Każde musi zostać w CV (możesz je przenieść albo przeredagować zdanie).
-- Punkty obecnego CV w 1. osobie ("Przygotowywałem…") przepisz formą rzeczownikową ("Przygotowywanie…"), zachowując ich sens.
-- CV MUSI nadal zmieścić się na jednej stronie (łącznie maks. ~420 słów). Nie wydłużaj go: jeśli coś dopisujesz, skróć albo usuń coś mniej trafnego.
-- Zachowaj język CV. Zwróć CAŁE CV. W "notes" ${forUser()} napisz krótko, co zmieniono.`;
+- "keepKeywords": słowa kluczowe, które obecne CV już ma. Żadne nie może zniknąć z CV.
+- Nowe i zmienione punkty pisz formą rzeczownikową ("Przygotowywanie…"), jak reszta CV. Nie wydłużaj CV bardziej, niż trzeba.
+- Zachowaj język CV. W "notes" ${forUser()} napisz krótko, co zmieniono.`;
 
+/**
+ * Poprawa tylko tego, co kandydat zaznaczył w raporcie: AI zwraca zmiany w konkretnych miejscach, a program wprowadza
+ * je na kopii CV. `freshId` daje id nowym punktom. Zwraca nowe CV, opis zmian i notatkę AI.
+ */
 export async function improveCv(
   profile: Profile,
   posting: JobPosting,
   current: CvContent,
   plan: ImprovePlan,
   ctx: LlmContext,
-): Promise<CvContent> {
+  freshId: () => string,
+): Promise<{ content: CvContent; changes: string[]; notes: string }> {
   const lang = current.language;
-  const content = await callJson({
-    schema: checkedImproveSchema(profile, lang, current, posting.keywords),
-    schemaName: 'cv',
+  const allowed = aiItemIds(plan);
+  const edits = await callJson({
+    schema: checkedEditsSchema(current, profile, lang, posting.keywords, allowed),
+    schemaName: 'cv_edits',
     tier: 'main',
     temperature: 0.3,
-    maxTokens: 10_000,
+    maxTokens: 4000,
     system: SYSTEM(lang, genderForms(profile.pronouns)) + IMPROVE_EXTRA(),
-    user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nOBECNE CV:\n${json(current)}\n\nPLAN POPRAWEK:\n${json(planForPrompt(plan))}\n\nZwróć poprawione CV.`,
+    user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nOBECNE CV:\n${json(current)}\n\nPLAN POPRAWEK (wybrany przez kandydata):\n${json(planForPrompt(plan))}\n\nZwróć listę zmian.`,
     ctx,
   });
-  // Liczby z punktów, które kandydat już zaakceptował, są potwierdzone.
-  return groundCv(content, profile, { lang, confirmed: factTexts(current), names: numberedNames(posting) });
+  const applied = applyEdits(current, edits, allowed, freshId);
+  // Liczby z punktów, które kandydat już zaakceptował, są potwierdzone; sprawdzamy tylko teksty, które AI zmieniło.
+  const checked = groundCv(applied.content, profile, { lang, confirmed: factTexts(current), names: numberedNames(posting) });
+  return { content: keepUntouched(applied.content, checked, applied.touched), changes: applied.changes, notes: edits.notes.trim() };
 }
 
 const SYNC_EXTRA = () => `

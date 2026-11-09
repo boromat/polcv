@@ -8,6 +8,7 @@ import type {
   CvVersion,
   GapAnswer,
   GithubImportResult,
+  ImproveOptions,
   ImproveResult,
   InterviewPrep,
   CourseAdvice,
@@ -154,7 +155,8 @@ export const api = {
   facts: (pid: string, aid: string, facts: { topic: string; answer: string }[]) => req<{ saved: number }>('POST', `${A(pid, aid)}/facts`, { facts }),
   generate: (pid: string, aid: string, opts: { language?: 'pl' | 'en'; template?: TemplateId } = {}) =>
     req<CvVersion>('POST', `${A(pid, aid)}/generate`, opts),
-  improve: (pid: string, aid: string) => req<ImproveResult>('POST', `${A(pid, aid)}/improve`),
+  improveOptions: (pid: string, aid: string) => req<ImproveOptions>('POST', `${A(pid, aid)}/improve/options`),
+  improve: (pid: string, aid: string, items: string[]) => req<ImproveResult>('POST', `${A(pid, aid)}/improve`, { items }),
   version: (pid: string, aid: string, v: number) => req<VersionDetail>('GET', `${A(pid, aid)}/versions/${v}`),
   saveVersion: (pid: string, aid: string, v: number, patch: Partial<Pick<CvVersion, 'content' | 'decisions' | 'template' | 'photo' | 'rodo'>>) =>
     req<{ cv: CvVersion; pending: number; profileUpdates: string[] }>('PUT', `${A(pid, aid)}/versions/${v}`, patch),

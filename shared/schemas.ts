@@ -421,8 +421,30 @@ export interface ImproveResult {
   after: number | null;
   /** co kandydat może dopisać w profilu, żeby podnieść wynik (w języku interfejsu) */
   needsInput: string[];
-  /** komunikat przy 'none' */
+  /** przy 'none' powód; przy nowej wersji: co zmieniono, notatka AI i ostrzeżenie o długości */
   message: string;
+}
+
+/** Jedna rzecz z raportu, którą kandydat może zlecić AI w "Popraw automatycznie" (teksty w języku interfejsu). */
+export interface ImproveOption {
+  id: string;
+  kind: 'fix' | 'keyword' | 'criterion' | 'stuffing' | 'dates';
+  title: string;
+  detail: string;
+  /** poprawka rekrutera: obecny fragment i propozycja */
+  find?: string;
+  replace?: string;
+  /** kryterium oceny AI: nazwę podpisuje klient */
+  criterion?: string;
+}
+
+/** Lista do wyboru przed "Popraw automatycznie" - zwracana przez /improve/options. */
+export interface ImproveOptions {
+  options: ImproveOption[];
+  /** czego AI nie poprawi bez nowych informacji (w języku interfejsu) */
+  needsInput: string[];
+  /** strony CV według oceny: dłuższe niż jedna skraca "Skróć do 1 strony" */
+  pages: number;
 }
 
 /** Wynik "Dodaj projekty z GitHuba" - zwracany przez /github. Profil jest już zapisany. */

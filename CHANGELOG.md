@@ -45,6 +45,15 @@ All notable changes to PolCV are recorded here. The format follows
 
 ### Changed
 
+- **You choose what *Improve automatically* changes.** The button now opens a list in the report:
+  the recruiter's fixes (current text and proposal), keywords your profile backs up, weak criteria,
+  repeated words and mixed date formats. Nothing is ticked in advance, and the AI changes only what
+  you tick. It answers with changes to specific places (replace, add or remove a point, the
+  summary, the headline, skills) instead of a whole new CV, and anything outside your choice is
+  sent back, so the rest of the CV, including your own wording, stays word for word. Mixed date
+  formats are fixed by the app without the AI. A CV that grows past one page is not shortened on
+  its own, and the message lists what changed. The list needs a current score; after editing the
+  CV, *Score again* comes first.
 - **No en dashes either.** Besides the long dash (—), the CV, cover letters and everything the AI
   writes now use a plain hyphen instead of the en dash (–): dates read "07.2025 - 09.2025", ranges
   "2-3", and the template separates role and company with " - ". Older versions are shown and

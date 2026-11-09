@@ -1,4 +1,5 @@
-import type { AiReview, AtsReport, CvContent, JobPosting, Keyword, Profile } from '../../../shared/schemas';
+import { createHash } from 'node:crypto';
+import type { AiReview, AtsReport, CvContent, ImproveOption, JobPosting, Keyword, Profile } from '../../../shared/schemas';
 import {
   aliasVariants,
   cvKeywordSources,
@@ -67,6 +68,8 @@ export const confirmedTopic = (f: { topic: string }) => (f.topic.trim().split(/\
 export const factEvidence = (f: { topic: string; answer: string }) => [confirmedTopic(f), f.answer].filter(Boolean).join(' ');
 
 export interface AddableKeyword {
+  /** "kw:<słowo>": po nim kandydat wybiera, co poprawić */
+  id: string;
   term: string;
   importance: 'must' | 'nice';
   /** 'missing' = nie ma w CV; 'listOnly' = w CV tylko wymienione (lista umiejętności, nagłówek), bez dowodu w treści */
@@ -83,9 +86,11 @@ export interface AddableKeyword {
 
 export interface ImprovePlan {
   addable: AddableKeyword[];
-  fixes: { section: string; find: string; replace: string; why: string }[];
-  criteria: { key: string; score: number; comment: string; goal: string }[];
-  format: string[];
+  /** `userData`: odpowiedź kandydata na poprawkę "wymaga Twoich danych" (z extraFacts) */
+  fixes: { id: string; section: string; find: string; replace: string; why: string; userData?: string }[];
+  criteria: { id: string; key: string; score: number; comment: string; goal: string }[];
+  /** "pages": CV dłuższe niż strona (od tego jest "Skróć do 1 strony"); "dates": różne formaty dat (program poprawia je sam) */
+  format: { id: 'pages' | 'dates'; text: string }[];
   /** słowa powtórzone za często */
   stuffed: string[];
   /** słowa kluczowe, które obecne CV już ma (w tym brzmieniu) - nie wolno ich zgubić */
@@ -147,6 +152,7 @@ export function improvePlan(report: AtsReport, profile: Profile, posting: JobPos
     const hit = strong ?? weak;
     if (hit) {
       addable.push({
+        id: `kw:${kw.term}`,
         term: kw.term,
         importance: kw.importance,
         status: inCv ? 'listOnly' : 'missing',
@@ -173,23 +179,24 @@ export function improvePlan(report: AtsReport, profile: Profile, posting: JobPos
   // Poprawka "wymaga Twoich danych", na którą kandydat odpowiedział w raporcie, idzie do AI razem z tą odpowiedzią.
   const answerFor = (question: string) => profile.extraFacts.find((x) => x.has && x.answer.trim() && normalize(x.topic) === normalize(question));
   const fixes = (review?.fixes ?? []).flatMap(({ section, find, replace, why, needsUserInput }) => {
-    if (!needsUserInput) return [{ section, find, replace, why }];
+    const id = fixId({ section, find, replace });
+    if (!needsUserInput) return [{ id, section, find, replace, why }];
     const answer = answerFor(fixQuestion({ why, replace }));
-    return answer ? [{ section, find, replace, why: `${why} Dane od kandydata (extraFacts, id ${answer.id}): ${answer.answer}` }] : [];
+    return answer ? [{ id, section, find, replace, why, userData: `extraFacts, id ${answer.id}: ${answer.answer}` }] : [];
   });
   const asks = (review?.fixes ?? []).filter((f) => f.needsUserInput && !answerFor(fixQuestion(f))).map(fixQuestion);
   const criteria = (review?.criteria ?? [])
     .filter((c) => c.score < 7 && CRITERION_GOAL[c.key])
-    .map((c) => ({ key: c.key, score: c.score, comment: c.comment, goal: CRITERION_GOAL[c.key]! }));
+    .map((c) => ({ id: `crit:${c.key}`, key: c.key, score: c.score, comment: c.comment, goal: CRITERION_GOAL[c.key]! }));
   // Efektów nie da się dopisać bez nowych faktów; pytamy, jeśli rekruter nie zadał już konkretnych pytań.
   const achievements = review?.criteria.find((c) => c.key === 'achievements');
   if (achievements && achievements.score < 7 && !asks.length) {
     asks.push(tr('Konkretne efekty: dopisz w profilu wyniki swojej pracy (liczby, skala, co powstało), jeśli je znasz.'));
   }
 
-  const format: string[] = [];
-  if (report.format.pages > 1) format.push(`CV ma ${report.format.pages} strony: skróć je do jednej strony (skróć albo usuń najmniej trafne punkty).`);
-  if (!datesConsistent(cv)) format.push('Daty są w różnych formatach: zapisz wszystkie w jednym formacie (po polsku MM.RRRR, po angielsku MM/YYYY).');
+  const format: ImprovePlan['format'] = [];
+  if (report.format.pages > 1) format.push({ id: 'pages', text: `CV ma ${report.format.pages} strony: skróć je do jednej strony (skróć albo usuń najmniej trafne punkty).` });
+  if (!datesConsistent(cv)) format.push({ id: 'dates', text: 'Daty są w różnych formatach: zapisz wszystkie w jednym formacie (po polsku MM.RRRR, po angielsku MM/YYYY).' });
   const contact: string[] = [];
   if (!profile.contact.fullName.trim()) contact.push(tr('Brak imienia i nazwiska w profilu - uzupełnij je.'));
   if (!profile.contact.email.trim()) contact.push(tr('Brak e-maila w profilu - ATS nie będzie mógł się z Tobą skontaktować.'));
@@ -220,4 +227,51 @@ export function nothingToImprove(p: ImprovePlan): string {
 export function planForPrompt(p: ImprovePlan) {
   const { needsInput, keep, ...rest } = p;
   return { ...rest, keepKeywords: keep };
+}
+
+/** Poprawka rekrutera po treści, a nie po numerze: odpowiedź kandydata na inną poprawkę nie przesuwa wyboru. */
+const fixId = (f: { section: string; find: string; replace: string }) =>
+  `fix:${createHash('sha1').update(`${f.section}\n${f.find}\n${f.replace}`).digest('hex').slice(0, 10)}`;
+
+/** Id tego, co z planu robi AI (format dat program poprawia sam, długość - "Skróć do 1 strony"). */
+export function aiItemIds(p: ImprovePlan): Set<string> {
+  return new Set([...p.addable.map((x) => x.id), ...p.fixes.map((x) => x.id), ...p.criteria.map((x) => x.id), ...(p.stuffed.length ? ['stuffed'] : [])]);
+}
+
+/** Plan tylko z tym, co kandydat zaznaczył. Format nie idzie do AI: daty poprawia program, a długość osobny przycisk. */
+export function selectPlan(p: ImprovePlan, ids: Iterable<string>): ImprovePlan {
+  const s = new Set(ids);
+  return {
+    ...p,
+    addable: p.addable.filter((x) => s.has(x.id)),
+    fixes: p.fixes.filter((x) => s.has(x.id)),
+    criteria: p.criteria.filter((x) => s.has(x.id)),
+    format: [],
+    stuffed: s.has('stuffed') ? p.stuffed : [],
+  };
+}
+
+const short = (s: string, n = 140) => (s.length > n ? `${s.slice(0, n - 1).trimEnd()}…` : s);
+
+/** Lista do wyboru w raporcie, w języku interfejsu: kandydat zaznacza, co AI ma poprawić. */
+export function improveOptions(p: ImprovePlan, lang: 'pl' | 'en'): ImproveOption[] {
+  const out: ImproveOption[] = [];
+  for (const f of p.fixes) out.push({ id: f.id, kind: 'fix', title: f.section, detail: f.why, find: f.find, replace: f.replace });
+  for (const a of p.addable) {
+    const action =
+      a.status === 'listOnly'
+        ? tr('Jest tylko na liście umiejętności: AI pokaże je w punkcie albo w podsumowaniu, tam gdzie potwierdza to profil.')
+        : a.todo.includes('sekcji umiejętności')
+          ? tr('AI dopisze je do listy umiejętności (w profilu jest na liście).')
+          : tr('AI dopisze je w treści CV, tam gdzie potwierdza to profil.');
+    out.push({ id: a.id, kind: 'keyword', title: tr('Słowo kluczowe „{term}”', { term: a.term }), detail: `${action} ${tr('Z profilu: „{text}”', { text: short(a.profileText) })}` });
+  }
+  for (const c of p.criteria) out.push({ id: c.id, kind: 'criterion', title: '', detail: c.comment, criterion: c.key });
+  if (p.stuffed.length) {
+    out.push({ id: 'stuffed', kind: 'stuffing', title: tr('Mniej powtórzeń'), detail: tr('Słowa powtórzone za często: {terms}. AI zostawi każde najwyżej 2-3 razy.', { terms: p.stuffed.join(', ') }) });
+  }
+  if (p.format.some((f) => f.id === 'dates')) {
+    out.push({ id: 'dates', kind: 'dates', title: tr('Jeden format dat'), detail: tr('Daty w CV są zapisane różnie: program zapisze wszystkie jako {format}, bez AI.', { format: lang === 'pl' ? 'MM.RRRR' : 'MM/YYYY' }) });
+  }
+  return out;
 }

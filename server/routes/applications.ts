@@ -125,8 +125,16 @@ applicationsRouter.post(`${base}/:aid/generate`, async (req, res) => {
   );
 });
 
+applicationsRouter.post(`${base}/:aid/improve/options`, async (req, res) => {
+  res.json(await svc.improveChoices(req.params.pid, req.params.aid));
+});
+
+// Id pozycji, które kandydat zaznaczył w raporcie (z /improve/options).
+const ImproveItemsSchema = z.array(z.string().min(1).max(200)).max(100);
 applicationsRouter.post(`${base}/:aid/improve`, async (req, res) => {
-  res.json(await svc.improve(req.params.pid, req.params.aid));
+  const parsed = ImproveItemsSchema.safeParse(req.body?.items ?? []);
+  if (!parsed.success) throw new HttpError(400, tr('Zaznacz, co AI ma poprawić.'));
+  res.json(await svc.improve(req.params.pid, req.params.aid, parsed.data));
 });
 
 applicationsRouter.get(`${base}/:aid/versions/:v`, async (req, res) => {

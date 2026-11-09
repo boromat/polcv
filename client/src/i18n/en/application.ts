@@ -12,7 +12,7 @@ export const application: Record<string, string> = {
   'Napisać CV od nowa? AI napisze całe CV jeszcze raz, więc ręczne poprawki z obecnej wersji do niego nie przejdą (ta wersja zostanie na liście wersji). Nowe rzeczy z profilu z zachowaniem poprawek dopisuje „Synchronizuj z profilem”.':
     'Rewrite the CV from scratch? The AI writes the whole CV again, so your own edits in the current version do not carry over (this version stays in the version list). To add new things from your profile and keep your edits, use "Sync with profile".',
   'Piszę CV od nowa…': 'Rewriting the CV from scratch…',
-  'Poprawiam CV na podstawie raportu…': 'Improving the CV based on the report…',
+  'Poprawiam zaznaczone miejsca w CV…': 'Improving the parts of the CV you selected…',
   'Nowa wersja CV: wynik {from} → {to}.': 'New CV version: score {from} → {to}.',
   'Gotowe - powstała nowa wersja CV.': 'Done, a new CV version has been created.',
   'Nowa wersja wyszła gorzej ({to} < {from}) - zostawiam poprzednią. Możesz ją podejrzeć w wyborze wersji.':
@@ -22,8 +22,8 @@ export const application: Record<string, string> = {
   'Nowa wersja nie wypadła lepiej - zostawiam poprzednią. Możesz ją podejrzeć w wyborze wersji.':
     'The new version did not score better, so the previous one stays current. You can still view it in the version picker.',
   'Żeby podnieść wynik bardziej, możesz dopisać w profilu:': 'To raise the score further, you can add this to your profile:',
-  'AI poprawia CV według raportu, a potem program ocenia nową wersję i zostawia lepszą. To zwykle 1-2 minuty.':
-    'The AI improves the CV based on the report, then the app scores the new version and keeps the better one. This usually takes 1-2 minutes.',
+  'AI zmienia tylko to, co zaznaczysz, a potem program ocenia nową wersję i zostawia lepszą. To zwykle 1-2 minuty.':
+    'The AI changes only what you selected, then the app scores the new version and keeps the better one. This usually takes 1-2 minutes.',
   'Oceniam CV…': 'Scoring the CV…',
   'Zapisuję PDF…': 'Saving the PDF…',
   'PDF zapisany w historii i pobrany. Status zmieniono na „Wysłane” - zmień go, jeśli CV nie zostało jeszcze wysłane.':
@@ -176,7 +176,7 @@ export const application: Record<string, string> = {
   'Ocena AI-rekrutera': 'AI recruiter score',
   'Jak oceniłby Cię automatyczny screening AI.': 'How an automated AI screening would rate you.',
   'Ocena AI nie powiodła się:': 'AI scoring failed:',
-  'AI wprowadzi poprawki, które nie wymagają nowych informacji, oceni nową wersję i zostawi lepszą.': 'The AI will make the fixes that need no new information, score the new version and keep the better one.',
+  'Wybierzesz, co AI ma poprawić. Zmieni tylko te miejsca, oceni nową wersję i zostawi lepszą.': 'You choose what the AI should fix. It changes only those parts, scores the new version and keeps the better one.',
   'Najpierw zdecyduj o 1 żółtej sugestii w edytorze.': 'First decide on the yellow suggestion in the editor.',
   'Najpierw zdecyduj o {n} żółtych sugestiach w edytorze.': 'First decide on the {n} yellow suggestions in the editor.',
   'Słowa kluczowe z ogłoszenia': 'Keywords from the job posting',
@@ -260,7 +260,7 @@ export const application: Record<string, string> = {
   'Anuluj': 'Cancel',
   'Zapisuję…': 'Saving…',
   'Zapisz w profilu': 'Save to profile',
-  'Zapisane w profilu. Kliknij „Popraw automatycznie”, a AI doda to do CV, oceni nową wersję i zostawi lepszą.': 'Saved to your profile. Click "Improve automatically" and the AI will add it to the CV, score the new version and keep the better one.',
+  'Zapisane w profilu. Kliknij „Popraw automatycznie” i zaznacz, co AI ma dodać do CV.': 'Saved to your profile. Click "Improve automatically" and select what the AI should add to the CV.',
   'Zapisane w profilu - kliknij, żeby zmienić': 'Saved to your profile - click to change',
   'Kliknij, jeśli to znasz': 'Click if you know this',
   'w profilu': 'in profile',
@@ -323,4 +323,19 @@ export const application: Record<string, string> = {
   'AI zmienia CV według Twojego polecenia…': 'The AI is changing the CV as you asked…',
   'Nowa wersja {v} według Twojego polecenia. Poprzednia zostaje na liście wersji.': 'New version {v} as you asked. The previous one stays in the version list.',
   'AI korzysta tylko z Twojego profilu i pilnuje jednej strony. To zwykle kilkanaście sekund.': 'The AI uses only your profile and keeps the CV to one page. This usually takes 10-20 seconds.',
+  'Kryterium: {name}': 'Criterion: {name}',
+  'Poprawka rekrutera: {section}': 'Recruiter fix: {section}',
+  'Co AI ma poprawić?': 'What should the AI fix?',
+  'Zamknij': 'Close',
+  'CV zmieniło się od ostatniej oceny. Oceń je ponownie, żeby wybrać aktualne poprawki.': 'The CV has changed since it was last scored. Score it again to choose from the current fixes.',
+  'Zaznacz, co chcesz zmienić. AI poprawi tylko te miejsca, a resztę CV zostawi tak, jak jest. Potem program oceni nową wersję i zostawi lepszą.':
+    'Select what you want changed. The AI fixes only those parts and leaves the rest of the CV as it is. Then the app scores the new version and keeps the better one.',
+  'Wczytuję poprawki…': 'Loading the fixes…',
+  'Raport nie wskazuje niczego, co AI mogłoby poprawić bez nowych informacji.': 'The report shows nothing the AI could fix without new information.',
+  'Możesz dopisać w profilu:': 'You can add this to your profile:',
+  'Zaznacz wszystkie': 'Select all',
+  'Odznacz wszystkie': 'Clear all',
+  'CV ma {n} strony: skrócisz je przyciskiem „Skróć do 1 strony” w zakładce Edytor CV.': 'The CV has {n} pages: shorten it with "Shorten to 1 page" in the CV editor tab.',
+  'Wprowadź zaznaczone ({n})': 'Apply selected ({n})',
+  'Wprowadź zaznaczone': 'Apply selected',
 };

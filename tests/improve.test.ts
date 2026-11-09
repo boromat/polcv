@@ -81,21 +81,51 @@ const savedReport = (total: number, ai: AiReview): ((v: CvVersion) => AtsReport)
   aiError: '',
 });
 
+/** Odpowiedź AI z poprawą: lista zmian, nie całe CV. */
+const edits = (list: object[], skills: object[] = [], notes = 'Poprawiono punkt.') =>
+  JSON.stringify({ edits: list.map((e) => ({ sourceIds: [], ...e })), skills, notes });
+const clearer = { item: 'crit:clarity', action: 'replace', target: 'b1', text: 'Prowadzenie profilu firmy na Instagramie (social media) i relacji' };
+const lowClarity = () => review(8, { criteria: review(8).criteria.map((c) => (c.key === 'clarity' ? { ...c, comment: 'Punkt b1 jest ogólnikowy.', score: 5 } : c)) });
+
 describe('Popraw automatycznie', () => {
-  it('nic do zrobienia: AI nie jest wywoływane, a komunikat mówi, co dopisać w profilu', async () => {
+  it('lista do wyboru: tylko to, co da się poprawić; bez niczego do zrobienia lista jest pusta, a pytania zostają', async () => {
     const ask = { section: 'experience', find: '', replace: 'Publikacja N postów tygodniowo', why: 'Ile postów publikujesz tygodniowo?', needsUserInput: true };
     const { pid, aid } = await setup(decided(), savedReport(80, review(8, { fixes: [ask] })));
-    const res = await svc.improve(pid, aid);
+    const choices = await svc.improveChoices(pid, aid);
     expect(sent).toEqual([]);
-    expect(res).toMatchObject({ kept: 'none', version: null, before: 80, after: null, needsInput: ['Ile postów publikujesz tygodniowo?'] });
-    expect(res.message).toContain('Możesz dopisać w profilu:\n- Ile postów publikujesz tygodniowo?');
-    expect((await store.listVersions(pid, aid)).map((v) => v.version)).toEqual([1]);
+    expect(choices).toEqual({ options: [], needsInput: ['Ile postów publikujesz tygodniowo?'], pages: 1 });
+    await expect(svc.improve(pid, aid, [])).rejects.toMatchObject({ status: 400 });
+
+    const other = await setup(decided(), savedReport(80, lowClarity()));
+    expect((await svc.improveChoices(other.pid, other.aid)).options).toEqual([
+      { id: 'crit:clarity', kind: 'criterion', title: '', detail: 'Punkt b1 jest ogólnikowy.', criterion: 'clarity' },
+    ]);
+  });
+
+  it('AI zmienia tylko zaznaczone miejsce; zmiana spoza wyboru wraca do poprawki, a reszta CV zostaje słowo w słowo', async () => {
+    const before = decided();
+    before.summary.text = 'Studiuję marketing i sama poprawiłam to podsumowanie.';
+    const { pid, aid } = await setup(before, savedReport(30, lowClarity()));
+    const sneaky = { item: 'crit:red_flags', action: 'replace', target: 'summary', text: 'Studiuję marketing i znam social media.' };
+    replies = { cv_edits: [edits([clearer, sneaky]), edits([clearer])], cv_review: [JSON.stringify(review(10))] };
+    const res = await svc.improve(pid, aid, ['crit:clarity']);
+    expect(sent.map((s) => s.schema)).toEqual(['cv_edits', 'cv_edits', 'cv_review']);
+    expect(sent[1].body.messages.at(-1).content).toContain('"item" "crit:red_flags", którego nie ma w PLANIE POPRAWEK');
+    expect(sent[0].body.messages[1].content).toContain('PLAN POPRAWEK');
+    expect(res).toMatchObject({ kept: 'new', version: 2, before: 30 });
+    expect(res.message).toContain('Zmienione: punkt „Prowadzenie profilu firmy na Instagramie');
+    expect(res.message).toContain('Poprawiono punkt.');
+    const v2 = (await store.getVersion(pid, aid, 2)).content;
+    expect(v2.experience[0].bullets.map((b) => [b.id, b.text])).toEqual([['b1', clearer.text]]);
+    expect({ ...v2.experience[0], bullets: [] }).toEqual({ ...before.experience[0], bullets: [] });
+    expect({ ...v2, experience: [], notes: '' }).toEqual({ ...before, experience: [], notes: '' });
+    expect((await store.getApplication(pid, aid)).currentVersion).toBe(2);
   });
 
   it('gorsza nowa wersja zostaje na liście, ale bieżąca jest poprzednia', async () => {
-    const { pid, aid } = await setup(decided(), savedReport(80, review(8, { criteria: review(8).criteria.map((c) => (c.key === 'clarity' ? { ...c, score: 5 } : c)) })));
-    replies = { cv: [JSON.stringify(decided())], cv_review: [JSON.stringify(review(1))] };
-    const res = await svc.improve(pid, aid);
+    const { pid, aid } = await setup(decided(), savedReport(80, lowClarity()));
+    replies = { cv_edits: [edits([clearer])], cv_review: [JSON.stringify(review(1))] };
+    const res = await svc.improve(pid, aid, ['crit:clarity']);
     expect(res.kept).toBe('old');
     expect(res.before).toBe(80);
     expect(res.after).toBeLessThan(80);
@@ -103,27 +133,25 @@ describe('Popraw automatycznie', () => {
     expect((await store.getApplication(pid, aid)).currentVersion).toBe(1);
     expect((await store.getVersion(pid, aid, 2)).origin).toBe('improved');
     expect((await store.getReport(pid, aid, 2))?.total).toBe(res.after);
-    // Plan trafił do modelu zamiast surowego raportu.
-    const improveCall = sent.find((s) => s.schema === 'cv')!;
-    expect(improveCall.body.messages[1].content).toContain('PLAN POPRAWEK');
   });
 
-  it('lepsza nowa wersja zostaje bieżąca; wynik "przed" pochodzi ze świeżej oceny serwera', async () => {
-    const { pid, aid } = await setup(decided(), savedReport(30, review(5)));
-    replies = { cv: [JSON.stringify(decided())], cv_review: [JSON.stringify(review(10))] };
-    const res = await svc.improve(pid, aid);
-    expect(res).toMatchObject({ kept: 'new', version: 2, before: 30 });
-    expect(res.after).toBeGreaterThan(30);
-    expect((await store.getApplication(pid, aid)).currentVersion).toBe(2);
+  it('format dat: poprawia program, bez AI', async () => {
+    const mixed = decided();
+    mixed.experience[0].dates = '07/2025 - 09/2025';
+    const { pid, aid } = await setup(mixed, savedReport(60, review(8)));
+    expect((await svc.improveChoices(pid, aid)).options.map((o) => o.id)).toEqual(['dates']);
+    replies = { cv_review: [JSON.stringify(review(9))] };
+    const res = await svc.improve(pid, aid, ['dates']);
+    expect(sent.map((s) => s.schema)).toEqual(['cv_review']);
+    expect(res.message).toContain('Zmienione: format dat.');
+    expect((await store.getVersion(pid, aid, 2)).content.experience[0].dates).toBe('07.2025 - 09.2025');
   });
 
-  it('nieaktualny raport: najpierw ocena obecnej wersji, potem poprawa i ocena nowej', async () => {
+  it('nieaktualna ocena: najpierw "Oceń ponownie", bez wywołania AI', async () => {
     const { pid, aid } = await setup(decided());
-    replies = { cv_review: [JSON.stringify(review(5)), JSON.stringify(review(9))], cv: [JSON.stringify(decided())] };
-    const res = await svc.improve(pid, aid);
-    expect(sent.map((s) => s.schema)).toEqual(['cv_review', 'cv', 'cv_review']);
-    expect(res.before).toBe((await store.getReport(pid, aid, 1))?.total);
-    expect(res.kept).toBe('new');
+    await expect(svc.improveChoices(pid, aid)).rejects.toMatchObject({ status: 409 });
+    await expect(svc.improve(pid, aid, ['crit:clarity'])).rejects.toMatchObject({ status: 409 });
+    expect(sent).toEqual([]);
   });
 });
 

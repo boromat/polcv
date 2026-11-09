@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { AtsReport } from '../../../../shared/schemas';
+import { useEffect, useRef, useState } from 'react';
+import type { AtsReport, ImproveOption, ImproveOptions } from '../../../../shared/schemas';
 import { ErrorBox, scoreColor } from '../../components/ui';
 import { useT } from '../../i18n';
 
@@ -91,10 +91,147 @@ function FactForm({ question, placeholder, onSave, onCancel }: { question: strin
 /** Pytanie z poprawki "wymaga Twoich danych" (rekruter pisze je w "why"); jak fixQuestion na serwerze. */
 const fixQuestion = (f: { why: string; replace: string }) => f.why.trim() || f.replace.trim();
 
+/**
+ * Wybór przed "Popraw automatycznie": kandydat zaznacza, co AI ma zmienić. Nic nie jest zaznaczone z góry,
+ * a AI zmienia tylko zaznaczone miejsca.
+ */
+function ImprovePicker({
+  load,
+  stale,
+  onEvaluate,
+  onApply,
+  onClose,
+}: {
+  load: () => Promise<ImproveOptions>;
+  stale: boolean;
+  onEvaluate: () => void;
+  onApply: (ids: string[]) => void;
+  onClose: () => void;
+}) {
+  const { t } = useT();
+  const CRITERIA = criteria(t);
+  const [data, setData] = useState<ImproveOptions | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [chosen, setChosen] = useState<Set<string>>(new Set());
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => box.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), []);
+  // Lista jest liczona z bieżącej oceny: po ponownej ocenie wczytuje się od nowa.
+  useEffect(() => {
+    if (stale) return;
+    let live = true;
+    setData(null);
+    load()
+      .then((d) => live && setData(d))
+      .catch((e) => live && setError(e.message));
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stale]);
+  const toggle = (id: string) =>
+    setChosen((cur) => {
+      const next = new Set(cur);
+      if (!next.delete(id)) next.add(id);
+      return next;
+    });
+  const title = (o: ImproveOption) =>
+    o.kind === 'criterion'
+      ? t('Kryterium: {name}', { name: CRITERIA[o.criterion ?? ''] ?? o.criterion ?? '' })
+      : o.kind === 'fix'
+        ? t('Poprawka rekrutera: {section}', { section: o.title })
+        : o.title;
+
+  return (
+    <div ref={box} className="callout info stack" style={{ marginTop: 12, gap: 10 }}>
+      <div className="row between">
+        <h3>{t('Co AI ma poprawić?')}</h3>
+        <button className="btn ghost sm" onClick={onClose}>
+          {t('Zamknij')}
+        </button>
+      </div>
+      {stale ? (
+        <div className="row between">
+          <span>{t('CV zmieniło się od ostatniej oceny. Oceń je ponownie, żeby wybrać aktualne poprawki.')}</span>
+          <button className="btn sm" onClick={onEvaluate}>
+            {t('Oceń ponownie')}
+          </button>
+        </div>
+      ) : (
+        <>
+          <p className="small">{t('Zaznacz, co chcesz zmienić. AI poprawi tylko te miejsca, a resztę CV zostawi tak, jak jest. Potem program oceni nową wersję i zostawi lepszą.')}</p>
+          <ErrorBox error={error} onClose={() => setError(null)} />
+          {!data && !error && <p className="faint">{t('Wczytuję poprawki…')}</p>}
+          {data && !data.options.length && (
+            <div className="small">
+              {t('Raport nie wskazuje niczego, co AI mogłoby poprawić bez nowych informacji.')}
+              {data.needsInput.length > 0 && (
+                <>
+                  {' '}
+                  {t('Możesz dopisać w profilu:')}
+                  <ul style={{ margin: '4px 0 0 18px' }}>
+                    {data.needsInput.map((q) => (
+                      <li key={q}>{q}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
+          )}
+          {data && data.options.length > 0 && (
+            <>
+              <div className="row" style={{ gap: 6 }}>
+                <button className="btn ghost sm" onClick={() => setChosen(new Set(data.options.map((o) => o.id)))}>
+                  {t('Zaznacz wszystkie')}
+                </button>
+                <button className="btn ghost sm" onClick={() => setChosen(new Set())} disabled={!chosen.size}>
+                  {t('Odznacz wszystkie')}
+                </button>
+              </div>
+              <div className="stack" style={{ gap: 8 }}>
+                {data.options.map((o) => (
+                  <label key={o.id} className="fix" style={{ cursor: 'pointer', background: 'var(--card)' }}>
+                    <span className="check">
+                      <input type="checkbox" checked={chosen.has(o.id)} onChange={() => toggle(o.id)} aria-label={title(o)} />
+                      <b>{title(o)}</b>
+                    </span>
+                    {o.find && (
+                      <div className="small">
+                        <del>{o.find}</del>
+                      </div>
+                    )}
+                    {o.replace && (
+                      <div className="small">
+                        <ins>{o.replace}</ins>
+                      </div>
+                    )}
+                    {o.detail && <span className="faint">{o.detail}</span>}
+                  </label>
+                ))}
+              </div>
+            </>
+          )}
+          {data && data.pages > 1 && <p className="faint">{t('CV ma {n} strony: skrócisz je przyciskiem „Skróć do 1 strony” w zakładce Edytor CV.', { n: data.pages })}</p>}
+          <div className="row" style={{ justifyContent: 'flex-end', gap: 6 }}>
+            <button className="btn sm" onClick={onClose}>
+              {t('Anuluj')}
+            </button>
+            <button className="btn sm primary" onClick={() => onApply([...chosen])} disabled={!chosen.size}>
+              {chosen.size ? t('Wprowadź zaznaczone ({n})', { n: chosen.size }) : t('Wprowadź zaznaczone')}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export function ReportView({
   report,
   stale,
   onEvaluate,
+  picker,
+  onPicker,
+  loadOptions,
   onImprove,
   pending,
   factTopics,
@@ -103,7 +240,12 @@ export function ReportView({
   report: AtsReport | null;
   stale: boolean;
   onEvaluate: () => void;
-  onImprove: () => void;
+  /** czy lista wyboru poprawek jest otwarta */
+  picker: boolean;
+  onPicker: (open: boolean) => void;
+  loadOptions: () => Promise<ImproveOptions>;
+  /** poprawa zaznaczonych pozycji (id z listy wyboru) */
+  onImprove: (ids: string[]) => void;
   pending: number;
   /** tematy już potwierdzone w profilu przy tej aplikacji */
   factTopics: string[];
@@ -114,6 +256,12 @@ export function ReportView({
   const [open, setOpen] = useState<string | null>(null);
   // Gdzie ostatnio zapisano odpowiedź: tam pokazujemy, co dalej.
   const [saved, setSaved] = useState<'kw' | 'fix' | null>(null);
+  // Każde otwarcie wyboru wczytuje go od nowa (np. po zapisaniu odpowiedzi w profilu dochodzą nowe pozycje).
+  const [pickerKey, setPickerKey] = useState(0);
+  const openPicker = () => {
+    setPickerKey((k) => k + 1);
+    onPicker(true);
+  };
   const inProfile = (topic: string) => factTopics.some((x) => x.trim().toLowerCase() === topic.trim().toLowerCase());
   const toggle = (key: string) => setOpen((cur) => (cur === key ? null : key));
   const addFact = async (where: 'kw' | 'fix', topic: string, answer: string) => {
@@ -146,8 +294,8 @@ export function ReportView({
   const savedNote = (where: 'kw' | 'fix') =>
     saved === where && (
     <div className="callout good row between">
-      <span>{t('Zapisane w profilu. Kliknij „Popraw automatycznie”, a AI doda to do CV, oceni nową wersję i zostawi lepszą.')}</span>
-      <button className="btn sm primary" onClick={onImprove} disabled={pending > 0}>
+      <span>{t('Zapisane w profilu. Kliknij „Popraw automatycznie” i zaznacz, co AI ma dodać do CV.')}</span>
+      <button className="btn sm primary" onClick={openPicker} disabled={pending > 0}>
         {t('Popraw automatycznie')}
       </button>
     </div>
@@ -197,8 +345,8 @@ export function ReportView({
           </div>
         </div>
         <div className="row" style={{ marginTop: 16, justifyContent: 'flex-end' }}>
-          <span className="faint">{t('AI wprowadzi poprawki, które nie wymagają nowych informacji, oceni nową wersję i zostawi lepszą.')}</span>
-          <button className="btn primary" onClick={onImprove} disabled={pending > 0} title={pending > 0 ? t('Najpierw zdecyduj o żółtych sugestiach') : ''}>
+          <span className="faint">{t('Wybierzesz, co AI ma poprawić. Zmieni tylko te miejsca, oceni nową wersję i zostawi lepszą.')}</span>
+          <button className="btn primary" onClick={openPicker} disabled={pending > 0 || picker} title={pending > 0 ? t('Najpierw zdecyduj o żółtych sugestiach') : ''}>
             {t('Popraw automatycznie')}
           </button>
         </div>
@@ -206,6 +354,9 @@ export function ReportView({
           <p className="faint" style={{ textAlign: 'right' }}>
             {pending === 1 ? t('Najpierw zdecyduj o 1 żółtej sugestii w edytorze.') : t('Najpierw zdecyduj o {n} żółtych sugestiach w edytorze.', { n: pending })}
           </p>
+        )}
+        {picker && pending === 0 && (
+          <ImprovePicker key={pickerKey} load={loadOptions} stale={stale} onEvaluate={onEvaluate} onApply={onImprove} onClose={() => onPicker(false)} />
         )}
       </div>
 

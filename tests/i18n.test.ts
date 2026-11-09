@@ -80,7 +80,7 @@ describe('tłumaczenia serwera', () => {
   });
 });
 
-it('angielskie teksty bez długich myślników', () => {
-  const dashes = [...Object.values(CLIENT_EN), ...Object.values(SERVER_EN)].filter((v) => v.includes('—'));
-  expect(dashes).toEqual([]);
+it('teksty bez długiej pauzy i półpauzy (po polsku i po angielsku)', () => {
+  const all = [...Object.entries(CLIENT_EN), ...Object.entries(SERVER_EN)].flat();
+  expect(all.filter((v) => /[—–]/.test(v))).toEqual([]);
 });

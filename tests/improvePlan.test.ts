@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { AiReview, AtsReport, CvContent, CvText, CvVersion, JobPosting, Keyword, Profile } from '../shared/schemas';
 import { aliasVariants } from '../server/ats/keywords';
 import { notWorse } from '../server/ats/score';
-import { hasWork, improvePlan, nothingToImprove, planForPrompt, profileSources, titleCore } from '../server/llm/prompts/improvePlan';
+import { aiItemIds, hasWork, improveOptions, improvePlan, nothingToImprove, planForPrompt, profileSources, selectPlan, titleCore } from '../server/llm/prompts/improvePlan';
 import { unverifiedSkills } from '../server/services';
 import { withLang } from '../server/i18n';
 import { blankContent } from './fixtures';
@@ -130,14 +130,39 @@ describe('plan poprawy CV', () => {
   });
 
   it('poprawki bez danych od kandydata, kryteria poniżej 7 bez "achievements" i format', () => {
-    expect(plan.fixes).toEqual([{ section: 'summary', find: 'Finance student', replace: 'Finance student targeting sales analysis', why: 'Nazwa stanowiska.' }]);
+    expect(plan.fixes.map(({ id, ...f }) => f)).toEqual([{ section: 'summary', find: 'Finance student', replace: 'Finance student targeting sales analysis', why: 'Nazwa stanowiska.' }]);
+    expect(plan.fixes[0].id).toMatch(/^fix:[0-9a-f]{10}$/);
     expect(plan.criteria.map((c) => [c.key, c.score, c.comment])).toEqual([
       ['must_have_match', 6, 'Komentarz must_have_match'],
       ['clarity', 6, 'Komentarz clarity'],
     ]);
     expect(plan.criteria.every((c) => c.goal.length > 20)).toBe(true);
-    expect(plan.format).toEqual(['CV ma 2 strony: skróć je do jednej strony (skróć albo usuń najmniej trafne punkty).']);
+    expect(plan.format).toEqual([{ id: 'pages', text: 'CV ma 2 strony: skróć je do jednej strony (skróć albo usuń najmniej trafne punkty).' }]);
     expect(hasWork(plan)).toBe(true);
+  });
+
+  it('wybór kandydata: do AI idzie tylko to, co zaznaczył, bez formatu; lista do wyboru w języku interfejsu', () => {
+    const fixId = plan.fixes[0].id;
+    expect([...aiItemIds(plan)].sort()).toEqual(['crit:clarity', 'crit:must_have_match', fixId, 'kw:Jira', 'kw:SQL', 'kw:VLOOKUP'].sort());
+    const chosen = selectPlan(plan, ['kw:SQL', fixId, 'pages']);
+    expect(chosen.addable.map((a) => a.term)).toEqual(['SQL']);
+    expect(chosen.fixes.map((f) => f.id)).toEqual([fixId]);
+    expect(chosen.criteria).toEqual([]);
+    expect(chosen.format).toEqual([]);
+    expect(chosen.keep).toEqual(plan.keep);
+    expect(hasWork(selectPlan(plan, []))).toBe(false);
+
+    const options = improveOptions(plan, 'pl');
+    expect(options.map((o) => o.id)).toEqual([fixId, 'kw:VLOOKUP', 'kw:SQL', 'kw:Jira', 'crit:must_have_match', 'crit:clarity']);
+    expect(options[0]).toMatchObject({ kind: 'fix', title: 'summary', find: 'Finance student', replace: 'Finance student targeting sales analysis', detail: 'Nazwa stanowiska.' });
+    expect(options.find((o) => o.id === 'kw:SQL')).toMatchObject({ kind: 'keyword', title: 'Słowo kluczowe „SQL”' });
+    expect(options.find((o) => o.id === 'kw:SQL')?.detail).toContain('Jest tylko na liście umiejętności');
+    expect(options.find((o) => o.id === 'kw:Jira')?.detail).toContain('do listy umiejętności');
+    expect(withLang('en', () => improveOptions(plan, 'en'))[1].title).toBe('Keyword "VLOOKUP"');
+    // Odpowiedź kandydata na inną poprawkę nie zmienia id tej poprawki.
+    const answered: Profile = { ...profile, extraFacts: [{ id: 'f', topic: 'Ile raportów tygodniowo przygotowujesz? Dopisz to w profilu.', has: true, answer: '5 raportów', source: '', date: '' }] };
+    const again = improvePlan(report(review({ must_have_match: 6, achievements: 5, clarity: 6 }, fixes), 2), answered, posting, cvContent());
+    expect(again.fixes[0].id).toBe(fixId);
   });
 
   it('poprawka "wymaga Twoich danych" z odpowiedzią kandydata w profilu idzie do AI razem z tą odpowiedzią', () => {
@@ -147,7 +172,7 @@ describe('plan poprawy CV', () => {
     };
     const p = improvePlan(report(review({ must_have_match: 8, achievements: 8, clarity: 8 }, fixes)), answered, posting, cvContent());
     expect(p.fixes.map((f) => f.section)).toEqual(['summary', 'experience']);
-    expect(p.fixes[1].why).toContain('5 raportów sprzedaży tygodniowo');
+    expect(p.fixes[1].userData).toContain('5 raportów sprzedaży tygodniowo');
     expect(p.needsInput.some((q) => q.startsWith('Ile raportów'))).toBe(false);
   });
 
@@ -176,8 +201,9 @@ describe('plan poprawy CV', () => {
       projects: [{ sourceId: 'x', name: 'Raport', role: '', dates: '2024/05', technologies: [], link: '', bullets: [] }],
     });
     const p = improvePlan(report(null), { ...profile, contact: { ...profile.contact, phone: '' } }, posting, c);
-    expect(p.format).toEqual(['Daty są w różnych formatach: zapisz wszystkie w jednym formacie (po polsku MM.RRRR, po angielsku MM/YYYY).']);
+    expect(p.format).toEqual([{ id: 'dates', text: 'Daty są w różnych formatach: zapisz wszystkie w jednym formacie (po polsku MM.RRRR, po angielsku MM/YYYY).' }]);
     expect(p.stuffed).toEqual(['Excel']);
+    expect(improveOptions(p, 'en').map((o) => o.id)).toEqual(expect.arrayContaining(['stuffed', 'dates']));
     expect(p.needsInput).toContain('Brak telefonu w profilu (albo jest niepełny).');
   });
 
