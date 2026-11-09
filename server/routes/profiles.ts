@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Router } from 'express';
 import multer from 'multer';
-import { ProfileSchema, type ExtraFact, type Profile, type ProfileExtract } from '../../shared/schemas';
+import { ProfileSchema, Pronouns, type ExtraFact, type Profile, type ProfileExtract } from '../../shared/schemas';
 import * as store from '../storage/store';
 import { HttpError, newId, nowIso } from '../storage/store';
 import { cvFileToText } from '../cv/importCv';
@@ -27,6 +27,7 @@ profilesRouter.post('/profiles', async (req, res) => {
   const name = String(req.body?.displayName ?? '').trim();
   if (!name) throw new HttpError(400, tr('Podaj nazwę profilu.'));
   const p = store.emptyProfile(name);
+  if ((Pronouns as readonly string[]).includes(req.body?.pronouns)) p.pronouns = req.body.pronouns;
   await store.saveProfile(p);
   res.status(201).json(publicProfile(p));
 });

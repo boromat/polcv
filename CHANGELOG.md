@@ -20,6 +20,11 @@ All notable changes to PolCV are recorded here. The format follows
   asks the AI to work the relevant ones into a new version, kept to one page: new items are added,
   changed ones are updated in place. The previous version stays in the list. Corrections made in
   the CV editor itself do not come back as changes.
+- **How you refer to yourself.** Creating a profile asks for *on*, *ona* or *ono* (it can be changed
+  in *Mój profil*). The gap questions and the career advisor address you in the matching Polish
+  forms ("wykonywałeś", "wykonywałaś", "wykonywałoś"), and interview answers and cover letters use
+  them in the first person. Profiles without a choice keep the neutral wording. Before, gap questions
+  often needed several AI calls because the model kept writing gendered forms.
 
 ### Fixed
 

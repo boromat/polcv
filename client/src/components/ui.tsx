@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import type { Pronoun } from '../../../shared/schemas';
 import { goworkSearchUrl } from '../../../shared/gowork';
 import { getLang, useT } from '../i18n';
 
@@ -101,6 +102,9 @@ export function GoworkLink({ company, className }: { company: string; className?
     </a>
   );
 }
+
+/** Jak kandydat się określa (te same wartości co Pronouns w shared/schemas; klient importuje stamtąd tylko typy). */
+export const PRONOUNS: Pronoun[] = ['on', 'ona', 'ono'];
 
 /** Liczba nowości z profilu na przycisku: starsze wersje CV liczą wszystko od swojego powstania, więc bywa duża. */
 export const newsLabel = (n: number) => (n > 9 ? '9+' : String(n));

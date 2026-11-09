@@ -95,9 +95,15 @@ export const ProfileExtractSchema = z.object({
   interests: z.array(z.string()),
 });
 
+/** Jak kandydat się określa: od tego zależą formy, którymi AI się do niego zwraca ("wykonywałeś/aś/oś"). */
+export const Pronouns = ['on', 'ona', 'ono'] as const;
+export type Pronoun = (typeof Pronouns)[number];
+
 export const ProfileSchema = ProfileExtractSchema.extend({
   id: z.string(),
   displayName: z.string(),
+  /** Starsze profile go nie mają: wtedy AI pisze bez form z rodzajem. */
+  pronouns: z.enum(Pronouns).optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
   apiKey: z.string(),

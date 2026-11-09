@@ -43,6 +43,21 @@ describe('pytania o braki: styl nie blokuje CV', () => {
     expect(sent[0].max_tokens).toBe(8000);
   });
 
+  it('kandydat określa się jako "on": "używałeś" przechodzi od razu, a prompt prosi o formy męskie', async () => {
+    answer = gap('Gdzie używałeś testów A/B?');
+    const res = await gapQuestions({ ...profile, pronouns: 'on' }, posting, { profileId: '', task: 'test' });
+    expect(res.questions[0].question).toBe('Gdzie używałeś testów A/B?');
+    expect(sent).toHaveLength(1);
+    expect(sent[0].messages[0].content).toContain('Kandydat określa się jako "on"');
+  });
+
+  it('kandydatka określa się jako "ona": forma męska wraca do poprawki', async () => {
+    answer = gap('Gdzie używałeś testów A/B?');
+    await gapQuestions({ ...profile, pronouns: 'ona' }, posting, { profileId: '', task: 'test' });
+    expect(sent.length).toBeGreaterThan(1);
+    expect(sent[1].messages.at(-1).content).toContain('Formy niezgodne z tym, jak kandydat się określa ("ona")');
+  });
+
   it('gdy model uparcie pisze "używałeś", pytania i tak wracają (po 3 próbach poprawki jedno zapytanie bez tej kontroli)', async () => {
     answer = gap('Gdzie używałeś testów A/B?');
     const res = await gapQuestions(profile, posting, { profileId: '', task: 'test' });

@@ -4,6 +4,19 @@ import { lang } from '../../i18n';
 /** Teksty dla użytkownika (notatki, pytania, uzasadnienia) piszemy w języku interfejsu; treść CV idzie za ogłoszeniem. */
 export const forUser = () => (lang() === 'en' ? 'po angielsku' : 'po polsku');
 
+/**
+ * Formy z rodzajem według tego, jak kandydat się określa (wybór przy tworzeniu profilu): "you" do zwracania się do
+ * niego, "me" do tekstów w jego imieniu, "suffix" końcówka 2. osoby czasu przeszłego. null, gdy nie podał.
+ */
+export const genderForms = (p: Profile['pronouns']) =>
+  p === 'on'
+    ? { label: 'on', you: 'męskich, np. "Czy wykonywałeś…?", "Gdzie pracowałeś?"', me: 'męskich, np. "zrobiłem", "pracowałem"', suffix: 'eś' }
+    : p === 'ona'
+      ? { label: 'ona', you: 'żeńskich, np. "Czy wykonywałaś…?", "Gdzie pracowałaś?"', me: 'żeńskich, np. "zrobiłam", "pracowałam"', suffix: 'aś' }
+      : p === 'ono'
+        ? { label: 'ono', you: 'nijakich, np. "Czy wykonywałoś…?", "Gdzie pracowałoś?"', me: 'nijakich, np. "zrobiłom", "pracowałom"', suffix: 'oś' }
+        : null;
+
 /** Profil bez danych technicznych (klucz API, pliki) - tylko to, co AI ma wiedzieć. */
 export function profileForPrompt(p: Profile) {
   const { apiKey, files, photo, id, displayName, createdAt, updatedAt, ...rest } = p;

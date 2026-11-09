@@ -1,8 +1,8 @@
 import { CareerProposalsSchema, CareerTurnSchema, OfferRankSchema, type Career, type CareerTurn, type JobLead, type Profile, type RoleProposal } from '../../../shared/schemas';
 import { callJson } from '../openrouter';
-import { forUser, json, profileForPrompt, today } from './common';
+import { forUser, genderForms, json, profileForPrompt, today } from './common';
 
-const TURN_SYSTEM = () => `Jesteś doradcą kariery na polskim rynku pracy. Prowadzisz z kandydatem (zwykle student/junior) krótką rozmowę, żeby:
+const TURN_SYSTEM = (forms: ReturnType<typeof genderForms>) => `Jesteś doradcą kariery na polskim rynku pracy. Prowadzisz z kandydatem (zwykle student/junior) krótką rozmowę, żeby:
 1) zrozumieć, jakiej pracy szuka: stanowiska i kierunki, co go interesuje, czego nie chce;
 2) pogłębić doświadczenie, które w profilu jest opisane ogólnie albo go brakuje: konkretne zadania, narzędzia, projekty, efekty, liczby - to przyda się potem w CV;
 3) poznać preferencje: miasto i promień (km) dla pracy stacjonarnej/hybrydowej, czy praca zdalna z całej Polski wchodzi w grę, minimalne wynagrodzenie (brutto miesięcznie), forma umowy, wymiar etatu, poziom (staż/junior/mid).
@@ -10,7 +10,7 @@ const TURN_SYSTEM = () => `Jesteś doradcą kariery na polskim rynku pracy. Prow
 ZASADY ROZMOWY:
 - Jedno pytanie naraz (najwyżej dwa krótkie, ściśle powiązane). Krótko, życzliwie, ${forUser()}, na "Ty". W tym języku pisz też "summary" i "newFacts".
 - Nawiązuj do poprzedniej odpowiedzi kandydata i dopytuj, gdy jest ogólna.
-- Formy z rodzajem: jeśli kandydat sam pisze o sobie formami z rodzajem ("zbudowałem"/"zbudowałam"), używaj tego samego rodzaju; inaczej pisz neutralnie ("co było Twoim zadaniem?"). O sobie pisz neutralnie ("zapisuję", "mam to zapisane").
+- ${forms ? `Kandydat określa się jako "${forms.label}": zwracając się do niego, używaj form ${forms.you}.` : 'Formy z rodzajem: jeśli kandydat sam pisze o sobie formami z rodzajem ("zbudowałem"/"zbudowałam"), używaj tego samego rodzaju; inaczej pisz neutralnie ("co było Twoim zadaniem?").'} O sobie pisz neutralnie ("zapisuję", "mam to zapisane").
 - Nie pytaj o rzeczy, które już wiesz z profilu, preferencji, podsumowania lub wcześniejszej rozmowy.
 - Jeśli kandydat nie odpowiedział na Twoje pytanie, tylko zmienił temat - możesz ponowić je NAJWYŻEJ RAZ. Jeśli dalej je pomija, odpuść i przejdź do kolejnego tematu.
 - Pilnuj, żeby w trakcie rozmowy pokryć wszystkie trzy obszary (czego szuka, doświadczenie, preferencje) - nie utykaj na jednym.
@@ -34,7 +34,7 @@ export async function careerTurn(profile: Profile, career: Career): Promise<Care
     tier: 'main',
     temperature: 0.5,
     maxTokens: 3000,
-    system: TURN_SYSTEM(),
+    system: TURN_SYSTEM(genderForms(profile.pronouns)),
     user: `PROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nOBECNE PREFERENCJE:\n${json(career.prefs)}\n\nDOTYCHCZASOWE PODSUMOWANIE:\n${career.summary || '(brak)'}\n\nROZMOWA:\n${history || '(jeszcze się nie zaczęła)'}`,
     ctx: { profileId: profile.id, task: 'doradca kariery - rozmowa' },
   });

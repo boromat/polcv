@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import type { Profile } from '../../../shared/schemas';
+import type { Profile, Pronoun } from '../../../shared/schemas';
 import { githubUserFromLinks } from '../../../shared/github';
 import { api } from '../api';
 import { useApp } from '../ctx';
-import { Busy, ErrorBox, Field, LazyText } from '../components/ui';
+import { Busy, ErrorBox, Field, LazyText, PRONOUNS } from '../components/ui';
 import { plFew, useT } from '../i18n';
 
 const rid = () => Math.random().toString(36).slice(2, 12);
@@ -453,6 +453,16 @@ export function ProfilePage() {
           <div className="grid2" style={{ marginTop: 12 }}>
             <Field label={t('Imię i nazwisko')}>
               <input type="text" value={p.contact.fullName} onChange={(e) => set({ contact: { ...p.contact, fullName: e.target.value } })} />
+            </Field>
+            <Field label={t('Jak się określasz?')} hint={t('Od tego zależą formy, którymi AI się do Ciebie zwraca, np. „wykonywałeś”, „wykonywałaś”, „wykonywałoś”.')}>
+              <select value={p.pronouns ?? ''} onChange={(e) => set({ pronouns: (e.target.value || undefined) as Pronoun | undefined })}>
+                <option value="">{t('nie podano (AI pisze bez form z rodzajem)')}</option>
+                {PRONOUNS.map((x) => (
+                  <option key={x} value={x}>
+                    {t(x)}
+                  </option>
+                ))}
+              </select>
             </Field>
             <Field label={t('E-mail')}>
               <input type="email" value={p.contact.email} onChange={(e) => set({ contact: { ...p.contact, email: e.target.value } })} />

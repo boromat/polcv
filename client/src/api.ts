@@ -12,6 +12,7 @@ import type {
   InterviewPrep,
   CourseAdvice,
   Profile,
+  Pronoun,
   ProfileExtract,
   TemplateId,
   UsageEntry,
@@ -112,7 +113,7 @@ export const api = {
   usage: () => req<UsageView>('GET', '/usage'),
 
   profiles: () => req<Profile[]>('GET', '/profiles'),
-  createProfile: (displayName: string) => req<Profile>('POST', '/profiles', { displayName }),
+  createProfile: (displayName: string, pronouns: Pronoun) => req<Profile>('POST', '/profiles', { displayName, pronouns }),
   profile: (pid: string) => req<Profile>('GET', P(pid)),
   saveProfile: (pid: string, p: Profile) => req<Profile>('PUT', P(pid), p),
   deleteProfile: (pid: string) => req<{ ok: true }>('DELETE', P(pid)),

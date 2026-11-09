@@ -286,4 +286,11 @@ export const profile: Record<string, string> = {
   'Aktualizuję… (do minuty)': 'Updating… (up to a minute)',
   'Zaktualizuj do {version}': 'Update to {version}',
   'Gotowe: polanon {version}.': 'Done: polanon {version}.',
+  'Jak się określasz?': 'How do you refer to yourself?',
+  'on': 'he (on)',
+  'ona': 'she (ona)',
+  'ono': 'it (ono)',
+  'Wybierz, jak się określasz: od tego zależą formy, którymi AI się do Ciebie zwraca.': 'Choose how you refer to yourself: the AI uses the matching Polish forms when it addresses you.',
+  'Od tego zależą formy, którymi AI się do Ciebie zwraca, np. „wykonywałeś”, „wykonywałaś”, „wykonywałoś”.': 'The AI uses the matching Polish forms when it addresses you, e.g. "wykonywałeś", "wykonywałaś", "wykonywałoś".',
+  'nie podano (AI pisze bez form z rodzajem)': 'not set (the AI avoids gendered forms)',
 };

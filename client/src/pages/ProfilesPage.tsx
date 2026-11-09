@@ -1,23 +1,27 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import type { Pronoun } from '../../../shared/schemas';
 import { api } from '../api';
 import { useApp } from '../ctx';
 import { useT } from '../i18n';
-import { ErrorBox, fmtDate } from '../components/ui';
+import { ErrorBox, fmtDate, PRONOUNS } from '../components/ui';
 
 export function ProfilesPage() {
   const { profiles, current, select, reloadProfiles } = useApp();
   const { t } = useT();
   const [name, setName] = useState('');
+  const [pronouns, setPronouns] = useState<Pronoun | ''>('');
   const [error, setError] = useState<string | null>(null);
   const nav = useNavigate();
 
   const create = async () => {
+    if (!pronouns) return;
     try {
-      const p = await api.createProfile(name.trim());
+      const p = await api.createProfile(name.trim(), pronouns);
       await reloadProfiles();
       select(p.id);
       setName('');
+      setPronouns('');
       nav('/profile');
     } catch (e: any) {
       setError(e.message);
@@ -86,11 +90,21 @@ export function ProfilesPage() {
             style={{ marginTop: 12 }}
             onSubmit={(e) => {
               e.preventDefault();
-              if (name.trim()) create();
+              if (name.trim() && pronouns) create();
             }}
           >
             <input type="text" placeholder={t('Nazwa profilu')} value={name} onChange={(e) => setName(e.target.value)} style={{ flex: 1, minWidth: 200 }} />
-            <button className="btn primary" disabled={!name.trim()}>
+            <select value={pronouns} onChange={(e) => setPronouns(e.target.value as Pronoun)} aria-label={t('Jak się określasz?')} style={{ width: 'auto' }}>
+              <option value="" disabled>
+                {t('Jak się określasz?')}
+              </option>
+              {PRONOUNS.map((x) => (
+                <option key={x} value={x}>
+                  {t(x)}
+                </option>
+              ))}
+            </select>
+            <button className="btn primary" disabled={!name.trim() || !pronouns} title={!pronouns ? t('Wybierz, jak się określasz: od tego zależą formy, którymi AI się do Ciebie zwraca.') : ''}>
               {t('Utwórz profil')}
             </button>
           </form>
