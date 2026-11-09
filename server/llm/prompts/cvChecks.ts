@@ -45,13 +45,18 @@ const THIRD_PERSON = new Set([
   'specjalizuje', 'interesuje', 'wykorzystuje', 'używa', 'stosuje', 'łączy', 'wspiera', 'dba', 'szuka', 'poszukuje', 'chce', 'dąży',
 ]);
 
-/** Słowa podsumowania po polsku, które nie pasują do CV pisanego przez kandydata: 3. osoba i czas przeszły z rodzajem. */
-export function summaryPersonIssues(text: string): { thirdPerson: string[]; gendered: string[] } {
+// Podsumowanie jak opis kogoś z boku: równoważnik od nazwy roli ("Student kierunku X, …") albo "…, pracujący z…".
+const NOMINAL_OPENER = /^[^\p{L}]*(student|studentka|absolwent|absolwentka|stażysta|stażystka|praktykant|praktykantka|technik|inżynier|programista|programistka|analityk|analityczka|specjalista|specjalistka)(?!\p{L})/iu;
+const PARTICIPLE_AFTER_COMMA = /,\s*(\p{L}+(?:ący|ąca))(?!\p{L})/gu;
+
+/** Słowa podsumowania po polsku, które nie pasują do CV pisanego przez kandydata: 3. osoba, czas przeszły z rodzajem, równoważnik. */
+export function summaryPersonIssues(text: string): { thirdPerson: string[]; gendered: string[]; nominal: string[] } {
   const words = text.split(/\s+/).map((w) => w.replace(/^[^\p{L}]+|[^\p{L}]+$/gu, '')).filter(Boolean);
   const lower = (w: string) => w.toLowerCase();
   return {
     thirdPerson: [...new Set(words.filter((w) => THIRD_PERSON.has(lower(w))))],
     gendered: [...new Set(words.filter((w) => PAST_PERSONAL.test(lower(w)) && !NOUNS_LEM.has(lower(w))))],
+    nominal: [...new Set([NOMINAL_OPENER.exec(text)?.[1], ...[...text.matchAll(PARTICIPLE_AFTER_COMMA)].map((m) => m[1])].filter((w): w is string => !!w))],
   };
 }
 
@@ -68,11 +73,17 @@ export function styleIssues(c: CvContent, lang: Lang): CvIssue[] {
   const out: CvIssue[] = [];
   if (lang === 'pl') {
     for (const field of ['text', 'fallbackText'] as const) {
-      const { thirdPerson, gendered } = summaryPersonIssues(c.summary[field]);
+      const { thirdPerson, gendered, nominal } = summaryPersonIssues(c.summary[field]);
       if (thirdPerson.length) {
         out.push({
           path: ['summary', field],
           message: `Podsumowanie w 3. osobie („${thirdPerson.join('”, „')}”). Kandydat pisze CV o sobie: 1. osoba w czasie teraźniejszym, bez „ja”, np. „Znam…”, „Tworzę…”, „Jestem…”, „Szukam…”.`,
+        });
+      }
+      if (nominal.length) {
+        out.push({
+          path: ['summary', field],
+          message: `Podsumowanie brzmi jak opis kogoś z boku („${nominal.join('”, „')}”). Pisz w 1. osobie od pierwszego zdania, np. „Jestem studentem…” albo „Studiuję…”, „Pracuję z…”, bez równoważników i imiesłowów.`,
         });
       }
       if (gendered.length) {

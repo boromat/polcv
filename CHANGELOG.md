@@ -46,6 +46,10 @@ All notable changes to PolCV are recorded here. The format follows
   which filled the results with unrelated remote offers.
 - An entry added with *+ experience*, *+ project* or *+ school* and left empty no longer leaves an
   empty block in the preview, the PDF or the score.
+- The CV summary is now in the first person from its first sentence ("Jestem studentem…",
+  "Studiuję…") instead of opening like a description of someone else ("Student kierunku X,
+  pracujący z…"). A summary that opens with a role noun or a participle after a comma goes back to
+  the model for a fix.
 
 ## [1.1.0] - 2026-11-08
 

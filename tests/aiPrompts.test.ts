@@ -65,7 +65,7 @@ const bullet = (text: string) => ({ id: 'b1', text, status: 'fact' as const, rea
 const content = (bullets: string[], dates = '01.2020 – 12.2025'): CvContent => ({
   language: 'pl',
   headline: 'Młodszy specjalista ds. marketingu',
-  summary: { id: 's1', text: 'Student marketingu.', status: 'fact', reason: '', fallbackText: '', sourceIds: [] },
+  summary: { id: 's1', text: 'Studiuję marketing.', status: 'fact', reason: '', fallbackText: '', sourceIds: [] },
   sectionOrder: ['summary', 'experience', 'education'],
   experience: [{ sourceId: 'exp1', role: 'Stażysta ds. marketingu', company: 'Firma', location: 'Kraków', dates, bullets: bullets.map(bullet) }],
   projects: [],

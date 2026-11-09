@@ -55,7 +55,7 @@ const text = (t: string, extra: Partial<CvText> = {}): CvText => ({ id: 't1', te
 const cv = (over: Partial<CvContent> = {}): CvContent => ({
   language: 'pl',
   headline: 'Młodszy specjalista ds. marketingu',
-  summary: text('Student marketingu z doświadczeniem w social media.'),
+  summary: text('Studiuję marketing i mam doświadczenie w social media.'),
   sectionOrder: ['summary', 'experience', 'education'],
   experience: [
     { sourceId: 'exp1', role: 'Stażysta ds. marketingu', company: 'Firma Test', location: 'Kraków', dates: '07.2025 - 10.2025', bullets: [text('Prowadzenie profilu firmy na Instagramie')] },
@@ -108,17 +108,23 @@ describe('punkty w 1. osobie', () => {
 
 describe('podsumowanie pisane przez kandydata', () => {
   it('wyłapuje 3. osobę i czas przeszły z rodzajem', () => {
-    expect(summaryPersonIssues('Zna Python, n8n i API, a w projektach tworzy prompty. Jest studentem.')).toEqual({ thirdPerson: ['Zna', 'tworzy', 'Jest'], gendered: [] });
-    expect(summaryPersonIssues('Pracowałem w social media i zbudowałam sklep.')).toEqual({ thirdPerson: [], gendered: ['Pracowałem', 'zbudowałam'] });
+    expect(summaryPersonIssues('Zna Python, n8n i API, a w projektach tworzy prompty. Jest studentem.')).toEqual({ thirdPerson: ['Zna', 'tworzy', 'Jest'], gendered: [], nominal: [] });
+    expect(summaryPersonIssues('Pracowałem w social media i zbudowałam sklep.')).toEqual({ thirdPerson: [], gendered: ['Pracowałem', 'zbudowałam'], nominal: [] });
+  });
+
+  it('równoważnik od nazwy roli i imiesłów po przecinku to opis kogoś z boku', () => {
+    expect(summaryPersonIssues('Student technologii kognitywnych, pracujący z narzędziami AI. Tworzę narzędzia.').nominal).toEqual(['Student', 'pracujący']);
+    expect(summaryPersonIssues('Technik informatyk z doświadczeniem w sieciach.').nominal).toEqual(['Technik']);
   });
 
   it('przepuszcza 1. osobę w czasie teraźniejszym i zdania bez czasownika', () => {
     for (const t of [
-      'Student kierunku Technologie kognitywne. Znam Pythona i n8n, tworzę agentów AI i szukam pracy przy wdrożeniach.',
+      'Jestem studentem kierunku Technologie kognitywne. Znam Pythona i n8n, tworzę agentów AI i szukam pracy przy wdrożeniach.',
+      'Studiuję technologie kognitywne. Tworzę narzędzia wspierające analizę danych.',
       'Jestem studentką marketingu. Mam doświadczenie w social media i współpracy z działem sprzedaży.',
       'Doświadczenie w analizie danych (Excel, Power BI), praca zespołem projektowym.',
     ]) {
-      expect(summaryPersonIssues(t)).toEqual({ thirdPerson: [], gendered: [] });
+      expect(summaryPersonIssues(t)).toEqual({ thirdPerson: [], gendered: [], nominal: [] });
     }
   });
 

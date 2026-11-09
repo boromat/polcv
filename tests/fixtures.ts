@@ -82,7 +82,7 @@ export const cv: CvVersion = {
   content: {
     language: 'pl',
     headline: 'Młodszy Specjalista ds. Marketingu',
-    summary: { id: 'sum', text: 'Studentka marketingu z doświadczeniem w social media i analityce Google Analytics 4 (GA4). Zażółć gęślą jaźń.', status: 'fact', reason: '', fallbackText: '', sourceIds: ['exp1'] },
+    summary: { id: 'sum', text: 'Studiuję marketing i mam doświadczenie w social media i analityce Google Analytics 4 (GA4). Zażółć gęślą jaźń.', status: 'fact', reason: '', fallbackText: '', sourceIds: ['exp1'] },
     sectionOrder: ['summary', 'experience', 'education', 'skills', 'languages'],
     experience: [
       {

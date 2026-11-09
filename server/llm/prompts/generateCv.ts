@@ -1,17 +1,17 @@
 import type { CvContent, JobPosting, Profile } from '../../../shared/schemas';
 import { callJson, type LlmContext } from '../openrouter';
-import { json, postingForPrompt, profileForPrompt, today, writingRules, forUser } from './common';
+import { json, postingForPrompt, profileForPrompt, today, writingRules, forUser, genderForms } from './common';
 import { checkedCvSchema, checkedImproveSchema, factTexts, groundCv, numberedNames } from './cvChecks';
 import { planForPrompt, type ImprovePlan } from './improvePlan';
 import type { ProfileNews } from '../../cv/profileNews';
 
-const SYSTEM = (lang: 'pl' | 'en') => `Jesteś doświadczonym rekruterem i ekspertem od CV przechodzących przez systemy ATS oraz automatyczną ocenę AI. Piszesz CV kandydata (student/junior) dopasowane do konkretnego ogłoszenia.
+const SYSTEM = (lang: 'pl' | 'en', forms: ReturnType<typeof genderForms>) => `Jesteś doświadczonym rekruterem i ekspertem od CV przechodzących przez systemy ATS oraz automatyczną ocenę AI. Piszesz CV kandydata (student/junior) dopasowane do konkretnego ogłoszenia.
 
 JĘZYK CV: ${lang === 'pl' ? 'polski' : 'angielski'}. Całą treść pisz w tym języku (nazwy własne, technologie i narzędzia zostaw w oryginale). Pole "notes" zawsze ${forUser()}.
 ${writingRules()}
 STRUKTURA:
 - "headline": tytuł stanowiska z ogłoszenia (dosłownie) albo jego bliski odpowiednik zgodny z poziomem kandydata.
-- "summary": 2–4 zdania dopasowane do ogłoszenia: kim jest kandydat (np. student kierunku X), 3–4 najważniejsze dopasowane umiejętności, jeden konkretny dowód (projekt/osiągnięcie), co wnosi na tym stanowisku. ${lang === 'pl' ? 'Kandydat pisze CV o sobie, więc podsumowanie jest w 1. osobie liczby pojedynczej, w czasie teraźniejszym i bez zaimka "ja": "Znam Pythona i n8n…", "Tworzę agentów AI…", "Szukam…". Nigdy w 3. osobie ("Zna", "Tworzy", "Posiada") ani w czasie przeszłym z rodzajem ("pracowałem", "zbudowałam"). Pierwsze zdanie może być bez czasownika ("Student kierunku X…").' : 'No "I" or other pronouns, e.g. "Computer science student building…", "Experienced in…".'} Bez frazesów. Też obiekt z statusem fact/suggested.
+- "summary": 2–4 zdania dopasowane do ogłoszenia: kim jest kandydat (np. student kierunku X), 3–4 najważniejsze dopasowane umiejętności, jeden konkretny dowód (projekt/osiągnięcie), co wnosi na tym stanowisku. ${lang === 'pl' ? `Kandydat pisze CV o sobie, więc CAŁE podsumowanie, także pierwsze zdanie, jest w 1. osobie liczby pojedynczej, w czasie teraźniejszym i bez zaimka "ja": ${forms?.label === 'on' ? '"Jestem studentem kierunku X i pracuję…"' : forms?.label === 'ona' ? '"Jestem studentką kierunku X i pracuję…"' : '"Studiuję X na…", "Pracuję…"'}, "Znam Pythona i n8n…", "Tworzę agentów AI…". Nigdy w 3. osobie ("Zna", "Tworzy", "Posiada"), bez równoważników zdań i imiesłowów ("Student kierunku X, pracujący z…") i bez czasu przeszłego z rodzajem ("pracowałem", "zbudowałam").` : 'No "I" or other pronouns, e.g. "Computer science student building…", "Experienced in…".'} Bez frazesów. Też obiekt z statusem fact/suggested.
 - "sectionOrder": kolejność sekcji od najważniejszej dla TEGO ogłoszenia. Dla studenta/juniora z małym doświadczeniem zwykle: summary, projects lub experience (co jest trafniejsze), education, skills, certificates, languages, interests. Pomiń sekcje, które byłyby puste.
 - "experience" i "projects": wybierz pozycje trafne dla ogłoszenia; mniej trafne skróć do 1 punktu albo pomiń, jeśli brakuje miejsca. "dates" w formacie ${lang === 'pl' ? '"MM.RRRR – MM.RRRR" albo "MM.RRRR – obecnie"' : '"MM/YYYY – MM/YYYY" albo "MM/YYYY – present"'}. "sourceId" = id pozycji z profilu.
 - "skills": 2–4 grupy z nazwami w języku CV (np. ${lang === 'pl' ? '"Narzędzia", "Umiejętności techniczne", "Kompetencje"' : '"Tools", "Technical skills", "Soft skills"'}). TYLKO umiejętności z profilu lub z extraFacts has=true; najpierw te z ogłoszenia; łącznie maks. ~15 pozycji. Każda pozycja to krótka nazwa (1–4 słowa), bez nawiasów z wyjaśnieniami - dowody umiejętności należą do punktów doświadczenia, nie do listy.
@@ -38,7 +38,7 @@ export async function generateCv(
     tier: 'main',
     temperature: 0.4,
     maxTokens: 10_000,
-    system: SYSTEM(lang),
+    system: SYSTEM(lang, genderForms(profile.pronouns)),
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nNapisz CV (language="${lang}").`,
     ctx,
   });
@@ -73,7 +73,7 @@ export async function improveCv(
     tier: 'main',
     temperature: 0.3,
     maxTokens: 10_000,
-    system: SYSTEM(lang) + IMPROVE_EXTRA(),
+    system: SYSTEM(lang, genderForms(profile.pronouns)) + IMPROVE_EXTRA(),
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nOBECNE CV:\n${json(current)}\n\nPLAN POPRAWEK:\n${json(planForPrompt(plan))}\n\nZwróć poprawione CV.`,
     ctx,
   });
@@ -100,7 +100,7 @@ export async function syncCv(profile: Profile, posting: JobPosting, current: CvC
     tier: 'main',
     temperature: 0.3,
     maxTokens: 10_000,
-    system: SYSTEM(lang) + SYNC_EXTRA(),
+    system: SYSTEM(lang, genderForms(profile.pronouns)) + SYNC_EXTRA(),
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nOBECNE CV:\n${json(current)}\n\nNOWE W PROFILU:\n${json(news)}\n\nZwróć CV uzupełnione o trafne nowości z profilu.`,
     ctx,
   });
@@ -132,7 +132,7 @@ export async function shortenCv(
     tier: 'main',
     temperature: 0.3,
     maxTokens: 10_000,
-    system: SYSTEM(lang) + SHORTEN_EXTRA(cut),
+    system: SYSTEM(lang, genderForms(profile.pronouns)) + SHORTEN_EXTRA(cut),
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nOBECNE CV:\n${json(current)}\n\nSkróć CV, żeby zmieściło się na jednej stronie.`,
     ctx,
   });
