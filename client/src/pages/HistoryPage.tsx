@@ -190,7 +190,7 @@ export function HistoryPage() {
                               {t('Synchronizuj ({n})', { n: newsLabel(a.profileNews) })}
                             </button>
                           )}
-                          {a.currentVersion > 0 && a.posting && (
+                          {a.profileNews === 0 && a.currentVersion > 0 && a.posting && (
                             <button className="btn ghost sm" onClick={() => regenerate(a)} disabled={syncing !== null} title={t('Napisz to CV od nowa z obecnego profilu')}>
                               {t('Wygeneruj ponownie')}
                             </button>
