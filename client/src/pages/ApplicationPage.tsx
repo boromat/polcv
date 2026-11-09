@@ -4,7 +4,7 @@ import type { CvVersion, GapAnswer, ImproveResult, TemplateId } from '../../../s
 import { api, type AppDetail, type VersionDetail } from '../api';
 import { useApp } from '../ctx';
 import { plFew, translate, useT } from '../i18n';
-import { Busy, downloadFile, ErrorBox, fmtDate, GoworkLink, openWhenReady, ScoreBadge, STATUS_LABELS, STATUSES, usd } from '../components/ui';
+import { Busy, downloadFile, ErrorBox, fmtDate, GoworkLink, newsLabel, openWhenReady, ScoreBadge, STATUS_LABELS, STATUSES, usd } from '../components/ui';
 import { GapStep } from './app/GapStep';
 import { CvEditor, pendingCount } from './app/CvEditor';
 import { ReportView } from './app/ReportView';
@@ -406,7 +406,7 @@ export function ApplicationPage() {
                   disabled={!detail.profileNews}
                   title={detail.profileNews ? t('Dopisz do CV to, co doszło do profilu od tej wersji') : t('Od tej wersji w profilu nie doszło nic nowego')}
                 >
-                  {detail.profileNews ? t('Synchronizuj z profilem ({n})', { n: detail.profileNews }) : t('Synchronizuj z profilem')}
+                  {detail.profileNews ? t('Synchronizuj z profilem ({n})', { n: newsLabel(detail.profileNews) }) : t('Synchronizuj z profilem')}
                 </button>
                 <button className="btn ghost sm" onClick={regenerate}>
                   {t('Napisz od nowa')}

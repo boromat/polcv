@@ -307,4 +307,5 @@ export const application: Record<string, string> = {
   'Synchronizuj z profilem': 'Sync with profile',
   '„{title}”: nowa wersja CV {v} z rzeczami z profilu.': '"{title}": new CV version {v} with things from your profile.',
   'Synchronizuję…': 'Syncing…',
+  'Synchronizuj ({n})': 'Sync ({n})',
 };

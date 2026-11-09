@@ -4,7 +4,7 @@ import type { ApplicationSummary } from '../../../shared/schemas';
 import { api } from '../api';
 import { useApp } from '../ctx';
 import { useT } from '../i18n';
-import { ErrorBox, fmtDate, GoworkLink, ScoreBadge, STATUS_LABELS, STATUSES, statusTone, usd } from '../components/ui';
+import { ErrorBox, fmtDate, GoworkLink, newsLabel, ScoreBadge, STATUS_LABELS, STATUSES, statusTone, usd } from '../components/ui';
 
 export function HistoryPage() {
   const { current } = useApp();
@@ -169,7 +169,7 @@ export function HistoryPage() {
                       <td onClick={(e) => e.stopPropagation()} className="nowrap">
                         {a.profileNews > 0 && (
                           <button className="btn sm" onClick={() => syncProfile(a)} disabled={syncing !== null} title={t('Dopisz do CV to, co doszło do profilu od tej wersji')}>
-                            {syncing === a.id ? t('Synchronizuję…') : t('Synchronizuj z profilem ({n})', { n: a.profileNews })}
+                            {syncing === a.id ? t('Synchronizuję…') : t('Synchronizuj ({n})', { n: newsLabel(a.profileNews) })}
                           </button>
                         )}
                         {a.pdfFile && (

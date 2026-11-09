@@ -102,6 +102,9 @@ export function GoworkLink({ company, className }: { company: string; className?
   );
 }
 
+/** Liczba nowości z profilu na przycisku: starsze wersje CV liczą wszystko od swojego powstania, więc bywa duża. */
+export const newsLabel = (n: number) => (n > 9 ? '9+' : String(n));
+
 export const usd = (n: number) => {
   const v = n < 0.01 && n > 0 ? n.toFixed(4) : n.toFixed(2);
   return getLang() === 'en' ? `$${v}` : `${v} $`;
