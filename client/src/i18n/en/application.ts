@@ -313,4 +313,11 @@ export const application: Record<string, string> = {
   'Pracuję…': 'Working…',
   'Napisz to CV od nowa z obecnego profilu': 'Write this CV again from your current profile',
   'Wygeneruj ponownie': 'Generate again',
+  'Polecenie dla AI': 'Instruction for the AI',
+  'Napisz, co AI ma zmienić w tym CV, np. co dodać z Twojego profilu. Zrobi tylko to, o co prosisz, tylko z faktów z profilu, i utworzy nową wersję (obecna zostanie na liście).': 'Write what the AI should change in this CV, for example what to add from your profile. It does only what you ask, using only facts from your profile, and creates a new version (the current one stays in the list).',
+  'Np. dodaj praktyki zawodowe i harcerstwo z mojego profilu': 'E.g. add my vocational placement and scouting from my profile',
+  'Zmień CV': 'Change the CV',
+  'AI zmienia CV według Twojego polecenia…': 'The AI is changing the CV as you asked…',
+  'Nowa wersja {v} według Twojego polecenia. Poprzednia zostaje na liście wersji.': 'New version {v} as you asked. The previous one stays in the version list.',
+  'AI korzysta tylko z Twojego profilu i pilnuje jednej strony. To zwykle kilkanaście sekund.': 'The AI uses only your profile and keeps the CV to one page. This usually takes 10-20 seconds.',
 };

@@ -106,12 +106,15 @@ export function CvEditor({
   hasPhoto,
   unverifiedSkills,
   focusId,
+  onInstruct,
 }: {
   cv: CvVersion;
   onPatch: (p: Patch) => void;
   hasPhoto: boolean;
   unverifiedSkills: string[];
   focusId: string | null;
+  /** polecenie dla AI z pola na dole edytora; true, gdy się udało (pole się wtedy czyści) */
+  onInstruct: (instruction: string) => Promise<boolean>;
 }) {
   const { t } = useT();
   // Edytor pokazuje treść z wpisanymi decyzjami: odrzucona sugestia nie może wrócić przy kolejnej edycji.
@@ -342,6 +345,33 @@ export function CvEditor({
           <LazyText value={c.interests.join(', ')} onCommit={(v) => setC({ interests: v.split(',').map((s) => s.trim()).filter(Boolean) })} />
         </Field>
       </Section>
+
+      <InstructBox onInstruct={onInstruct} />
+    </div>
+  );
+}
+
+/** Pole na dole edytora: kandydat pisze AI, co ma zmienić (np. co dodać z profilu). */
+function InstructBox({ onInstruct }: { onInstruct: (instruction: string) => Promise<boolean> }) {
+  const { t } = useT();
+  const [text, setText] = useState('');
+  return (
+    <div className="card stack" style={{ gap: 8 }}>
+      <h3>{t('Polecenie dla AI')}</h3>
+      <p className="faint small">
+        {t('Napisz, co AI ma zmienić w tym CV, np. co dodać z Twojego profilu. Zrobi tylko to, o co prosisz, tylko z faktów z profilu, i utworzy nową wersję (obecna zostanie na liście).')}
+      </p>
+      <textarea rows={3} value={text} onChange={(e) => setText(e.target.value)} placeholder={t('Np. dodaj praktyki zawodowe i harcerstwo z mojego profilu')} aria-label={t('Polecenie dla AI')} />
+      <button
+        className="btn sm primary"
+        style={{ alignSelf: 'flex-start' }}
+        disabled={!text.trim()}
+        onClick={async () => {
+          if (await onInstruct(text.trim())) setText('');
+        }}
+      >
+        {t('Zmień CV')}
+      </button>
     </div>
   );
 }

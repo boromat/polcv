@@ -8,7 +8,7 @@ import { HttpError, newId, nowIso } from './storage/store';
 import { fetchPosting } from './jobs/fetchPosting';
 import { parsePosting } from './llm/prompts/parsePosting';
 import { gapQuestions } from './llm/prompts/gapQuestions';
-import { generateCv, improveCv, shortenCv, syncCv } from './llm/prompts/generateCv';
+import { generateCv, improveCv, instructCv, shortenCv, syncCv } from './llm/prompts/generateCv';
 import { newsCount, profileIdsOf, profileNews, refreshSnapshot } from './cv/profileNews';
 import { evaluateCv } from './llm/prompts/evaluateCv';
 import { courseAdvice, coverLetter, interviewPrep } from './llm/prompts/extras';
@@ -290,6 +290,28 @@ export async function syncWithProfile(profileId: string, appId: string): Promise
     decisions: {},
     profileIds: profileIdsOf(profile),
   }));
+  await store.updateApplication(profileId, appId, (a) => {
+    a.currentVersion = cv.version;
+  });
+  return { version: cv.version, message: content.notes };
+}
+
+/**
+ * Polecenie kandydata dla AI (pole na dole edytora): zmiana CV według jego słów, tylko z faktów profilu.
+ * Wynik to nowa, bieżąca wersja dopasowana do jednej strony; poprzednia zostaje na liście.
+ */
+export async function instructVersion(profileId: string, appId: string, v: number, instruction: string): Promise<{ version: number; message: string }> {
+  const text = instruction.trim();
+  if (!text) throw new HttpError(400, tr('Napisz, co AI ma zmienić w CV.'));
+  const app = await store.getApplication(profileId, appId);
+  if (!app.posting) throw new HttpError(409, tr('Brak przeanalizowanego ogłoszenia.'));
+  const [profile, current] = await Promise.all([store.getProfile(profileId), store.getVersion(profileId, appId, v)]);
+  const base = applyDecisions(current);
+  const changed = withFreshIds(await instructCv(profile, app.posting, base, text.slice(0, 1000), ctxOf(app, 'polecenie dla AI')));
+  changed.language = base.language;
+  const content = await fitToPage(profile, app, { ...current, content: changed, decisions: {} }, factTexts(base));
+  const t = nowIso();
+  const cv = await store.addVersion(profileId, appId, (version) => ({ ...current, version, createdAt: t, updatedAt: t, origin: 'improved', content, decisions: {} }));
   await store.updateApplication(profileId, appId, (a) => {
     a.currentVersion = cv.version;
   });

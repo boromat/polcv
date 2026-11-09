@@ -123,6 +123,21 @@ describe('CV na jedną stronę', () => {
     expect((await store.getApplication(pid, aid)).currentVersion).toBe(res.version);
   });
 
+  it('polecenie dla AI: idzie do modelu dosłownie, wynik to nowa, bieżąca wersja; puste polecenie jest odrzucane', async () => {
+    const { pid, aid } = await setup();
+    replies = [JSON.stringify(fixtures.cv.content)];
+    const first = await svc.generate(pid, aid);
+    await expect(svc.instructVersion(pid, aid, first.version, '   ')).rejects.toMatchObject({ status: 400 });
+    sent.length = 0;
+    replies = [JSON.stringify({ ...fixtures.cv.content, notes: 'Dodano praktyki.' })];
+    const res = await svc.instructVersion(pid, aid, first.version, 'dodaj praktyki zawodowe z mojego profilu');
+    expect(sent).toHaveLength(1);
+    expect(sent[0].messages[0].content).toContain('POLECENIE KANDYDATA');
+    expect(sent[0].messages[1].content).toContain('dodaj praktyki zawodowe z mojego profilu');
+    expect(res).toEqual({ version: first.version + 1, message: 'Dodano praktyki.' });
+    expect((await store.getApplication(pid, aid)).currentVersion).toBe(res.version);
+  });
+
   it('"Skróć do 1 strony" przy CV, które się mieści: bez AI i bez nowej wersji', async () => {
     const { pid, aid } = await setup();
     replies = [JSON.stringify(fixtures.cv.content)];

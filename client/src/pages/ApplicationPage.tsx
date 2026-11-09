@@ -204,6 +204,23 @@ export function ApplicationPage() {
 
   const evaluate = () => run(t('Oceniam CV…'), async (step) => evaluateAndReload(app.currentVersion, step));
 
+  /** Polecenie dla AI z pola na dole edytora; true = gotowe (pole może się wyczyścić). */
+  const instruct = async (instruction: string) => {
+    let done = false;
+    await run(
+      t('AI zmienia CV według Twojego polecenia…'),
+      async () => {
+        const res = await api.instructCv(pid, aid, app.currentVersion, instruction);
+        const d = await loadDetail();
+        await loadVersion(d.application.currentVersion);
+        setNotice([t('Nowa wersja {v} według Twojego polecenia. Poprzednia zostaje na liście wersji.', { v: res.version }), res.message].filter(Boolean).join('\n'));
+        done = true;
+      },
+      t('AI korzysta tylko z Twojego profilu i pilnuje jednej strony. To zwykle kilkanaście sekund.'),
+    );
+    return done;
+  };
+
   const syncProfile = () =>
     run(
       t('Dopisuję do CV nowe rzeczy z profilu…'),
@@ -448,7 +465,7 @@ export function ApplicationPage() {
 
             {tab === 'cv' && (
               <div className="editor-split">
-                <CvEditor cv={vd.cv} onPatch={patch} hasPhoto={detail.hasPhoto} unverifiedSkills={vd.unverifiedSkills} focusId={focusId} />
+                <CvEditor cv={vd.cv} onPatch={patch} hasPhoto={detail.hasPhoto} unverifiedSkills={vd.unverifiedSkills} focusId={focusId} onInstruct={instruct} />
                 <div className="preview-pane">
                   <iframe className="preview-frame" title={t('Podgląd CV')} src={api.previewUrl(pid, aid, app.currentVersion, bust)} />
                   <p className="faint" style={{ marginTop: 6 }}>

@@ -107,6 +107,31 @@ export async function syncCv(profile: Profile, posting: JobPosting, current: CvC
   return groundCv(content, profile, { lang, confirmed: factTexts(current), names: numberedNames(posting) });
 }
 
+const INSTRUCT_EXTRA = () => `
+POLECENIE KANDYDATA:
+Kandydat poprawił już CV ręcznie i prosi o zmianę opisaną w POLECENIU (zwykle: dodaj coś ze swojego profilu).
+- Zrób dokładnie to, o co prosi, korzystając wyłącznie z faktów z profilu i z "extraFacts" (has=true). Nowe pozycje mają "sourceId" = id z profilu.
+- Resztę CV zostaw bez zmian. Kandydat mógł celowo coś usunąć: nie przywracaj tego, chyba że o to prosi.
+- Jeśli prosi o coś, czego nie ma w profilu, nie wymyślaj tego: napisz w "notes", czego brakuje w profilu.
+- CV musi nadal zmieścić się na jednej stronie: jeśli dodajesz, skróć najmniej trafne punkty, ale nie to, o co prosi kandydat.
+- Zachowaj język CV. Zwróć CAŁE CV. W "notes" ${forUser()} napisz krótko, co zmieniono.`;
+
+/** Zmiana CV według polecenia kandydata (np. "dodaj praktyki z mojego profilu"). */
+export async function instructCv(profile: Profile, posting: JobPosting, current: CvContent, instruction: string, ctx: LlmContext): Promise<CvContent> {
+  const lang = current.language;
+  const content = await callJson({
+    schema: checkedImproveSchema(profile, lang, current, posting.keywords, false),
+    schemaName: 'cv',
+    tier: 'main',
+    temperature: 0.3,
+    maxTokens: 10_000,
+    system: SYSTEM(lang, genderForms(profile.pronouns)) + INSTRUCT_EXTRA(),
+    user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nOBECNE CV:\n${json(current)}\n\nPOLECENIE:\n"""\n${instruction}\n"""`,
+    ctx,
+  });
+  return groundCv(content, profile, { lang, confirmed: factTexts(current), names: numberedNames(posting) });
+}
+
 const SHORTEN_EXTRA = (cut: number) => `
 SKRACANIE DO JEDNEJ STRONY:
 Dostajesz gotowe CV, które nie mieści się na jednej stronie A4 nawet przy zmniejszonej czcionce. Skróć treść o ok. ${cut}%.

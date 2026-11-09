@@ -172,9 +172,11 @@ export function lostKeywordIssues(next: CvContent, current: CvContent, keywords:
 }
 
 /** Schemat poprawionego CV: jak checkedCvSchema, a do tego nie wolno zgubić słów kluczowych obecnej wersji. */
-export function checkedImproveSchema(profile: Profile, lang: Lang, current: CvContent, keywords: Keyword[]) {
+/** `keepSchools`: false przy poleceniu kandydata - szkoły, którą sam usunął z CV, nie przywracamy na siłę. */
+export function checkedImproveSchema(profile: Profile, lang: Lang, current: CvContent, keywords: Keyword[], keepSchools = true) {
   return CvContentSchema.superRefine((c, ctx) => {
-    for (const issue of [...styleIssues(c, lang), ...sourceIssues(c, profile), ...educationIssues(c, profile), ...lostKeywordIssues(c, current, keywords)]) {
+    const schools = keepSchools ? educationIssues(c, profile) : [];
+    for (const issue of [...styleIssues(c, lang), ...sourceIssues(c, profile), ...schools, ...lostKeywordIssues(c, current, keywords)]) {
       ctx.addIssue({ code: 'custom', ...issue });
     }
   });

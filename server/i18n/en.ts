@@ -196,4 +196,5 @@ export const EN: Record<string, string> = {
   'nowa szkoła „{name}”': 'new school "{name}"',
   'To CV ma już wszystko z profilu: od tej wersji nic nie doszło.': 'This CV already has everything from your profile: nothing has been added since this version.',
   'Ta kopia PolCV nie pochodzi z git clone, więc nie zaktualizuje się sama. Pobierz nową wersję ze strony {url}.': 'This copy of PolCV did not come from git clone, so it cannot update itself. Download the new version from {url}.',
+  'Napisz, co AI ma zmienić w CV.': 'Write what the AI should change in the CV.',
 };
