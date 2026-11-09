@@ -50,11 +50,21 @@ export function profileSources(p: Profile): ProfileSource[] {
   // Odpowiedź "mam" z opisem to dowód; samo "tak" bez opisu tylko potwierdza umiejętność.
   for (const f of p.extraFacts.filter((x) => x.has)) {
     const label = `odpowiedź kandydata „${f.topic}” (extraFacts, id ${f.id})`;
-    if (f.answer.trim().split(/\s+/).length >= 3) add('experience', 1, true, label, [`${f.topic}: ${f.answer}`]);
-    else add('skills', 0.5, false, label, [f.topic]);
+    const topic = confirmedTopic(f);
+    if (f.answer.trim().split(/\s+/).length >= 3) add('experience', 1, true, label, [topic ? `${topic}: ${f.answer}` : f.answer]);
+    else add('skills', 0.5, false, label, topic ? [topic] : []);
   }
   return out;
 }
+
+/**
+ * Temat odpowiedzi, który kandydat potwierdził: krótki ("komunikatywność" z "mam to", "Python"). Długi temat to pytanie
+ * z wymaganiami ("…Make, n8n, Zapier lub Power Automate"), więc potwierdza tylko to, co jest w samej odpowiedzi.
+ */
+export const confirmedTopic = (f: { topic: string }) => (f.topic.trim().split(/\s+/).length <= 4 ? f.topic.trim() : '');
+
+/** Tekst odpowiedzi kandydata, który potwierdza umiejętności (bez długiego pytania z wymaganiami). */
+export const factEvidence = (f: { topic: string; answer: string }) => [confirmedTopic(f), f.answer].filter(Boolean).join(' ');
 
 export interface AddableKeyword {
   term: string;

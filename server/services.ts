@@ -14,7 +14,7 @@ import { evaluateCv } from './llm/prompts/evaluateCv';
 import { courseAdvice, coverLetter, interviewPrep } from './llm/prompts/extras';
 import { applyDecisions } from './llm/prompts/common';
 import { factTexts } from './llm/prompts/cvChecks';
-import { hasWork, improvePlan, nothingToImprove } from './llm/prompts/improvePlan';
+import { factEvidence, hasWork, improvePlan, nothingToImprove } from './llm/prompts/improvePlan';
 import { decideLanguage, decidePhoto, decideRodo } from './cv/rodo';
 import { photoDataUri, renderCvHtml, renderLetterHtml, withoutPending, type RenderMode } from './cv/render';
 import { htmlToPdf } from './cv/pdf';
@@ -399,7 +399,7 @@ export async function improve(profileId: string, appId: string): Promise<Improve
  * aliasy ("VLOOKUP" = "WYSZUKAJ.PIONOWO", "Microsoft Excel" = "MS Excel") oraz term i synonimy słowa kluczowego ogłoszenia.
  */
 export function unverifiedSkills(cv: CvVersion, profile: Profile, posting: JobPosting | null = null): string[] {
-  const facts = profile.extraFacts.filter((f) => f.has).map((f) => `${f.topic} ${f.answer}`);
+  const facts = profile.extraFacts.filter((f) => f.has).map(factEvidence);
   const source = [
     ...profile.skills.map((s) => s.name),
     ...profile.experience.flatMap((e) => [e.role, e.description, ...e.achievements]),

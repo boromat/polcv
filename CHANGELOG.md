@@ -54,6 +54,9 @@ All notable changes to PolCV are recorded here. The format follows
 - Shortening a CV to one page could silently drop a school (for example a technical secondary school
   with a vocational title). Every school in the profile now stays in the CV, with fewer details if
   space is short, and a CV that misses one goes back to the model for a fix.
+- An answer to a long gap question that lists several tools ("Make, n8n, Zapier or Power Automate")
+  no longer confirms all of them: *Improve automatically* and the skill check count only what the
+  answer itself says. A short topic, such as a keyword confirmed with *I have this*, still counts.
 
 ## [1.1.0] - 2026-11-08
 

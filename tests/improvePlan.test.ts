@@ -151,6 +151,18 @@ describe('plan poprawy CV', () => {
     expect(p.needsInput.some((q) => q.startsWith('Ile raportów'))).toBe(false);
   });
 
+  it('pytanie wymieniające kilka narzędzi potwierdza tylko te, które są w odpowiedzi kandydata', () => {
+    const asked: Profile = {
+      ...profile,
+      extraFacts: [
+        { id: 'g1', topic: 'Doświadczenie w tworzeniu automatyzacji w narzędziach typu Make, n8n, Zapier lub Power Automate', has: true, answer: 'Tworzyłem automatyzacje w n8n do własnych projektów', source: '', date: '' },
+        { id: 'g2', topic: 'komunikatywność', has: true, answer: 'Rozmowy z klientami w handlu', source: '', date: '' },
+      ],
+    };
+    const p = improvePlan(report(null), asked, { ...posting, keywords: [kw('n8n', 'must'), kw('Zapier', 'must'), kw('komunikatywność', 'must', 'kompetencja miękka')] }, cvContent());
+    expect(p.addable.map((a) => a.term).sort()).toEqual(['komunikatywność', 'n8n']);
+  });
+
   it('dla modelu: bez pytań do kandydata, z listą słów do zachowania', () => {
     const p = planForPrompt(plan);
     expect(p).not.toHaveProperty('needsInput');
