@@ -9,7 +9,7 @@ import { fetchPosting } from './jobs/fetchPosting';
 import { parsePosting } from './llm/prompts/parsePosting';
 import { gapQuestions } from './llm/prompts/gapQuestions';
 import { generateCv, improveCv, shortenCv, syncCv } from './llm/prompts/generateCv';
-import { newsCount, profileIdsOf, profileNews } from './cv/profileNews';
+import { newsCount, profileIdsOf, profileNews, refreshSnapshot } from './cv/profileNews';
 import { evaluateCv } from './llm/prompts/evaluateCv';
 import { courseAdvice, coverLetter, interviewPrep } from './llm/prompts/extras';
 import { applyDecisions } from './llm/prompts/common';
@@ -223,7 +223,14 @@ export async function updateVersion(
   const next: CvVersion = { ...cv, ...patch, version: cv.version, updatedAt: nowIso() };
   await store.saveVersion(profileId, appId, next);
   let profileUpdates: string[] = [];
-  if (patch.content) await store.updateProfile(profileId, (p) => void (profileUpdates = syncCvEdit(p, cv.content, patch.content!)));
+  if (patch.content) {
+    const profile = await store.updateProfile(profileId, (p) => void (profileUpdates = syncCvEdit(p, cv.content, patch.content!)));
+    // To, co przeszło z CV do profilu, CV już ma: nie może potem wrócić przy synchronizacji jako zmiana w profilu.
+    if (profileUpdates.length && next.profileIds) {
+      next.profileIds = refreshSnapshot(next.profileIds, profile, next.content);
+      await store.saveVersion(profileId, appId, next);
+    }
+  }
   return { cv: next, profileUpdates };
 }
 

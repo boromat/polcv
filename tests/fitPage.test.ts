@@ -119,7 +119,7 @@ describe('CV na jedną stronę', () => {
     expect(res).toEqual({ version: first.version + 1, message: 'Dodano pracę w Przykładowej Firmie.' });
     const synced = await store.getVersion(pid, aid, res.version!);
     expect(synced.origin).toBe('synced');
-    expect(synced.profileIds).toContain('exp-new');
+    expect(synced.profileIds?.some((s) => s.startsWith('exp-new#'))).toBe(true);
     expect((await store.getApplication(pid, aid)).currentVersion).toBe(res.version);
   });
 

@@ -85,6 +85,7 @@ const SYNC_EXTRA = () => `
 AKTUALIZACJA Z PROFILU:
 Dostajesz obecne CV i NOWE W PROFILU: informacje, które kandydat dodał po napisaniu tej wersji (rozmowa z doradcą kariery, odpowiedzi na pytania, edycja profilu, projekty z GitHuba).
 - Dodaj do CV to z NOWEGO W PROFILU, co jest trafne dla ogłoszenia: nowe doświadczenie, projekty i szkoły jako pozycje ("sourceId" = id z profilu), fakty ("facts") jako punkty pozycji, której dotyczą, albo w podsumowaniu, a umiejętności, certyfikaty i języki do ich sekcji. Fakt o pracy, stażu albo wolontariacie, którego nie ma w "experience" profilu, możesz pokazać jako pozycję doświadczenia z "sourceId" = id tego faktu.
+- Elementy, których id jest w "changed", już były w profilu (często też w CV), ale kandydat je poprawił: jeśli są w CV, popraw ich wpis według nowej wersji (nazwa, daty, nowe punkty) i nie dodawaj ich drugi raz; jeśli ich nie ma, potraktuj je jak nowe.
 - To, co nietrafne dla tego ogłoszenia, pomiń.
 - Pozostałą treść CV zostaw bez zmian. Skróć ją tylko wtedy, gdy inaczej CV nie zmieści się na jednej stronie (najpierw najmniej trafne punkty).
 - Nie dopisuj niczego spoza profilu. Zachowaj język CV. Zwróć CAŁE CV.

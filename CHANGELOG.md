@@ -16,9 +16,10 @@ All notable changes to PolCV are recorded here. The format follows
   to your profile, so the next CVs include it.
 - **Sync with profile.** Each CV version remembers what your profile held when it was made. In
   *History* and next to the version picker, *Sync with profile (n)* shows how many things have been
-  added since (from the career advisor chat, gap answers, profile edits or GitHub) and asks the AI
-  to work the relevant ones into a new version, kept to one page. The previous version stays in the
-  list.
+  added or changed since (from the career advisor chat, gap answers, profile edits or GitHub) and
+  asks the AI to work the relevant ones into a new version, kept to one page: new items are added,
+  changed ones are updated in place. The previous version stays in the list. Corrections made in
+  the CV editor itself do not come back as changes.
 
 ### Fixed
 

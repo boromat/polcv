@@ -1,11 +1,45 @@
-import type { CvVersion, ExtraFact, Profile } from '../../shared/schemas';
+import { createHash } from 'node:crypto';
+import type { CvContent, CvVersion, ExtraFact, Profile } from '../../shared/schemas';
 import { normalize } from '../ats/keywords';
 
-/** Identyfikatory elementów profilu. Wersja CV zapamiętuje je przy powstaniu, żeby potem wiedzieć, co doszło. */
-export const profileIdsOf = (p: Profile): string[] =>
-  [...p.experience, ...p.projects, ...p.education, ...p.certificates, ...p.languages, ...p.skills, ...p.extraFacts].map((x) => x.id);
+const itemsOf = (p: Profile) => [...p.experience, ...p.projects, ...p.education, ...p.certificates, ...p.languages, ...p.skills, ...p.extraFacts];
+const itemHash = (x: unknown) => createHash('sha1').update(JSON.stringify(x)).digest('hex').slice(0, 10);
 
-/** To, co doszło do profilu od powstania wersji CV, a czego w tym CV nie ma. */
+/**
+ * Stan elementów profilu ("id#skrót treści"). Wersja CV zapamiętuje go przy powstaniu, żeby potem wiedzieć,
+ * co doszło albo się zmieniło. Wersje z 9.11.2026 mają same identyfikatory, bez skrótu.
+ */
+export const profileIdsOf = (p: Profile): string[] => itemsOf(p).map((x) => `${x.id}#${itemHash(x)}`);
+
+const parseSnapshot = (s: string[]) =>
+  new Map(
+    s.map((e): [string, string | null] => {
+      const i = e.indexOf('#');
+      return i < 0 ? [e, null] : [e.slice(0, i), e.slice(i + 1)];
+    }),
+  );
+
+/** Id pozycji profilu, z których korzysta CV (wpisy i punkty). */
+function usedIds(c: CvContent): Set<string> {
+  return new Set([
+    ...[...c.experience, ...c.projects, ...c.education].map((e) => e.sourceId),
+    ...[c.summary, ...c.experience.flatMap((e) => e.bullets), ...c.projects.flatMap((p) => p.bullets)].flatMap((t) => t.sourceIds),
+  ]);
+}
+
+/**
+ * Po poprawce w edytorze CV (która przeszła do profilu) elementy profilu używane przez CV mają już stan z tego CV,
+ * więc nie mogą wrócić przy synchronizacji jako "zmienione".
+ */
+export function refreshSnapshot(snapshot: string[] | undefined, profile: Profile, cv: CvContent): string[] | undefined {
+  if (!snapshot) return undefined;
+  const map = parseSnapshot(snapshot);
+  const used = usedIds(cv);
+  for (const x of itemsOf(profile)) if (used.has(x.id)) map.set(x.id, itemHash(x));
+  return [...map].map(([id, h]) => (h ? `${id}#${h}` : id));
+}
+
+/** To, co doszło do profilu albo się w nim zmieniło od powstania wersji CV. */
 export interface ProfileNews {
   experience: Profile['experience'];
   projects: Profile['projects'];
@@ -14,19 +48,33 @@ export interface ProfileNews {
   languages: Profile['languages'];
   skills: string[];
   facts: ExtraFact[];
+  /** id elementów, które już były, ale się zmieniły (ich wpis w CV trzeba poprawić, a nie dodać drugi raz) */
+  changed: string[];
 }
 
 export function profileNews(profile: Profile, cv: CvVersion): ProfileNews {
-  const known = cv.profileIds ? new Set(cv.profileIds) : null;
+  const snap = cv.profileIds ? parseSnapshot(cv.profileIds) : null;
   const c = cv.content;
-  const empty: ProfileNews = { experience: [], projects: [], education: [], certificates: [], languages: [], skills: [], facts: [] };
-  // Starsza wersja nie ma listy: gdy profil od tamtej pory się nie zmienił, nic nie doszło.
-  if (!known && profile.updatedAt <= cv.createdAt) return empty;
-  const isNew = (id: string) => !known || !known.has(id);
-  const used = new Set([
-    ...[...c.experience, ...c.projects, ...c.education].map((e) => e.sourceId),
-    ...[c.summary, ...c.experience.flatMap((e) => e.bullets), ...c.projects.flatMap((p) => p.bullets)].flatMap((t) => t.sourceIds),
-  ]);
+  const empty: ProfileNews = { experience: [], projects: [], education: [], certificates: [], languages: [], skills: [], facts: [], changed: [] };
+  // Starsza wersja bez listy: gdy profil od tamtej pory się nie zmienił, nic nie doszło.
+  if (!snap && profile.updatedAt <= cv.createdAt) return empty;
+  const used = usedIds(c);
+  const changedSince = profile.updatedAt > cv.createdAt;
+  const changed: string[] = [];
+  /** 'new' = nie było go przy wersji, 'changed' = był, ale ma inną treść, null = bez zmian. */
+  const status = (x: { id: string }): 'new' | 'changed' | null => {
+    if (!snap || !snap.has(x.id)) return 'new';
+    const h = snap.get(x.id);
+    if (h) return h === itemHash(x) ? null : 'changed';
+    // Lista bez skrótów: zmianę zakładamy dla pozycji z CV, gdy profil zmienił się po powstaniu wersji.
+    return changedSince && used.has(x.id) ? 'changed' : null;
+  };
+  const pick = <T extends { id: string }>(list: T[], isNew: (x: T) => boolean) =>
+    list.filter((x) => {
+      const s = status(x);
+      if (s === 'changed') changed.push(x.id);
+      return s === 'changed' || (s === 'new' && isNew(x));
+    });
   const inCv = (names: string[]) => {
     const set = new Set(names.map(normalize));
     return (name: string) => set.has(normalize(name));
@@ -36,14 +84,18 @@ export function profileNews(profile: Profile, cv: CvVersion): ProfileNews {
   const hasLang = inCv(c.languages.map((x) => x.name));
   const since = cv.createdAt.slice(0, 10);
   return {
-    experience: profile.experience.filter((e) => isNew(e.id) && !used.has(e.id)),
-    projects: profile.projects.filter((p) => isNew(p.id) && !used.has(p.id)),
-    education: profile.education.filter((e) => isNew(e.id) && !used.has(e.id)),
-    certificates: profile.certificates.filter((x) => isNew(x.id) && !hasCert(x.name)),
-    languages: profile.languages.filter((x) => isNew(x.id) && !hasLang(x.name)),
+    experience: pick(profile.experience, (e) => !used.has(e.id)),
+    projects: pick(profile.projects, (p) => !used.has(p.id)),
+    education: pick(profile.education, (e) => !used.has(e.id)),
+    certificates: pick(profile.certificates, (x) => !hasCert(x.name)),
+    languages: pick(profile.languages, (x) => !hasLang(x.name)),
     // Bez listy z wersji nie wiadomo, które umiejętności AI pominęło celowo, więc ich nie proponujemy.
-    skills: known ? profile.skills.filter((s) => !known.has(s.id) && !hasSkill(s.name)).map((s) => s.name) : [],
-    facts: profile.extraFacts.filter((f) => f.has && !used.has(f.id) && (known ? !known.has(f.id) : f.date >= since)),
+    skills: snap ? pick(profile.skills, (s) => !hasSkill(s.name)).map((s) => s.name) : [],
+    facts: pick(
+      profile.extraFacts.filter((f) => f.has),
+      (f) => !used.has(f.id) && (snap ? true : f.date >= since),
+    ),
+    changed,
   };
 }
 
