@@ -314,3 +314,21 @@ describe('słowa kluczowe przy poprawie', () => {
     expect(checkedImproveSchema(profile, 'pl', current, keywords).safeParse(current).success).toBe(true);
   });
 });
+
+describe('wykształcenie zostaje w CV', () => {
+  it('brak szkoły z profilu (np. technikum) wraca do poprawki, komplet przechodzi', async () => {
+    const { educationIssues } = await import('../server/llm/prompts/cvChecks');
+    const { cv: fixtureCv, profile: fixtureProfile } = await import('./fixtures');
+    const withTechnikum = {
+      ...fixtureProfile,
+      education: [
+        ...fixtureProfile.education,
+        { id: 'edu2', school: 'Technikum nr 1', degree: 'technik', field: 'Technik informatyk', start: '2019-09', end: '2023-06', current: false, details: '' },
+      ],
+    };
+    const issues = educationIssues(fixtureCv.content, withTechnikum);
+    expect(issues).toHaveLength(1);
+    expect(issues[0].message).toContain('Technikum nr 1');
+    expect(educationIssues(fixtureCv.content, fixtureProfile)).toEqual([]);
+  });
+});

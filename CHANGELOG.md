@@ -51,6 +51,9 @@ All notable changes to PolCV are recorded here. The format follows
   "Studiuję…") instead of opening like a description of someone else ("Student kierunku X,
   pracujący z…"). A summary that opens with a role noun or a participle after a comma goes back to
   the model for a fix.
+- Shortening a CV to one page could silently drop a school (for example a technical secondary school
+  with a vocational title). Every school in the profile now stays in the CV, with fewer details if
+  space is short, and a CV that misses one goes back to the model for a fix.
 
 ## [1.1.0] - 2026-11-08
 

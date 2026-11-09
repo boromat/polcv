@@ -15,7 +15,7 @@ STRUKTURA:
 - "sectionOrder": kolejność sekcji od najważniejszej dla TEGO ogłoszenia. Dla studenta/juniora z małym doświadczeniem zwykle: summary, projects lub experience (co jest trafniejsze), education, skills, certificates, languages, interests. Pomiń sekcje, które byłyby puste.
 - "experience" i "projects": wybierz pozycje trafne dla ogłoszenia; mniej trafne skróć do 1 punktu albo pomiń, jeśli brakuje miejsca. "dates" w formacie ${lang === 'pl' ? '"MM.RRRR – MM.RRRR" albo "MM.RRRR – obecnie"' : '"MM/YYYY – MM/YYYY" albo "MM/YYYY – present"'}. "sourceId" = id pozycji z profilu.
 - "skills": 2–4 grupy z nazwami w języku CV (np. ${lang === 'pl' ? '"Narzędzia", "Umiejętności techniczne", "Kompetencje"' : '"Tools", "Technical skills", "Soft skills"'}). TYLKO umiejętności z profilu lub z extraFacts has=true; najpierw te z ogłoszenia; łącznie maks. ~15 pozycji. Każda pozycja to krótka nazwa (1–4 słowa), bez nawiasów z wyjaśnieniami - dowody umiejętności należą do punktów doświadczenia, nie do listy.
-- "education": szczegóły tylko trafne (kierunek, specjalizacja, ważne przedmioty/projekty, średnia jeśli wysoka).
+- "education": KAŻDA szkoła z profilu zostaje w CV (także szkoła średnia z tytułem zawodowym, np. technik informatyk). Szczegóły tylko trafne (kierunek, specjalizacja, ważne przedmioty/projekty, średnia jeśli wysoka); przy braku miejsca skróć szczegóły, nie usuwaj szkoły.
 - "certificates", "languages": z profilu; w "languages" poziom w skali CEFR, jeśli znany.
 - "interests": maks. 3 krótkie pozycje z profilu, tylko jeśli pomagają (inaczej pusta lista).
 - Objętość: CV musi zmieścić się na JEDNEJ stronie A4 razem z nagłówkiem, zdjęciem i klauzulą RODO, czyli łącznie ok. 300-420 słów. Punkt to jedna linia (do ok. 120 znaków), maks. 3 punkty na pozycję. Lepiej mniej i trafniej.
@@ -110,6 +110,7 @@ export async function syncCv(profile: Profile, posting: JobPosting, current: CvC
 const SHORTEN_EXTRA = (cut: number) => `
 SKRACANIE DO JEDNEJ STRONY:
 Dostajesz gotowe CV, które nie mieści się na jednej stronie A4 nawet przy zmniejszonej czcionce. Skróć treść o ok. ${cut}%.
+- Wykształcenia nie usuwaj: każda szkoła zostaje, możesz najwyżej skrócić jej szczegóły.
 - Najpierw tnij to, co najmniej trafne dla ogłoszenia: mniej ważne projekty i doświadczenie skróć do 1 punktu albo pomiń, długie punkty skróć do jednej linii (do ok. 110 znaków), listę umiejętności ogranicz do 12-15 pozycji (najpierw te z ogłoszenia), podsumowanie do 2-3 zdań.
 - Nie dopisuj niczego nowego. Zachowaj słowa kluczowe z ogłoszenia, a w punktach, które zostają, fakty, "sourceId" i status (fact/suggested).
 - Zachowaj język CV. Zwróć CAŁE CV. Pole "notes" przepisz i dopisz na końcu jedno zdanie ${forUser()}, co skrócono, żeby CV zmieściło się na stronie.`;

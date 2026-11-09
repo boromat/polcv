@@ -138,9 +138,20 @@ export function sourceIssues(c: CvContent, profile: Profile): CvIssue[] {
 }
 
 /** Schemat CV dla modelu: punkty w 1. osobie i wpisy spoza profilu wracają do poprawki. Schemat JSON się nie zmienia. */
+/** Szkoły z profilu zostają w CV zawsze: przy skracaniu model potrafił po cichu wyciąć technikum. */
+export function educationIssues(c: CvContent, profile: Profile): CvIssue[] {
+  const inCv = new Set(c.education.map((e) => e.sourceId));
+  return profile.education
+    .filter((e) => (e.school.trim() || e.field.trim()) && !inCv.has(e.id))
+    .map((e) => ({
+      path: ['education'],
+      message: `Brakuje szkoły z profilu: „${[e.school, e.field].filter(Boolean).join(', ')}” (sourceId ${e.id}). Wykształcenie zostaje w CV w całości; przy braku miejsca skróć jej szczegóły albo inne sekcje.`,
+    }));
+}
+
 export function checkedCvSchema(profile: Profile, lang: Lang) {
   return CvContentSchema.superRefine((c, ctx) => {
-    for (const issue of [...styleIssues(c, lang), ...sourceIssues(c, profile)]) ctx.addIssue({ code: 'custom', ...issue });
+    for (const issue of [...styleIssues(c, lang), ...sourceIssues(c, profile), ...educationIssues(c, profile)]) ctx.addIssue({ code: 'custom', ...issue });
   });
 }
 
@@ -163,7 +174,7 @@ export function lostKeywordIssues(next: CvContent, current: CvContent, keywords:
 /** Schemat poprawionego CV: jak checkedCvSchema, a do tego nie wolno zgubić słów kluczowych obecnej wersji. */
 export function checkedImproveSchema(profile: Profile, lang: Lang, current: CvContent, keywords: Keyword[]) {
   return CvContentSchema.superRefine((c, ctx) => {
-    for (const issue of [...styleIssues(c, lang), ...sourceIssues(c, profile), ...lostKeywordIssues(c, current, keywords)]) {
+    for (const issue of [...styleIssues(c, lang), ...sourceIssues(c, profile), ...educationIssues(c, profile), ...lostKeywordIssues(c, current, keywords)]) {
       ctx.addIssue({ code: 'custom', ...issue });
     }
   });
