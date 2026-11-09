@@ -97,6 +97,32 @@ describe('CV na jedną stronę', () => {
     expect((await store.getVersion(pid, aid, long.version)).content.summary.text).toContain('ZA-DŁUGIE');
   });
 
+  it('"Synchronizuj z profilem": nowa praca z profilu idzie do AI, wynik to nowa, bieżąca wersja "z profilu"', async () => {
+    const { pid, aid } = await setup();
+    replies = [JSON.stringify(fixtures.cv.content)];
+    const first = await svc.generate(pid, aid);
+    expect(first.profileIds?.length).toBeGreaterThan(0);
+    expect(await svc.syncWithProfile(pid, aid)).toEqual({ version: null, message: 'To CV ma już wszystko z profilu: od tej wersji nic nie doszło.' });
+
+    await store.updateProfile(pid, (p) => {
+      p.experience.push({
+        id: 'exp-new', kind: 'praca', role: 'Specjalista ds. dokumentacji', company: 'Przykładowa Firma', location: '', start: '2025-08', end: '', current: true,
+        description: '', achievements: ['Szablony dokumentów z AI'],
+      });
+    });
+    sent.length = 0;
+    replies = [JSON.stringify({ ...fixtures.cv.content, notes: 'Dodano pracę w Przykładowej Firmie.' })];
+    const res = await svc.syncWithProfile(pid, aid);
+    expect(sent).toHaveLength(1);
+    const user: string = sent[0].messages[1].content;
+    expect(user.slice(user.indexOf('NOWE W PROFILU'))).toContain('Przykładowa Firma');
+    expect(res).toEqual({ version: first.version + 1, message: 'Dodano pracę w Przykładowej Firmie.' });
+    const synced = await store.getVersion(pid, aid, res.version!);
+    expect(synced.origin).toBe('synced');
+    expect(synced.profileIds).toContain('exp-new');
+    expect((await store.getApplication(pid, aid)).currentVersion).toBe(res.version);
+  });
+
   it('"Skróć do 1 strony" przy CV, które się mieści: bez AI i bez nowej wersji', async () => {
     const { pid, aid } = await setup();
     replies = [JSON.stringify(fixtures.cv.content)];

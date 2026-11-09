@@ -204,6 +204,18 @@ export function ApplicationPage() {
 
   const evaluate = () => run(t('Oceniam CV…'), async (step) => evaluateAndReload(app.currentVersion, step));
 
+  const syncProfile = () =>
+    run(
+      t('Dopisuję do CV nowe rzeczy z profilu…'),
+      async () => {
+        const res = await api.syncProfile(pid, aid);
+        const d = await loadDetail();
+        await loadVersion(d.application.currentVersion);
+        setNotice(res.version ? [t('Nowa wersja {v} z rzeczami z profilu. Poprzednia zostaje na liście wersji.', { v: res.version }), res.message].filter(Boolean).join('\n') : res.message);
+      },
+      t('AI dopisze to, co doszło do profilu od tej wersji (np. z rozmowy z doradcą), jeśli pasuje do ogłoszenia. To zwykle kilkanaście sekund.'),
+    );
+
   const shorten = () =>
     run(
       t('Skracam CV do jednej strony…'),
@@ -373,7 +385,7 @@ export function ApplicationPage() {
                 <select value={app.currentVersion} onChange={(e) => switchVersion(Number(e.target.value))} style={{ width: 'auto' }}>
                   {detail.versions.map((v) => (
                     <option key={v.version} value={v.version}>
-                      v{v.version} - {v.origin === 'improved' ? t('poprawiona') : t('wygenerowana')}
+                      v{v.version} - {v.origin === 'improved' ? t('poprawiona') : v.origin === 'synced' ? t('z profilu') : t('wygenerowana')}
                       {v.score != null ? ` (${v.score}/100)` : v.scoreIncomplete ? ` (${t('ocena niepełna')})` : ''}
                     </option>
                   ))}
@@ -388,6 +400,14 @@ export function ApplicationPage() {
                 )}
               </div>
               <div className="row">
+                <button
+                  className="btn sm"
+                  onClick={syncProfile}
+                  disabled={!detail.profileNews}
+                  title={detail.profileNews ? t('Dopisz do CV to, co doszło do profilu od tej wersji') : t('Od tej wersji w profilu nie doszło nic nowego')}
+                >
+                  {detail.profileNews ? t('Synchronizuj z profilem ({n})', { n: detail.profileNews }) : t('Synchronizuj z profilem')}
+                </button>
                 <button className="btn ghost sm" onClick={regenerate}>
                   {t('Napisz od nowa')}
                 </button>

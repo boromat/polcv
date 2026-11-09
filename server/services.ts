@@ -8,7 +8,8 @@ import { HttpError, newId, nowIso } from './storage/store';
 import { fetchPosting } from './jobs/fetchPosting';
 import { parsePosting } from './llm/prompts/parsePosting';
 import { gapQuestions } from './llm/prompts/gapQuestions';
-import { generateCv, improveCv, shortenCv } from './llm/prompts/generateCv';
+import { generateCv, improveCv, shortenCv, syncCv } from './llm/prompts/generateCv';
+import { newsCount, profileIdsOf, profileNews } from './cv/profileNews';
 import { evaluateCv } from './llm/prompts/evaluateCv';
 import { courseAdvice, coverLetter, interviewPrep } from './llm/prompts/extras';
 import { applyDecisions } from './llm/prompts/common';
@@ -195,6 +196,7 @@ export async function generate(profileId: string, appId: string, language?: 'pl'
     photo: photo.include,
     photoReason: photo.reason,
     rodo,
+    profileIds: profileIdsOf(profile),
   };
   const content = await fitToPage(profile, app, draft, confirmed);
   // Numer: kolejny po najwyższej istniejącej wersji (użytkownik mógł wrócić do starszej).
@@ -247,6 +249,44 @@ async function fitToPage(profile: Profile, app: Application, draft: CvVersion, c
   const content = withFreshIds(await shortenCv(profile, app.posting!, draft.content, fill ?? 1.2, ctxOf(app, 'skracanie CV'), confirmed));
   content.language = draft.content.language;
   return content;
+}
+
+/** Ile rzeczy doszło do profilu od bieżącej wersji CV aplikacji (0 bez CV). */
+export async function profileNewsCount(profile: Profile, app: Application): Promise<number> {
+  if (!app.currentVersion) return 0;
+  const cv = await store.getVersion(profile.id, app.id, app.currentVersion).catch(() => null);
+  return cv ? newsCount(profileNews(profile, cv)) : 0;
+}
+
+/**
+ * "Synchronizuj z profilem": AI wpisuje w CV to, co doszło do profilu od powstania bieżącej wersji (np. z rozmowy
+ * z doradcą). Wynik to nowa, bieżąca wersja; poprzednia zostaje na liście. Bez nowości AI nie jest wywoływane.
+ */
+export async function syncWithProfile(profileId: string, appId: string): Promise<{ version: number | null; message: string }> {
+  const app = await store.getApplication(profileId, appId);
+  if (!app.posting || !app.currentVersion) throw new HttpError(409, tr('Najpierw wygeneruj CV.'));
+  const [profile, current] = await Promise.all([store.getProfile(profileId), store.getVersion(profileId, appId, app.currentVersion)]);
+  const news = profileNews(profile, current);
+  if (!newsCount(news)) return { version: null, message: tr('To CV ma już wszystko z profilu: od tej wersji nic nie doszło.') };
+  const base = applyDecisions(current);
+  const synced = withFreshIds(await syncCv(profile, app.posting, base, news, ctxOf(app, 'aktualizacja z profilu')));
+  synced.language = base.language;
+  const content = await fitToPage(profile, app, { ...current, content: synced, decisions: {} }, factTexts(base));
+  const t = nowIso();
+  const cv = await store.addVersion(profileId, appId, (version) => ({
+    ...current,
+    version,
+    createdAt: t,
+    updatedAt: t,
+    origin: 'synced',
+    content,
+    decisions: {},
+    profileIds: profileIdsOf(profile),
+  }));
+  await store.updateApplication(profileId, appId, (a) => {
+    a.currentVersion = cv.version;
+  });
+  return { version: cv.version, message: content.notes };
 }
 
 /**

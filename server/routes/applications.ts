@@ -26,13 +26,14 @@ const num = (v: string) => {
 
 applicationsRouter.get(base, async (req, res) => {
   const { pid } = req.params;
-  const [apps, usage] = await Promise.all([store.listApplications(pid), store.readUsage()]);
+  const [apps, usage, profile] = await Promise.all([store.listApplications(pid), store.readUsage(), store.getProfile(pid)]);
   const out: ApplicationSummary[] = [];
   for (const a of apps) {
     const report = honestReport(a.currentVersion ? await store.getReport(pid, a.id, a.currentVersion) : null);
     const costUsd = usage.filter((u) => u.applicationId === a.id).reduce((s, u) => s + u.cost, 0);
+    const profileNews = await svc.profileNewsCount(profile, a);
     const { rawText, ...rest } = a;
-    out.push({ ...rest, rawText: '', costUsd, score: report?.total ?? null, scoreIncomplete: !!report && report.total === null });
+    out.push({ ...rest, rawText: '', costUsd, score: report?.total ?? null, scoreIncomplete: !!report && report.total === null, profileNews });
   }
   res.json(out);
 });
@@ -60,7 +61,12 @@ applicationsRouter.get(`${base}/:aid`, async (req, res) => {
     hasPhoto: !!profile.photo,
     // Tematy, które kandydat przy tej aplikacji potwierdził w profilu (pytania o braki, "mam to" w raporcie).
     factTopics: profile.extraFacts.filter((f) => f.has && f.id === svc.answerFactId(aid, f.topic)).map((f) => f.topic),
+    profileNews: await svc.profileNewsCount(profile, app),
   });
+});
+
+applicationsRouter.post(`${base}/:aid/sync-profile`, async (req, res) => {
+  res.json(await svc.syncWithProfile(req.params.pid, req.params.aid));
 });
 
 applicationsRouter.patch(`${base}/:aid`, async (req, res) => {

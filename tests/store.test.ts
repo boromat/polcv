@@ -222,7 +222,21 @@ describe('długie wywołania AI nie cofają równoległych zmian', () => {
     done: false,
     prefs: { ...store.emptyCareer('Kraków').prefs, remote: false },
     newFacts: [{ topic: 'Excel', answer: 'Tabele przestawne w raportach sprzedaży' }],
+    newExperience: [],
     summary: 'Szuka pracy w marketingu.',
+  });
+
+  it('chat: praca opisana w rozmowie trafia do sekcji Doświadczenie profilu', async () => {
+    const p = await newProfile();
+    vi.mocked(prompts.careerTurn).mockResolvedValue({
+      ...turn(),
+      newExperience: [
+        { kind: 'praca', role: 'Specjalista ds. dokumentacji', company: 'Przykładowa Firma SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ', location: '', start: '2025-08', end: '', current: true, achievements: ['Szablony dokumentów z AI'] },
+      ],
+    });
+    await career.chat(p.id, 'Od sierpnia 2025 pracuję w Przykładowej Firmie');
+    const job = (await store.getProfile(p.id)).experience.at(-1)!;
+    expect(job).toMatchObject({ kind: 'praca', role: 'Specjalista ds. dokumentacji', start: '2025-08', current: true, achievements: ['Szablony dokumentów z AI'] });
   });
 
   it('chat: zmiana profilu w trakcie odpowiedzi AI zostaje, a fakty się dopisują', async () => {

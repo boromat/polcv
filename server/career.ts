@@ -1,4 +1,5 @@
-import type { Career, CareerPrefs, Profile } from '../shared/schemas';
+import type { Career, CareerPrefs, CareerTurn, Profile } from '../shared/schemas';
+import { companyCore } from '../shared/gowork';
 import * as store from './storage/store';
 import { HttpError, newId, nowIso } from './storage/store';
 import { careerTurn, proposeRoles, rankOffers } from './llm/prompts/career';
@@ -34,11 +35,13 @@ export async function chat(profileId: string, message: string): Promise<Career> 
     const known = new Set(p.extraFacts.map((f) => normalize(f.topic)));
     return turn.newFacts.filter((f) => f.topic.trim() && f.answer.trim() && !known.has(normalize(f.topic)));
   };
-  if (isNew(profile).length) {
+  const jobs = turn.newExperience.filter((e) => e.company.trim() || e.role.trim());
+  if (isNew(profile).length || jobs.length) {
     await store.updateProfile(profileId, (p) => {
       for (const f of isNew(p)) {
         p.extraFacts.push({ id: newId(), topic: f.topic.trim(), has: true, answer: f.answer.trim(), source: tr('Rozmowa z doradcą kariery'), date: nowIso().slice(0, 10) });
       }
+      for (const e of jobs) addExperience(p, e);
     });
   }
 
@@ -50,6 +53,40 @@ export async function chat(profileId: string, message: string): Promise<Career> 
     c.summary = turn.summary || c.summary;
     c.done = turn.done;
   });
+}
+
+/**
+ * Praca, staż czy wolontariat z rozmowy trafia do sekcji Doświadczenie. Ta sama firma (bez formy prawnej, więc
+ * "ALFA SPÓŁKA Z O.O." = "ALFA Sp. z o.o.") albo, bez firmy, to samo stanowisko: dopisujemy tylko nowe osiągnięcia
+ * i uzupełniamy puste pola, niczego nie nadpisując.
+ */
+export function addExperience(p: Profile, e: CareerTurn['newExperience'][number]) {
+  const key = (s: string) => normalize(companyCore(s));
+  const same = p.experience.find((x) => (e.company.trim() ? key(x.company) === key(e.company) : normalize(x.role) === normalize(e.role)));
+  const achievements = e.achievements.map((a) => a.trim()).filter(Boolean);
+  if (!same) {
+    p.experience.push({
+      id: newId(),
+      kind: e.kind,
+      role: e.role.trim(),
+      company: e.company.trim(),
+      location: e.location.trim(),
+      start: e.start.trim(),
+      end: e.current ? '' : e.end.trim(),
+      current: e.current,
+      description: '',
+      achievements,
+    });
+    return;
+  }
+  for (const a of achievements) if (!same.achievements.some((x) => normalize(x) === normalize(a))) same.achievements.push(a);
+  if (!same.role.trim()) same.role = e.role.trim();
+  if (!same.location.trim()) same.location = e.location.trim();
+  if (!same.start.trim()) same.start = e.start.trim();
+  if (!same.end.trim() && !same.current) {
+    same.end = e.current ? '' : e.end.trim();
+    same.current = e.current;
+  }
 }
 
 export async function resetChat(profileId: string): Promise<Career> {

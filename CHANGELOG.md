@@ -14,9 +14,19 @@ All notable changes to PolCV are recorded here. The format follows
   *+ project* and *+ school* buttons, for example for the company you work at now. As soon as the
   entry has a role or company (a project its name, a school its name or field), it is also added
   to your profile, so the next CVs include it.
+- **Sync with profile.** Each CV version remembers what your profile held when it was made. In
+  *History* and next to the version picker, *Sync with profile (n)* shows how many things have been
+  added since (from the career advisor chat, gap answers, profile edits or GitHub) and asks the AI
+  to work the relevant ones into a new version, kept to one page. The previous version stays in the
+  list.
 
 ### Fixed
 
+- The career advisor now writes a job, internship or volunteering you describe in the chat into the
+  *Experience* section of your profile (role, company, dates, achievements). Before, it was saved
+  only as loose facts, so the profile's *Experience* stayed empty. The same company under another
+  legal form (for example "Sp. z o.o." and "SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ") gets new
+  achievements instead of a copy.
 - The pracuj.pl link under *Otwórz wyszukiwanie* showed no offers for manual trades (mechanic,
   welder, painter and the like): its level filter allowed only trainee, assistant and junior, while
   the portal marks these offers as *manual worker*. That level is now included for every seniority.

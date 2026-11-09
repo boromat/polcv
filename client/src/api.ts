@@ -82,11 +82,13 @@ export interface UsageView {
 export interface AppDetail {
   application: Application;
   /** scoreIncomplete: raport jest, ale bez części AI (brak wyniku łącznego) */
-  versions: { version: number; createdAt: string; origin: 'generated' | 'improved'; score: number | null; scoreIncomplete: boolean }[];
+  versions: { version: number; createdAt: string; origin: 'generated' | 'improved' | 'synced'; score: number | null; scoreIncomplete: boolean }[];
   costUsd: number;
   hasPhoto: boolean;
   /** tematy potwierdzone przy tej aplikacji w profilu (pytania o braki, "mam to" w raporcie) */
   factTopics: string[];
+  /** ile rzeczy doszło do profilu od bieżącej wersji CV */
+  profileNews: number;
 }
 
 export interface VersionDetail {
@@ -144,6 +146,7 @@ export const api = {
   saveVersion: (pid: string, aid: string, v: number, patch: Partial<Pick<CvVersion, 'content' | 'decisions' | 'template' | 'photo' | 'rodo'>>) =>
     req<{ cv: CvVersion; pending: number; profileUpdates: string[] }>('PUT', `${A(pid, aid)}/versions/${v}`, patch),
   evaluate: (pid: string, aid: string, v: number) => req<AtsReport>('POST', `${A(pid, aid)}/versions/${v}/evaluate`),
+  syncProfile: (pid: string, aid: string) => req<{ version: number | null; message: string }>('POST', `${A(pid, aid)}/sync-profile`),
   shorten: (pid: string, aid: string, v: number) => req<{ cv: CvVersion | null }>('POST', `${A(pid, aid)}/versions/${v}/shorten`),
   previewUrl: (pid: string, aid: string, v: number, bust: string) => `/api${A(pid, aid)}/versions/${v}/preview?lang=${getLang()}&${bust}`,
   pdfUrl: (pid: string, aid: string, v: number) => `/api${A(pid, aid)}/versions/${v}/pdf?lang=${getLang()}&${Date.now()}`,

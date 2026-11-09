@@ -3,6 +3,7 @@ import { callJson, type LlmContext } from '../openrouter';
 import { json, postingForPrompt, profileForPrompt, today, writingRules, forUser } from './common';
 import { checkedCvSchema, checkedImproveSchema, factTexts, groundCv, numberedNames } from './cvChecks';
 import { planForPrompt, type ImprovePlan } from './improvePlan';
+import type { ProfileNews } from '../../cv/profileNews';
 
 const SYSTEM = (lang: 'pl' | 'en') => `Jesteś doświadczonym rekruterem i ekspertem od CV przechodzących przez systemy ATS oraz automatyczną ocenę AI. Piszesz CV kandydata (student/junior) dopasowane do konkretnego ogłoszenia.
 
@@ -77,6 +78,31 @@ export async function improveCv(
     ctx,
   });
   // Liczby z punktów, które kandydat już zaakceptował, są potwierdzone.
+  return groundCv(content, profile, { lang, confirmed: factTexts(current), names: numberedNames(posting) });
+}
+
+const SYNC_EXTRA = () => `
+AKTUALIZACJA Z PROFILU:
+Dostajesz obecne CV i NOWE W PROFILU: informacje, które kandydat dodał po napisaniu tej wersji (rozmowa z doradcą kariery, odpowiedzi na pytania, edycja profilu, projekty z GitHuba).
+- Dodaj do CV to z NOWEGO W PROFILU, co jest trafne dla ogłoszenia: nowe doświadczenie, projekty i szkoły jako pozycje ("sourceId" = id z profilu), fakty ("facts") jako punkty pozycji, której dotyczą, albo w podsumowaniu, a umiejętności, certyfikaty i języki do ich sekcji. Fakt o pracy, stażu albo wolontariacie, którego nie ma w "experience" profilu, możesz pokazać jako pozycję doświadczenia z "sourceId" = id tego faktu.
+- To, co nietrafne dla tego ogłoszenia, pomiń.
+- Pozostałą treść CV zostaw bez zmian. Skróć ją tylko wtedy, gdy inaczej CV nie zmieści się na jednej stronie (najpierw najmniej trafne punkty).
+- Nie dopisuj niczego spoza profilu. Zachowaj język CV. Zwróć CAŁE CV.
+- "notes" ${forUser()}: krótko, co dodano z profilu, a co pominięto i dlaczego.`;
+
+/** Nowe rzeczy z profilu (od powstania tej wersji) wpisane w obecne CV. */
+export async function syncCv(profile: Profile, posting: JobPosting, current: CvContent, news: ProfileNews, ctx: LlmContext): Promise<CvContent> {
+  const lang = current.language;
+  const content = await callJson({
+    schema: checkedImproveSchema(profile, lang, current, posting.keywords),
+    schemaName: 'cv',
+    tier: 'main',
+    temperature: 0.3,
+    maxTokens: 10_000,
+    system: SYSTEM(lang) + SYNC_EXTRA(),
+    user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nOBECNE CV:\n${json(current)}\n\nNOWE W PROFILU:\n${json(news)}\n\nZwróć CV uzupełnione o trafne nowości z profilu.`,
+    ctx,
+  });
   return groundCv(content, profile, { lang, confirmed: factTexts(current), names: numberedNames(posting) });
 }
 

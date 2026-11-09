@@ -194,4 +194,5 @@ export const EN: Record<string, string> = {
   'nowe doświadczenie „{name}”': 'new experience "{name}"',
   'nowy projekt „{name}”': 'new project "{name}"',
   'nowa szkoła „{name}”': 'new school "{name}"',
+  'To CV ma już wszystko z profilu: od tej wersji nic nie doszło.': 'This CV already has everything from your profile: nothing has been added since this version.',
 };

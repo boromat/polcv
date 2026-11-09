@@ -218,8 +218,10 @@ export const CvVersionSchema = z.object({
   version: z.number(),
   createdAt: z.string(),
   updatedAt: z.string(),
-  origin: z.enum(['generated', 'improved']),
+  origin: z.enum(['generated', 'improved', 'synced']),
   content: CvContentSchema,
+  /** Elementy profilu z chwili powstania wersji (starsze wersje ich nie mają): po nich widać, co doszło. */
+  profileIds: z.array(z.string()).optional(),
   decisions: z.record(z.string(), z.enum(['accepted', 'rejected'])),
   template: z.enum(TemplateIds),
   photo: z.boolean(),
@@ -395,7 +397,8 @@ export type Settings = z.infer<typeof SettingsSchema>;
 export type UsageEntry = z.infer<typeof UsageEntrySchema>;
 
 /** Wpis historii z dołączonym kosztem i wynikiem - zwracany przez /api/applications. */
-export type ApplicationSummary = Application & { costUsd: number; score: number | null; scoreIncomplete: boolean };
+/** `profileNews`: ile rzeczy doszło do profilu od bieżącej wersji CV (0, gdy nic albo CV jeszcze nie ma). */
+export type ApplicationSummary = Application & { costUsd: number; score: number | null; scoreIncomplete: boolean; profileNews: number };
 
 /** Wynik "Popraw automatycznie" - zwracany przez /improve. */
 export interface ImproveResult {
@@ -447,6 +450,21 @@ export const CareerTurnSchema = z.object({
   done: z.boolean(),
   prefs: CareerPrefsSchema,
   newFacts: z.array(z.object({ topic: z.string(), answer: z.string() })),
+  /** Praca, staż czy wolontariat z ostatniej wiadomości: trafiają do sekcji Doświadczenie profilu. */
+  newExperience: z
+    .array(
+      z.object({
+        kind: ExperienceSchema.shape.kind,
+        role: z.string(),
+        company: z.string(),
+        location: z.string(),
+        start: z.string().describe('RRRR-MM albo RRRR, pusty jeśli nie wiadomo'),
+        end: z.string().describe('RRRR-MM albo RRRR, pusty jeśli trwa albo nie wiadomo'),
+        current: z.boolean(),
+        achievements: z.array(z.string()),
+      }),
+    )
+    .default([]),
   summary: z.string(),
 });
 

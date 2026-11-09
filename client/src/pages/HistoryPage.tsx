@@ -13,6 +13,8 @@ export function HistoryPage() {
   const [apps, setApps] = useState<ApplicationSummary[] | null>(null);
   const [filter, setFilter] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState<string | null>(null);
 
   const load = () => current && api.applications(current.id).then(setApps).catch((e) => setError(e.message));
   useEffect(() => {
@@ -34,6 +36,25 @@ export function HistoryPage() {
     if (!confirm(t('Usunąć aplikację „{title}” z historii?', { title: a.posting?.title ?? '' }))) return;
     await api.deleteApplication(current.id, a.id).catch((e) => setError(e.message));
     load();
+  };
+
+  const syncProfile = async (a: ApplicationSummary) => {
+    setSyncing(a.id);
+    setError(null);
+    setNotice(null);
+    try {
+      const res = await api.syncProfile(current.id, a.id);
+      setNotice(
+        res.version
+          ? t('„{title}”: nowa wersja CV {v} z rzeczami z profilu.', { title: a.posting?.title ?? '', v: res.version }) + (res.message ? `\n${res.message}` : '')
+          : res.message,
+      );
+      await load();
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setSyncing(null);
+    }
   };
 
   // Wiersz otwiera się kliknięciem myszą; z klawiatury i środkowym przyciskiem działa link w tytule.
@@ -65,6 +86,14 @@ export function HistoryPage() {
         </Link>
       </div>
       <ErrorBox error={error} onClose={() => setError(null)} />
+      {notice && (
+        <div className="callout good row between">
+          <span style={{ whiteSpace: 'pre-line' }}>{notice}</span>
+          <button className="icon-btn" onClick={() => setNotice(null)} aria-label={t('Zamknij')}>
+            ✕
+          </button>
+        </div>
+      )}
       {apps && apps.length === 0 && (
         <div className="card empty">
           <h2>{t('Jeszcze nic tu nie ma')}</h2>
@@ -138,6 +167,11 @@ export function HistoryPage() {
                       </td>
                       <td className="nowrap faint">{usd(a.costUsd)}</td>
                       <td onClick={(e) => e.stopPropagation()} className="nowrap">
+                        {a.profileNews > 0 && (
+                          <button className="btn sm" onClick={() => syncProfile(a)} disabled={syncing !== null} title={t('Dopisz do CV to, co doszło do profilu od tej wersji')}>
+                            {syncing === a.id ? t('Synchronizuję…') : t('Synchronizuj z profilem ({n})', { n: a.profileNews })}
+                          </button>
+                        )}
                         {a.pdfFile && (
                           <a className="btn ghost sm" href={api.downloadUrl(current.id, a.id)}>
                             PDF
