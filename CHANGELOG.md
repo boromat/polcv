@@ -25,6 +25,12 @@ All notable changes to PolCV are recorded here. The format follows
   forms ("wykonywałeś", "wykonywałaś", "wykonywałoś"), and interview answers and cover letters use
   them in the first person. Profiles without a choice keep the neutral wording. Before, gap questions
   often needed several AI calls because the model kept writing gendered forms.
+- **Updates from Settings.** When a newer PolCV release is on GitHub, Settings show it with an
+  *Update PolCV* button for copies made with `git clone` (it runs `git pull`, `npm install` and the
+  build, then asks you to start PolCV again) and a link to the releases page otherwise. The release
+  is checked through GitHub's public API at most once an hour.
+- **Install the spaCy model** for polanon with one button in Settings (`polanon[ner]` and the Polish
+  `pl_core_news_md` model, about 50 MB), after a confirmation that shows the commands.
 
 ### Fixed
 

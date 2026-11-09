@@ -64,6 +64,15 @@ export interface PolanonStatus {
   updateAvailable?: boolean;
 }
 
+/** Wersja PolCV i najnowsze wydanie na GitHubie; canSelfUpdate = kopia z git clone (aktualizacja przyciskiem). */
+export interface UpdateStatus {
+  current: string;
+  latest: string | null;
+  updateAvailable: boolean;
+  canSelfUpdate: boolean;
+  releasesUrl: string;
+}
+
 export interface ModelInfo {
   id: string;
   name: string;
@@ -109,6 +118,9 @@ export const api = {
   checkKey: (apiKey?: string) => req<{ ok: boolean; message: string }>('POST', '/settings/check-key', { apiKey }),
   polanonStatus: () => req<PolanonStatus>('GET', '/settings/polanon'),
   installPolanon: () => req<{ ok: boolean; output: string; status: PolanonStatus }>('POST', '/settings/polanon/install'),
+  installNer: () => req<{ ok: boolean; output: string; status: PolanonStatus }>('POST', '/settings/polanon/ner'),
+  updateStatus: () => req<UpdateStatus>('GET', '/settings/update'),
+  updatePolcv: () => req<{ ok: boolean; output: string; version: string }>('POST', '/settings/update'),
   models: () => req<ModelInfo[]>('GET', '/models'),
   usage: () => req<UsageView>('GET', '/usage'),
 

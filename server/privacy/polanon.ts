@@ -176,6 +176,24 @@ export async function polanonUpdate(installed: string | null): Promise<{ latest:
   return { latest, updateAvailable: !!(latest && installed && isNewer(latest, installed)) };
 }
 
+/**
+ * Model spaCy dla polanonu (rozpoznawanie miejsc i rzadszych nazw): `pip install "polanon[ner]"` i polski model
+ * `pl_core_news_md` w znalezionym Pythonie. Pobranie modelu trwa kilka minut.
+ */
+export async function installNer(settings: Settings): Promise<{ ok: boolean; output: string; status: PolanonStatus }> {
+  const found = await findPython(settings.pythonPath);
+  if (!found.python) return { ok: false, output: found.error, status: await polanonStatus(settings) };
+  let output = '';
+  for (const args of [['-m', 'pip', 'install', '--upgrade', 'polanon[ner]'], ['-m', 'spacy', 'download', 'pl_core_news_md']]) {
+    const r = await run(found.cmd, args, 900_000);
+    output += `> ${found.command} ${args.join(' ')}\n${r.stdout}\n${r.stderr}\n`;
+    if (r.code !== 0) break;
+  }
+  stopBridge();
+  const status = await polanonStatus(settings);
+  return { ok: status.spacy && status.model, output: output.trim().slice(-1500), status };
+}
+
 /** `pip install --upgrade polanon` w znalezionym Pythonie (pip sam wybiera instalację dla użytkownika, gdy trzeba). */
 export async function installPolanon(settings: Settings): Promise<{ ok: boolean; output: string; status: PolanonStatus }> {
   const found = await findPython(settings.pythonPath);

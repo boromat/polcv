@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { api, type ModelInfo, type PolanonStatus, type SettingsPatch, type SettingsView, type UsageView } from '../api';
+import { api, type ModelInfo, type PolanonStatus, type SettingsPatch, type SettingsView, type UpdateStatus, type UsageView } from '../api';
 import { useApp } from '../ctx';
 import { ErrorBox, Field, usd } from '../components/ui';
 import { useT } from '../i18n';
@@ -92,6 +92,22 @@ function PrivacyCard({ settings, onSave }: { settings: SettingsView; onSave: (p:
     }
   };
 
+  const installNer = async () => {
+    const commands = [`${status?.command} -m pip install --upgrade "polanon[ner]"`, `${status?.command} -m spacy download pl_core_news_md`].join('\n');
+    if (!confirm(t('Zainstalować model spaCy dla polanonu? To ok. 50 MB i kilka minut.') + '\n\n' + t('Program uruchomi: {command}', { command: commands }))) return;
+    setInstalling(true);
+    setInstallLog(null);
+    try {
+      const r = await api.installNer();
+      setInstallLog(r);
+      setStatus(r.status);
+    } catch (e: any) {
+      setInstallLog({ ok: false, output: e.message });
+    } finally {
+      setInstalling(false);
+    }
+  };
+
   const savePath = async () => {
     if (pythonPath.trim() === settings.pythonPath) return;
     await onSave({ pythonPath });
@@ -165,10 +181,15 @@ function PrivacyCard({ settings, onSave }: { settings: SettingsView; onSave: (p:
             {t('Rozpoznawaj też miejsca i inne nazwy (model spaCy, dokładniej, ale wolniej)')}
           </label>
           {!(status.spacy && status.model) && (
-            <p className="faint small">
-              {t('Model spaCy instalujesz sam:')} <code>{cmd} -m pip install "polanon[ner]"</code>
-              {t(', potem')} <code>{cmd} -m spacy download pl_core_news_md</code>.
-            </p>
+            <div className="stack" style={{ gap: 6 }}>
+              <button className="btn sm" style={{ alignSelf: 'flex-start' }} onClick={installNer} disabled={installing}>
+                {installing ? t('Instaluję… (kilka minut)') : t('Zainstaluj model spaCy')}
+              </button>
+              <p className="faint small">
+                {t('Albo sam:')} <code>{cmd} -m pip install "polanon[ner]"</code>
+                {t(', potem')} <code>{cmd} -m spacy download pl_core_news_md</code>.
+              </p>
+            </div>
           )}
           <p className="faint small">
             {t('To pseudonimizacja, a nie pełna anonimizacja - nie każdy szczegół da się wykryć (np. nazwa uczelni bez modelu spaCy zostaje czytelna).')}
@@ -186,6 +207,58 @@ function PrivacyCard({ settings, onSave }: { settings: SettingsView; onSave: (p:
           <input value={pythonPath} onChange={(e) => setPythonPath(e.target.value)} onBlur={savePath} placeholder={t('np. {path} (puste = wykryj automatycznie)', { path: 'C:\\Python312\\python.exe' })} style={{ flex: 1, minWidth: 220 }} />
         </div>
       </details>
+    </div>
+  );
+}
+
+/** Nowa wersja PolCV: przy kopii z git clone aktualizacja przyciskiem, inaczej link do strony wydań. */
+function UpdateCard() {
+  const { t } = useT();
+  const [status, setStatus] = useState<UpdateStatus | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [log, setLog] = useState<{ ok: boolean; output: string; version: string } | null>(null);
+  useEffect(() => {
+    api.updateStatus().then(setStatus).catch(() => {});
+  }, []);
+  if (!status?.updateAvailable && !log) return null;
+
+  const update = async () => {
+    if (!confirm(t('Zaktualizować PolCV do wersji {version}? Program pobierze zmiany (git pull), zainstaluje zależności i zbuduje interfejs. Twoje dane zostają bez zmian.', { version: status?.latest ?? '' }))) return;
+    setBusy(true);
+    try {
+      setLog(await api.updatePolcv());
+    } catch (e: any) {
+      setLog({ ok: false, output: e.message, version: status?.current ?? '' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="card stack">
+      <div className="row between">
+        <h2>{t('Nowa wersja PolCV')}</h2>
+        {status?.latest && <span className="badge warn">{t('dostępna {version}', { version: status.latest })}</span>}
+      </div>
+      {log ? (
+        <div className={`callout small ${log.ok ? 'good' : 'error'}`}>
+          {log.ok ? t('Gotowe: PolCV {version}. Zamknij czarne okno PolCV i uruchom start.bat ponownie, żeby nowa wersja zadziałała.', { version: log.version }) : <pre className="pre" style={{ margin: 0 }}>{log.output}</pre>}
+        </div>
+      ) : status?.canSelfUpdate ? (
+        <button className="btn sm primary" style={{ alignSelf: 'flex-start' }} onClick={update} disabled={busy}>
+          {busy ? t('Aktualizuję… (kilka minut)') : t('Zaktualizuj PolCV do {version}', { version: status.latest ?? '' })}
+        </button>
+      ) : (
+        <p className="small">
+          {t('Ta kopia nie pochodzi z git clone, więc pobierz nową wersję ze strony wydań i zastąp nią folder programu (bez folderu data).')}{' '}
+          <a href={status?.releasesUrl} target="_blank" rel="noreferrer">
+            {t('Strona wydań')} ↗
+          </a>
+        </p>
+      )}
+      <a className="small" href="https://github.com/boromat/polcv/blob/main/CHANGELOG.md" target="_blank" rel="noreferrer">
+        {t('Co nowego')} ↗
+      </a>
     </div>
   );
 }
@@ -320,6 +393,7 @@ export function SettingsPage() {
           )}
         </div>
       </div>
+      <UpdateCard />
       <p className="faint small" style={{ marginTop: 18, textAlign: 'center' }}>
         PolCV {__APP_VERSION__} ·{' '}
         <a href="https://github.com/boromat/polcv/blob/main/CHANGELOG.md" target="_blank" rel="noreferrer">

@@ -3,7 +3,8 @@ import * as store from '../storage/store';
 import { HttpError } from '../storage/store';
 import { checkKey, listModels } from '../llm/openrouter';
 import { activeSearchers } from '../jobs/search';
-import { checkPythonPath, installPolanon, polanonStatus, polanonUpdate, type PolanonStatus } from '../privacy/polanon';
+import { checkPythonPath, installNer, installPolanon, polanonStatus, polanonUpdate, type PolanonStatus } from '../privacy/polanon';
+import { polcvUpdateStatus, updatePolcv } from '../update';
 import type { Settings } from '../../shared/schemas';
 import { tr } from '../i18n';
 
@@ -45,6 +46,19 @@ const withUpdate = async (s: PolanonStatus) => ({ ...s, ...(await polanonUpdate(
 
 settingsRouter.get('/settings/polanon', async (_req, res) => {
   res.json(await withUpdate(await polanonStatus(await store.getSettings())));
+});
+
+settingsRouter.post('/settings/polanon/ner', async (_req, res) => {
+  const r = await installNer(await store.getSettings());
+  res.json({ ...r, status: await withUpdate(r.status) });
+});
+
+settingsRouter.get('/settings/update', async (_req, res) => {
+  res.json(await polcvUpdateStatus());
+});
+
+settingsRouter.post('/settings/update', async (_req, res) => {
+  res.json(await updatePolcv());
 });
 
 settingsRouter.post('/settings/polanon/install', async (_req, res) => {
