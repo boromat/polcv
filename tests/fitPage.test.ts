@@ -97,11 +97,20 @@ describe('CV na jedną stronę', () => {
     expect((await store.getVersion(pid, aid, long.version)).content.summary.text).toContain('ZA-DŁUGIE');
   });
 
-  it('"Synchronizuj z profilem": nowa praca z profilu idzie do AI, wynik to nowa, bieżąca wersja "z profilu"', async () => {
-    const { pid, aid } = await setup();
+  /** CV z ręczną poprawką kandydata w podsumowaniu (podsumowanie nie przechodzi do profilu). */
+  async function editedCv(pid: string, aid: string, summary = 'Studiuję marketing i sama poprawiłam to podsumowanie.') {
     replies = [JSON.stringify(fixtures.cv.content)];
     const first = await svc.generate(pid, aid);
+    await store.saveVersion(pid, aid, { ...first, content: { ...first.content, summary: { ...first.content.summary, text: summary } } });
+    sent.length = 0;
+    return first;
+  }
+
+  it('"Synchronizuj z profilem": nowa praca z profilu idzie do AI, reszta CV zostaje z poprawkami kandydata', async () => {
+    const { pid, aid } = await setup();
+    const first = await editedCv(pid, aid);
     expect(first.profileIds?.length).toBeGreaterThan(0);
+    expect(first.profileEntries?.experience.map((e) => e.id)).toEqual(['exp1']);
     expect(await svc.syncWithProfile(pid, aid)).toEqual({ version: null, message: 'To CV ma już wszystko z profilu: od tej wersji nic nie doszło.' });
 
     await store.updateProfile(pid, (p) => {
@@ -110,17 +119,56 @@ describe('CV na jedną stronę', () => {
         description: '', achievements: ['Szablony dokumentów z AI'],
       });
     });
-    sent.length = 0;
-    replies = [JSON.stringify({ ...fixtures.cv.content, notes: 'Dodano pracę w Przykładowej Firmie.' })];
+    const current = await store.getVersion(pid, aid, first.version);
+    const job = { sourceId: 'exp-new', role: 'Specjalista ds. dokumentacji', company: 'Przykładowa Firma', location: '', dates: '08.2025 – obecnie', bullets: [{ id: 'n1', text: 'Tworzenie szablonów dokumentów z AI', status: 'fact', reason: '', fallbackText: '', sourceIds: ['exp-new'] }] };
+    // AI przy okazji przepisuje podsumowanie: to ma nie przejść.
+    replies = [JSON.stringify({ ...current.content, summary: { ...current.content.summary, text: 'Studiuję marketing i pracuję z dokumentacją.' }, experience: [job, ...current.content.experience], notes: 'Dodano pracę w Przykładowej Firmie.' })];
     const res = await svc.syncWithProfile(pid, aid);
     expect(sent).toHaveLength(1);
     const user: string = sent[0].messages[1].content;
     expect(user.slice(user.indexOf('NOWE W PROFILU'))).toContain('Przykładowa Firma');
-    expect(res).toEqual({ version: first.version + 1, message: 'Dodano pracę w Przykładowej Firmie.' });
+    expect(res.version).toBe(first.version + 1);
+    expect(res.message).toContain('Dodano pracę w Przykładowej Firmie.');
     const synced = await store.getVersion(pid, aid, res.version!);
     expect(synced.origin).toBe('synced');
+    expect(synced.content.summary.text).toBe('Studiuję marketing i sama poprawiłam to podsumowanie.');
+    expect(synced.content.experience.map((e) => e.sourceId)).toEqual(['exp-new', 'exp1']);
     expect(synced.profileIds?.some((s) => s.startsWith('exp-new#'))).toBe(true);
+    expect(synced.profileEntries?.experience.map((e) => e.id)).toEqual(['exp1', 'exp-new']);
     expect((await store.getApplication(pid, aid)).currentVersion).toBe(res.version);
+  });
+
+  it('"Synchronizuj z profilem": zmienione stanowisko wchodzi bez AI, a za długiego CV nic samo nie skraca', async () => {
+    const { pid, aid } = await setup();
+    const first = await editedCv(pid, aid, 'Studiuję marketing i sama poprawiłam to podsumowanie. ZA-DŁUGIE');
+    await store.updateProfile(pid, (p) => {
+      p.experience[0].role = 'Specjalistka ds. marketingu';
+    });
+    const res = await svc.syncWithProfile(pid, aid);
+    expect(sent).toHaveLength(0);
+    expect(res.version).toBe(first.version + 1);
+    expect(res.message).toContain('Poprawione według profilu: Specjalistka ds. marketingu.');
+    expect(res.message).toContain('Skróć do 1 strony');
+    const synced = await store.getVersion(pid, aid, res.version!);
+    expect(synced.content.experience[0].role).toBe('Specjalistka ds. marketingu');
+    expect(synced.content.experience[0].bullets.map((b) => b.text)).toEqual(first.content.experience[0].bullets.map((b) => b.text));
+    expect(synced.content.summary.text).toContain('sama poprawiłam');
+    expect(await svc.profileNewsCount(await store.getProfile(pid), await store.getApplication(pid, aid))).toBe(0);
+  });
+
+  it('"Synchronizuj z profilem": gdy nic z nowości nie pasuje, nie ma nowej wersji, a licznik się zeruje', async () => {
+    const { pid, aid } = await setup();
+    const first = await editedCv(pid, aid);
+    await store.updateProfile(pid, (p) => {
+      p.skills.push({ id: 's9', name: 'Spawanie MIG', category: 'inne', level: '' });
+    });
+    const current = await store.getVersion(pid, aid, first.version);
+    replies = [JSON.stringify({ ...current.content, notes: 'Spawanie nie pasuje do tego ogłoszenia.' })];
+    const res = await svc.syncWithProfile(pid, aid);
+    expect(sent).toHaveLength(1);
+    expect(res).toEqual({ version: null, message: 'Spawanie nie pasuje do tego ogłoszenia.' });
+    expect((await store.listVersions(pid, aid)).map((v) => v.version)).toEqual([first.version]);
+    expect(await svc.profileNewsCount(await store.getProfile(pid), await store.getApplication(pid, aid))).toBe(0);
   });
 
   it('polecenie dla AI: idzie do modelu dosłownie, wynik to nowa, bieżąca wersja; puste polecenie jest odrzucane', async () => {

@@ -197,4 +197,8 @@ export const EN: Record<string, string> = {
   'To CV ma już wszystko z profilu: od tej wersji nic nie doszło.': 'This CV already has everything from your profile: nothing has been added since this version.',
   'Ta kopia PolCV nie pochodzi z git clone, więc nie zaktualizuje się sama. Pobierz nową wersję ze strony {url}.': 'This copy of PolCV did not come from git clone, so it cannot update itself. Download the new version from {url}.',
   'Napisz, co AI ma zmienić w CV.': 'Write what the AI should change in the CV.',
+  'Nowości z profilu nie pasują do tego ogłoszenia, więc CV zostaje bez zmian.': 'The new things in your profile do not fit this posting, so the CV stays as it is.',
+  'Poprawione według profilu: {items}.': 'Updated from your profile: {items}.',
+  'Reszta CV została bez zmian, z Twoimi poprawkami.': 'The rest of the CV is unchanged, with your own edits.',
+  'CV nie mieści się już na jednej stronie: usuń coś w edytorze albo kliknij „Skróć do 1 strony”.': 'The CV no longer fits on one page: remove something in the editor or click "Shorten to 1 page".',
 };

@@ -9,7 +9,8 @@ import { fetchPosting } from './jobs/fetchPosting';
 import { parsePosting } from './llm/prompts/parsePosting';
 import { gapQuestions } from './llm/prompts/gapQuestions';
 import { generateCv, improveCv, instructCv, shortenCv, syncCv } from './llm/prompts/generateCv';
-import { newsCount, profileIdsOf, profileNews, refreshSnapshot } from './cv/profileNews';
+import { newsCount, profileEntriesOf, profileIdsOf, profileNews, refreshEntries, refreshSnapshot } from './cv/profileNews';
+import { applyProfileFields, entryUpdates, mergeSync, needsAi, syncRequest } from './cv/syncMerge';
 import { evaluateCv } from './llm/prompts/evaluateCv';
 import { courseAdvice, coverLetter, interviewPrep } from './llm/prompts/extras';
 import { applyDecisions } from './llm/prompts/common';
@@ -197,6 +198,7 @@ export async function generate(profileId: string, appId: string, language?: 'pl'
     photoReason: photo.reason,
     rodo,
     profileIds: profileIdsOf(profile),
+    profileEntries: profileEntriesOf(profile),
   };
   const content = await fitToPage(profile, app, draft, confirmed);
   // Numer: kolejny po najwyższej istniejącej wersji (użytkownik mógł wrócić do starszej).
@@ -228,6 +230,7 @@ export async function updateVersion(
     // To, co przeszło z CV do profilu, CV już ma: nie może potem wrócić przy synchronizacji jako zmiana w profilu.
     if (profileUpdates.length && next.profileIds) {
       next.profileIds = refreshSnapshot(next.profileIds, profile, next.content);
+      next.profileEntries = refreshEntries(next.profileEntries, profile, next.content);
       await store.saveVersion(profileId, appId, next);
     }
   }
@@ -266,8 +269,10 @@ export async function profileNewsCount(profile: Profile, app: Application): Prom
 }
 
 /**
- * "Synchronizuj z profilem": AI wpisuje w CV to, co doszło do profilu od powstania bieżącej wersji (np. z rozmowy
- * z doradcą). Wynik to nowa, bieżąca wersja; poprzednia zostaje na liście. Bez nowości AI nie jest wywoływane.
+ * "Synchronizuj z profilem": to, co doszło do profilu od powstania bieżącej wersji (np. z rozmowy z doradcą), trafia do CV
+ * bez ruszania ręcznych poprawek kandydata. Zmienione nazwy, firmy i daty pozycji z CV wpisujemy wprost z profilu,
+ * AI pisze tylko nowe pozycje i punkty, a CV dłuższego niż strona nie skracamy samodzielnie. Wynik to nowa, bieżąca
+ * wersja; poprzednia zostaje na liście. Gdy z nowości nic do CV nie pasuje, nowej wersji nie ma, a licznik się zeruje.
  */
 export async function syncWithProfile(profileId: string, appId: string): Promise<{ version: number | null; message: string }> {
   const app = await store.getApplication(profileId, appId);
@@ -276,9 +281,24 @@ export async function syncWithProfile(profileId: string, appId: string): Promise
   const news = profileNews(profile, current);
   if (!newsCount(news)) return { version: null, message: tr('To CV ma już wszystko z profilu: od tej wersji nic nie doszło.') };
   const base = applyDecisions(current);
-  const synced = withFreshIds(await syncCv(profile, app.posting, base, news, ctxOf(app, 'aktualizacja z profilu')));
-  synced.language = base.language;
-  const content = await fitToPage(profile, app, { ...current, content: synced, decisions: {} }, factTexts(base));
+  const updates = entryUpdates(news, current);
+  const fields = applyProfileFields(base, profile, news, updates, base.language === profileLanguage(profile));
+  const request = syncRequest(news, fields.content, updates, fields.aiHeaders);
+  let content = fields.content;
+  let notes = '';
+  if (needsAi(request)) {
+    const ai = await syncCv(profile, app.posting, fields.content, request, ctxOf(app, 'aktualizacja z profilu'));
+    content = mergeSync(fields.content, ai, request, () => `t${nanoid(8)}`);
+    notes = ai.notes.trim();
+  }
+  const snapshot = { profileIds: profileIdsOf(profile), profileEntries: profileEntriesOf(profile) };
+  const withoutNotes = (c: CvContent) => JSON.stringify({ ...c, notes: '' });
+  if (withoutNotes(content) === withoutNotes(base)) {
+    // Bez nowej wersji, ale te nowości już nie wrócą jako "do synchronizacji".
+    await store.saveVersion(profileId, appId, { ...current, ...snapshot });
+    return { version: null, message: notes || tr('Nowości z profilu nie pasują do tego ogłoszenia, więc CV zostaje bez zmian.') };
+  }
+  const { pages } = await htmlToPdf(await renderCv(profile, { ...current, content, decisions: {} }, 'pdf'));
   const t = nowIso();
   const cv = await store.addVersion(profileId, appId, (version) => ({
     ...current,
@@ -288,12 +308,18 @@ export async function syncWithProfile(profileId: string, appId: string): Promise
     origin: 'synced',
     content,
     decisions: {},
-    profileIds: profileIdsOf(profile),
+    ...snapshot,
   }));
   await store.updateApplication(profileId, appId, (a) => {
     a.currentVersion = cv.version;
   });
-  return { version: cv.version, message: content.notes };
+  const message = [
+    fields.touched.length ? tr('Poprawione według profilu: {items}.', { items: fields.touched.join(', ') }) : '',
+    notes,
+    tr('Reszta CV została bez zmian, z Twoimi poprawkami.'),
+    pages > 1 ? tr('CV nie mieści się już na jednej stronie: usuń coś w edytorze albo kliknij „Skróć do 1 strony”.') : '',
+  ];
+  return { version: cv.version, message: message.filter(Boolean).join('\n') };
 }
 
 /**

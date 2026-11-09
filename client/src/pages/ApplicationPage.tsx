@@ -165,7 +165,7 @@ export function ApplicationPage() {
   };
 
   const regenerate = () => {
-    if (!confirm(t('Napisać CV od nowa? Obecna wersja zostanie zachowana na liście wersji.'))) return;
+    if (!confirm(t('Napisać CV od nowa? AI napisze całe CV jeszcze raz, więc ręczne poprawki z obecnej wersji do niego nie przejdą (ta wersja zostanie na liście wersji). Nowe rzeczy z profilu z zachowaniem poprawek dopisuje „Synchronizuj z profilem”.'))) return;
     run(t('Piszę CV od nowa…'), async (step) => {
       const cv = await api.generate(pid, aid, { template: vd?.cv.template });
       await evaluateAndReload(cv.version, step);
@@ -230,7 +230,7 @@ export function ApplicationPage() {
         await loadVersion(d.application.currentVersion);
         setNotice(res.version ? [t('Nowa wersja {v} z rzeczami z profilu. Poprzednia zostaje na liście wersji.', { v: res.version }), res.message].filter(Boolean).join('\n') : res.message);
       },
-      t('AI dopisze to, co doszło do profilu od tej wersji (np. z rozmowy z doradcą), jeśli pasuje do ogłoszenia. To zwykle kilkanaście sekund.'),
+      t('Twoje poprawki w CV zostają. Zmienione nazwy i daty PolCV przepisze z profilu, a AI dopisze tylko nowe rzeczy (np. z rozmowy z doradcą), jeśli pasują do ogłoszenia. Z AI to zwykle kilkanaście sekund.'),
     );
 
   const shorten = () =>

@@ -228,6 +228,10 @@ export const CvVersionSchema = z.object({
   content: CvContentSchema,
   /** Elementy profilu z chwili powstania wersji (starsze wersje ich nie mają): po nich widać, co doszło. */
   profileIds: z.array(z.string()).optional(),
+  /** Pozycje profilu z chwili powstania wersji: po nich widać, co w pozycji z CV się zmieniło (nazwa, daty, nowe osiągnięcia). */
+  profileEntries: z
+    .object({ experience: z.array(ExperienceSchema), projects: z.array(ProjectSchema), education: z.array(EducationSchema) })
+    .optional(),
   decisions: z.record(z.string(), z.enum(['accepted', 'rejected'])),
   template: z.enum(TemplateIds),
   photo: z.boolean(),

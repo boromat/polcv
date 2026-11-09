@@ -9,7 +9,8 @@ export const application: Record<string, string> = {
   'Piszę CV pod to ogłoszenie…': 'Writing the CV for this job posting…',
   'Wybieram z profilu to, co pasuje, i piszę językiem ogłoszenia. To zwykle 30–60 sekund.':
     'Picking what fits from your profile and writing in the language of the job posting. This usually takes 30-60 seconds.',
-  'Napisać CV od nowa? Obecna wersja zostanie zachowana na liście wersji.': 'Rewrite the CV from scratch? The current version will stay in the version list.',
+  'Napisać CV od nowa? AI napisze całe CV jeszcze raz, więc ręczne poprawki z obecnej wersji do niego nie przejdą (ta wersja zostanie na liście wersji). Nowe rzeczy z profilu z zachowaniem poprawek dopisuje „Synchronizuj z profilem”.':
+    'Rewrite the CV from scratch? The AI writes the whole CV again, so your own edits in the current version do not carry over (this version stays in the version list). To add new things from your profile and keep your edits, use "Sync with profile".',
   'Piszę CV od nowa…': 'Rewriting the CV from scratch…',
   'Poprawiam CV na podstawie raportu…': 'Improving the CV based on the report…',
   'Nowa wersja CV: wynik {from} → {to}.': 'New CV version: score {from} → {to}.',
@@ -299,7 +300,8 @@ export const application: Record<string, string> = {
   'Usuń szkołę z CV': 'Remove school from CV',
   'Dopisuję do CV nowe rzeczy z profilu…': 'Adding new things from your profile to the CV…',
   'Nowa wersja {v} z rzeczami z profilu. Poprzednia zostaje na liście wersji.': 'New version {v} with things from your profile. The previous one stays in the version list.',
-  'AI dopisze to, co doszło do profilu od tej wersji (np. z rozmowy z doradcą), jeśli pasuje do ogłoszenia. To zwykle kilkanaście sekund.': 'The AI adds what has been added to your profile since this version (for example from the career advisor chat) if it fits the posting. This usually takes 10-20 seconds.',
+  'Twoje poprawki w CV zostają. Zmienione nazwy i daty PolCV przepisze z profilu, a AI dopisze tylko nowe rzeczy (np. z rozmowy z doradcą), jeśli pasują do ogłoszenia. Z AI to zwykle kilkanaście sekund.':
+    'Your edits in the CV stay. PolCV copies changed names and dates from your profile, and the AI only adds new things (for example from the career advisor chat) if they fit the posting. With the AI this usually takes 10-20 seconds.',
   'z profilu': 'from profile',
   'Dopisz do CV to, co doszło do profilu od tej wersji': 'Add to the CV what has been added to your profile since this version',
   'Od tej wersji w profilu nie doszło nic nowego': 'Nothing new has been added to your profile since this version',
@@ -308,7 +310,8 @@ export const application: Record<string, string> = {
   '„{title}”: nowa wersja CV {v} z rzeczami z profilu.': '"{title}": new CV version {v} with things from your profile.',
   'Synchronizuję…': 'Syncing…',
   'Synchronizuj ({n})': 'Sync ({n})',
-  'Wygenerować CV „{title}” od nowa? Powstanie nowa wersja, a poprzednie zostaną na liście wersji.': 'Write the CV "{title}" again? A new version is created and the previous ones stay in the version list.',
+  'Wygenerować CV „{title}” od nowa? AI napisze całe CV jeszcze raz, więc ręczne poprawki do niego nie przejdą. Poprzednie wersje zostaną na liście wersji.':
+    'Write the CV "{title}" again? The AI writes the whole CV again, so your own edits do not carry over. The previous versions stay in the version list.',
   '„{title}”: nowa wersja CV {v}.': '"{title}": new CV version {v}.',
   'Pracuję…': 'Working…',
   'Napisz to CV od nowa z obecnego profilu': 'Write this CV again from your current profile',

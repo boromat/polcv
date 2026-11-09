@@ -39,7 +39,7 @@ export function HistoryPage() {
   };
 
   const regenerate = async (a: ApplicationSummary) => {
-    if (!confirm(t('Wygenerować CV „{title}” od nowa? Powstanie nowa wersja, a poprzednie zostaną na liście wersji.', { title: a.posting?.title ?? '' }))) return;
+    if (!confirm(t('Wygenerować CV „{title}” od nowa? AI napisze całe CV jeszcze raz, więc ręczne poprawki do niego nie przejdą. Poprzednie wersje zostaną na liście wersji.',{ title: a.posting?.title ?? '' }))) return;
     setSyncing(a.id);
     setError(null);
     setNotice(null);

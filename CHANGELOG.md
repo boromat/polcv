@@ -17,10 +17,16 @@ All notable changes to PolCV are recorded here. The format follows
 - **Sync with profile.** Each CV version remembers what your profile held when it was made. In
   *History* and next to the version picker, *Sync with profile (n)* shows how many things have been
   added or changed since (from the career advisor chat, gap answers, profile edits or GitHub) and
-  asks the AI to work the relevant ones into a new version, kept to one page: new items are added,
-  changed ones are updated in place. The previous version stays in the list. Corrections made in
-  the CV editor itself do not come back as changes. When there is nothing to sync, *History*
-  offers *Generate again* instead, after a confirmation.
+  brings them into a new version without touching your own edits in the CV. A changed role,
+  company, school, place or date of an entry the CV already has is copied straight from the
+  profile, without the AI. The AI writes only what is new (entries, points from new achievements
+  or facts, skills, certificates, languages), and only those new parts are taken from its answer:
+  your summary, points and order stay word for word, and points you removed do not come back.
+  A CV that grows past one page is not shortened on its own; you get a note and can remove
+  something or use *Shorten to 1 page*. When nothing new fits the posting, no version is added and
+  the counter goes back to zero. The previous version stays in the list. Corrections made in the
+  CV editor itself do not come back as changes. When there is nothing to sync, *History* offers
+  *Generate again* instead, after a confirmation that says your own edits do not carry over.
 - **Instruction for the AI.** At the bottom of the CV editor you can tell the AI what to change, for
   example "add my vocational placement and scouting from my profile". It does only that, using only
   facts from your profile, does not bring back what you removed on purpose, keeps the CV to one page
@@ -58,6 +64,9 @@ All notable changes to PolCV are recorded here. The format follows
 - Shortening a CV to one page could silently drop a school (for example a technical secondary school
   with a vocational title). Every school in the profile now stays in the CV, with fewer details if
   space is short, and a CV that misses one goes back to the model for a fix.
+- *Improve automatically*, *Shorten to 1 page* and the instruction for the AI no longer make the AI
+  rewrite text you wrote yourself: the style checks (first person in the summary, noun forms in
+  points) apply only to what the AI writes anew, so your own wording passes as it is.
 - An answer to a long gap question that lists several tools ("Make, n8n, Zapier or Power Automate")
   no longer confirms all of them: *Improve automatically* and the skill check count only what the
   answer itself says. A short topic, such as a keyword confirmed with *I have this*, still counts.

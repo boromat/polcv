@@ -27,6 +27,12 @@ function usedIds(c: CvContent): Set<string> {
   ]);
 }
 
+export type ProfileEntries = NonNullable<CvVersion['profileEntries']>;
+
+/** Kopia pozycji profilu (doświadczenie, projekty, szkoły) do zapamiętania w wersji CV. */
+export const profileEntriesOf = (p: Profile): ProfileEntries =>
+  structuredClone({ experience: p.experience, projects: p.projects, education: p.education });
+
 /**
  * Po poprawce w edytorze CV (która przeszła do profilu) elementy profilu używane przez CV mają już stan z tego CV,
  * więc nie mogą wrócić przy synchronizacji jako "zmienione".
@@ -37,6 +43,22 @@ export function refreshSnapshot(snapshot: string[] | undefined, profile: Profile
   const used = usedIds(cv);
   for (const x of itemsOf(profile)) if (used.has(x.id)) map.set(x.id, itemHash(x));
   return [...map].map(([id, h]) => (h ? `${id}#${h}` : id));
+}
+
+/** To samo dla kopii pozycji: pozycje używane przez CV dostają stan z profilu po poprawce. */
+export function refreshEntries(entries: ProfileEntries | undefined, profile: Profile, cv: CvContent): ProfileEntries | undefined {
+  if (!entries) return undefined;
+  const used = usedIds(cv);
+  const fresh = profileEntriesOf(profile);
+  const merge = <T extends { id: string }>(old: T[], now: T[]): T[] => [
+    ...old.map((x) => (used.has(x.id) ? (now.find((n) => n.id === x.id) ?? x) : x)),
+    ...now.filter((n) => used.has(n.id) && !old.some((x) => x.id === n.id)),
+  ];
+  return {
+    experience: merge(entries.experience, fresh.experience),
+    projects: merge(entries.projects, fresh.projects),
+    education: merge(entries.education, fresh.education),
+  };
 }
 
 /** To, co doszło do profilu albo się w nim zmieniło od powstania wersji CV. */

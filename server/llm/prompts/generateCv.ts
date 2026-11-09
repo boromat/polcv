@@ -3,7 +3,7 @@ import { callJson, type LlmContext } from '../openrouter';
 import { json, postingForPrompt, profileForPrompt, today, writingRules, forUser, genderForms } from './common';
 import { checkedCvSchema, checkedImproveSchema, factTexts, groundCv, numberedNames } from './cvChecks';
 import { planForPrompt, type ImprovePlan } from './improvePlan';
-import type { ProfileNews } from '../../cv/profileNews';
+import type { SyncRequest } from '../../cv/syncMerge';
 
 const SYSTEM = (lang: 'pl' | 'en', forms: ReturnType<typeof genderForms>) => `Jesteś doświadczonym rekruterem i ekspertem od CV przechodzących przez systemy ATS oraz automatyczną ocenę AI. Piszesz CV kandydata (student/junior) dopasowane do konkretnego ogłoszenia.
 
@@ -83,19 +83,20 @@ export async function improveCv(
 
 const SYNC_EXTRA = () => `
 AKTUALIZACJA Z PROFILU:
-Dostajesz obecne CV i NOWE W PROFILU: informacje, które kandydat dodał po napisaniu tej wersji (rozmowa z doradcą kariery, odpowiedzi na pytania, edycja profilu, projekty z GitHuba).
-- Dodaj do CV to z NOWEGO W PROFILU, co jest trafne dla ogłoszenia: nowe doświadczenie, projekty i szkoły jako pozycje ("sourceId" = id z profilu), fakty ("facts") jako punkty pozycji, której dotyczą, albo w podsumowaniu, a umiejętności, certyfikaty i języki do ich sekcji. Fakt o pracy, stażu albo wolontariacie, którego nie ma w "experience" profilu, możesz pokazać jako pozycję doświadczenia z "sourceId" = id tego faktu.
-- Elementy, których id jest w "changed", już były w profilu (często też w CV), ale kandydat je poprawił: jeśli są w CV, popraw ich wpis według nowej wersji (nazwa, daty, nowe punkty) i nie dodawaj ich drugi raz; jeśli ich nie ma, potraktuj je jak nowe.
-- To, co nietrafne dla tego ogłoszenia, pomiń.
-- Pozostałą treść CV zostaw bez zmian. Skróć ją tylko wtedy, gdy inaczej CV nie zmieści się na jednej stronie (najpierw najmniej trafne punkty).
+Kandydat poprawił to CV ręcznie. Dostajesz je jako OBECNE CV oraz NOWE W PROFILU: tylko to, co doszło do profilu po napisaniu tej wersji (rozmowa z doradcą kariery, odpowiedzi na pytania, edycja profilu, projekty z GitHuba).
+- Niczego, co już jest w CV, nie zmieniaj ani nie usuwaj: tytułu, podsumowania, pozycji, punktów (zostaw ich "id" i tekst) ani kolejności. Kandydat mógł coś usunąć celowo: nie przywracaj tego.
+- Dodaj z NOWEGO W PROFILU to, co jest trafne dla ogłoszenia: nowe doświadczenie, projekty i szkoły jako pozycje ("sourceId" = id z profilu), fakty ("facts") jako nowe punkty pozycji, której dotyczą (z id faktu w "sourceIds"), a umiejętności, certyfikaty i języki do ich sekcji. Fakt o pracy, stażu albo wolontariacie, którego nie ma w "experience" profilu, możesz pokazać jako pozycję doświadczenia z "sourceId" = id tego faktu.
+- "updates" to pozycje, które już są w CV, a kandydat uzupełnił je w profilu: dopisz do nich nowe punkty tylko z "newPoints" (nietrafne pomiń), a gdy "header" = true, popraw nagłówek pozycji (stanowisko, firma, szkoła, kierunek) według profilu, w języku CV.
+- To, co nietrafne dla tego ogłoszenia, pomiń. Nie skracaj CV: o tym, co usunąć, zdecyduje kandydat.
 - Nie dopisuj niczego spoza profilu. Zachowaj język CV. Zwróć CAŁE CV.
 - "notes" ${forUser()}: krótko, co dodano z profilu, a co pominięto i dlaczego.`;
 
-/** Nowe rzeczy z profilu (od powstania tej wersji) wpisane w obecne CV. */
-export async function syncCv(profile: Profile, posting: JobPosting, current: CvContent, news: ProfileNews, ctx: LlmContext): Promise<CvContent> {
+/** Nowe rzeczy z profilu (od powstania tej wersji) dopisane do obecnego CV; reszta CV ma zostać bez zmian. */
+export async function syncCv(profile: Profile, posting: JobPosting, current: CvContent, news: SyncRequest, ctx: LlmContext): Promise<CvContent> {
   const lang = current.language;
   const content = await callJson({
-    schema: checkedImproveSchema(profile, lang, current, posting.keywords),
+    // Szkoły, którą kandydat sam usunął z CV, synchronizacja nie przywraca.
+    schema: checkedImproveSchema(profile, lang, current, posting.keywords, false),
     schemaName: 'cv',
     tier: 'main',
     temperature: 0.3,

@@ -69,10 +69,17 @@ const bulletsOf = (c: CvContent) => [
  * Punkty po polsku w 1. osobie, punkty po angielsku od "I" i podsumowanie po polsku w 3. osobie albo w czasie przeszłym
  * z rodzajem (wszędzie także w wersji bezpiecznej, bo po odrzuceniu sugestii trafia do CV).
  */
-export function styleIssues(c: CvContent, lang: Lang): CvIssue[] {
+/** Teksty obecnej wersji CV: kandydat mógł je napisać sam, więc przy poprawce zostają takie, jakie są. */
+export function currentTexts(c: CvContent): Set<string> {
+  return new Set([c.summary, ...bulletsOf(c).map((x) => x.b)].flatMap((t) => [t.text, t.fallbackText]).filter((t) => t.trim()));
+}
+
+/** `keep`: teksty, które zostają bez zmian z obecnej wersji (np. napisane przez kandydata) - ich styl nie wraca do poprawki. */
+export function styleIssues(c: CvContent, lang: Lang, keep: Set<string> = new Set()): CvIssue[] {
   const out: CvIssue[] = [];
   if (lang === 'pl') {
     for (const field of ['text', 'fallbackText'] as const) {
+      if (keep.has(c.summary[field])) continue;
       const { thirdPerson, gendered, nominal } = summaryPersonIssues(c.summary[field]);
       if (thirdPerson.length) {
         out.push({
@@ -97,7 +104,7 @@ export function styleIssues(c: CvContent, lang: Lang): CvIssue[] {
   for (const { b, path } of bulletsOf(c)) {
     for (const field of ['text', 'fallbackText'] as const) {
       const t = b[field];
-      if (!t.trim()) continue;
+      if (!t.trim() || keep.has(t)) continue;
       if (lang === 'pl') {
         const verb = firstPersonVerb(t);
         if (verb) {
@@ -174,9 +181,10 @@ export function lostKeywordIssues(next: CvContent, current: CvContent, keywords:
 /** Schemat poprawionego CV: jak checkedCvSchema, a do tego nie wolno zgubić słów kluczowych obecnej wersji. */
 /** `keepSchools`: false przy poleceniu kandydata - szkoły, którą sam usunął z CV, nie przywracamy na siłę. */
 export function checkedImproveSchema(profile: Profile, lang: Lang, current: CvContent, keywords: Keyword[], keepSchools = true) {
+  const keep = currentTexts(current);
   return CvContentSchema.superRefine((c, ctx) => {
     const schools = keepSchools ? educationIssues(c, profile) : [];
-    for (const issue of [...styleIssues(c, lang), ...sourceIssues(c, profile), ...schools, ...lostKeywordIssues(c, current, keywords)]) {
+    for (const issue of [...styleIssues(c, lang, keep), ...sourceIssues(c, profile), ...schools, ...lostKeywordIssues(c, current, keywords)]) {
       ctx.addIssue({ code: 'custom', ...issue });
     }
   });
