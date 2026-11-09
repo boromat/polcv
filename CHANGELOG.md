@@ -33,6 +33,8 @@ All notable changes to PolCV are recorded here. The format follows
   the portal marks these offers as *manual worker*. That level is now included for every seniority.
 - The career advisor no longer leaves remote work on for someone looking for local or manual work,
   which filled the results with unrelated remote offers.
+- An entry added with *+ experience*, *+ project* or *+ school* and left empty no longer leaves an
+  empty block in the preview, the PDF or the score.
 
 ## [1.1.0] - 2026-11-08
 

@@ -60,6 +60,15 @@ describe('PDF w obie strony (render → PDF → tekst jak w ATS)', () => {
     expect(fmt.score).toBe(fmt.max - 3);
   });
 
+  it('pusty wpis dodany w edytorze (bez stanowiska, firmy i punktów) nie zostawia w CV pustego bloku', () => {
+    const content = structuredClone(cv.content);
+    content.experience.push({ sourceId: 'cv-pusty', role: '', company: '', location: '', dates: '', bullets: [{ id: 'x', text: ' ', status: 'fact', reason: '', fallbackText: '', sourceIds: [] }] });
+    content.education.push({ sourceId: 'cv-szkola', school: '', degree: '', field: '', dates: '', details: '' });
+    const html = renderCvHtml({ ...cv, content }, profile, null, 'pdf');
+    const plain = renderCvHtml(cv, profile, null, 'pdf');
+    expect(html.match(/class="entry"/g)?.length).toBe(plain.match(/class="entry"/g)?.length);
+  });
+
   it('podgląd podświetla oczekujące sugestie, PDF nie', () => {
     expect(renderCvHtml(cv, profile, null, 'preview')).toContain('<mark class="suggested" data-id="b2">');
     expect(renderCvHtml(cv, profile, null, 'pdf')).not.toContain('<mark');

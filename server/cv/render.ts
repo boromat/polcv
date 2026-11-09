@@ -324,8 +324,16 @@ export function photoDataUri(profileDir: string, photo: string): string | null {
 
 const ALL_SECTIONS: SectionKey[] = ['summary', 'experience', 'projects', 'education', 'skills', 'certificates', 'languages', 'interests'];
 
+/** Wpis dodany w edytorze przyciskiem "+" i niewypełniony nie może zostawić w CV pustego bloku. */
+const filledEntries = (c: CvContent): CvContent => ({
+  ...c,
+  experience: c.experience.filter((e) => e.role.trim() || e.company.trim() || e.bullets.some((b) => b.text.trim())),
+  projects: c.projects.filter((p) => p.name.trim() || p.bullets.some((b) => b.text.trim())),
+  education: c.education.filter((e) => e.school.trim() || e.degree.trim() || e.field.trim()),
+});
+
 export function renderCvHtml(cv: CvVersion, profile: Profile, photo: string | null, mode: RenderMode): string {
-  const c = cv.content;
+  const c = filledEntries(cv.content);
   // Sekcje spoza sectionOrder (np. dodane ręcznie) dokładamy na końcu, żeby nic nie zginęło.
   const order = [...new Set([...c.sectionOrder, ...ALL_SECTIONS])];
   const body = [
