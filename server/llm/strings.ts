@@ -14,14 +14,21 @@ export function replaceStrings<T>(value: T, next: Iterator<string>): T {
   return value;
 }
 
+/** Długa pauza (—) i półpauza (–) jako zwykły myślnik: "a — b" → "a - b", "2–3" → "2-3", "a – b" → "a - b". */
+export const plainDashText = (t: string) =>
+  t
+    .replace(/[ \t]*—[ \t]*/g, ' - ')
+    .replace(/(?<=\S)–(?=\S)/g, '-')
+    .replace(/[ \t]*–[ \t]*/g, ' - ');
+
 /**
- * Długi myślnik (—) to dziś typowy ślad tekstu pisanego przez AI, a rekruterzy zaczęli go zauważać.
- * W tekstach od modelu zamieniamy go na zwykły myślnik, którego ludzie faktycznie używają.
+ * Długa pauza (—) i półpauza (–) to dziś typowe ślady tekstu pisanego przez AI, a rekruterzy zaczęli je zauważać.
+ * W tekstach od modelu zamieniamy je na zwykły myślnik, którego ludzie faktycznie używają.
  */
 export function plainDashes<T>(value: T): T {
   const texts: string[] = [];
   collectStrings(value, texts);
-  return replaceStrings(value, texts.map((t) => t.replace(/[ \t]*—[ \t]*/g, ' - '))[Symbol.iterator]());
+  return replaceStrings(value, texts.map(plainDashText)[Symbol.iterator]());
 }
 
 /** Zamykający znak bez pary w tekście - resztka składni JSON ("…i efekty.}"). */

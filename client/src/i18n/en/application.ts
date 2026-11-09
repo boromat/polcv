@@ -7,7 +7,7 @@ export const application: Record<string, string> = {
   'Tworzę PDF, odczytuję go jak system ATS i daję do oceny AI.': 'Creating the PDF, reading it the way an ATS does and passing it to the AI for scoring.',
   'Zapisuję odpowiedzi w profilu…': 'Saving your answers to the profile…',
   'Piszę CV pod to ogłoszenie…': 'Writing the CV for this job posting…',
-  'Wybieram z profilu to, co pasuje, i piszę językiem ogłoszenia. To zwykle 30–60 sekund.':
+  'Wybieram z profilu to, co pasuje, i piszę językiem ogłoszenia. To zwykle 30-60 sekund.':
     'Picking what fits from your profile and writing in the language of the job posting. This usually takes 30-60 seconds.',
   'Napisać CV od nowa? AI napisze całe CV jeszcze raz, więc ręczne poprawki z obecnej wersji do niego nie przejdą (ta wersja zostanie na liście wersji). Nowe rzeczy z profilu z zachowaniem poprawek dopisuje „Synchronizuj z profilem”.':
     'Rewrite the CV from scratch? The AI writes the whole CV again, so your own edits in the current version do not carry over (this version stays in the version list). To add new things from your profile and keep your edits, use "Sync with profile".',
@@ -22,7 +22,7 @@ export const application: Record<string, string> = {
   'Nowa wersja nie wypadła lepiej - zostawiam poprzednią. Możesz ją podejrzeć w wyborze wersji.':
     'The new version did not score better, so the previous one stays current. You can still view it in the version picker.',
   'Żeby podnieść wynik bardziej, możesz dopisać w profilu:': 'To raise the score further, you can add this to your profile:',
-  'AI poprawia CV według raportu, a potem program ocenia nową wersję i zostawia lepszą. To zwykle 1–2 minuty.':
+  'AI poprawia CV według raportu, a potem program ocenia nową wersję i zostawia lepszą. To zwykle 1-2 minuty.':
     'The AI improves the CV based on the report, then the app scores the new version and keeps the better one. This usually takes 1-2 minutes.',
   'Oceniam CV…': 'Scoring the CV…',
   'Zapisuję PDF…': 'Saving the PDF…',
@@ -116,8 +116,8 @@ export const application: Record<string, string> = {
   'Usuń grupę': 'Remove group',
   '+ grupa umiejętności': '+ skill group',
   'Języki, certyfikaty, zainteresowania': 'Languages, certificates, interests',
-  'Języki (np. Angielski – B2, po przecinku)': 'Languages (e.g. English – B2, comma-separated)',
-  'Certyfikaty i kursy (jeden w linii: nazwa – wystawca – data)': 'Certificates and courses (one per line: name – issuer – date)',
+  'Języki (np. Angielski - B2, po przecinku)': 'Languages (e.g. English - B2, comma-separated)',
+  'Certyfikaty i kursy (jeden w linii: nazwa - wystawca - data)': 'Certificates and courses (one per line: name - issuer - date)',
   'Zainteresowania (po przecinku)': 'Interests (comma-separated)',
 
   // GapStep
@@ -247,7 +247,7 @@ export const application: Record<string, string> = {
   'dlaczego chcesz pracować właśnie w tej firmie': 'why you want to work at this particular company',
   i: 'and',
   'dlaczego pasujesz do stanowiska': 'why you are a good fit for the role',
-  ', podając 2–3 konkretne przykłady. Część ogłoszeń go wymaga, w innych pomaga się wyróżnić.':
+  ', podając 2-3 konkretne przykłady. Część ogłoszeń go wymaga, w innych pomaga się wyróżnić.':
     ', giving 2-3 specific examples. Some job postings require one; for others it helps you stand out.',
   'To ogłoszenie wymaga listu motywacyjnego.': 'This job posting requires a cover letter.',
   'Napisz list motywacyjny': 'Write the cover letter',

@@ -326,7 +326,7 @@ export function ReportView({
               <h3>{t('Słabe strony')}</h3>
               <ul className="check-list" style={{ marginTop: 10 }}>
                 {review.weaknesses.map((s, i) => (
-                  <li key={i}><span className="ic bad-ic">–</span>{s}</li>
+                  <li key={i}><span className="ic bad-ic">-</span>{s}</li>
                 ))}
               </ul>
             </div>

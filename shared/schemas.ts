@@ -486,7 +486,7 @@ export const RoleProposalSchema = z.object({
   why: z.string(),
   gaps: z.array(z.string()),
   howToClose: z.string(),
-  keywords: z.array(z.string()).describe('3–4 krótkie frazy do wyszukiwarki ofert'),
+  keywords: z.array(z.string()).describe('3-4 krótkie frazy do wyszukiwarki ofert'),
 });
 
 export const CareerProposalsSchema = z.object({ intro: z.string(), roles: z.array(RoleProposalSchema) });

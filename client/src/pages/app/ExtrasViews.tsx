@@ -366,7 +366,7 @@ export function LetterView({ pid, app, run }: { pid: string; app: Application; r
         <p style={{ maxWidth: 560 }}>
           {t('To krótki list (do 1 strony) wysyłany razem z CV: piszesz w nim,')} <b>{t('dlaczego chcesz pracować właśnie w tej firmie')}</b> {t('i')}{' '}
           <b>{t('dlaczego pasujesz do stanowiska')}</b>
-          {t(', podając 2–3 konkretne przykłady. Część ogłoszeń go wymaga, w innych pomaga się wyróżnić.')}
+          {t(', podając 2-3 konkretne przykłady. Część ogłoszeń go wymaga, w innych pomaga się wyróżnić.')}
         </p>
         {app.posting?.coverLetterRequired && <div className="callout warn">{t('To ogłoszenie wymaga listu motywacyjnego.')}</div>}
         <button className="btn primary lg" onClick={make}>

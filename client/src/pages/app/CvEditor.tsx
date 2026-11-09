@@ -313,9 +313,9 @@ export function CvEditor({
       </Section>
 
       <Section title={t('Języki, certyfikaty, zainteresowania')} defaultOpen={false}>
-        <Field label={t('Języki (np. Angielski – B2, po przecinku)')}>
+        <Field label={t('Języki (np. Angielski - B2, po przecinku)')}>
           <LazyText
-            value={c.languages.map((l) => (l.level ? `${l.name} – ${l.level}` : l.name)).join(', ')}
+            value={c.languages.map((l) => (l.level ? `${l.name} - ${l.level}` : l.name)).join(', ')}
             onCommit={(v) =>
               setC({
                 languages: v.split(',').map((s) => s.trim()).filter(Boolean).map((s) => {
@@ -326,15 +326,16 @@ export function CvEditor({
             }
           />
         </Field>
-        <Field label={t('Certyfikaty i kursy (jeden w linii: nazwa – wystawca – data)')}>
+        <Field label={t('Certyfikaty i kursy (jeden w linii: nazwa - wystawca - data)')}>
           <LazyText
             multiline
             rows={3}
-            value={c.certificates.map((x) => [x.name, x.issuer, x.date].filter(Boolean).join(' – ')).join('\n')}
+            value={c.certificates.map((x) => [x.name, x.issuer, x.date].filter(Boolean).join(' - ')).join('\n')}
             onCommit={(v) =>
               setC({
                 certificates: v.split('\n').map((s) => s.trim()).filter(Boolean).map((s) => {
-                  const [name, issuer = '', date = ''] = s.split(/\s+–\s+/);
+                  // Myślnik ze spacjami po obu stronach; półpauza ze starszych wersji też się liczy.
+                  const [name, issuer = '', date = ''] = s.split(/\s+[-–]\s+/);
                   return { name, issuer, date };
                 }),
               })

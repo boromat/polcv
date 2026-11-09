@@ -5,7 +5,7 @@
 [![CI](https://github.com/boromat/polcv/actions/workflows/ci.yml/badge.svg)](https://github.com/boromat/polcv/actions/workflows/ci.yml)
 [![Licencja: MIT](https://img.shields.io/badge/licencja-MIT-blue.svg)](LICENSE)
 
-**CV pod konkretne ogłoszenie - zrobione dla polskiego rynku pracy.** Otwarty program na Twój komputer dla studentów i juniorów: z linku do ogłoszenia robi CV pisane pod systemy ATS i ocenę AI-rekrutera. Program jest darmowy; płacisz tylko za użycie AI (zwykle 20–60 gr za CV).
+**CV pod konkretne ogłoszenie - zrobione dla polskiego rynku pracy.** Otwarty program na Twój komputer dla studentów i juniorów: z linku do ogłoszenia robi CV pisane pod systemy ATS i ocenę AI-rekrutera. Program jest darmowy; płacisz tylko za użycie AI (zwykle 20-60 gr za CV).
 
 ![PolCV: wklejenie ogłoszenia, pytania o braki w profilu, CV z podglądem na żywo i raport ATS z polską odmianą słów kluczowych](docs/demo.gif)
 
@@ -26,7 +26,7 @@ Jak to działa:
 2. AI wyciąga z niego wymagania i słowa kluczowe, których szukają systemy ATS,
 3. dopytuje o rzeczy, których brakuje w Twoim profilu (odpowiedzi zapamiętuje),
 4. pisze CV pod to ogłoszenie - bez zmyślania; odważniejsze sformułowania zaznacza na żółto do Twojej decyzji,
-5. ocenia CV jak system ATS i AI-rekruter (wynik 0–100) i umie je automatycznie poprawić,
+5. ocenia CV jak system ATS i AI-rekruter (wynik 0-100) i umie je automatycznie poprawić,
 6. zapisuje PDF i historię aplikacji ze statusami; na życzenie przygotowuje do rozmowy i pisze list motywacyjny,
 7. na życzenie dopisuje do profilu Twoje projekty z GitHuba - tylko publiczne repozytoria i tylko to, co wynika z ich opisów i plików README.
 
@@ -45,13 +45,13 @@ Wszystkie dane zostają na Twoim komputerze, w folderze `data`. Do AI (przez Ope
 OpenRouter to jedno konto, przez które program korzysta z modeli AI (np. Claude). Płacisz tylko za to, czego użyjesz.
 
 1. Wejdź na <https://openrouter.ai> i załóż konto.
-2. W zakładce **Credits** doładuj konto (np. 5–10 $).
+2. W zakładce **Credits** doładuj konto (np. 5-10 $).
 3. W zakładce **Keys** kliknij **Create Key** i skopiuj klucz (zaczyna się od `sk-or-`).
 4. W programie wejdź w **Ustawienia**, wklej klucz i kliknij **Sprawdź i zapisz**.
 
 ### Ile to kosztuje
 
-Przy domyślnych modelach (Claude Sonnet do pisania i oceny, Claude Haiku do analizy) jedno CV z oceną to zwykle **ok. 0,05–0,15 $** (20–60 gr). Automatyczna poprawka, przygotowanie do rozmowy i list motywacyjny kosztują podobnie. W **Ustawieniach** widać dokładne wydatki i można wybrać tańsze lub mocniejsze modele.
+Przy domyślnych modelach (Claude Sonnet do pisania i oceny, Claude Haiku do analizy) jedno CV z oceną to zwykle **ok. 0,05-0,15 $** (20-60 gr). Automatyczna poprawka, przygotowanie do rozmowy i list motywacyjny kosztują podobnie. W **Ustawieniach** widać dokładne wydatki i można wybrać tańsze lub mocniejsze modele.
 
 ## Jak używać
 
@@ -73,10 +73,10 @@ Zakładka **Szukaj pracy**:
 
 1. **Rozmowa** - doradca AI zadaje pytania po kolei: jakiej pracy szukasz, co konkretnie było Twoim zadaniem (dopytuje o szczegóły), gdzie i na jakich warunkach chcesz pracować. Rozmowa jest zapamiętywana - możesz wrócić później. Konkretne informacje o doświadczeniu trafiają do profilu (kolejne CV je wykorzystają).
 2. **Czego szukasz** - panel z preferencjami, który doradca wypełnia w trakcie rozmowy; możesz go zmienić ręcznie:
-   - praca **stacjonarna/hybrydowa** w promieniu (10–100 km) od wybranego miasta,
+   - praca **stacjonarna/hybrydowa** w promieniu (10-100 km) od wybranego miasta,
    - praca **zdalna** z całej Polski,
    - minimalne wynagrodzenie, forma umowy, wymiar etatu, poziom (staż/junior/mid).
-3. **Propozycje i oferty** - AI proponuje 5–8 stanowisk z uzasadnieniem i tym, czego brakuje. Przy każdym są linki **Otwórz wyszukiwanie: pracuj.pl · justjoin.it · nofluffjobs** z frazą, miastem, promieniem i poziomem - otwierasz je sam w przeglądarce, a ciekawą ofertę wklejasz w **Nowe CV**.
+3. **Propozycje i oferty** - AI proponuje 5-8 stanowisk z uzasadnieniem i tym, czego brakuje. Przy każdym są linki **Otwórz wyszukiwanie: pracuj.pl · justjoin.it · nofluffjobs** z frazą, miastem, promieniem i poziomem - otwierasz je sam w przeglądarce, a ciekawą ofertę wklejasz w **Nowe CV**.
 
 Pod nazwą firmy (przy ofertach, w Historii i w aplikacji) jest link **opinie na GoWork**, który otwiera wyszukiwanie opinii o pracodawcy na GoWork.pl. Program niczego z GoWork nie pobiera.
 
@@ -126,7 +126,7 @@ Kopia zapasowa = skopiowanie folderu `data`.
 ## Zastrzeżenia
 
 - PolCV nie jest powiązany z pracuj.pl, justjoin.it, nofluffjobs, GoWork, OpenRouter ani dostawcami modeli AI - ich nazwy służą tylko do opisu, z czym program współpracuje.
-- Za treść CV wysyłanego pracodawcy odpowiadasz Ty. Program oznacza sugestie AI, ale decyzja należy do Ciebie. Wynik 0–100 to symulacja typowych reguł ATS i opinia AI, nie gwarancja.
+- Za treść CV wysyłanego pracodawcy odpowiadasz Ty. Program oznacza sugestie AI, ale decyzja należy do Ciebie. Wynik 0-100 to symulacja typowych reguł ATS i opinia AI, nie gwarancja.
 - Cudze CV importuj tylko za zgodą tej osoby.
 - Program jest udostępniany „tak jak jest”, bez gwarancji (licencja MIT).
 

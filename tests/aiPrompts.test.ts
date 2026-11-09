@@ -62,7 +62,7 @@ const posting: JobPosting = {
 
 const bullet = (text: string) => ({ id: 'b1', text, status: 'fact' as const, reason: '', fallbackText: '', sourceIds: ['exp1'] });
 
-const content = (bullets: string[], dates = '01.2020 – 12.2025'): CvContent => ({
+const content = (bullets: string[], dates = '01.2020 - 12.2025'): CvContent => ({
   language: 'pl',
   headline: 'Młodszy specjalista ds. marketingu',
   summary: { id: 's1', text: 'Studiuję marketing.', status: 'fact', reason: '', fallbackText: '', sourceIds: [] },
@@ -144,8 +144,8 @@ describe('pisanie i poprawa CV', () => {
     expect(lastUserMessage(1)).toContain('1. osobie („Przygotowywałem”)');
     // Druga nieudana próba idzie od zera, więc trzecia nie ma treści poprawki - ważne, że w końcu przeszła.
     expect(sent).toHaveLength(3);
-    expect(cv.experience[0]).toMatchObject({ company: 'Firma Testowa Sp. z o.o.', dates: '07.2025 – 09.2025' });
-    expect(cv.education[0].dates).toBe('10.2023 – obecnie');
+    expect(cv.experience[0]).toMatchObject({ company: 'Firma Testowa Sp. z o.o.', dates: '07.2025 - 09.2025' });
+    expect(cv.education[0].dates).toBe('10.2023 - obecnie');
     expect(cv.experience[0].bullets.map((b) => b.status)).toEqual(['fact', 'suggested']);
     expect(cv.experience[0].bullets[1]).toMatchObject({ reason: 'Liczba spoza profilu (40) - potwierdź albo odrzuć.', fallbackText: 'Obsługa zgłoszeń dziennie' });
     expect(sent[0].messages[0].content).toContain('ZAWSZE formą rzeczownikową');

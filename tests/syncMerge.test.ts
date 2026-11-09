@@ -41,7 +41,7 @@ describe('synchronizacja z profilem bez gubienia ręcznych poprawek', () => {
     expect(needsAi(request)).toBe(false);
     const e = fields.content.experience[0];
     expect(e.role).toBe('Specjalistka ds. marketingu');
-    expect(e.dates).toBe('07.2025 – 12.2025');
+    expect(e.dates).toBe('07.2025 - 12.2025');
     expect(e.bullets).toEqual(cv.content.experience[0].bullets);
     expect(fields.content.summary.text).toBe('Moje własne podsumowanie, poprawione ręcznie.');
     expect(fields.touched).toEqual(['Specjalistka ds. marketingu']);
@@ -101,7 +101,7 @@ describe('synchronizacja z profilem bez gubienia ręcznych poprawek', () => {
 
     const ai = structuredClone(fields.content);
     ai.experience = [
-      { sourceId: 'exp2', role: 'Asystentka ds. social media', company: 'Nowa Firma', location: 'Kraków', dates: '10.2025 – obecnie', bullets: [text('y1', 'Tworzenie postów na Instagramie', ['exp2'])] },
+      { sourceId: 'exp2', role: 'Asystentka ds. social media', company: 'Nowa Firma', location: 'Kraków', dates: '10.2025 - obecnie', bullets: [text('y1', 'Tworzenie postów na Instagramie', ['exp2'])] },
       { sourceId: 'exp-fake', role: 'Wymyślona', company: 'Nie ma', location: '', dates: '', bullets: [] },
     ];
     ai.education = [];
@@ -152,7 +152,7 @@ describe('synchronizacja z profilem bez gubienia ręcznych poprawek', () => {
 
     const { fields, request } = plan(after, cv, false);
     expect(fields.content.experience[0].role).toBe('Marketing Intern');
-    expect(fields.content.experience[0].dates).toBe('07/2025 – 12/2025');
+    expect(fields.content.experience[0].dates).toBe('07/2025 - 12/2025');
     expect(request.updates).toEqual([{ id: 'exp1', header: true, newPoints: [] }]);
 
     const ai = structuredClone(fields.content);

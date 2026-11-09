@@ -205,13 +205,13 @@ export function cvDate(value: string, lang: Lang): string | null {
   return Number(month) >= 1 && Number(month) <= 12 ? `${month.padStart(2, '0')}${sep}${year}` : null;
 }
 
-/** Zakres jak w promptcie: "MM.RRRR – MM.RRRR" / "MM.RRRR – obecnie" (po angielsku "MM/YYYY – present"); null = zostaje zapis modelu. */
+/** Zakres jak w promptcie: "MM.RRRR - MM.RRRR" / "MM.RRRR - obecnie" (po angielsku "MM/YYYY - present"); null = zostaje zapis modelu. */
 export function cvDateRange(start: string, end: string, current: boolean, lang: Lang): string | null {
   const s = cvDate(start, lang);
   const e = current ? (lang === 'pl' ? 'obecnie' : 'present') : cvDate(end, lang);
   if (s === null || e === null) return null;
   if (!s) return current ? '' : e;
-  return e ? `${s} – ${e}` : s;
+  return e ? `${s} - ${e}` : s;
 }
 
 // ---------- Liczby spoza profilu ----------

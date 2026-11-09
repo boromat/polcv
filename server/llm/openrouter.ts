@@ -31,7 +31,7 @@ export interface CallOptions<T> {
 
 const DASH_NOTE = `
 
-W tekstach nie używaj długiego myślnika (—). Zamiast niego wstaw przecinek, dwukropek, nawias albo zwykły myślnik (-).`;
+W tekstach nie używaj długiej pauzy (—) ani półpauzy (–). Zamiast nich wstaw przecinek, dwukropek, nawias albo zwykły myślnik (-), także w zakresach dat i liczb (np. "03.2024 - 06.2025", "2-3").`;
 
 /** Klucz z profilu ma pierwszeństwo przed globalnym (żeby kolega płacił za swoje). */
 async function resolveKey(profileId: string): Promise<string> {

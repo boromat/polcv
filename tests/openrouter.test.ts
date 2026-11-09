@@ -98,15 +98,15 @@ describe('klient OpenRouter', () => {
     expect(usage.at(-1)).toMatchObject({ task: 'test', model: 'test/model', cost: 0.0123 });
   });
 
-  it('długi myślnik od modelu zamienia na zwykły, ale tekst przepisywany dosłownie zostawia', async () => {
-    replies = [ok('{"name":"Raporty w Power BI — co tydzień","score":1}')];
-    expect(await call()).toEqual({ name: 'Raporty w Power BI - co tydzień', score: 1 });
-    expect(sent[0].messages[0].content).toContain('nie używaj długiego myślnika');
+  it('długą pauzę i półpauzę od modelu zamienia na zwykły myślnik, ale tekst przepisywany dosłownie zostawia', async () => {
+    replies = [ok('{"name":"Raporty w Power BI — co tydzień, 03.2024 – 06.2025, 2–3 razy","score":1}')];
+    expect(await call()).toEqual({ name: 'Raporty w Power BI - co tydzień, 03.2024 - 06.2025, 2-3 razy', score: 1 });
+    expect(sent[0].messages[0].content).toContain('nie używaj długiej pauzy (—) ani półpauzy (–)');
 
     const { callJson } = await import('../server/llm/openrouter');
     replies = [ok('{"name":"Klauzula — dosłownie z ogłoszenia","score":1}')];
     const verbatim = await callJson({ schema: Schema, schemaName: 'test', system: 's', user: 'u', tier: 'fast', verbatim: true, ctx: { profileId: '', task: 'test' } });
     expect(verbatim.name).toBe('Klauzula — dosłownie z ogłoszenia');
-    expect(sent[1].messages[0].content).not.toContain('długiego myślnika');
+    expect(sent[1].messages[0].content).not.toContain('półpauzy');
   });
 });

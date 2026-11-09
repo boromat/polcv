@@ -647,7 +647,7 @@ export function ProfilePage() {
           render={(x, s) => (
             <div className="grid2">
               <Field label={t('Język')}><input type="text" value={x.name} onChange={(e) => s({ name: e.target.value })} /></Field>
-              <Field label={t('Poziom (A1–C2)')}><input type="text" value={x.level} onChange={(e) => s({ level: e.target.value })} placeholder="B2" /></Field>
+              <Field label={t('Poziom (A1-C2)')}><input type="text" value={x.level} onChange={(e) => s({ level: e.target.value })} placeholder="B2" /></Field>
             </div>
           )}
         />

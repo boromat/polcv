@@ -87,7 +87,7 @@ describe('odpowiedzi na pytania o braki', () => {
   it('scala kopie zapisane przez starszą wersję (losowe id, to samo źródło i temat)', async () => {
     const posting = fixtures.posting;
     const params = { title: posting.title, company: posting.company };
-    const source = (lang: 'pl' | 'en') => withLang(lang, () => tr('Odpowiedź przy aplikacji: {title} – {company}', params).trim());
+    const source = (lang: 'pl' | 'en') => withLang(lang, () => tr('Odpowiedź przy aplikacji: {title} - {company}', params).trim());
     const old = (id: string, answer: string, lang: 'pl' | 'en' = 'pl'): ExtraFact => ({ id, topic: 'Excel', has: true, answer, source: source(lang), date: '2026-01-01' });
     const fromChat: ExtraFact = { id: 'c1', topic: 'Excel', has: true, answer: 'Z rozmowy', source: 'Rozmowa z doradcą kariery', date: '2026-01-01' };
     const { pid, aid } = await setup([old('a1', 'stara 1'), fromChat, old('a2', 'stara 2', 'en'), old('a3', 'stara 3')]);

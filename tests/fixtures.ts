@@ -86,7 +86,7 @@ export const cv: CvVersion = {
     sectionOrder: ['summary', 'experience', 'education', 'skills', 'languages'],
     experience: [
       {
-        sourceId: 'exp1', role: 'Stażystka ds. marketingu', company: 'Firma Testowa Sp. z o.o.', location: 'Kraków', dates: '07.2025 – 09.2025',
+        sourceId: 'exp1', role: 'Stażystka ds. marketingu', company: 'Firma Testowa Sp. z o.o.', location: 'Kraków', dates: '07.2025 - 09.2025',
         bullets: [
           { id: 'b1', text: 'Prowadzenie profilu firmy na Instagramie (social media)', status: 'fact', reason: '', fallbackText: '', sourceIds: ['exp1'] },
           { id: 'b2', text: 'Zwiększenie zasięgu profilu o ok. 30%', status: 'suggested', reason: 'Liczba szacunkowa', fallbackText: 'Rozwijanie zasięgu profilu', sourceIds: ['exp1'] },
@@ -94,7 +94,7 @@ export const cv: CvVersion = {
       },
     ],
     projects: [],
-    education: [{ sourceId: 'edu1', school: 'Uniwersytet Ekonomiczny w Krakowie', degree: 'Licencjat', field: 'Marketing i komunikacja rynkowa', dates: '10.2023 – obecnie', details: '' }],
+    education: [{ sourceId: 'edu1', school: 'Uniwersytet Ekonomiczny w Krakowie', degree: 'Licencjat', field: 'Marketing i komunikacja rynkowa', dates: '10.2023 - obecnie', details: '' }],
     skills: [{ category: 'Narzędzia', items: ['Google Analytics 4', 'Canva', 'MS Excel'] }],
     certificates: [],
     languages: [{ name: 'Angielski', level: 'B2' }],

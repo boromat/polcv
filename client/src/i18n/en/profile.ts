@@ -134,7 +134,7 @@ export const profile: Record<string, string> = {
   średni: 'intermediate',
   'Języki obce': 'Foreign languages',
   Język: 'Language',
-  'Poziom (A1–C2)': 'Level (A1-C2)',
+  'Poziom (A1-C2)': 'Level (A1-C2)',
   'Certyfikaty, kursy, szkolenia': 'Certificates, courses, training',
   Wystawca: 'Issuer',
   Data: 'Date',
@@ -158,7 +158,7 @@ export const profile: Record<string, string> = {
 
   // SettingsPage: wyszukiwanie ofert
   'Włączyć automatyczne wyszukiwanie ofert?': 'Turn on automatic job search?',
-  'Program będzie sam wysyłał zapytania do portali (kilka–kilkanaście na stanowisko).':
+  'Program będzie sam wysyłał zapytania do portali (kilka-kilkanaście na stanowisko).':
     'The app will send queries to job portals on its own (from a few to a dozen or so per job title).',
   'Korzystasz z tego na własną odpowiedzialność: tylko na własny użytek i zgodnie z regulaminami portali. W każdej chwili możesz to wyłączyć.':
     "You use this at your own risk: for personal use only and in line with the portals' terms of service. You can turn it off at any time.",
@@ -218,14 +218,14 @@ export const profile: Record<string, string> = {
   'Jak zdobyć klucz:': 'How to get a key:',
   'wejdź na': 'go to',
   ', załóż konto, doładuj je w zakładce': ', create an account, top it up in the',
-  '(np. 5–10 $ wystarczy na kilkadziesiąt CV), a potem w zakładce':
+  '(np. 5-10 $ wystarczy na kilkadziesiąt CV), a potem w zakładce':
     'tab (e.g. $5-10 is enough for a few dozen CVs), then in the',
   kliknij: 'tab click',
   ', skopiuj klucz i wklej go poniżej.': ', copy the key and paste it below.',
   'Wklej nowy klucz, żeby go zmienić': 'Paste a new key to change it',
   'Sprawdź i zapisz': 'Check and save',
   'Modele AI': 'AI models',
-  'Model główny pisze i ocenia CV (tu liczy się jakość). Model szybki tylko wyciąga dane z ogłoszeń i CV (może być tani). Ceny podane są za milion tokenów: wejście / wyjście. Jedno CV z oceną to zwykle kilka–kilkanaście centów.':
+  'Model główny pisze i ocenia CV (tu liczy się jakość). Model szybki tylko wyciąga dane z ogłoszeń i CV (może być tani). Ceny podane są za milion tokenów: wejście / wyjście. Jedno CV z oceną to zwykle kilka-kilkanaście centów.':
     'The main model writes and scores CVs (quality matters here). The fast model only extracts data from postings and CVs (it can be cheap). Prices are per million tokens: input / output. One CV with a score usually costs from a few to a dozen or so cents.',
   'Model główny (pisanie i ocena CV)': 'Main model (writing and scoring CVs)',
   'Model szybki (analiza ogłoszeń i import CV)': 'Fast model (posting analysis and CV import)',

@@ -378,7 +378,7 @@ function RoleCard({
           </span>
         ))}
       </div>
-      {searching && <div className="callout info small">{t('Szukam ofert na nofluffjobs i oceniam dopasowanie… (ok. 10–30 s)')}</div>}
+      {searching && <div className="callout info small">{t('Szukam ofert na nofluffjobs i oceniam dopasowanie… (ok. 10-30 s)')}</div>}
       {offers && !searching && (
         <div className="stack" style={{ gap: 8 }}>
           <div className="faint">

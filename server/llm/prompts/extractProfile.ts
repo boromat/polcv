@@ -7,7 +7,7 @@ Zasady:
 - Przepisuj tylko to, co jest w tekście CV. Niczego nie dodawaj, nie oceniaj i nie upiększaj.
 - Zachowaj język oryginału (CV po polsku → wartości po polsku).
 - Daty zapisuj jako RRRR-MM (albo RRRR, jeśli brak miesiąca). Brak daty = pusty string. Trwające: current=true i end="".
-- Osiągnięcia i obowiązki rozbij na osobne punkty w "achievements"; "description" to 1–2 zdania ogólnego opisu (albo pusty).
+- Osiągnięcia i obowiązki rozbij na osobne punkty w "achievements"; "description" to 1-2 zdania ogólnego opisu (albo pusty).
 - Umiejętności rozbij na pojedyncze pozycje (np. "Excel", "SQL", "Praca w zespole") i przypisz kategorię: techniczne / narzędzia / miękkie / inne.
 - Projekty (studenckie, własne, z kół naukowych, hackathony) zapisz w "projects", nie w "experience".
 - Kursy, szkolenia i certyfikaty zapisz w "certificates" z odpowiednim "kind".

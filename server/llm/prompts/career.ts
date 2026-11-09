@@ -22,8 +22,8 @@ POLA ODPOWIEDZI:
 - "prefs": PEŁNE aktualne preferencje. Zmieniaj tylko to, co kandydat powiedział lub jednoznacznie potwierdził; resztę przepisz bez zmian z OBECNYCH PREFERENCJI. salaryMin w PLN brutto/mies. (jeśli poda netto lub stawkę godzinową - przelicz orientacyjnie i powiedz o tym). "remote" (praca zdalna) ustaw na false, gdy kandydat szuka pracy lokalnie albo na miejscu, albo gdy szuka tylko zawodów, których nie da się wykonywać zdalnie (praca fizyczna, np. mechanik, spawacz, magazynier, produkcja, budowa, gastronomia); inaczej domyślne true zapełni wyniki niepasującymi ofertami zdalnymi. Gdy nie wiadomo, zapytaj.
 - "newFacts": tylko NOWE, konkretne informacje o doświadczeniu/umiejętnościach z OSTATNIEJ wiadomości kandydata (bez preferencji i bez wymyślania). "topic" krótko (np. "Python - automatyzacja raportów"), "answer" - treść jego słowami, doprecyzowana. Pusta lista, jeśli nic nowego.
 - "newExperience": praca, staż, praktyki, wolontariat albo zlecenia (freelance), o których kandydat napisał w OSTATNIEJ wiadomości: "role" i "company" tak, jak je podał, "start"/"end" w formacie RRRR-MM (albo RRRR), "current" true, gdy to trwa, "achievements" - konkretne zadania i efekty jego słowami (także liczby, które podał). Gdy dopowiada coś do pozycji, która już jest w "experience" profilu, podaj ją jeszcze raz z tą samą firmą i z nowymi "achievements". Nie wymyślaj dat ani firm. Pusta lista, jeśli nic takiego nie padło.
-- "summary": 3–6 zdań aktualnego podsumowania: czego kandydat szuka, co umie, jakie ma warunki.
-- "done": true, gdy wiesz już wystarczająco dużo (zwykle po 8–12 pytaniach) albo kandydat chce kończyć - wtedy "reply" to krótkie podsumowanie i zachęta do kliknięcia "Pokaż propozycje pracy". Po zakończeniu kandydat może dalej pisać - wtedy odpowiadaj normalnie.
+- "summary": 3-6 zdań aktualnego podsumowania: czego kandydat szuka, co umie, jakie ma warunki.
+- "done": true, gdy wiesz już wystarczająco dużo (zwykle po 8-12 pytaniach) albo kandydat chce kończyć - wtedy "reply" to krótkie podsumowanie i zachęta do kliknięcia "Pokaż propozycje pracy". Po zakończeniu kandydat może dalej pisać - wtedy odpowiadaj normalnie.
 Dzisiejsza data: ${today()}.`;
 
 export async function careerTurn(profile: Profile, career: Career): Promise<CareerTurn> {
@@ -40,17 +40,17 @@ export async function careerTurn(profile: Profile, career: Career): Promise<Care
   });
 }
 
-const PROPOSALS_SYSTEM = () => `Jesteś doradcą kariery na polskim rynku pracy. Na podstawie profilu kandydata, jego odpowiedzi i preferencji zaproponuj 5–8 stanowisk, na które ma REALNE szanse teraz.
+const PROPOSALS_SYSTEM = () => `Jesteś doradcą kariery na polskim rynku pracy. Na podstawie profilu kandydata, jego odpowiedzi i preferencji zaproponuj 5-8 stanowisk, na które ma REALNE szanse teraz.
 Zasady:
-- Mieszanka: większość "wysokie" i "średnie" dopasowanie, 1–2 "ambitne" (wymagają nadrobienia czegoś, ale są osiągalne).
+- Mieszanka: większość "wysokie" i "średnie" dopasowanie, 1-2 "ambitne" (wymagają nadrobienia czegoś, ale są osiągalne).
 - Uwzględnij stanowiska, których kandydat szuka (targetRoles), ale dodaj też pokrewne, o których mógł nie pomyśleć.
 - "title": nazwa stanowiska tak, jak pojawia się w ogłoszeniach (np. "Młodszy analityk danych").
-- "why": 2–3 zdania, odwołuj się do KONKRETNYCH elementów profilu (projekt, staż, narzędzie).
-- "gaps": czego brakuje względem typowych wymagań (krótko, 0–4 pozycje). "howToClose": konkretnie, jak to nadrobić w kilka tygodni.
+- "why": 2-3 zdania, odwołuj się do KONKRETNYCH elementów profilu (projekt, staż, narzędzie).
+- "gaps": czego brakuje względem typowych wymagań (krótko, 0-4 pozycje). "howToClose": konkretnie, jak to nadrobić w kilka tygodni.
 - "seniority": staż / junior / mid - zgodnie z doświadczeniem kandydata i jego preferencją.
-- "keywords": 3–4 krótkie frazy (1–3 słowa), które wpisałby rekruter albo kandydat w wyszukiwarkę portalu z ofertami. Używaj nazw, które NAPRAWDĘ pojawiają się w tytułach polskich ogłoszeń: w IT zwykle po angielsku ("AI engineer", "machine learning", "python developer", "RPA developer"), poza IT po polsku ("analityk danych", "specjalista ds. marketingu"). Najpopularniejsza fraza pierwsza. Bez słów o poziomie i trybie ("junior", "stażysta", "praca", "zdalna").
+- "keywords": 3-4 krótkie frazy (1-3 słowa), które wpisałby rekruter albo kandydat w wyszukiwarkę portalu z ofertami. Używaj nazw, które NAPRAWDĘ pojawiają się w tytułach polskich ogłoszeń: w IT zwykle po angielsku ("AI engineer", "machine learning", "python developer", "RPA developer"), poza IT po polsku ("analityk danych", "specjalista ds. marketingu"). Najpopularniejsza fraza pierwsza. Bez słów o poziomie i trybie ("junior", "stażysta", "praca", "zdalna").
 - "id": r1, r2, …
-- "intro": 2–3 zdania podsumowania dla kandydata.
+- "intro": 2-3 zdania podsumowania dla kandydata.
 Nie wymyślaj doświadczenia kandydata. Wszystko ${forUser()} (poza frazami w "keywords", które mają brzmieć jak tytuły polskich ogłoszeń).`;
 
 export async function proposeRoles(profile: Profile, career: Career) {
@@ -66,14 +66,14 @@ export async function proposeRoles(profile: Profile, career: Career) {
   });
 }
 
-const RANK_SYSTEM = () => `Oceniasz, na ile oferty pracy pasują do kandydata (student/junior) i jakie ma szanse. Dla każdej oferty: "match" 0–100 (realna szansa + dopasowanie umiejętności i poziomu) oraz "reason" - jedno krótkie zdanie ${forUser()} (maks. 15 słów), np. "Zgadza się SQL i Power BI, ale wymagają 2 lat doświadczenia".
+const RANK_SYSTEM = () => `Oceniasz, na ile oferty pracy pasują do kandydata (student/junior) i jakie ma szanse. Dla każdej oferty: "match" 0-100 (realna szansa + dopasowanie umiejętności i poziomu) oraz "reason" - jedno krótkie zdanie ${forUser()} (maks. 15 słów), np. "Zgadza się SQL i Power BI, ale wymagają 2 lat doświadczenia".
 Oceniaj tylko na podstawie podanych danych oferty - nie wymyślaj wymagań. Oferty dla wyraźnie bardziej doświadczonych osób oceniaj nisko. Zwróć ocenę dla KAŻDEGO "id".`;
 
 export async function rankOffers(profile: Profile, career: Career, role: RoleProposal, leads: JobLead[]) {
   const candidate = {
     summary: career.summary,
     skills: profile.skills.map((s) => s.name),
-    experience: profile.experience.map((e) => `${e.role} – ${e.company}`),
+    experience: profile.experience.map((e) => `${e.role} - ${e.company}`),
     projects: profile.projects.map((p) => `${p.name} (${p.technologies.join(', ')})`),
     education: profile.education.map((e) => `${e.degree} ${e.field}, ${e.school}`),
     languages: profile.languages.map((l) => `${l.name} ${l.level}`),

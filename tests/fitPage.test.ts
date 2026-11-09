@@ -120,7 +120,7 @@ describe('CV na jedną stronę', () => {
       });
     });
     const current = await store.getVersion(pid, aid, first.version);
-    const job = { sourceId: 'exp-new', role: 'Specjalista ds. dokumentacji', company: 'Przykładowa Firma', location: '', dates: '08.2025 – obecnie', bullets: [{ id: 'n1', text: 'Tworzenie szablonów dokumentów z AI', status: 'fact', reason: '', fallbackText: '', sourceIds: ['exp-new'] }] };
+    const job = { sourceId: 'exp-new', role: 'Specjalista ds. dokumentacji', company: 'Przykładowa Firma', location: '', dates: '08.2025 - obecnie', bullets: [{ id: 'n1', text: 'Tworzenie szablonów dokumentów z AI', status: 'fact', reason: '', fallbackText: '', sourceIds: ['exp-new'] }] };
     // AI przy okazji przepisuje podsumowanie: to ma nie przejść.
     replies = [JSON.stringify({ ...current.content, summary: { ...current.content.summary, text: 'Studiuję marketing i pracuję z dokumentacją.' }, experience: [job, ...current.content.experience], notes: 'Dodano pracę w Przykładowej Firmie.' })];
     const res = await svc.syncWithProfile(pid, aid);

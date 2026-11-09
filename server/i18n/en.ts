@@ -38,7 +38,7 @@ export const EN: Record<string, string> = {
   'Podaj link do ogłoszenia albo wklej jego treść.': 'Enter a link to the job posting or paste the posting text.',
   'Treść ogłoszenia jest za krótka - wklej całe ogłoszenie.': 'The posting text is too short. Paste the whole job posting.',
   'Najpierw trzeba przeanalizować ogłoszenie.': 'The job posting has to be analysed first.',
-  'Odpowiedź przy aplikacji: {title} – {company}': 'Answer given when applying: {title} - {company}',
+  'Odpowiedź przy aplikacji: {title} - {company}': 'Answer given when applying: {title} - {company}',
   'Nie znam / nie mam doświadczenia.': "I don't know it / I have no experience with it.",
   'Brak przeanalizowanego ogłoszenia.': 'There is no analysed job posting.',
   'Nie udało się uzyskać oceny AI.': 'Could not get the AI review.',

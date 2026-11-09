@@ -20,7 +20,7 @@ export function Busy({ message, hint }: { message: string; hint?: string }) {
     return () => window.removeEventListener('beforeunload', leave);
   }, []);
   // Kolejne kroki (np. pisanie i ocena CV) liczą się razem, więc po minucie zastępujemy też podpowiedź kroku.
-  const text = sec >= LONG_WAIT_S ? t('Jeszcze pracuję - to może potrwać do ok. 3 minut. Nie zamykaj tej strony.') : (hint ?? t('AI pracuje - zwykle trwa to 15–60 sekund.'));
+  const text = sec >= LONG_WAIT_S ? t('Jeszcze pracuję - to może potrwać do ok. 3 minut. Nie zamykaj tej strony.') : (hint ?? t('AI pracuje - zwykle trwa to 15-60 sekund.'));
   return (
     <div className="busy-overlay" role="status" aria-live="polite">
       <div className="busy-box">

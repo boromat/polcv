@@ -1,7 +1,7 @@
 /** Angielskie tłumaczenia: career. Klucz to polski tekst z kodu. */
 export const career: Record<string, string> = {
   // components/ui.tsx: komponenty wspólne
-  'AI pracuje - zwykle trwa to 15–60 sekund.': 'The AI is working, this usually takes 15-60 seconds.',
+  'AI pracuje - zwykle trwa to 15-60 sekund.': 'The AI is working, this usually takes 15-60 seconds.',
   'Jeszcze pracuję - to może potrwać do ok. 3 minut. Nie zamykaj tej strony.': 'Still working, this can take up to about 3 minutes. Please do not close this page.',
   Zamknij: 'Close',
   'brak oceny': 'not scored',
@@ -172,7 +172,7 @@ export const career: Record<string, string> = {
   'Szukaj ofert': 'Find job offers',
   'Czego brakuje:': 'What is missing:',
   'Otwórz wyszukiwanie:': 'Open a search:',
-  'Szukam ofert na nofluffjobs i oceniam dopasowanie… (ok. 10–30 s)': 'Searching nofluffjobs for offers and rating the match… (about 10-30 s)',
+  'Szukam ofert na nofluffjobs i oceniam dopasowanie… (ok. 10-30 s)': 'Searching nofluffjobs for offers and rating the match… (about 10-30 s)',
   'Sprawdzono {n} ofert, pasuje do Twoich preferencji: {m}': 'Checked {n} offers, matching your preferences: {m}',
   '(w tym {n} słabo dopasowanych - ukryte)': '(weak matches hidden: {n})',
   'Wyszukano {date}.': 'Searched on {date}.',

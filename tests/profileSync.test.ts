@@ -23,7 +23,7 @@ describe('poprawki w CV trafiają do profilu', () => {
   it('stanowisko, firma i daty doświadczenia', () => {
     const { p, before, after } = setup();
     after.experience[0].role = 'Asystentka ds. marketingu';
-    after.experience[0].dates = '06.2025 – 09.2025';
+    after.experience[0].dates = '06.2025 - 09.2025';
     expect(syncCvEdit(p, before, after)).toEqual(['doświadczenie „Asystentka ds. marketingu”']);
     expect(p.experience[0]).toMatchObject({ role: 'Asystentka ds. marketingu', start: '2025-06', end: '2025-09', current: false });
   });

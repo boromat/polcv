@@ -151,7 +151,7 @@ export function ApplicationPage() {
     const key = answersKey(answers);
     const send = key !== (savedAnswers.current ?? answersKey(app.gap?.answers ?? []));
     const writing = t('Piszę CV pod to ogłoszenie…');
-    const writingHint = t('Wybieram z profilu to, co pasuje, i piszę językiem ogłoszenia. To zwykle 30–60 sekund.');
+    const writingHint = t('Wybieram z profilu to, co pasuje, i piszę językiem ogłoszenia. To zwykle 30-60 sekund.');
     return run(send ? t('Zapisuję odpowiedzi w profilu…') : writing, async (step) => {
       if (send) {
         await api.answers(pid, aid, answers);
@@ -199,7 +199,7 @@ export function ApplicationPage() {
         setNotice(improveNotice(res));
         setTab('report');
       },
-      t('AI poprawia CV według raportu, a potem program ocenia nową wersję i zostawia lepszą. To zwykle 1–2 minuty.'),
+      t('AI poprawia CV według raportu, a potem program ocenia nową wersję i zostawia lepszą. To zwykle 1-2 minuty.'),
     );
 
   const evaluate = () => run(t('Oceniam CV…'), async (step) => evaluateAndReload(app.currentVersion, step));

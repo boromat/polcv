@@ -43,6 +43,14 @@ All notable changes to PolCV are recorded here. The format follows
 - **Install the spaCy model** for polanon with one button in Settings (`polanon[ner]` and the Polish
   `pl_core_news_md` model, about 50 MB), after a confirmation that shows the commands.
 
+### Changed
+
+- **No en dashes either.** Besides the long dash (—), the CV, cover letters and everything the AI
+  writes now use a plain hyphen instead of the en dash (–): dates read "07.2025 - 09.2025", ranges
+  "2-3", and the template separates role and company with " - ". Older versions are shown and
+  exported the same way without being written again. Text copied word for word from a posting,
+  such as its GDPR clause, stays as it is.
+
 ### Fixed
 
 - The career advisor now writes a job, internship or volunteering you describe in the chat into the

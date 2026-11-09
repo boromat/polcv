@@ -15,7 +15,7 @@ function profileDate(s: string): string | null {
   return YEAR.test(s.trim()) ? s.trim() : null;
 }
 
-/** "03.2024 – 06.2025", "09/2023 - present" → daty profilu; null, gdy to nie jest czytelny zakres. */
+/** "03.2024 - 06.2025", "09/2023 - present" → daty profilu; null, gdy to nie jest czytelny zakres. */
 export function parseCvDates(s: string): { start: string; end: string; current: boolean } | null {
   const parts = s.split(/\s*[-\u2013\u2014]\s*/).filter(Boolean);
   if (parts.length !== 2) return null;

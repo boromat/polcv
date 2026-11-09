@@ -154,7 +154,7 @@ export async function fetchPosting(rawUrl: string): Promise<FetchedPosting> {
       tr('Nie udało się pobrać treści ogłoszenia z tego linku (strona mogła zablokować pobieranie). Skopiuj tekst ogłoszenia i wklej go w pole poniżej.'),
     );
 
-  // 1–2. Zwykłe pobranie: JSON-LD + główna treść.
+  // 1-2. Zwykłe pobranie: JSON-LD + główna treść.
   let fileText: string | null = null; // link prowadzi do pliku, nie do strony
   try {
     const res = await fetch(url, {

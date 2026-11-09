@@ -39,7 +39,7 @@ What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish applicat
    the next CV.
 3. **Writes the CV without inventing anything.** Every line points at a fact in your profile;
    bolder wording is marked yellow and needs your approval before the PDF can be exported.
-4. **Scores it 0–100:** keywords (40 pts, computed locally with Polish inflection and synonyms),
+4. **Scores it 0-100:** keywords (40 pts, computed locally with Polish inflection and synonyms),
    ATS readability (20 pts, checked on text extracted back from the generated PDF) and an AI
    recruiter review (40 pts) with concrete fixes - plus an *Improve automatically* button. Click a
    missing keyword you know, or *Fill in* on a fix that needs your input, and the answer goes to
@@ -68,7 +68,7 @@ npm start       # http://localhost:3000
 
 Then open **Ustawienia** (Settings) and paste an OpenRouter API key. The defaults are Claude
 Sonnet for writing and Claude Haiku for parsing; one CV with its report costs roughly
-$0.05–0.15. The Settings page lists the models and shows what you have spent.
+$0.05-0.15. The Settings page lists the models and shows what you have spent.
 
 ## Privacy
 

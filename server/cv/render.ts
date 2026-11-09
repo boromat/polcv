@@ -3,6 +3,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import type { CoverLetter, CvContent, CvText, CvVersion, Profile, SectionKey, TemplateId } from '../../shared/schemas';
 import { tr } from '../i18n';
+import { plainDashes } from '../llm/strings';
 
 const require = createRequire(import.meta.url);
 
@@ -268,7 +269,7 @@ function sectionHtml(key: SectionKey, c: CvContent, d: CvVersion['decisions'], m
     case 'experience': {
       if (!c.experience.length) return '';
       const items = c.experience.map(
-        (e) => `<div class="entry"><div class="entry-head"><span class="title">${esc(e.role)}${e.company ? ` – ${esc(e.company)}` : ''}</span><span class="dates">${esc(e.dates)}</span></div>
+        (e) => `<div class="entry"><div class="entry-head"><span class="title">${esc(e.role)}${e.company ? ` - ${esc(e.company)}` : ''}</span><span class="dates">${esc(e.dates)}</span></div>
 ${e.location ? `<div class="sub">${esc(e.location)}</div>` : ''}${bulletsHtml(e.bullets, d, mode)}</div>`,
       );
       return `<section>${h}${items.join('')}</section>`;
@@ -277,7 +278,7 @@ ${e.location ? `<div class="sub">${esc(e.location)}</div>` : ''}${bulletsHtml(e.
       if (!c.projects.length) return '';
       const tech = c.language === 'pl' ? 'Technologie' : 'Technologies';
       const items = c.projects.map(
-        (p) => `<div class="entry"><div class="entry-head"><span class="title">${esc(p.name)}${p.role ? ` – ${esc(p.role)}` : ''}</span><span class="dates">${esc(p.dates)}</span></div>
+        (p) => `<div class="entry"><div class="entry-head"><span class="title">${esc(p.name)}${p.role ? ` - ${esc(p.role)}` : ''}</span><span class="dates">${esc(p.dates)}</span></div>
 ${p.technologies.length || p.link ? `<div class="sub">${p.technologies.length ? `${tech}: ${esc(p.technologies.join(', '))}` : ''}${p.technologies.length && p.link ? ' | ' : ''}${p.link ? `<a href="${esc(href(p.link))}">${esc(prettyUrl(p.link))}</a>` : ''}</div>` : ''}
 ${bulletsHtml(p.bullets, d, mode)}</div>`,
       );
@@ -298,11 +299,11 @@ ${bulletsHtml(p.bullets, d, mode)}</div>`,
     }
     case 'certificates': {
       if (!c.certificates.length) return '';
-      return `<section>${h}<ul>${c.certificates.map((x) => `<li>${esc(x.name)}${x.issuer ? ` – ${esc(x.issuer)}` : ''}${x.date ? ` (${esc(x.date)})` : ''}</li>`).join('')}</ul></section>`;
+      return `<section>${h}<ul>${c.certificates.map((x) => `<li>${esc(x.name)}${x.issuer ? ` - ${esc(x.issuer)}` : ''}${x.date ? ` (${esc(x.date)})` : ''}</li>`).join('')}</ul></section>`;
     }
     case 'languages': {
       if (!c.languages.length) return '';
-      return `<section>${h}<p>${c.languages.map((l) => `${esc(l.name)}${l.level ? ` – ${esc(l.level)}` : ''}`).join('<span class="sep">  |  </span>')}</p></section>`;
+      return `<section>${h}<p>${c.languages.map((l) => `${esc(l.name)}${l.level ? ` - ${esc(l.level)}` : ''}`).join('<span class="sep">  |  </span>')}</p></section>`;
     }
     case 'interests': {
       if (!c.interests.length) return '';
@@ -333,7 +334,8 @@ const filledEntries = (c: CvContent): CvContent => ({
 });
 
 export function renderCvHtml(cv: CvVersion, profile: Profile, photo: string | null, mode: RenderMode): string {
-  const c = filledEntries(cv.content);
+  // Starsze wersje mają półpauzy w datach ("07.2025 – 09.2025"): w podglądzie i PDF zawsze zwykły myślnik.
+  const c = plainDashes(filledEntries(cv.content));
   // Sekcje spoza sectionOrder (np. dodane ręcznie) dokładamy na końcu, żeby nic nie zginęło.
   const order = [...new Set([...c.sectionOrder, ...ALL_SECTIONS])];
   const body = [
@@ -341,10 +343,11 @@ export function renderCvHtml(cv: CvVersion, profile: Profile, photo: string | nu
     ...order.map((k) => sectionHtml(k, c, cv.decisions, mode)),
     cv.rodo.include && cv.rodo.text ? `<div class="rodo">${esc(cv.rodo.text)}</div>` : '',
   ].join('\n');
-  return docHtml(cv.template, c.language, `CV – ${profile.contact.fullName}`, body, mode);
+  return docHtml(cv.template, c.language, `CV - ${profile.contact.fullName}`, body, mode);
 }
 
-export function renderLetterHtml(letter: CoverLetter, profile: Profile, template: TemplateId, posting: { company: string; title: string }, mode: RenderMode): string {
+export function renderLetterHtml(saved: CoverLetter, profile: Profile, template: TemplateId, posting: { company: string; title: string }, mode: RenderMode): string {
+  const letter = plainDashes(saved);
   const date = new Date().toLocaleDateString(letter.language === 'pl' ? 'pl-PL' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const place = profile.contact.location ? `${esc(profile.contact.location.split(',')[0])}, ` : '';
   const re = letter.language === 'pl' ? 'Dotyczy' : 'Re';
@@ -356,5 +359,5 @@ export function renderLetterHtml(letter: CoverLetter, profile: Profile, template
 ${letter.paragraphs.map((p) => `<p style="margin-top:3.5mm;text-align:justify">${esc(p)}</p>`).join('\n')}
 <div style="margin-top:7mm">${esc(letter.closing)}</div>
 <div style="margin-top:1.5mm;font-weight:600">${esc(profile.contact.fullName)}</div>`;
-  return docHtml(template, letter.language, `List motywacyjny – ${profile.contact.fullName}`, body, mode);
+  return docHtml(template, letter.language, `List motywacyjny - ${profile.contact.fullName}`, body, mode);
 }

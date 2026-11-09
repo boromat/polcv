@@ -91,7 +91,7 @@ export function parseNofluff(html: string, near?: { point: Point; km: number }):
       location,
       workModes: remote ? ['zdalna'] : ['stacjonarna / hybrydowa'],
       workTime: '',
-      salary: s?.from ? `${s.from}–${s.to} ${s.currency} / ${s.period === 'Hour' ? 'godz.' : 'mies.'} (${NF_CONTRACT[s.type] ?? s.type})` : '',
+      salary: s?.from ? `${s.from}-${s.to} ${s.currency} / ${s.period === 'Hour' ? 'godz.' : 'mies.'} (${NF_CONTRACT[s.type] ?? s.type})` : '',
       salaryMonthly: s?.to && s.currency === 'PLN' ? toMonthly(s.to, s.period ?? 'Month') : null,
       contracts: s?.type ? [NF_CONTRACT[s.type] ?? mapContract(s.type)] : [],
       seniority: (p.seniority ?? []).join(' / '),

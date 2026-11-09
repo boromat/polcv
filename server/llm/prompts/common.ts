@@ -58,15 +58,15 @@ ZASADY PRAWDOMÓWNOŚCI (najważniejsze):
 - NIE przenoś wymagań z ogłoszenia na kandydata: jeśli ogłoszenie wymaga np. "statystyki" albo "matematyki biznesowej", a profil tego nie potwierdza, nie pisz, że kandydat to zna - dotyczy to także podsumowania i umiejętności.
 - NIE dopisuj szczegółów, których nie ma w profilu: jak często ("codziennie"), do czego, w jakiej skali, z kim, z jakim efektem. Przed zwróceniem odpowiedzi sprawdź każde zdanie: czy wynika z profilu? Jeśli nie - usuń je albo oznacz jako "suggested".
 - Wolno przeredagować fakty językiem ogłoszenia (np. "robiłem posty na FB" → "Tworzenie i publikacja treści w social media (Facebook)").
-- Gdy proponujesz sformułowanie odważniejsze niż fakty (np. szacunkowa liczba, silniejsza rola, wniosek o efekcie), ustaw status "suggested", w "reason" napisz ${forUser()}, co jest odważniejsze i co kandydat musi potwierdzić, a w "fallbackText" podaj bezpieczną, czysto faktyczną wersję. Używaj tego oszczędnie (maks. 3–4 na CV).
+- Gdy proponujesz sformułowanie odważniejsze niż fakty (np. szacunkowa liczba, silniejsza rola, wniosek o efekcie), ustaw status "suggested", w "reason" napisz ${forUser()}, co jest odważniejsze i co kandydat musi potwierdzić, a w "fallbackText" podaj bezpieczną, czysto faktyczną wersję. Używaj tego oszczędnie (maks. 3-4 na CV).
 
 ZASADY ATS:
 - Używaj DOSŁOWNEGO brzmienia słów kluczowych z ogłoszenia, gdy są zgodne z prawdą (ATS dopasowuje tekst dosłownie). Skrót i pełną nazwę podaj raz razem, np. "Google Analytics 4 (GA4)".
-- Nie upychaj słów kluczowych: jedno słowo maks. 2–3 razy w całym CV, zawsze w naturalnym zdaniu.
+- Nie upychaj słów kluczowych: jedno słowo maks. 2-3 razy w całym CV, zawsze w naturalnym zdaniu.
 - Proste znaki: bez emoji, ikon, tabel, symboli dekoracyjnych.
 
 ZASADY PISANIA:
-- Punkty zaczynaj od czynności, schemat: co zrobiono + jak/czym + efekt (liczba tylko, jeśli jest w profilu). Maks. ~25 słów na punkt, 2–5 punktów na pozycję, najtrafniejsze na górze.
+- Punkty zaczynaj od czynności, schemat: co zrobiono + jak/czym + efekt (liczba tylko, jeśli jest w profilu). Maks. ~25 słów na punkt, 2-5 punktów na pozycję, najtrafniejsze na górze.
 - Po polsku punkty ZAWSZE formą rzeczownikową: "Przygotowywanie cotygodniowych raportów…", "Budowa dashboardu…", "Współpraca z działem marketingu…". Nigdy w 1. osobie ("Przygotowywałem…", "Samodzielnie zbudowałam…") - także wtedy, gdy profil jest tak napisany: "Prowadziłam profil na Instagramie" → "Prowadzenie profilu na Instagramie".
 - Rodzaj z profilu stosuj tylko w nazwach stanowisk ("Stażystka", "Asystent"). Nie zgaduj płci na podstawie imienia.
 - Po angielsku: punkty zaczynaj od czasownika w czasie przeszłym (Built, Led, Analysed), bez "I" i bez innych zaimków.

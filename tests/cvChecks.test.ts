@@ -172,9 +172,9 @@ describe('daty i firma z profilu', () => {
     expect(cvDate('2025-13', 'pl')).toBeNull();
     expect(cvDate('maj 2024', 'pl')).toBeNull();
 
-    expect(cvDateRange('2025-07', '2025-09', false, 'pl')).toBe('07.2025 – 09.2025');
-    expect(cvDateRange('2024-03', '', true, 'pl')).toBe('03.2024 – obecnie');
-    expect(cvDateRange('2024-03', '2024-05', true, 'en')).toBe('03/2024 – present');
+    expect(cvDateRange('2025-07', '2025-09', false, 'pl')).toBe('07.2025 - 09.2025');
+    expect(cvDateRange('2024-03', '', true, 'pl')).toBe('03.2024 - obecnie');
+    expect(cvDateRange('2024-03', '2024-05', true, 'en')).toBe('03/2024 - present');
     expect(cvDateRange('2022', '', false, 'pl')).toBe('2022');
     expect(cvDateRange('', '2024-06', false, 'en')).toBe('06/2024');
     expect(cvDateRange('', '', false, 'pl')).toBe('');
@@ -184,19 +184,19 @@ describe('daty i firma z profilu', () => {
   it('firma i daty doświadczenia oraz daty edukacji pochodzą z profilu', () => {
     const c = cv({
       experience: [
-        { ...cv().experience[0], company: 'Wymyślona Firma', dates: '01.2020 – 12.2025' },
-        { sourceId: 'exp3', role: 'Pomoc', company: 'Coś', location: '', dates: '07.2022 – 08.2022', bullets: [] },
+        { ...cv().experience[0], company: 'Wymyślona Firma', dates: '01.2020 - 12.2025' },
+        { sourceId: 'exp3', role: 'Pomoc', company: 'Coś', location: '', dates: '07.2022 - 08.2022', bullets: [] },
         { sourceId: 'x1', role: 'Kampania', company: 'Koło naukowe', location: '', dates: '2025', bullets: [] },
       ],
     });
     const out = groundCv(c, profile, { lang: 'pl' });
-    expect(out.experience[0]).toMatchObject({ company: 'Firma Testowa Sp. z o.o.', dates: '07.2025 – 09.2025', role: 'Stażysta ds. marketingu' });
+    expect(out.experience[0]).toMatchObject({ company: 'Firma Testowa Sp. z o.o.', dates: '07.2025 - 09.2025', role: 'Stażysta ds. marketingu' });
     // Data w profilu w nietypowym zapisie: zostaje wersja modelu, ale firma i tak z profilu.
-    expect(out.experience[1]).toMatchObject({ company: '', dates: '07.2022 – 08.2022' });
+    expect(out.experience[1]).toMatchObject({ company: '', dates: '07.2022 - 08.2022' });
     // Wpis z odpowiedzi kandydata (extraFacts) nie ma firmy ani dat w profilu - bez zmian.
     expect(out.experience[2]).toMatchObject({ company: 'Koło naukowe', dates: '2025' });
-    expect(out.education[0].dates).toBe('10.2023 – obecnie');
-    expect(groundCv(c, profile, { lang: 'en' }).education[0].dates).toBe('10/2023 – present');
+    expect(out.education[0].dates).toBe('10.2023 - obecnie');
+    expect(groundCv(c, profile, { lang: 'en' }).education[0].dates).toBe('10/2023 - present');
     expect(c.experience[0].company).toBe('Wymyślona Firma'); // wejście bez zmian
   });
 

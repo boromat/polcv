@@ -111,7 +111,7 @@ export async function addFacts(profileId: string, appId: string, facts: { topic:
 async function storeAnswerFacts(app: Application, answers: Pick<GapAnswer, 'requirement' | 'has' | 'answer'>[]): Promise<void> {
   const appId = app.id;
   const params = { title: app.posting?.title ?? '', company: app.posting?.company ?? '' };
-  const sourceText = () => tr('Odpowiedź przy aplikacji: {title} – {company}', params).trim();
+  const sourceText = () => tr('Odpowiedź przy aplikacji: {title} - {company}', params).trim();
   const source = sourceText();
   // Starsze wersje dawały faktom losowe id - rozpoznajemy je po źródle (w obu językach) i temacie.
   const legacySources = new Set([source, withLang('pl', sourceText), withLang('en', sourceText)]);

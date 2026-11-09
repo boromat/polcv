@@ -69,6 +69,16 @@ describe('PDF w obie strony (render → PDF → tekst jak w ATS)', () => {
     expect(html.match(/class="entry"/g)?.length).toBe(plain.match(/class="entry"/g)?.length);
   });
 
+  it('starsza wersja z półpauzami w datach i tekście: w CV zawsze zwykły myślnik', () => {
+    const content = structuredClone(cv.content);
+    content.experience[0].dates = '07.2025 – 09.2025';
+    content.summary.text = 'Studiuję marketing – od 2–3 lat prowadzę media społecznościowe.';
+    const html = renderCvHtml({ ...cv, content }, profile, null, 'pdf');
+    expect(html).not.toMatch(/[–—]/);
+    expect(html).toContain('07.2025 - 09.2025');
+    expect(html).toContain('Studiuję marketing - od 2-3 lat');
+  });
+
   it('podgląd podświetla oczekujące sugestie, PDF nie', () => {
     expect(renderCvHtml(cv, profile, null, 'preview')).toContain('<mark class="suggested" data-id="b2">');
     expect(renderCvHtml(cv, profile, null, 'pdf')).not.toContain('<mark');

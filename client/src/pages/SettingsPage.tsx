@@ -26,7 +26,7 @@ function JobSearchCard({ settings, onSave }: { settings: SettingsView; onSave: (
     const ok = confirm(
       t('Włączyć automatyczne wyszukiwanie ofert?') +
         '\n\n' +
-        t('Program będzie sam wysyłał zapytania do portali (kilka–kilkanaście na stanowisko).') +
+        t('Program będzie sam wysyłał zapytania do portali (kilka-kilkanaście na stanowisko).') +
         ' ' +
         t('Korzystasz z tego na własną odpowiedzialność: tylko na własny użytek i zgodnie z regulaminami portali. W każdej chwili możesz to wyłączyć.'),
     );
@@ -330,7 +330,7 @@ export function SettingsPage() {
           ) : (
             <div className="callout info">
               <b>{t('Jak zdobyć klucz:')}</b> {t('wejdź na')} <a href="https://openrouter.ai" target="_blank" rel="noreferrer">openrouter.ai</a>
-              {t(', załóż konto, doładuj je w zakładce')} <i>Credits</i> {t('(np. 5–10 $ wystarczy na kilkadziesiąt CV), a potem w zakładce')} <i>Keys</i>{' '}
+              {t(', załóż konto, doładuj je w zakładce')} <i>Credits</i> {t('(np. 5-10 $ wystarczy na kilkadziesiąt CV), a potem w zakładce')} <i>Keys</i>{' '}
               {t('kliknij')} <i>Create Key</i>
               {t(', skopiuj klucz i wklej go poniżej.')}
             </div>
@@ -347,7 +347,7 @@ export function SettingsPage() {
         <div className="card stack">
           <h2>{t('Modele AI')}</h2>
           <p className="muted small">
-            {t('Model główny pisze i ocenia CV (tu liczy się jakość). Model szybki tylko wyciąga dane z ogłoszeń i CV (może być tani). Ceny podane są za milion tokenów: wejście / wyjście. Jedno CV z oceną to zwykle kilka–kilkanaście centów.')}
+            {t('Model główny pisze i ocenia CV (tu liczy się jakość). Model szybki tylko wyciąga dane z ogłoszeń i CV (może być tani). Ceny podane są za milion tokenów: wejście / wyjście. Jedno CV z oceną to zwykle kilka-kilkanaście centów.')}
           </p>
           <Field label={t('Model główny (pisanie i ocena CV)')}>
             <ModelSelect value={settings.mainModel} models={models} onChange={(mainModel) => save({ mainModel })} />

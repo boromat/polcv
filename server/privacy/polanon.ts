@@ -224,7 +224,7 @@ class Bridge {
     // Zapis do Pythona, który właśnie się zamknął (EPIPE), nie może wyłączyć serwera - błąd zgłosi 'exit'.
     this.child.stdin.on('error', () => {});
     this.ready = new Promise((resolve, reject) => {
-      // Z modelem spaCy start trwa kilka–kilkanaście sekund, na wolnym dysku dłużej.
+      // Z modelem spaCy start trwa kilka-kilkanaście sekund, na wolnym dysku dłużej.
       const startSeconds = ner ? 120 : 60;
       const startTimer = setTimeout(() => {
         // Bez tego mostek "wisiałby" do restartu programu: kolejne wywołanie AI uruchomi go od nowa.
