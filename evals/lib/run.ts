@@ -6,7 +6,7 @@ import * as store from '../../server/storage/store';
 import * as svc from '../../server/services';
 import { observeCalls, type CallAttempt } from '../../server/llm/openrouter';
 import { parsePosting } from '../../server/llm/prompts/parsePosting';
-import { educationIssues, sourceIssues, styleIssues, unverifiedSkillItems } from '../../server/llm/prompts/cvChecks';
+import { educationIssues, rejectedSkillItems, sourceIssues, styleIssues } from '../../server/llm/prompts/cvChecks';
 import { applyDecisions } from '../../server/llm/prompts/common';
 import { renderCvHtml, withoutPending } from '../../server/cv/render';
 import { htmlToPdf } from '../../server/cv/pdf';
@@ -34,6 +34,8 @@ export interface CaseResult {
    * punktów), brak szkoły, zły format (wyniki sprzed 11.11.2026 nie mają `skills`)
    */
   rejected: { unsourced: number; skills?: number; style: number; schools: number; format: number };
+  /** umiejętności, za które kontrola odrzuciła podejścia (bez powtórzeń); brak w wynikach sprzed tej zmiany */
+  rejectedSkills?: string[];
   /** CV było za długie i AI je skracało */
   shortened: boolean;
   /** liczby spoza profilu, które kontrola zamieniła w żółte sugestie */
@@ -116,15 +118,17 @@ async function pool<T>(items: T[], limit: number, fn: (item: T) => Promise<void>
 }
 
 /** Powody odrzucenia jednego podejścia, policzone tymi samymi kontrolami, które odrzuciły odpowiedź modelu. */
-function rejectionReasons(a: CallAttempt, c: EvalCase, lang: 'pl' | 'en', keywords: JobPosting['keywords']): Required<CaseResult['rejected']> {
+function rejectionReasons(a: CallAttempt, c: EvalCase, lang: 'pl' | 'en', keywords: JobPosting['keywords']): Required<CaseResult['rejected']> & { skillNames: string[] } {
   const parsed = CvContentSchema.safeParse(a.raw);
-  if (!parsed.success) return { unsourced: 0, skills: 0, style: 0, schools: 0, format: 1 };
+  if (!parsed.success) return { unsourced: 0, skills: 0, style: 0, schools: 0, format: 1, skillNames: [] };
+  const skillNames = rejectedSkillItems(parsed.data, c.profile, keywords);
   return {
     unsourced: sourceIssues(parsed.data, c.profile).length,
-    skills: unverifiedSkillItems(parsed.data, c.profile, keywords).length,
+    skills: skillNames.length,
     style: styleIssues(parsed.data, lang, undefined, c.profile.pronouns).length,
     schools: educationIssues(parsed.data, c.profile).length,
     format: 0,
+    skillNames,
   };
 }
 
@@ -168,6 +172,7 @@ async function runCase(c: EvalCase, opts: EvalOptions, attempts: Map<string, Cal
     acceptedAt: null,
     attempts: 0,
     rejected: { unsourced: 0, skills: 0, style: 0, schools: 0, format: 0 },
+    rejectedSkills: [],
     shortened: false,
     numbersFlagged: 0,
     suggestions: 0,
@@ -204,6 +209,7 @@ async function runCase(c: EvalCase, opts: EvalOptions, attempts: Map<string, Cal
     base.rejected.style += r.style;
     base.rejected.schools += r.schools;
     base.rejected.format += r.format;
+    base.rejectedSkills = [...new Set([...(base.rejectedSkills ?? []), ...r.skillNames])];
   }
   if (!cv) return { result: base, parseCost };
 
@@ -286,11 +292,11 @@ export function toMarkdown(r: EvalResult): string {
     `| Koszt na CV / razem | ${usd(s.costPerCv)} / ${usd(s.costTotal)} |`,
     `| Czas na CV (średnio / najdłużej) | ${sec(s.secondsPerCv)} / ${sec(s.secondsMax)} |`,
     '',
-    '| Przypadek | Podejście | Odrzucone: bez źródła / umiejętności / styl / szkoła / format | Liczby spoza profilu | Słowa kluczowe | Strony | Koszt | Czas | Zakazane fakty |',
-    '|---|---|---|---|---|---|---|---|---|',
+    '| Przypadek | Podejście | Odrzucone: bez źródła / umiejętności / styl / szkoła / format | Liczby spoza profilu | Słowa kluczowe | Strony | Koszt | Czas | Zakazane fakty | Odrzucone umiejętności |',
+    '|---|---|---|---|---|---|---|---|---|---|',
     ...r.cases.map((c) => {
       const forbidden = !c.forbiddenChecked ? '' : c.forbidden.length ? c.forbidden.map((v) => `${v.foundAs} (${v.status === 'fact' ? 'fakt' : 'sugestia'}, ${v.where})`).join('; ') : 'brak';
-      return `| ${c.id} | ${c.acceptedAt ?? `nie (${c.error.slice(0, 60)})`} | ${c.rejected.unsourced} / ${c.rejected.skills ?? '-'} / ${c.rejected.style} / ${c.rejected.schools} / ${c.rejected.format} | ${c.numbersFlagged} | ${pct(c.keywordCoverage)} (${c.keywordsMatched}/${c.keywordsTotal}) | ${c.pages ?? '-'}${c.shortened ? ' (skrócone)' : ''} | ${usd(c.costUsd)} | ${sec(c.seconds)} | ${forbidden} |`;
+      return `| ${c.id} | ${c.acceptedAt ?? `nie (${c.error.slice(0, 60)})`} | ${c.rejected.unsourced} / ${c.rejected.skills ?? '-'} / ${c.rejected.style} / ${c.rejected.schools} / ${c.rejected.format} | ${c.numbersFlagged} | ${pct(c.keywordCoverage)} (${c.keywordsMatched}/${c.keywordsTotal}) | ${c.pages ?? '-'}${c.shortened ? ' (skrócone)' : ''} | ${usd(c.costUsd)} | ${sec(c.seconds)} | ${forbidden} | ${(c.rejectedSkills ?? []).join(', ')} |`;
     }),
     '',
   ];

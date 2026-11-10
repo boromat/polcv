@@ -61,6 +61,9 @@ describe('npm run eval na atrapie modelu', () => {
     expect(md).toContain('| CV przyjęte w 1. / 2. / 3. podejściu | 50% / 50% / 0% |');
     expect(md).toContain('Google Ads (fakt, bullet)');
     expect(md).toContain('| 01-marketing-studentka | 2 | 1 / 1 / 0 / 0 / 0 |');
+    // Nazwy odrzuconych umiejętności są w wyniku, żeby było widać, co kontrola odrzuciła.
+    expect(first.rejectedSkills).toEqual(['Google Ads']);
+    expect(md).toMatch(/\| 01-marketing-studentka \|.*\| Google Ads \|$/m);
     expect(comparisonMarkdown([result, { ...result, model: 'inny/model' }])).toContain('| Miara | `mock/model` | `inny/model` |');
     // Drugi przebieg tego samego dnia z opisem nie nadpisuje pierwszego.
     const again = await runEval({ model: 'mock/model', fastModel: 'mock/fast', cases: cases.slice(1), outDir, mock: true, label: 'po-poprawce' });

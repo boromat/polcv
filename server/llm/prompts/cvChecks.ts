@@ -165,17 +165,47 @@ export function sourceIssues(c: CvContent, profile: Profile): CvIssue[] {
     }));
 }
 
-/** Schemat CV dla modelu: punkty w 1. osobie i wpisy spoza profilu wracają do poprawki. Schemat JSON się nie zmienia. */
 // ---------- Umiejętności spoza profilu ----------
+
+/** "Power BI (raporty)" → "Power BI": dopisek w nawiasie nie zmienia tego, jaką umiejętność pozycja deklaruje. */
+const skillBase = (item: string) => item.replace(/\s*\(.*?\)\s*/g, ' ').trim();
+
+/** Słowa pozycji bez znaków wokół: "(TMS)," → "TMS", "C++" i ".NET" zostają. */
+const skillWords = (s: string) =>
+  s
+    .split(/[\s,;]+/)
+    .map((w) => w.replace(/^[^\p{L}\p{N}.]+|[^\p{L}\p{N}+#]+$/gu, ''))
+    .filter(Boolean);
+
+/**
+ * Słowa, które się nie tłumaczą: skróty i wielka litera w środku (CMR, TMS, SQL, TypeScript), cyfry i znaki
+ * (GA4, C++, C+E, CI/CD, Node.js). "CMR documents" to tłumaczenie "dokumenty CMR", ale "CMR" musi być w profilu.
+ */
+const isNameWord = (w: string) => /\p{Lu}.*\p{Lu}|\d|[+#/]|\p{L}\.\p{L}/u.test(w);
+
+/** Pozycja = słowo kluczowe ogłoszenia, gdy to ta sama fraza co jego term albo synonim (w obie strony). */
+function postingMatches(base: string, keywords: Keyword[]): Keyword[] {
+  const t = tokenize(base);
+  const same = (v: string) => !!v.trim() && countPhrase(t, v) > 0 && countPhrase(tokenize(v), base) > 0;
+  return keywords.filter((k) => [k.term, ...k.synonyms].some(same));
+}
+
+interface SkillFinding {
+  item: string;
+  /** nazwy z pozycji, których profil nie ma (np. "SQL", w CV po polsku też "Ads" z "Google Ads") */
+  missingNames: string[];
+  /** pozycja to narzędzie albo nazwa wymagana w ogłoszeniu ("React", "Java"), a nie zwykła umiejętność */
+  postingName: boolean;
+}
 
 /**
  * Pozycje z listy umiejętności w CV, których nie da się znaleźć w profilu (ani w odpowiedziach "mam" z extraFacts).
  * Odpowiedniki się liczą: aliasy ("VLOOKUP" = "WYSZUKAJ.PIONOWO", "Microsoft Excel" = "MS Excel") oraz term i synonimy
- * słowa kluczowego ogłoszenia. CV po angielsku z polskiego profilu: zwykłe słowa ("Teamwork") to tłumaczenia, więc
- * sprawdzamy tylko nazwy techniczne (wielkie litery w środku, cyfry, znaki typu C++/CI/CD) i narzędzia z ogłoszenia
- * ("React"), bo te się nie tłumaczą.
+ * słowa kluczowego ogłoszenia. CV po angielsku z polskiego profilu: zwykłe słowa to tłumaczenia ("Teamwork",
+ * "CMR documents"), więc liczą się nazwy, które się nie tłumaczą, narzędzia z ogłoszenia ("React") i, tylko do
+ * ostrzeżenia, nazwy z wielkich liter ("Power Query").
  */
-export function unverifiedSkillItems(c: CvContent, profile: Profile, keywords: Keyword[] = []): string[] {
+function skillFindings(c: CvContent, profile: Profile, keywords: Keyword[]): SkillFinding[] {
   const facts = profile.extraFacts.filter((f) => f.has).map(factEvidence);
   const source = [
     ...profile.skills.map((s) => s.name),
@@ -183,56 +213,62 @@ export function unverifiedSkillItems(c: CvContent, profile: Profile, keywords: K
     ...profile.projects.flatMap((p) => [p.name, p.description, ...p.technologies, ...p.achievements]),
     ...profile.education.flatMap((e) => [e.field, e.details]),
     ...profile.certificates.map((x) => `${x.name} ${x.issuer}`),
-    ...profile.languages.map((l) => l.name),
+    ...profile.languages.map((l) => `${l.name} ${l.level}`), // "Angielski B2" w umiejętnościach to poziom z profilu
     profile.summary,
     ...facts,
   ].join(' \n ');
   const tokens = tokenize(source);
-  const profileIsPolish = looksPolish(source);
-  const technical = (s: string) => /\d|[+#/.]|\S[A-Z]|\s[A-Z]/.test(s);
-  // Pozycja = słowo kluczowe ogłoszenia, gdy to ta sama fraza co jego term albo synonim (w obie strony).
-  const sameAs = (base: string) => {
-    const t = tokenize(base);
-    return (v: string) => !!v.trim() && countPhrase(t, v) > 0 && countPhrase(tokenize(v), base) > 0;
-  };
-  const postingMatches = (base: string) => keywords.filter((k) => [k.term, ...k.synonyms].some(sameAs(base)));
-  const equivalents = (base: string): string[] => [...new Set([base, ...postingMatches(base).flatMap((k) => [k.term, ...k.synonyms])].flatMap(aliasVariants))];
-  const postingTool = (base: string) => postingMatches(base).some((k) => k.category === 'narzędzie');
-  return c.skills
-    .flatMap((g) => g.items)
-    .filter((item) => {
-      const base = item.replace(/\s*\(.*?\)\s*/g, ' ').trim(); // "Power BI (raporty)" → "Power BI"
-      if (!base) return false;
-      if (c.language === 'en' && profileIsPolish && !technical(base) && !postingTool(base)) return false;
-      return equivalents(base).every((v) => countPhrase(tokens, v) === 0);
-    });
+  const found = (v: string) => countPhrase(tokens, v) > 0;
+  const translated = c.language === 'en' && looksPolish(source);
+  const out: SkillFinding[] = [];
+  for (const item of c.skills.flatMap((g) => g.items)) {
+    const base = skillBase(item);
+    if (!base) continue;
+    const matches = postingMatches(base, keywords);
+    const equivalents = [...new Set([base, ...matches.flatMap((k) => [k.term, ...k.synonyms])].flatMap(aliasVariants))];
+    if (equivalents.some(found)) continue;
+    // Nazwy w pozycji: skróty i nazwy techniczne, a w CV po polsku też słowa z wielkiej litery poza pierwszym
+    // ("Kampanie Google Ads"), bo po polsku zwykłych słów nie pisze się wielką literą.
+    const words = skillWords(base);
+    const names = [...new Set(words.filter((w, i) => isNameWord(w) || (c.language === 'pl' && i > 0 && /^\p{Lu}/u.test(w))))];
+    const missingNames = names.filter((w) => !aliasVariants(w).some(found));
+    const postingTool = matches.some((k) => k.category === 'narzędzie');
+    // Tłumaczenie z nazwą z profilu ("CMR documentation") przechodzi; nazwa z wielkich liter bez skrótu
+    // ("Power Query", ale też "Transport Management System") zostaje jako ostrzeżenie w edytorze.
+    if (translated && !postingTool && (names.length ? !missingNames.length : !/\s\p{Lu}/u.test(base))) continue;
+    const postingName = matches.some(
+      (k) => k.category !== 'język' && !isSoftSkill(k) && (k.category === 'narzędzie' || /^\p{Lu}/u.test(k.term) || skillWords(k.term).some(isNameWord)),
+    );
+    out.push({ item, missingNames, postingName });
+  }
+  return out;
+}
+
+/** Pozycje umiejętności, których profil nie potwierdza (ostrzeżenie w edytorze). */
+export function unverifiedSkillItems(c: CvContent, profile: Profile, keywords: Keyword[] = []): string[] {
+  return skillFindings(c, profile, keywords).map((f) => f.item);
 }
 
 /**
- * Pozycja, która twierdzi coś konkretnego: nazwa techniczna ("SQL", "Google Ads", "Power BI") albo narzędzie lub
- * umiejętność wymagana w ogłoszeniu ("Java", "React"). Przeformułowana cecha z profilu ("Współpraca zespołowa" zamiast
- * "praca w zespole") tu nie wchodzi: tę pokazuje tylko ostrzeżenie w edytorze.
+ * Umiejętności spoza profilu, które wracają do modelu: pozycja z nazwą, której profil nie ma ("SQL", "Google Ads"),
+ * albo narzędzie lub nazwa wymagana w ogłoszeniu ("React", "Java"). Przeformułowana cecha ("Współpraca zespołowa"),
+ * zwykła umiejętność z ogłoszenia ("koordynacja przewozów") i pozycja z nazwą z profilu ("Obsługa systemu TMS" przy
+ * "system TMS") tu nie wchodzą: te pokazuje tylko ostrzeżenie w edytorze. `keep`: pozycje, które CV już miało
+ * (np. dopisane przez kandydata), nie są ruszane przy poprawie.
  */
-function claimLike(item: string, keywords: Keyword[]): boolean {
-  const base = item.replace(/\s*\(.*?\)\s*/g, ' ').trim();
-  if (/\d|[+#/.]|\S[A-Z]|\s[A-Z]/.test(base)) return true;
-  const t = tokenize(base);
-  return keywords.some(
-    (k) => k.category !== 'język' && !isSoftSkill(k) && [k.term, ...k.synonyms].some((v) => !!v.trim() && countPhrase(t, v) > 0 && countPhrase(tokenize(v), base) > 0),
-  );
-}
-
-/**
- * Konkretne umiejętności spoza profilu (nazwy techniczne, narzędzia i umiejętności z ogłoszenia) wracają do poprawki.
- * `keep`: pozycje, które CV już miało (np. dopisane przez kandydata), nie są ruszane przy poprawie.
- */
-export function skillIssues(c: CvContent, profile: Profile, keywords: Keyword[] = [], keep: string[] = []): CvIssue[] {
+export function rejectedSkillItems(c: CvContent, profile: Profile, keywords: Keyword[] = [], keep: string[] = []): string[] {
   const kept = new Set(keep.map(normalize));
-  const bad = unverifiedSkillItems(c, profile, keywords).filter((s) => !kept.has(normalize(s)) && claimLike(s, keywords));
+  return skillFindings(c, profile, keywords)
+    .filter((f) => !kept.has(normalize(f.item)) && (f.missingNames.length > 0 || f.postingName))
+    .map((f) => f.item);
+}
+
+export function skillIssues(c: CvContent, profile: Profile, keywords: Keyword[] = [], keep: string[] = []): CvIssue[] {
+  const bad = rejectedSkillItems(c, profile, keywords, keep);
   if (!bad.length) return [];
   return [{
     path: ['skills'],
-    message: `Umiejętności spoza profilu: „${bad.join('”, „')}”. W "skills" wpisuj tylko umiejętności z PROFILU KANDYDATA albo z "extraFacts" (has=true), także gdy ogłoszenie ich wymaga, i bez dopisków typu "(w nauce)". Usuń je z listy: braki kandydat zobaczy w raporcie.`,
+    message: `Umiejętności spoza profilu: „${bad.join('”, „')}”. W "skills" wpisuj tylko umiejętności z PROFILU KANDYDATA albo z "extraFacts" (has=true), także gdy ogłoszenie ich wymaga, i bez dopisków typu "(w nauce)". Usuń je z listy: braki kandydat zobaczy w raporcie. Skróty i nazwy narzędzi z profilu (np. "TMS", "CMR", "Excel") zapisuj tak jak w profilu, także w CV po angielsku.`,
   }];
 }
 
@@ -247,7 +283,11 @@ export function educationIssues(c: CvContent, profile: Profile): CvIssue[] {
     }));
 }
 
-/** `keywords`: słowa kluczowe ogłoszenia, żeby ich odpowiedniki z profilu liczyły się przy sprawdzaniu umiejętności. */
+/**
+ * Schemat CV dla modelu: punkty w 1. osobie, wpisy i umiejętności spoza profilu wracają do poprawki. Schemat JSON się
+ * nie zmienia. `keywords`: słowa kluczowe ogłoszenia, żeby ich odpowiedniki z profilu liczyły się przy sprawdzaniu
+ * umiejętności.
+ */
 export function checkedCvSchema(profile: Profile, lang: Lang, keywords: Keyword[] = []) {
   return CvContentSchema.superRefine((c, ctx) => {
     const issues = [...styleIssues(c, lang, undefined, profile.pronouns), ...sourceIssues(c, profile), ...educationIssues(c, profile), ...skillIssues(c, profile, keywords)];

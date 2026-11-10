@@ -11,6 +11,7 @@ import {
   knownNumbers,
   lostKeywordIssues,
   numberFinder,
+  rejectedSkillItems,
   skillIssues,
   sourceIssues,
   styleIssues,
@@ -190,6 +191,38 @@ describe('umiejętności spoza profilu', () => {
     expect(unverifiedSkillItems(c, profile, [react])).toEqual(['React', 'TypeScript']);
     // Bez słowa kluczowego z ogłoszenia "React" wygląda jak zwykłe słowo: jak dotąd go nie ruszamy.
     expect(unverifiedSkillItems(c, profile)).toEqual(['TypeScript']);
+  });
+
+  // Jak para 14 z evals/: w ewaluacji kontrola trzy razy odrzuciła tłumaczenia umiejętności z profilu.
+  const logistics: Profile = {
+    ...profile,
+    summary: 'Absolwent logistyki',
+    skills: [
+      { id: 's1', name: 'MS Excel', category: 'narzędzia', level: '' },
+      { id: 's2', name: 'system TMS', category: 'narzędzia', level: '' },
+      { id: 's3', name: 'dokumenty CMR', category: 'techniczne', level: '' },
+      { id: 's4', name: 'planowanie tras', category: 'techniczne', level: '' },
+    ],
+    languages: [{ id: 'l1', name: 'angielski', level: 'C1' }],
+    extraFacts: [],
+  };
+  const excel: Keyword = { term: 'Excel', synonyms: ['MS Excel', 'Microsoft Excel'], importance: 'must', category: 'narzędzie' };
+  const sap: Keyword = { term: 'SAP', synonyms: ['SAP ERP'], importance: 'nice', category: 'narzędzie' };
+
+  it('CV po angielsku: tłumaczenie z nazwą z profilu przechodzi ("CMR documentation" = "dokumenty CMR"), nowa nazwa nie', () => {
+    const items = ['Microsoft Excel', 'TMS (Transport Management System)', 'TMS system', 'Transport Management System', 'CMR documentation', 'Route planning', 'English C1'];
+    const c = cv({ language: 'en', skills: [{ category: 'Tools', items: [...items, 'SAP ERP', 'WMS'] }] });
+    // "Transport Management System" zostaje ostrzeżeniem w edytorze, ale do modelu nie wraca.
+    expect(unverifiedSkillItems(c, logistics, [excel, sap])).toEqual(['Transport Management System', 'SAP ERP', 'WMS']);
+    expect(rejectedSkillItems(c, logistics, [excel, sap])).toEqual(['SAP ERP', 'WMS']);
+    expect(skillIssues(c, logistics, [excel, sap]).map((i) => i.message).join('')).toContain('„SAP ERP”, „WMS”');
+    expect(skillIssues(cv({ language: 'en', skills: [{ category: 'Tools', items }] }), logistics, [excel, sap])).toEqual([]);
+  });
+
+  it('CV po polsku: nazwa z profilu w innych słowach to tylko ostrzeżenie, nowa nazwa wraca do modelu', () => {
+    const c = cv({ skills: [{ category: 'Narzędzia', items: ['Obsługa systemu TMS', 'Kampanie Google Ads', 'Excel zaawansowany'] }] });
+    expect(unverifiedSkillItems(c, logistics, [excel])).toEqual(['Obsługa systemu TMS', 'Kampanie Google Ads', 'Excel zaawansowany']);
+    expect(rejectedSkillItems(c, logistics, [excel])).toEqual(['Kampanie Google Ads']);
   });
 
   it('przy poprawie umiejętność, którą CV już miało, zostaje; nowa spoza profilu wraca do modelu', () => {
