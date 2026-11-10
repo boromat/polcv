@@ -125,6 +125,10 @@ Kopia zapasowa = skopiowanie folderu `data`.
 - **Okno `start.bat` zamyka się od razu** - uruchom je ponownie i przeczytaj komunikat; zwykle brakuje Node.js.
 - **Port 3000 zajęty** - zamknij inne okno PolCV albo ustaw inny port: w `start.bat` przed `call npm start` dopisz `set PORT=3001`.
 
+## Jakość generowania
+
+Na 18 fikcyjnych parach profil + ogłoszenie z [`evals/`](evals/README.md) Claude Haiku 5.5 (10.11.2026) napisał CV, które przeszło kontrole, w 16 przypadkach (89%, w tym 61% za pierwszym podejściem). Żadne nie miało pozycji ani liczby spoza profilu, wszystkie zmieściły się na jednej stronie A4, a jedno CV kosztowało ok. $0,002 i powstawało średnio 9 s. Dwa CV nie powstały, bo kontrola podsumowania trzy razy odrzuciła czas przeszły z rodzajem. To mały zbiór przygotowany przez autora programu: metody, wyniki dla każdej pary i ograniczenia opisuje [evals/README.md](evals/README.md).
+
 ## Bezpieczeństwo
 
 - Serwer nasłuchuje tylko na `127.0.0.1`. API odpowiada tylko pod `localhost`, `127.0.0.1` i `[::1]`, a zapytania zmieniające dane wysłane z innych stron dostają odmowę (program sprawdza nagłówki Host i Origin). Obca strona otwarta w tej samej przeglądarce nie odczyta więc Twojego profilu i niczego nie uruchomi.
@@ -148,6 +152,7 @@ npm run dev        # serwer (3000) + interfejs z hot-reload (5173)
 npm test           # testy: słowa kluczowe, RODO, PDF w obie strony, klient AI, wyszukiwanie, mostek polanon
 npm run typecheck  # TypeScript 7 (pakiet @typescript/native)
 npm run lint       # ESLint z typescript-eslint; pakiet typescript 6.0 jest tylko dla jego parsera
+npm run eval -- --mock   # ewaluacja jakości na atrapie modelu; z --model <id> na prawdziwym API (evals/README.md)
 ```
 
 - `server/` - Express: pobieranie ogłoszeń i wyszukiwanie (`jobs/`), prompty AI (`llm/prompts/`), szablony i PDF (`cv/`), ocena ATS (`ats/`), mostek do polanonu (`privacy/`), zapis plików (`storage/`).

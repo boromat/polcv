@@ -8,6 +8,11 @@ All notable changes to PolCV are recorded here. The format follows
 
 ### Added
 
+- **Quality evaluation of CV generation** (for developers). `npm run eval -- --model <id>` runs 18
+  fictional profile and posting pairs, including traps, through the same CV generation as the app
+  and reports which attempt passed the checks, what they caught, keyword coverage, whether the CV
+  fits one page, forbidden facts that got through, and cost and time per CV. CI runs it on a mock
+  model only. The first run, on Claude Haiku 5.5, is described in `evals/README.md`.
 - In *Szukaj pracy*, an offer you already made a CV for shows *CV already made*, linking to that
   application, so it is easy to spot after the offers are refreshed and rearranged.
 - **Add entries in the CV editor.** Experience, Projects and Education have *+ experience*,

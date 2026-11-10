@@ -94,6 +94,15 @@ $0.05-0.15. The Settings page lists the models and shows what you have spent.
   working, nothing is sent at all. Masking is pseudonymisation, not anonymisation - see polanon's
   threat model.
 
+## Generation quality
+
+On 18 fictional profile and posting pairs in [`evals/`](evals/README.md), Claude Haiku 5.5 (10 Nov 2026) wrote a CV
+that passed the checks in 16 cases (89%, 61% on the first attempt). None had an entry or a number that is not in the
+profile, all fit on one A4 page, and a CV cost about $0.002 and took 9 s on average. Two CVs were not produced
+because the summary check rejected a gendered past tense three times. It is a small set prepared by the author of
+the tool: [evals/README.md](evals/README.md) (in Polish) describes the method, the results for each pair and the
+limitations.
+
 ## Security
 
 - The server listens on `127.0.0.1` only. The API answers only requests sent to `localhost`,
@@ -143,6 +152,7 @@ npm run dev        # API on :3000 + Vite with hot reload on :5173
 npm test           # vitest: keywords, GDPR logic, PDF round trip, AI client, search, polanon bridge
 npm run typecheck  # TypeScript 7 (the @typescript/native package)
 npm run lint       # ESLint with typescript-eslint; the typescript 6.0 package is only for its parser
+npm run eval -- --mock   # quality evaluation on a mock model; with --model <id> on the real API (evals/README.md)
 ```
 
 - `server/` - Express API: posting fetchers and job search (`jobs/`), prompts (`llm/prompts/`),
