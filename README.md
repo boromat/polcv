@@ -146,7 +146,8 @@ npm install
 npx playwright install chromium
 npm run dev        # serwer (3000) + interfejs z hot-reload (5173)
 npm test           # testy: słowa kluczowe, RODO, PDF w obie strony, klient AI, wyszukiwanie, mostek polanon
-npm run typecheck
+npm run typecheck  # TypeScript 7 (pakiet @typescript/native)
+npm run lint       # ESLint z typescript-eslint; pakiet typescript 6.0 jest tylko dla jego parsera
 ```
 
 - `server/` - Express: pobieranie ogłoszeń i wyszukiwanie (`jobs/`), prompty AI (`llm/prompts/`), szablony i PDF (`cv/`), ocena ATS (`ats/`), mostek do polanonu (`privacy/`), zapis plików (`storage/`).

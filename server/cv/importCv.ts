@@ -12,7 +12,7 @@ export async function pdfToText(buf: Uint8Array): Promise<{ text: string; pages:
 /** Tekst z wgranego CV (PDF albo DOCX). */
 export async function cvFileToText(buf: Buffer, filename: string): Promise<string> {
   const ext = filename.toLowerCase().split('.').pop();
-  let text = '';
+  let text: string;
   if (ext === 'pdf') text = (await pdfToText(buf)).text;
   else if (ext === 'docx') text = (await mammoth.extractRawText({ buffer: buf })).value;
   else if (ext === 'txt' || ext === 'md') text = buf.toString('utf8');

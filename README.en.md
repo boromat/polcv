@@ -141,7 +141,8 @@ npm install
 npx playwright install chromium
 npm run dev        # API on :3000 + Vite with hot reload on :5173
 npm test           # vitest: keywords, GDPR logic, PDF round trip, AI client, search, polanon bridge
-npm run typecheck
+npm run typecheck  # TypeScript 7 (the @typescript/native package)
+npm run lint       # ESLint with typescript-eslint; the typescript 6.0 package is only for its parser
 ```
 
 - `server/` - Express API: posting fetchers and job search (`jobs/`), prompts (`llm/prompts/`),

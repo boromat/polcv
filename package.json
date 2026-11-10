@@ -15,7 +15,8 @@
     "start": "tsx server/index.ts",
     "setup": "npm install && npx playwright install chromium && npm run build",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "node node_modules/@typescript/native/bin/tsc --noEmit",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans": "^5.3.0",
@@ -34,17 +35,21 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/express": "^5.0.6",
     "@types/multer": "^2.3.0",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "@vitejs/plugin-react": "^6.2.1",
     "concurrently": "^10.0.6",
+    "eslint": "^10.14.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.5",
-    "typescript": "^7.0.2",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.2",
     "vite": "^8.3.5",
     "vitest": "^5.0.5"
   }

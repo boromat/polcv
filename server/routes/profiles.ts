@@ -78,7 +78,7 @@ profilesRouter.post('/profiles/:pid/import', upload.single('cv'), async (req, re
 
   const dir = store.profileFilesDir(profile.id);
   await fs.mkdir(dir, { recursive: true });
-  const stored = `${Date.now()}_${original.replace(/[^\w.\-]+/g, '_')}`;
+  const stored = `${Date.now()}_${original.replace(/[^\w.-]+/g, '_')}`;
   await fs.writeFile(path.join(dir, stored), file.buffer);
   // Odczyt pliku CV chwilę trwa - dopisujemy plik do aktualnego profilu, a nie do kopii sprzed odczytu.
   await store.updateProfile(profile.id, (p) => {

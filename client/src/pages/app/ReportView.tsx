@@ -116,7 +116,8 @@ function ImprovePicker({
   const [chosen, setChosen] = useState<Set<string>>(new Set());
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => box.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), []);
-  // Lista jest liczona z bieżącej oceny: po ponownej ocenie wczytuje się od nowa.
+  // Lista jest liczona z bieżącej oceny: po ponownej ocenie wczytuje się od nowa. `load` celowo nie jest zależnością:
+  // rodzic tworzy ją przy każdym renderze, a nowa lista ma się wczytać tylko po zmianie oceny.
   useEffect(() => {
     if (stale) return;
     let live = true;
@@ -127,7 +128,6 @@ function ImprovePicker({
     return () => {
       live = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stale]);
   const toggle = (id: string) =>
     setChosen((cur) => {

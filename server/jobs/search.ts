@@ -33,7 +33,7 @@ export function toMonthly(amount: number, unit: string): number {
 /** "8 000–10 500 zł brutto / mies." → 10500 (górna granica, miesięcznie). */
 export function parseSalaryText(text: string): number | null {
   if (!text) return null;
-  const nums = [...text.replace(/ /g, ' ').matchAll(/\d[\d ]*(?:[.,]\d+)?/g)]
+  const nums = [...text.replace(/\u00a0/g, ' ').matchAll(/\d[\d ]*(?:[.,]\d+)?/g)]
     .map((m) => Number(m[0].replace(/ /g, '').replace(',', '.')))
     .filter((n) => n > 0);
   if (!nums.length) return null;

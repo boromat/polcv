@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   test:
-    name: Typy, testy i build (${{ matrix.os }})
+    name: Typy, lint, testy i build (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -41,6 +41,9 @@ jobs:
 
       - name: Typy
         run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
 
       - name: Testy
         run: npm test
