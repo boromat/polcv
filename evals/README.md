@@ -70,9 +70,7 @@ kodzie z commita `3b0fb24`, 2. po poprawce kontroli podsumowania (`5f1f4a7`), 3.
 Analiza 18 ogłoszeń (raz, potem zamrożona) kosztowała $0,018; pisanie CV $0,044 w pierwszym przebiegu, $0,034 w drugim,
 $0,039 w trzecim i $0,032 w czwartym.
 
-Porównania z innymi modelami jeszcze nie ma: przebiegi objęły tylko model używany na co dzień. Skrypt jest
-gotowy (`npm run eval -- --model <id>`, potem `--report`), a dla wybranego zestawu trzech modeli koszt szacowany był
-na ok. $1.
+Porównanie z `anthropic/claude-sonnet-5.5` i `openai/gpt-6.1-sol` jest niżej, w sekcji „Porównanie modeli”.
 
 ### Co z tego wynika (przebieg 1)
 
@@ -172,6 +170,48 @@ i 18 ([wynik](results/2026-11-10_anthropic_claude-haiku-5.5_tytul.md), $0,004; d
 - Pokrycie słów kluczowych w parze 18 spadło z 45% do 35%: tytuł bezpieczny nie ma „kat. C+E”, a ocena liczy
   oczekującą sugestię w wersji bezpiecznej. To uczciwy wynik dla kandydata z kat. B; po zaakceptowaniu tytułu słowo wraca.
 - Dwie pary to tylko sprawdzenie działania, nie pomiar: pełny przebieg z tą zmianą to porównanie modeli niżej.
+
+## Porównanie modeli: 11.11.2026
+
+Pełne przebiegi 18 par na tych samych zamrożonych ogłoszeniach (data w plikach to data UTC, 2026-11-10), z kodem z
+commita `87cbeba`, czyli z kontrolą umiejętności, sugestią tytułu i drugim skracaniem. Modele:
+`anthropic/claude-sonnet-5.5` (domyślny model pisania w `server/storage/store.ts`) i `openai/gpt-6.1-sol` (inny dostawca
+w tej samej cenie za token: $2 / $10 za 1M tokenów wejścia / wyjścia na OpenRouter, sprawdzone 11.11.2026). Dla
+`anthropic/claude-haiku-5.5` ($0,10 / $0,50) tabela bierze przebieg 4 sprzed sugestii tytułu, więc jego 2 z 3 zakazanych
+faktów w treści to tytuły, które dziś byłyby sugestią (zob. sprawdzenie par 15 i 18 wyżej). Szczegóły:
+[Sonnet](results/2026-11-10_anthropic_claude-sonnet-5.5.md), [GPT](results/2026-11-10_openai_gpt-6.1-sol.md),
+[Haiku](results/2026-11-10_anthropic_claude-haiku-5.5_poprawka-umiejetnosci.md); wszystkie przebiegi naraz:
+`npm run eval -- --report`.
+
+| Miara | `anthropic/claude-haiku-5.5` | `anthropic/claude-sonnet-5.5` | `openai/gpt-6.1-sol` |
+|---|---|---|---|
+| CV przyjęte w 1. / 2. / 3. podejściu | 89% / 11% / 0% | 100% / 0% / 0% | 100% / 0% / 0% |
+| Nie powstało | 0% | 0% | 0% |
+| Odrzucenia: bez źródła / umiejętności | 0 / 3 | 0 / 0 | 0 / 0 |
+| Liczby spoza profilu zamienione w sugestie | 0 | 0 | 0 |
+| Pokrycie słów kluczowych (jak w ocenie ATS) | 58% | 59% | 56% |
+| CV na jednej stronie A4 | 94% (1 skrócone, ale na 2 strony) | 100% (1 skrócone) | 100% (bez skracania) |
+| Zakazane fakty: w treści / w sugestiach | 3 / 2 | 1 / 2 | 0 / 0 |
+| Koszt na CV | $0,0018 | $0,0311 | $0,0179 |
+| Czas na CV (średnio / najdłużej) | 8,3 s / 21,2 s | 9,6 s / 26,6 s | 12,6 s / 19,9 s |
+
+Przebieg Sonneta kosztował $0,56, GPT $0,32 (razem $0,88, mniej niż szacowane $1,5-3).
+
+- **Sonnet i GPT nie potrzebowały żadnej poprawki:** każde CV przeszło kontrole za pierwszym razem. Haiku w 2 parach
+  dopisał umiejętności spoza profilu (Google Ads, React, TypeScript) i dopiero kontrola kazała je usunąć.
+- **Zakazane fakty.** U Sonneta jedyny „fakt” to uczciwa deklaracja w podsumowaniu pary 15 („Chcę rozwijać się w
+  kierunku Javy”), a dwa tytuły z ogłoszenia (Java, C+E) czekają w sugestiach. GPT w ogóle nie przepisał tych tytułów
+  i nie wspomniał tych nazw nawet w podsumowaniu.
+- **Pokrycie słów kluczowych jest podobne** (56-59%), z różnicami w pojedynczych parach. GPT najrzadziej używa słów z
+  ogłoszenia tam, gdzie kandydat ich nie ma: w pułapce Java ma 30% (Sonnet 55%), w pułapce C+E 5% (Sonnet 10%,
+  Haiku 45%, ale u Haiku z tytułem „kat. C+E” jako faktem). Najwięcej zyskuje Sonnet u nauczycielki przechodzącej do HR
+  (48% wobec 38% u Haiku) i u handlowca (45% wobec 30-35%).
+- **Koszt i czas.** Sonnet jest ok. 17 razy droższy od Haiku na CV, GPT ok. 10 razy; GPT jest najwolniejszy, ale CV
+  długiego profilu (17) zmieścił na stronie bez skracania.
+- **Drugie skracanie nie zadziałało w żadnym przebiegu:** Sonnet skrócił CV długiego profilu raz i zmieściło się na
+  stronie, GPT nie skracał wcale. Na prawdziwym modelu drugie skracanie jest więc dalej niesprawdzone.
+- To po jednym przebiegu na model na 18 parach: różnica kilku punktów procentowych w pokryciu albo jeden zakazany
+  fakt to w granicach zmienności (zob. ograniczenia niżej).
 
 ## Ograniczenia
 

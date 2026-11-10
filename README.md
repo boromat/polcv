@@ -127,7 +127,15 @@ Kopia zapasowa = skopiowanie folderu `data`.
 
 ## Jakość generowania
 
-Na 18 fikcyjnych parach profil + ogłoszenie z [`evals/`](evals/README.md) Claude Haiku 5.5 (10.11.2026, po poprawkach kontroli podsumowania i listy umiejętności) napisał CV, które przeszło kontrole, we wszystkich 18 przypadkach, w 16 za pierwszym podejściem. Żadne nie miało pozycji, liczby ani umiejętności spoza profilu: kontrola odrzuciła Google Ads, Reacta i TypeScript, które model dopisał w 2 CV, i drugie podejście było już bez nich. Jedno CV kosztowało ok. $0,002 i powstawało średnio 8 s. 17 z 18 zmieściło się na jednej stronie A4; bardzo długi profil po skracaniu przez AI zajął 2 strony (od tego czasu AI skraca wtedy drugi raz). Tytuł CV bywa przepisany z ogłoszenia także wtedy, gdy kandydat nie spełnia wymagania z tytułu (np. „Junior Java Developer” bez Javy). To mały zbiór przygotowany przez autora programu: metody, wyniki dla każdej pary i ograniczenia opisuje [evals/README.md](evals/README.md).
+Na 18 fikcyjnych parach profil + ogłoszenie z [`evals/`](evals/README.md) (11.11.2026, po jednym przebiegu na model) wszystkie trzy sprawdzone modele napisały 18 CV, które przeszły kontrole, i żadne nie miało pozycji, liczby ani umiejętności spoza profilu:
+
+| Model | Za pierwszym podejściem | Pokrycie słów kluczowych | Koszt na CV | Czas na CV |
+|---|---|---|---|---|
+| `anthropic/claude-sonnet-5.5` | 18 z 18 | 59% | $0,031 | 9,6 s |
+| `openai/gpt-6.1-sol` | 18 z 18 | 56% | $0,018 | 12,6 s |
+| `anthropic/claude-haiku-5.5` | 16 z 18 | 58% | $0,002 | 8,3 s |
+
+**Polecam domyślny `anthropic/claude-sonnet-5.5`:** każde CV przechodzi kontrole od razu, ma najlepsze pokrycie słów kluczowych i powstaje w ok. 10 s, a 100 CV kosztuje ok. $3. Gdy liczy się koszt, `anthropic/claude-haiku-5.5` jest ok. 17 razy tańszy przy podobnym pokryciu, ale częściej dopisuje umiejętności spoza profilu (np. Reacta), które kontrola musi odrzucić. `openai/gpt-6.1-sol` był najostrożniejszy, ale najwolniejszy i słabiej używał słów z ogłoszenia w parach-pułapkach. Tytuł z ogłoszenia, którego profil nie potwierdza (np. „Junior Java Developer” bez Javy), trafia do żółtej sugestii. Drugie skracanie za długiego CV nie uruchomiło się w żadnym przebiegu, więc na prawdziwym modelu jest jeszcze niesprawdzone. To mały zbiór przygotowany przez autora programu: metody, wyniki dla każdej pary i ograniczenia opisuje [evals/README.md](evals/README.md).
 
 ## Bezpieczeństwo
 

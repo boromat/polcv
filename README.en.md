@@ -98,14 +98,24 @@ $0.05-0.15. The Settings page lists the models and shows what you have spent.
 
 ## Generation quality
 
-On 18 fictional profile and posting pairs in [`evals/`](evals/README.md), Claude Haiku 5.5 (10 Nov 2026, after fixes
-to the summary and skills checks) wrote a CV that passed the checks in all 18 cases, 16 on the first attempt. None had
-an entry, a number or a skill that is not in the profile: the check rejected Google Ads, React and TypeScript, which the
-model added in 2 CVs, and the second attempt left them out. A CV cost about $0.002 and took 8 s on average. 17 of 18
-fit on one A4 page; a very long profile took 2 pages after the AI shortened it (since then the AI shortens it a second
-time). The CV title is sometimes copied from
-the posting even when the candidate does not meet a requirement in it ("Junior Java Developer" without Java). It is a small set prepared by the author of the tool: [evals/README.md](evals/README.md)
-(in Polish) describes the method, the results for each pair and the limitations.
+On 18 fictional profile and posting pairs in [`evals/`](evals/README.md) (11 Nov 2026, one run per model), all three
+models tested wrote 18 CVs that passed the checks, and none had an entry, a number or a skill that is not in the
+profile:
+
+| Model | On the first attempt | Keyword coverage | Cost per CV | Time per CV |
+|---|---|---|---|---|
+| `anthropic/claude-sonnet-5.5` | 18 of 18 | 59% | $0.031 | 9.6 s |
+| `openai/gpt-6.1-sol` | 18 of 18 | 56% | $0.018 | 12.6 s |
+| `anthropic/claude-haiku-5.5` | 16 of 18 | 58% | $0.002 | 8.3 s |
+
+**I recommend the default `anthropic/claude-sonnet-5.5`:** every CV passes the checks straight away, it has the best
+keyword coverage and takes about 10 s, and 100 CVs cost about $3. When cost matters, `anthropic/claude-haiku-5.5` is
+about 17 times cheaper with similar coverage, but more often adds skills the profile does not have (React, for
+example), which the check has to reject. `openai/gpt-6.1-sol` was the most cautious, but the slowest, and used fewer of
+the posting's words in the trap pairs. A title from the posting that the profile does not confirm ("Junior Java
+Developer" without Java) goes to a yellow suggestion. The second shortening of an overlong CV did not run in any of
+these runs, so it is not yet tested on a real model. It is a small set prepared by the author of the tool:
+[evals/README.md](evals/README.md) (in Polish) describes the method, the results for each pair and the limitations.
 
 ## Security
 
