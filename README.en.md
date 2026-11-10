@@ -19,8 +19,9 @@ What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish applicat
 - **Polish job boards** - reads postings from pracuj.pl, justjoin.it and nofluffjobs.
 - **The GDPR (RODO) consent clause** Polish employers expect, added automatically or copied word
   for word from the posting; the **photo** follows Polish custom and the posting's wishes.
-- **Keywords matched across Polish inflection** - "marketingu", "marketingiem" and "marketing" are
-  one word, as they are to an ATS.
+- **Keywords matched across Polish inflection** - when PolCV scores a CV, "marketingu",
+  "marketingiem" and "marketing" are one word. Not every ATS understands inflection, so the AI
+  writes keywords in the posting's own wording wherever that is true.
 - **A Polish or English CV**, following the language of the posting. The app itself switches between
   Polish and English (PL | EN), so it also works for people applying in Poland who are still
   learning Polish.

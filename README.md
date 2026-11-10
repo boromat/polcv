@@ -15,7 +15,7 @@ Czym różni się od zagranicznych narzędzi (Jobscan, Teal, Rezi):
 
 - **polskie portale** - czyta ogłoszenia z pracuj.pl, justjoin.it i nofluffjobs,
 - **klauzula RODO** dodawana automatycznie (albo dosłownie ta z ogłoszenia), **zdjęcie** według polskich zwyczajów i wymagań oferty,
-- **słowa kluczowe z polską odmianą** - „marketingu”, „marketingiem” i „marketing” to dla programu to samo słowo, tak jak dla ATS,
+- **słowa kluczowe z polską odmianą** - przy liczeniu wyniku „marketingu”, „marketingiem” i „marketing” to dla programu to samo słowo; nie każdy system ATS rozpoznaje odmianę, więc AI wpisuje w CV słowa w brzmieniu z ogłoszenia, tam gdzie to zgodne z prawdą,
 - **CV po polsku albo po angielsku** - w języku ogłoszenia; sam program ma interfejs po polsku i po angielsku (przełącznik PL | EN), więc pomoże też osobom, które dopiero uczą się polskiego,
 - **doradca kariery** zna polskie realia: UoP / zlecenie / B2B, wynagrodzenie brutto, praca w promieniu od miasta albo zdalnie z całej Polski,
 - **polskie dane osobowe pod ochroną** - opcjonalnie z [polanon](https://github.com/boromat/polanon), który maskuje imiona w każdym przypadku, PESEL, NIP i inne, zanim cokolwiek trafi do AI.

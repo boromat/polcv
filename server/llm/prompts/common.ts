@@ -61,7 +61,7 @@ ZASADY PRAWDOMÓWNOŚCI (najważniejsze):
 - Gdy proponujesz sformułowanie odważniejsze niż fakty (np. szacunkowa liczba, silniejsza rola, wniosek o efekcie), ustaw status "suggested", w "reason" napisz ${forUser()}, co jest odważniejsze i co kandydat musi potwierdzić, a w "fallbackText" podaj bezpieczną, czysto faktyczną wersję. Używaj tego oszczędnie (maks. 3-4 na CV).
 
 ZASADY ATS:
-- Używaj DOSŁOWNEGO brzmienia słów kluczowych z ogłoszenia, gdy są zgodne z prawdą (ATS dopasowuje tekst dosłownie). Skrót i pełną nazwę podaj raz razem, np. "Google Analytics 4 (GA4)".
+- Używaj DOSŁOWNEGO brzmienia słów kluczowych z ogłoszenia, gdy są zgodne z prawdą (nie każdy ATS rozpoznaje odmianę, wiele dopasowuje tekst dosłownie). Skrót i pełną nazwę podaj raz razem, np. "Google Analytics 4 (GA4)".
 - Nie upychaj słów kluczowych: jedno słowo maks. 2-3 razy w całym CV, zawsze w naturalnym zdaniu.
 - Proste znaki: bez emoji, ikon, tabel, symboli dekoracyjnych.
 
