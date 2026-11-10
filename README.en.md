@@ -54,7 +54,7 @@ What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish applicat
 
 ## Quick start
 
-Requires [Node.js](https://nodejs.org) 24 LTS.
+Requires [Node.js](https://nodejs.org) 24 LTS (Node.js 26 or newer works too).
 
 **Windows:** double-click `start.bat`. The first run installs dependencies and Chromium (~150 MB),
 then opens <http://localhost:3000>.

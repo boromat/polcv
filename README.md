@@ -34,7 +34,7 @@ Wszystkie dane zostają na Twoim komputerze, w folderze `data`. Do AI (przez Ope
 
 ## Uruchomienie (Windows)
 
-1. Zainstaluj **Node.js LTS** ze strony <https://nodejs.org> (jeśli jeszcze go nie masz).
+1. Zainstaluj **Node.js 24 LTS** ze strony <https://nodejs.org> (jeśli jeszcze go nie masz; działa też Node.js 26 i nowszy).
 2. Kliknij dwukrotnie **`start.bat`**.
    - Za pierwszym razem program instaluje swoje części i pobiera przeglądarkę Chromium (ok. 150 MB) - to trwa kilka minut.
    - Potem sam otworzy się adres <http://localhost:3000>.

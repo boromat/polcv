@@ -10,8 +10,8 @@ if errorlevel 1 (
   exit /b 1
 )
 
-rem Vite 8 i reszta zaleznosci wymagaja Node.js 22.12 lub nowszego (program jest testowany na Node.js 24).
-node -e "const [a,b]=process.versions.node.split('.').map(Number);if(a>22||(a===22&&b>=12))process.exit(0);console.log('Masz za stara wersje Node.js ('+process.version+'). PolCV potrzebuje Node.js 22.12 lub nowszego, najlepiej 24 LTS.');process.exit(1)"
+rem Tak jak "engines" w package.json: unpdf (import CV z PDF) wymaga Node.js 24, a nanoid i vitest pomijaja nieparzyste wydanie 25.
+node -e "const [a]=process.versions.node.split('.').map(Number);if(a===24||a>=26)process.exit(0);console.log('Ta wersja Node.js ('+process.version+') nie wystarczy. PolCV potrzebuje Node.js 24 LTS albo 26 lub nowszego.');process.exit(1)"
 if errorlevel 1 (
   echo Pobierz nowa wersje z https://nodejs.org, zainstaluj ja i uruchom ten plik ponownie.
   pause
