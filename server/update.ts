@@ -1,47 +1,29 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { VERSION } from './version';
-import { APP_UA } from './jobs/http';
+import { latestVersionFrom } from './jobs/http';
 import { isNewer } from './privacy/polanon';
 import { tr } from './i18n';
-import { commandLine, requireConfirmed } from './commands';
+import { commandLine, requireConfirmed, runCommand } from './commands';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 export const RELEASES_URL = 'https://github.com/boromat/polcv/releases';
-const LATEST_API = 'https://api.github.com/repos/boromat/polcv/releases/latest';
 
-let latestCache: { at: number; version: string | null } | null = null;
+/** Najnowsze wydanie PolCV na GitHubie (numer bez "v"). */
+const latestRelease = latestVersionFrom(
+  'https://api.github.com/repos/boromat/polcv/releases/latest',
+  (j) => {
+    const tag = (j as { tag_name?: unknown }).tag_name;
+    return typeof tag === 'string' ? tag.replace(/^v/, '') : null;
+  },
+  { Accept: 'application/vnd.github+json' },
+);
 
-/** Najnowsze wydanie PolCV na GitHubie (publiczne API, nic o użytkowniku nie wysyłamy): godzinę w pamięci, bez sieci 5 minut. */
-async function latestRelease(): Promise<string | null> {
-  if (latestCache && Date.now() - latestCache.at < (latestCache.version ? 3600_000 : 300_000)) return latestCache.version;
-  const version = await fetch(LATEST_API, { headers: { 'User-Agent': APP_UA, Accept: 'application/vnd.github+json' }, signal: AbortSignal.timeout(8000) })
-    .then((r) => (r.ok ? r.json() : null))
-    .then((j: any) => (typeof j?.tag_name === 'string' ? j.tag_name.replace(/^v/, '') : null))
-    .catch(() => null);
-  latestCache = { at: Date.now(), version };
-  return version;
-}
-
-function run(cmd: string, args: string[], timeoutMs: number): Promise<{ code: number | null; out: string }> {
-  return new Promise((resolve) => {
-    let out = '';
-    // npm na Windows to skrypt .cmd, który bez powłoki się nie uruchomi.
-    const child = spawn(cmd, args, { cwd: ROOT, windowsHide: true, shell: process.platform === 'win32' && cmd === 'npm' });
-    const timer = setTimeout(() => child.kill(), timeoutMs);
-    child.stdout.on('data', (d) => (out += d));
-    child.stderr.on('data', (d) => (out += d));
-    child.on('error', (e) => {
-      clearTimeout(timer);
-      resolve({ code: null, out: out + e.message });
-    });
-    child.on('close', (code) => {
-      clearTimeout(timer);
-      resolve({ code, out });
-    });
-  });
+/** Komenda w folderze programu; wynik razem (stdout i stderr) do pokazania w Ustawieniach. */
+async function run(cmd: string, args: string[], timeoutMs: number): Promise<{ code: number | null; out: string }> {
+  const r = await runCommand([cmd], args, { cwd: ROOT, timeoutMs, shell: process.platform === 'win32' && cmd === 'npm' });
+  return { code: r.code, out: r.stdout + r.stderr };
 }
 
 /** Aktualizacja przyciskiem ma sens tylko w kopii z `git clone` tego repozytorium; z ZIP-a pobiera się nową wersję ręcznie. */

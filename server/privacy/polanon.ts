@@ -6,9 +6,9 @@ import { fileURLToPath } from 'node:url';
 import type { Profile, Settings } from '../../shared/schemas';
 import { HttpError } from '../storage/store';
 import { collectStrings, replaceStrings } from '../llm/strings';
-import { APP_UA } from '../jobs/http';
+import { latestVersionFrom } from '../jobs/http';
 import { tr } from '../i18n';
-import { commandLine, requireConfirmed } from '../commands';
+import { commandLine, requireConfirmed, runCommand } from '../commands';
 
 /**
  * Opcjonalne maskowanie danych osobowych przez polanon (pakiet Pythona, `pip install polanon`).
@@ -109,24 +109,7 @@ function candidates(pythonPath: string): string[][] {
   return list;
 }
 
-function run(cmd: string[], args: string[], timeoutMs: number): Promise<{ code: number | null; stdout: string; stderr: string }> {
-  return new Promise((resolve) => {
-    let stdout = '';
-    let stderr = '';
-    const child = spawn(cmd[0], [...cmd.slice(1), ...args], { env: ENV, windowsHide: true });
-    const timer = setTimeout(() => child.kill(), timeoutMs);
-    child.stdout.on('data', (d) => (stdout += d));
-    child.stderr.on('data', (d) => (stderr += d));
-    child.on('error', (e) => {
-      clearTimeout(timer);
-      resolve({ code: null, stdout, stderr: stderr || e.message });
-    });
-    child.on('close', (code) => {
-      clearTimeout(timer);
-      resolve({ code, stdout, stderr });
-    });
-  });
-}
+const run = (cmd: string[], args: string[], timeoutMs: number) => runCommand(cmd, args, { env: ENV, timeoutMs });
 
 const tooOld = (version: string) => {
   const [major, minor] = version.split('.').map(Number);
@@ -161,19 +144,11 @@ export async function polanonStatus(settings: Settings): Promise<PolanonStatus> 
   return { ...status, installCommands: status.python ? installCommands(cmd) : null };
 }
 
-const PYPI = 'https://pypi.org/pypi/polanon/json';
-let latestCache: { at: number; version: string | null } | null = null;
-
-/** Najnowsza wersja polanonu na PyPI (publiczne API, nic o użytkowniku nie wysyłamy): godzinę w pamięci, bez sieci 5 minut. */
-async function latestPolanon(): Promise<string | null> {
-  if (latestCache && Date.now() - latestCache.at < (latestCache.version ? 3600_000 : 300_000)) return latestCache.version;
-  const version = await fetch(PYPI, { headers: { 'User-Agent': APP_UA }, signal: AbortSignal.timeout(8000) })
-    .then((r) => (r.ok ? r.json() : null))
-    .then((j: any) => (typeof j?.info?.version === 'string' ? j.info.version : null))
-    .catch(() => null);
-  latestCache = { at: Date.now(), version };
-  return version;
-}
+/** Najnowsza wersja polanonu na PyPI. */
+const latestPolanon = latestVersionFrom('https://pypi.org/pypi/polanon/json', (j) => {
+  const version = (j as { info?: { version?: unknown } }).info?.version;
+  return typeof version === 'string' ? version : null;
+});
 
 /** Czy `latest` jest nowsze niż `installed` ("0.2.1" > "0.1.1"); przy nieczytelnym numerze false. */
 export function isNewer(latest: string, installed: string): boolean {
