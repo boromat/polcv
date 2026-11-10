@@ -145,6 +145,8 @@ umiejętności (ostatnia kolumna tabeli dla każdej pary).
 - **Nowy problem, niezwiązany z kontrolą umiejętności:** długi profil (17) po skracaniu przez AI zajął 2 strony.
   Skracanie jest jedno i potem nikt nie sprawdza liczby stron; w przebiegach 1-3 to jedno podejście wystarczało.
   Kontrola umiejętności przy skracaniu nie odrzuca pozycji, które CV już miało, więc skracania nie blokuje.
+  Po przebiegu 4 AI skraca drugi raz, od skróconej wersji, gdy CV dalej wystaje; wynik zapisuje, ile razy skracało
+  (w tabeli dla każdej pary „skrócone 2 razy”). Tej zmiany ewaluacja jeszcze nie zmierzyła.
 
 ## Ograniczenia
 

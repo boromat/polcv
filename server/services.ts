@@ -243,15 +243,24 @@ async function renderCv(profile: Profile, cv: CvVersion, mode: RenderMode): Prom
   return renderCvHtml(cv, profile, photo, mode);
 }
 
+/** Ile razy AI skraca CV, które dalej nie mieści się na stronie (każde skracanie to osobne zapytanie). */
+const SHORTEN_PASSES = 2;
+
 /**
- * CV, które nawet przy najmniejszej czcionce nie mieści się na stronie A4, AI skraca raz o tyle, ile wystaje.
+ * CV, które nawet przy najmniejszej czcionce nie mieści się na stronie A4, AI skraca o tyle, ile wystaje. Gdy po
+ * skróceniu dalej wystaje (w ewaluacji zdarzyło się to przy bardzo długim profilu), AI skraca jeszcze raz, od skróconej
+ * wersji. Po drugim razie CV zostaje takie, jak jest: liczbę stron widać w edytorze, a "Skróć do 1 strony" działa dalej.
  * Zwraca treść do zapisania: bez zmian, gdy CV się mieści.
  */
 async function fitToPage(profile: Profile, app: Application, draft: CvVersion, confirmed: string[]): Promise<CvContent> {
-  const { pages, fill } = await htmlToPdf(await renderCv(profile, draft, 'pdf'));
-  if (pages <= 1) return draft.content;
-  const content = withFreshIds(await shortenCv(profile, app.posting!, draft.content, fill ?? 1.2, ctxOf(app, 'skracanie CV'), confirmed));
-  content.language = draft.content.language;
+  let content = draft.content;
+  let { pages, fill } = await htmlToPdf(await renderCv(profile, draft, 'pdf'));
+  for (let pass = 0; pass < SHORTEN_PASSES && pages > 1; pass++) {
+    const shorter = withFreshIds(await shortenCv(profile, app.posting!, content, fill ?? 1.2, ctxOf(app, 'skracanie CV'), confirmed));
+    shorter.language = draft.content.language;
+    content = shorter;
+    ({ pages, fill } = await htmlToPdf(await renderCv(profile, { ...draft, content }, 'pdf')));
+  }
   return content;
 }
 

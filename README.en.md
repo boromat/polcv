@@ -100,7 +100,8 @@ On 18 fictional profile and posting pairs in [`evals/`](evals/README.md), Claude
 to the summary and skills checks) wrote a CV that passed the checks in all 18 cases, 16 on the first attempt. None had
 an entry, a number or a skill that is not in the profile: the check rejected Google Ads, React and TypeScript, which the
 model added in 2 CVs, and the second attempt left them out. A CV cost about $0.002 and took 8 s on average. 17 of 18
-fit on one A4 page; a very long profile took 2 pages after the AI shortened it. The CV title is sometimes copied from
+fit on one A4 page; a very long profile took 2 pages after the AI shortened it (since then the AI shortens it a second
+time). The CV title is sometimes copied from
 the posting even when the candidate does not meet a requirement in it ("Junior Java Developer" without Java). It is a small set prepared by the author of the tool: [evals/README.md](evals/README.md)
 (in Polish) describes the method, the results for each pair and the limitations.
 

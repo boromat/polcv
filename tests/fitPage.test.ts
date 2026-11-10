@@ -69,7 +69,7 @@ describe('CV na jedną stronę', () => {
     expect(cv.content.summary.text).toBe(fixtures.cv.content.summary.text);
   });
 
-  it('CV na dwie strony AI skraca raz, o tyle, ile wystaje, i zapisuje krótszą wersję', async () => {
+  it('CV na dwie strony AI skraca o tyle, ile wystaje (raz, gdy to wystarczy), i zapisuje krótszą wersję', async () => {
     const { pid, aid } = await setup();
     replies = [JSON.stringify(longCv()), JSON.stringify(fixtures.cv.content)];
     const cv = await svc.generate(pid, aid);
@@ -80,6 +80,27 @@ describe('CV na jedną stronę', () => {
     expect(system).toContain('Skróć treść o ok. 18%');
     expect(sent[1].messages[1].content).toContain('ZA-DŁUGIE');
     expect(cv.content.summary.text).not.toContain('ZA-DŁUGIE');
+    expect((await store.getApplication(pid, aid)).currentVersion).toBe(cv.version);
+  });
+
+  it('gdy po skróceniu CV dalej wystaje, AI skraca drugi raz, od skróconej wersji', async () => {
+    const { pid, aid } = await setup();
+    const stillLong = longCv();
+    stillLong.summary.text = 'Studiuję marketing. PIERWSZE-SKRÓCENIE ZA-DŁUGIE';
+    replies = [JSON.stringify(longCv()), JSON.stringify(stillLong), JSON.stringify(fixtures.cv.content)];
+    const cv = await svc.generate(pid, aid);
+    expect(sent).toHaveLength(3);
+    expect(sent[2].messages[0].content).toContain('SKRACANIE DO JEDNEJ STRONY');
+    expect(sent[2].messages[1].content).toContain('PIERWSZE-SKRÓCENIE');
+    expect(cv.content.summary.text).not.toContain('ZA-DŁUGIE');
+  });
+
+  it('po dwóch skróceniach CV zostaje, jakie jest: bez trzeciego zapytania do AI', async () => {
+    const { pid, aid } = await setup();
+    replies = [JSON.stringify(longCv()), JSON.stringify(longCv()), JSON.stringify(longCv())];
+    const cv = await svc.generate(pid, aid);
+    expect(sent).toHaveLength(3);
+    expect(cv.content.summary.text).toContain('ZA-DŁUGIE');
     expect((await store.getApplication(pid, aid)).currentVersion).toBe(cv.version);
   });
 

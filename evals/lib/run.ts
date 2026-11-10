@@ -38,6 +38,8 @@ export interface CaseResult {
   rejectedSkills?: string[];
   /** CV było za długie i AI je skracało */
   shortened: boolean;
+  /** ile razy AI skracało CV (drugi raz, gdy po pierwszym dalej wystawało); brak w wynikach sprzed tej zmiany */
+  shortenPasses?: number;
   /** liczby spoza profilu, które kontrola zamieniła w żółte sugestie */
   numbersFlagged: number;
   suggestions: number;
@@ -174,6 +176,7 @@ async function runCase(c: EvalCase, opts: EvalOptions, attempts: Map<string, Cal
     rejected: { unsourced: 0, skills: 0, style: 0, schools: 0, format: 0 },
     rejectedSkills: [],
     shortened: false,
+    shortenPasses: 0,
     numbersFlagged: 0,
     suggestions: 0,
     keywordCoverage: null,
@@ -201,6 +204,8 @@ async function runCase(c: EvalCase, opts: EvalOptions, attempts: Map<string, Cal
   base.attempts = writing.length;
   base.acceptedAt = writing.find((a) => a.accepted)?.attempt ?? null;
   base.shortened = seen.some((a) => a.ctx.task === 'skracanie CV');
+  // Każde skracanie zaczyna się od 1. podejścia (kolejne to poprawki tej samej odpowiedzi).
+  base.shortenPasses = seen.filter((a) => a.ctx.task === 'skracanie CV' && a.attempt === 1).length;
   const lang = cv?.content.language ?? posting.language;
   for (const a of writing.filter((x) => !x.accepted)) {
     const r = rejectionReasons(a, c, lang, posting.keywords);
@@ -296,7 +301,7 @@ export function toMarkdown(r: EvalResult): string {
     '|---|---|---|---|---|---|---|---|---|---|',
     ...r.cases.map((c) => {
       const forbidden = !c.forbiddenChecked ? '' : c.forbidden.length ? c.forbidden.map((v) => `${v.foundAs} (${v.status === 'fact' ? 'fakt' : 'sugestia'}, ${v.where})`).join('; ') : 'brak';
-      return `| ${c.id} | ${c.acceptedAt ?? `nie (${c.error.slice(0, 60)})`} | ${c.rejected.unsourced} / ${c.rejected.skills ?? '-'} / ${c.rejected.style} / ${c.rejected.schools} / ${c.rejected.format} | ${c.numbersFlagged} | ${pct(c.keywordCoverage)} (${c.keywordsMatched}/${c.keywordsTotal}) | ${c.pages ?? '-'}${c.shortened ? ' (skrócone)' : ''} | ${usd(c.costUsd)} | ${sec(c.seconds)} | ${forbidden} | ${(c.rejectedSkills ?? []).join(', ')} |`;
+      return `| ${c.id} | ${c.acceptedAt ?? `nie (${c.error.slice(0, 60)})`} | ${c.rejected.unsourced} / ${c.rejected.skills ?? '-'} / ${c.rejected.style} / ${c.rejected.schools} / ${c.rejected.format} | ${c.numbersFlagged} | ${pct(c.keywordCoverage)} (${c.keywordsMatched}/${c.keywordsTotal}) | ${c.pages ?? '-'}${c.shortened ? ((c.shortenPasses ?? 1) > 1 ? ` (skrócone ${c.shortenPasses} razy)` : ' (skrócone)') : ''} | ${usd(c.costUsd)} | ${sec(c.seconds)} | ${forbidden} | ${(c.rejectedSkills ?? []).join(', ')} |`;
     }),
     '',
   ];

@@ -42,7 +42,7 @@ describe('npm run eval na atrapie modelu', () => {
 
     const [first, second] = result.cases;
     expect(first).toMatchObject({ id: '01-marketing-studentka', ok: true, acceptedAt: 2, attempts: 2, rejected: { unsourced: 1, skills: 1, format: 0 }, pages: 1, language: 'pl' });
-    expect(second).toMatchObject({ id: '16-pulapka-bez-liczb', ok: true, acceptedAt: 1, attempts: 1, pages: 1 });
+    expect(second).toMatchObject({ id: '16-pulapka-bez-liczb', ok: true, acceptedAt: 1, attempts: 1, pages: 1, shortened: false, shortenPasses: 0 });
     // Atrapa wpisuje liczbę spoza profilu: kontrola zamienia ją w żółtą sugestię.
     expect(first.numbersFlagged).toBe(1);
     expect(second.numbersFlagged).toBe(1);

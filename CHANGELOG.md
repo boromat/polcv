@@ -83,6 +83,11 @@ All notable changes to PolCV are recorded here. The format follows
 
 ### Fixed
 
+- A CV that still runs over one page after the AI shortened it is shortened once more, starting
+  from the shorter version, when a CV is written, after the instruction for the AI and with
+  *Shorten to 1 page*. In the quality evaluation a very long profile took 2 pages after a single
+  pass. If it still does not fit after the second pass, it is saved as it is: the page count in the
+  editor shows it, and *Shorten to 1 page* still works.
 - The skills list is now checked against your profile in a new CV, after *Improve automatically* and
   after the changes you pick from the report. A specific skill the profile does not confirm (a
   technical name such as "TypeScript" or "Google Ads", or a skill the posting asks for, such as
