@@ -1,0 +1,26 @@
+{
+  "pronouns": "on",
+  "contact": { "fullName": "Tomasz Iskrzycki", "email": "tomasz.iskrzycki@example.com", "phone": "+48 500 000 111", "location": "Bielsko-Biała" },
+  "headline": "Elektryk",
+  "experience": [
+    {
+      "role": "Elektryk",
+      "company": "Instalbud Sp. z o.o.",
+      "location": "Bielsko-Biała",
+      "start": "2020-04",
+      "current": true,
+      "achievements": [
+        "Wykonuję instalacje elektryczne w budynkach mieszkalnych i biurowych",
+        "Montuję i podłączam rozdzielnice",
+        "Wykonuję pomiary elektryczne i protokoły pomiarowe",
+        "Czytam schematy elektryczne i dokumentację projektową"
+      ]
+    }
+  ],
+  "education": [{ "school": "Zespół Szkół Technicznych Volt w Bielsku-Białej", "degree": "technikum", "field": "Technik elektryk", "start": "2015-09", "end": "2019-06" }],
+  "skills": {
+    "techniczne": ["instalacje elektryczne", "montaż rozdzielnic", "pomiary elektryczne", "czytanie schematów"],
+    "inne": ["prawo jazdy kat. B"]
+  },
+  "certificates": [{ "kind": "certyfikat", "name": "Świadectwo kwalifikacyjne SEP E do 1 kV", "issuer": "Stowarzyszenie Elektryków Polskich", "date": "2020-02" }]
+}

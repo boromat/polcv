@@ -1,0 +1,37 @@
+{
+  "pronouns": "on",
+  "contact": { "fullName": "Adam Kretowicz", "email": "adam.kretowicz@example.com", "phone": "+48 500 000 115", "location": "Warszawa" },
+  "headline": "Junior Python Developer",
+  "experience": [
+    {
+      "kind": "staż",
+      "role": "Stażysta backend (Python)",
+      "company": "Fintechowo Sp. z o.o.",
+      "location": "Warszawa",
+      "start": "2025-02",
+      "end": "2025-07",
+      "achievements": [
+        "Rozwijałem endpointy REST w Flasku dla wewnętrznego panelu raportów",
+        "Pisałem zapytania SQL do bazy PostgreSQL",
+        "Dodałem testy w pytest do modułu importu plików CSV"
+      ]
+    }
+  ],
+  "education": [{ "school": "Warszawska Wyższa Szkoła Informatyki Praktycznej", "degree": "inżynier", "field": "Informatyka", "start": "2021-10", "end": "2025-02" }],
+  "projects": [
+    {
+      "name": "Kolejka zadań",
+      "role": "autor",
+      "start": "2024-09",
+      "end": "2024-12",
+      "description": "Prosty system kolejkowania zadań w tle dla aplikacji webowej.",
+      "technologies": ["Python", "Redis", "Flask"],
+      "achievements": ["Zaimplementowałem ponawianie nieudanych zadań i podgląd ich stanu"]
+    }
+  ],
+  "skills": {
+    "techniczne": ["Python", "Flask", "SQL", "PostgreSQL", "REST API", "pytest", "Redis"],
+    "narzędzia": ["Git", "Linux"]
+  },
+  "languages": [{ "name": "angielski", "level": "B2" }]
+}

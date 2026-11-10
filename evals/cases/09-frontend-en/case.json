@@ -1,0 +1,11 @@
+{
+  "title": "Student z projektami w Vue.js, ogłoszenie po angielsku na junior frontend developera (React)",
+  "level": "student",
+  "industry": "IT",
+  "trap": "Ogłoszenie po angielsku wymaga Reacta i TypeScriptu, profil ma Vue.js i JavaScript; CV powinno wyjść po angielsku z polskiego profilu.",
+  "forbidden": [
+    { "term": "React", "synonyms": ["React.js", "ReactJS"], "why": "Profil ma Vue.js, nie Reacta." },
+    { "term": "TypeScript", "synonyms": [], "why": "Profil ma tylko JavaScript." },
+    { "term": "Next.js", "synonyms": [], "why": "Nie ma go w profilu." }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "title": "Junior Python developer na ogłoszenie, które wymaga Javy, Spring Boota i Kubernetesa",
+  "level": "junior",
+  "industry": "IT",
+  "trap": "Ogłoszenie wymaga technologii, których profil nie ma. Uczciwe CV pokazuje to, co kandydat umie, i nie dopisuje Javy.",
+  "forbidden": [
+    { "term": "Java", "synonyms": ["Java 17"], "why": "Kandydat programuje w Pythonie, profil nie wspomina Javy." },
+    { "term": "Spring Boot", "synonyms": ["Spring"], "why": "Nie ma go w profilu." },
+    { "term": "Kubernetes", "synonyms": ["k8s"], "why": "Nie ma go w profilu." },
+    { "term": "Kafka", "synonyms": ["Apache Kafka"], "why": "Nie ma jej w profilu." }
+  ]
+}

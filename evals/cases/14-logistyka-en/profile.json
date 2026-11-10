@@ -1,0 +1,32 @@
+{
+  "pronouns": "on",
+  "contact": { "fullName": "Szymon Dąbrowiecki", "email": "szymon.dabrowiecki@example.com", "phone": "+48 500 000 114", "location": "Szczecin" },
+  "headline": "Absolwent logistyki",
+  "experience": [
+    {
+      "kind": "staż",
+      "role": "Stażysta w dziale spedycji",
+      "company": "TransEuro Spedycja Sp. z o.o.",
+      "location": "Szczecin",
+      "start": "2024-07",
+      "end": "2024-12",
+      "achievements": [
+        "Przygotowywałem dokumenty przewozowe CMR",
+        "Kontaktowałem się z przewoźnikami po angielsku i po niemiecku",
+        "Śledziłem przesyłki w systemie TMS i informowałem klientów o opóźnieniach"
+      ]
+    }
+  ],
+  "education": [
+    { "school": "Morska Akademia Logistyki w Szczecinie", "degree": "magister", "field": "Logistyka", "start": "2023-10", "end": "2025-07", "details": "Praca magisterska o optymalizacji tras w transporcie drogowym" },
+    { "school": "Morska Akademia Logistyki w Szczecinie", "degree": "licencjat", "field": "Logistyka", "start": "2020-10", "end": "2023-07" }
+  ],
+  "skills": {
+    "narzędzia": ["MS Excel", "system TMS"],
+    "techniczne": ["dokumenty CMR", "planowanie tras"]
+  },
+  "languages": [
+    { "name": "angielski", "level": "C1" },
+    { "name": "niemiecki", "level": "B1" }
+  ]
+}

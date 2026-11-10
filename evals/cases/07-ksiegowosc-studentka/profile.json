@@ -1,0 +1,38 @@
+{
+  "pronouns": "ona",
+  "contact": { "fullName": "Julia Mrozowska", "email": "julia.mrozowska@example.com", "phone": "+48 500 000 107", "location": "Kraków" },
+  "headline": "Studentka finansów i rachunkowości",
+  "experience": [
+    {
+      "kind": "praktyki",
+      "role": "Praktykantka w biurze rachunkowym",
+      "company": "Biuro Rachunkowe Bilans",
+      "location": "Kraków",
+      "start": "2025-07",
+      "end": "2025-08",
+      "achievements": [
+        "Księgowałam faktury zakupu i sprzedaży w KPiR dla jednoosobowych firm",
+        "Wprowadzałam dokumenty do programu Comarch ERP Optima",
+        "Przygotowywałam dokumenty do archiwizacji"
+      ]
+    },
+    {
+      "kind": "praca",
+      "role": "Kasjerka (praca dorywcza)",
+      "company": "Kino Kometa",
+      "location": "Kraków",
+      "start": "2023-10",
+      "end": "2025-06",
+      "achievements": ["Rozliczałam kasę na koniec zmiany"]
+    }
+  ],
+  "education": [
+    { "school": "Krakowska Szkoła Ekonomii i Finansów", "degree": "licencjat", "field": "Finanse i rachunkowość", "start": "2023-10", "current": true, "details": "Przedmioty: rachunkowość finansowa, prawo podatkowe" }
+  ],
+  "skills": {
+    "techniczne": ["KPiR", "podstawy VAT"],
+    "narzędzia": ["MS Excel", "Comarch ERP Optima"],
+    "miękkie": ["dokładność", "terminowość"]
+  },
+  "languages": [{ "name": "angielski", "level": "B1" }]
+}

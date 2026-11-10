@@ -1,0 +1,36 @@
+{
+  "pronouns": "on",
+  "contact": { "fullName": "Damian Kraliński", "email": "damian.kralinski@example.com", "phone": "+48 500 000 105", "location": "Radom" },
+  "headline": "Mechanik samochodowy",
+  "experience": [
+    {
+      "role": "Mechanik samochodowy",
+      "company": "Auto Naprawa Lipiec",
+      "location": "Radom",
+      "start": "2022-03",
+      "current": true,
+      "achievements": [
+        "Wymieniam rozrządy, sprzęgła i układy hamulcowe w samochodach osobowych i dostawczych",
+        "Diagnozuję usterki testerem komputerowym OBD",
+        "Serwisuję klimatyzację samochodową",
+        "Przyjmuję auta od klientów i wyjaśniam zakres naprawy"
+      ]
+    },
+    {
+      "kind": "praktyki",
+      "role": "Praktykant",
+      "company": "Serwis Opon Koło",
+      "location": "Radom",
+      "start": "2021-06",
+      "end": "2021-08",
+      "achievements": ["Wymieniałem opony i wyważałem koła"]
+    }
+  ],
+  "education": [{ "school": "Zespół Szkół Samochodowych w Radomiu", "degree": "technikum", "field": "Technik pojazdów samochodowych", "start": "2017-09", "end": "2022-06" }],
+  "skills": {
+    "techniczne": ["diagnostyka komputerowa", "układy hamulcowe", "rozrząd", "klimatyzacja samochodowa"],
+    "inne": ["prawo jazdy kat. B"]
+  },
+  "certificates": [{ "kind": "certyfikat", "name": "Certyfikat F-gazowy dla personelu (klimatyzacja pojazdów)", "issuer": "jednostka certyfikująca", "date": "2023-05" }],
+  "interests": ["motoryzacja", "wędkarstwo"]
+}

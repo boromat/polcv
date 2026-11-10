@@ -1,0 +1,165 @@
+{
+  "pronouns": "on",
+  "contact": { "fullName": "Rafał Jodłowski", "email": "rafal.jodlowski@example.com", "phone": "+48 500 000 117", "location": "Kielce", "links": [{ "label": "Portfolio", "url": "https://example.com/rafal" }] },
+  "headline": "Specjalista ds. e-commerce i marketingu",
+  "summary": "Od kilku lat łączę sprzedaż internetową, marketing i obsługę sklepów online. Pracowałem w małych firmach, gdzie robiłem wszystko od zdjęć produktów po kampanie reklamowe.",
+  "experience": [
+    {
+      "role": "Specjalista ds. e-commerce",
+      "company": "Meble Dębowe Sp. z o.o.",
+      "location": "Kielce",
+      "start": "2024-03",
+      "current": true,
+      "description": "Sklep internetowy z meblami drewnianymi na WooCommerce i Allegro.",
+      "achievements": [
+        "Prowadzę sklep na WooCommerce: dodawanie produktów, promocje, zamówienia",
+        "Prowadzę kampanie Meta Ads z budżetem 8 000 zł miesięcznie",
+        "Przygotowuję cotygodniowe raporty sprzedaży z Google Analytics 4",
+        "Wdrożyłem integrację sklepu z Allegro i zsynchronizowałem 450 produktów",
+        "Koordynuję sesje zdjęciowe produktów z fotografem",
+        "Odpowiadam na pytania klientów w czacie sklepu"
+      ]
+    },
+    {
+      "role": "Asystent ds. marketingu internetowego",
+      "company": "Biuro Podróży Wiatr w Żagle",
+      "location": "Kielce",
+      "start": "2022-09",
+      "end": "2024-02",
+      "achievements": [
+        "Prowadziłem kampanie Google Ads dla ofert last minute",
+        "Pisałem opisy wycieczek zoptymalizowane pod SEO",
+        "Wysyłałem newsletter do 12 000 subskrybentów w MailerLite",
+        "Przygotowywałem grafiki do social media w Canvie",
+        "Aktualizowałem treści na stronie w WordPressie"
+      ]
+    },
+    {
+      "role": "Sprzedawca internetowy",
+      "company": "Rowery Kółko",
+      "location": "Kielce",
+      "start": "2021-04",
+      "end": "2022-08",
+      "achievements": [
+        "Wystawiałem oferty rowerów i części na Allegro",
+        "Obsługiwałem zamówienia i zwroty",
+        "Robiłem zdjęcia produktów do ofert",
+        "Prowadziłem profil sklepu na Facebooku"
+      ]
+    },
+    {
+      "kind": "freelance",
+      "role": "Twórca stron internetowych",
+      "company": "",
+      "location": "Kielce",
+      "start": "2020-01",
+      "end": "2021-03",
+      "achievements": ["Zrobiłem 9 stron firmowych na WordPressie dla lokalnych firm", "Konfigurowałem sklepy na WooCommerce dla 3 klientów", "Przygotowywałem proste animacje do reklam"]
+    },
+    {
+      "role": "Konsultant w call center",
+      "company": "Telekontakt Centrum",
+      "location": "Kielce",
+      "start": "2019-02",
+      "end": "2019-12",
+      "achievements": ["Obsługiwałem infolinię sklepu internetowego z elektroniką", "Wprowadzałem zgłoszenia do systemu CRM"]
+    },
+    {
+      "kind": "staż",
+      "role": "Stażysta w dziale marketingu",
+      "company": "Browar Świętokrzyski Chmiel",
+      "location": "Kielce",
+      "start": "2018-07",
+      "end": "2018-09",
+      "achievements": ["Pomagałem przy organizacji stoiska na targach", "Przygotowywałem zestawienia konkurencji w Excelu"]
+    },
+    {
+      "role": "Kelner",
+      "company": "Restauracja Stara Kuźnia",
+      "location": "Kielce",
+      "start": "2017-06",
+      "end": "2018-06",
+      "achievements": ["Obsługiwałem gości restauracji i imprezy okolicznościowe"]
+    },
+    {
+      "kind": "wolontariat",
+      "role": "Wolontariusz",
+      "company": "Fundacja Zielone Kielce",
+      "location": "Kielce",
+      "start": "2016-09",
+      "end": "2017-06",
+      "achievements": ["Prowadziłem fanpage fundacji", "Pomagałem przy organizacji akcji sprzątania lasów"]
+    }
+  ],
+  "education": [
+    { "school": "Świętokrzyska Szkoła Biznesu", "degree": "licencjat", "field": "Marketing i zarządzanie", "start": "2017-10", "end": "2020-07", "details": "Praca dyplomowa o marketingu w mediach społecznościowych małych firm" },
+    { "school": "Technikum Ekonomiczne Merkury w Kielcach", "degree": "technikum", "field": "Technik ekonomista", "start": "2013-09", "end": "2017-06" }
+  ],
+  "projects": [
+    {
+      "name": "Sklep z ziołami",
+      "role": "autor",
+      "start": "2023-04",
+      "end": "2023-08",
+      "description": "Własny mały sklep internetowy z mieszankami ziołowymi.",
+      "technologies": ["Shopify", "Meta Ads", "Canva"],
+      "achievements": ["Uruchomiłem sklep na Shopify i sprzedałem pierwsze 200 zamówień", "Testowałem reklamy Meta Ads z małym budżetem"]
+    },
+    {
+      "name": "Blog rowerowy",
+      "role": "autor",
+      "start": "2021-01",
+      "end": "2022-12",
+      "description": "Blog o trasach rowerowych w Górach Świętokrzyskich.",
+      "technologies": ["WordPress", "SEO"],
+      "achievements": ["Napisałem 40 artykułów i doszedłem do 5 000 odsłon miesięcznie"]
+    },
+    {
+      "name": "Automatyzacja raportów",
+      "role": "autor",
+      "start": "2024-06",
+      "end": "2024-07",
+      "description": "Arkusz Google, który sam pobiera dane sprzedaży z WooCommerce.",
+      "technologies": ["Google Sheets", "Looker Studio"],
+      "achievements": ["Skróciłem przygotowanie raportu tygodniowego z 3 godzin do 30 minut"]
+    },
+    {
+      "name": "Sesje zdjęciowe produktów",
+      "role": "fotograf",
+      "start": "2020-05",
+      "end": "2021-12",
+      "description": "Zdjęcia produktowe dla lokalnych sklepów.",
+      "technologies": ["Lightroom", "Photoshop"]
+    },
+    {
+      "name": "Kampania crowdfundingowa",
+      "role": "marketing",
+      "start": "2022-02",
+      "end": "2022-04",
+      "description": "Promocja zbiórki na schronisko dla zwierząt.",
+      "technologies": ["Facebook", "Instagram"],
+      "achievements": ["Zbiórka zebrała 25 000 zł"]
+    }
+  ],
+  "skills": {
+    "narzędzia": [
+      "WooCommerce", "Shopify", "WordPress", "Allegro", "Google Analytics 4", "Google Ads", "Meta Ads", "Google Search Console",
+      "MailerLite", "Canva", "Photoshop", "Lightroom", "Looker Studio", "Google Sheets", "MS Excel", "Trello", "Slack", "BaseLinker"
+    ],
+    "techniczne": ["SEO", "copywriting", "e-mail marketing", "fotografia produktowa", "podstawy HTML", "podstawy CSS", "analiza danych sprzedażowych"],
+    "miękkie": ["samodzielność", "komunikatywność", "organizacja pracy", "kreatywność", "obsługa klienta"],
+    "inne": ["prawo jazdy kat. B", "drony (kategoria A1/A3)"]
+  },
+  "languages": [
+    { "name": "angielski", "level": "B2" },
+    { "name": "rosyjski", "level": "A2" }
+  ],
+  "certificates": [
+    { "kind": "certyfikat", "name": "Certyfikat Google Ads Search", "issuer": "Google Skillshop", "date": "2023-02" },
+    { "kind": "certyfikat", "name": "Certyfikat Google Analytics", "issuer": "Google Skillshop", "date": "2024-05" },
+    { "kind": "kurs", "name": "Meta Ads od podstaw", "issuer": "kurs online", "date": "2022-11" },
+    { "kind": "kurs", "name": "SEO dla sklepów internetowych", "issuer": "kurs online", "date": "2023-09" },
+    { "kind": "szkolenie", "name": "Fotografia produktowa", "issuer": "szkolenie stacjonarne", "date": "2020-03" }
+  ],
+  "interests": ["rower górski", "fotografia", "zielarstwo", "gry planszowe", "kuchnia azjatycka"]
+}

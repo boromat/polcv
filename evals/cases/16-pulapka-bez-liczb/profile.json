@@ -1,0 +1,34 @@
+{
+  "pronouns": "ona",
+  "contact": { "fullName": "Weronika Sadowiec", "email": "weronika.sadowiec@example.com", "phone": "+48 500 000 116", "location": "Toruń" },
+  "headline": "Baristka",
+  "experience": [
+    {
+      "role": "Baristka",
+      "company": "Kawiarnia Ziarenko",
+      "location": "Toruń",
+      "start": "2023-05",
+      "current": true,
+      "achievements": [
+        "Przygotowuję napoje kawowe i doradzam gościom w wyborze kawy",
+        "Obsługuję kasę i terminal płatniczy",
+        "Przyjmuję dostawy i sprawdzam terminy ważności produktów",
+        "Dbam o porządek na sali i za barem"
+      ]
+    },
+    {
+      "role": "Pracownica sklepu (praca wakacyjna)",
+      "company": "Sklep Spożywczy u Basi",
+      "location": "Toruń",
+      "start": "2022-07",
+      "end": "2022-08",
+      "achievements": ["Wykładałam towar na półki i obsługiwałam klientów przy kasie"]
+    }
+  ],
+  "education": [{ "school": "Liceum Ogólnokształcące Kopernik w Toruniu", "degree": "liceum", "field": "profil humanistyczny", "start": "2019-09", "end": "2023-06" }],
+  "skills": {
+    "miękkie": ["obsługa klienta", "praca w zespole", "dokładność"],
+    "narzędzia": ["kasa fiskalna", "terminal płatniczy"]
+  },
+  "languages": [{ "name": "angielski", "level": "B1" }]
+}

@@ -1,0 +1,10 @@
+{
+  "title": "Student informatyki z projektami w Pythonie na stanowisko junior Python developera",
+  "level": "student",
+  "industry": "IT",
+  "trap": "",
+  "forbidden": [
+    { "term": "Docker", "synonyms": [], "why": "Ogłoszenie wymaga Dockera, a profil go nie wspomina." },
+    { "term": "Django", "synonyms": ["Django REST Framework", "DRF"], "why": "Profil ma FastAPI, nie Django." }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "pronouns": "ona",
+  "contact": { "fullName": "Marta Wrzosek", "email": "marta.wrzosek@example.com", "phone": "+48 500 000 104", "location": "Lublin" },
+  "headline": "Nauczycielka języka angielskiego",
+  "summary": "Od kilku lat uczę angielskiego i coraz bardziej interesuje mnie praca z ludźmi w rekrutacji.",
+  "experience": [
+    {
+      "role": "Nauczycielka języka angielskiego",
+      "company": "Szkoła Podstawowa Słoneczna w Lublinie",
+      "location": "Lublin",
+      "start": "2019-09",
+      "current": true,
+      "achievements": [
+        "Prowadzę lekcje w 6 klasach, łącznie ok. 150 uczniów",
+        "Prowadzę rozmowy z rodzicami i przygotowuję opinie o postępach uczniów",
+        "Koordynowałam wymianę uczniowską ze szkołą partnerską z Irlandii",
+        "Organizuję dni otwarte szkoły i rozmowy z kandydatami do klas językowych"
+      ]
+    },
+    {
+      "kind": "freelance",
+      "role": "Lektorka języka angielskiego",
+      "company": "",
+      "location": "Lublin",
+      "start": "2017-10",
+      "end": "2019-06",
+      "achievements": ["Prowadziłam lekcje indywidualne dla dorosłych przygotowujących się do rozmów kwalifikacyjnych po angielsku"]
+    }
+  ],
+  "education": [{ "school": "Uniwersytet Wschodni w Lublinie", "degree": "magister", "field": "Filologia angielska", "start": "2014-10", "end": "2019-06" }],
+  "skills": {
+    "miękkie": ["prowadzenie rozmów", "komunikatywność", "organizacja pracy", "empatia"],
+    "narzędzia": ["MS Office", "Microsoft Teams", "Google Workspace"]
+  },
+  "languages": [
+    { "name": "angielski", "level": "C1" },
+    { "name": "hiszpański", "level": "A2" }
+  ],
+  "certificates": [{ "kind": "kurs", "name": "Rekruter od podstaw", "issuer": "kurs online", "date": "2025-04" }]
+}

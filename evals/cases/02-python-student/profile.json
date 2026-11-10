@@ -1,0 +1,46 @@
+{
+  "pronouns": "on",
+  "contact": { "fullName": "Bartosz Lisiecki", "email": "bartosz.lisiecki@example.com", "phone": "+48 500 000 102", "location": "Wrocław" },
+  "headline": "Student informatyki, programista Python",
+  "experience": [
+    {
+      "kind": "praktyki",
+      "role": "Praktykant w dziale testów",
+      "company": "SoftPol Sp. z o.o.",
+      "location": "Wrocław",
+      "start": "2024-07",
+      "end": "2024-08",
+      "achievements": ["Testowałem ręcznie aplikację webową do rezerwacji sal", "Zgłaszałem błędy w Jirze z opisem kroków do odtworzenia"]
+    }
+  ],
+  "education": [
+    { "school": "Politechnika Nadodrzańska", "degree": "inżynier", "field": "Informatyka", "start": "2022-10", "current": true, "details": "Przedmioty: bazy danych, programowanie obiektowe, sieci komputerowe" }
+  ],
+  "projects": [
+    {
+      "name": "Budżetownik",
+      "role": "autor",
+      "start": "2025-01",
+      "end": "2025-04",
+      "description": "Aplikacja webowa do planowania domowego budżetu.",
+      "technologies": ["Python", "FastAPI", "SQLite", "HTML"],
+      "link": "https://example.com/budzetownik",
+      "achievements": ["Zaprojektowałem REST API z logowaniem użytkowników w FastAPI", "Napisałem testy jednostkowe w pytest dla obliczeń budżetu"]
+    },
+    {
+      "name": "Bot terminów",
+      "role": "autor",
+      "start": "2024-10",
+      "end": "2024-12",
+      "description": "Bot na Discordzie przypominający grupie studentów o terminach oddania projektów.",
+      "technologies": ["Python", "discord.py"],
+      "achievements": ["Bot obsługiwał serwer roku z 60 osobami"]
+    }
+  ],
+  "skills": {
+    "techniczne": ["Python", "FastAPI", "SQL", "SQLite", "HTML", "pytest"],
+    "narzędzia": ["Git", "Jira", "VS Code"]
+  },
+  "languages": [{ "name": "angielski", "level": "B2" }],
+  "interests": ["szachy", "rower"]
+}

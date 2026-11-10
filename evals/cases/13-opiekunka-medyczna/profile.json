@@ -1,0 +1,34 @@
+{
+  "pronouns": "ona",
+  "contact": { "fullName": "Ewa Ciszewska", "email": "ewa.ciszewska@example.com", "phone": "+48 500 000 113", "location": "Opole" },
+  "headline": "Opiekunka osób starszych",
+  "experience": [
+    {
+      "role": "Opiekunka osoby starszej",
+      "company": "",
+      "location": "Opole",
+      "start": "2021-03",
+      "end": "2024-08",
+      "description": "Opieka nad starszą osobą w jej domu, umowa z rodziną.",
+      "achievements": ["Pomagałam w czynnościach higienicznych i karmieniu", "Mierzyłam ciśnienie i podawałam leki według zaleceń lekarza", "Towarzyszyłam podopiecznej w wizytach lekarskich"]
+    },
+    {
+      "kind": "wolontariat",
+      "role": "Wolontariuszka",
+      "company": "Hospicjum Dobra Przystań",
+      "location": "Opole",
+      "start": "2024-09",
+      "current": true,
+      "achievements": ["Towarzyszę pacjentom i pomagam personelowi przy posiłkach"]
+    }
+  ],
+  "education": [
+    { "school": "Szkoła Policealna Medyk Plus w Opolu", "degree": "szkoła policealna", "field": "Opiekun medyczny", "start": "2024-09", "end": "2025-06", "details": "Kwalifikacja MS.04" },
+    { "school": "Liceum Ogólnokształcące Akademia w Opolu", "degree": "liceum", "field": "", "start": "2000-09", "end": "2004-06" }
+  ],
+  "skills": {
+    "techniczne": ["czynności higieniczne", "karmienie", "pomiar ciśnienia", "zmiana opatrunków"],
+    "miękkie": ["empatia", "cierpliwość"]
+  },
+  "certificates": [{ "kind": "szkolenie", "name": "Kurs pierwszej pomocy", "issuer": "szkolenie stacjonarne", "date": "2025-01" }]
+}

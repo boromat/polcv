@@ -1,0 +1,40 @@
+{
+  "pronouns": "ona",
+  "contact": { "fullName": "Natalia Pawłowska", "email": "natalia.pawlowska@example.com", "phone": "+48 500 000 103", "location": "Gdańsk" },
+  "headline": "Asystentka ds. sprzedaży",
+  "experience": [
+    {
+      "role": "Asystentka ds. sprzedaży",
+      "company": "Hurtownia Bałtyk Sp. z o.o.",
+      "location": "Gdańsk",
+      "start": "2024-09",
+      "current": true,
+      "achievements": [
+        "Przygotowuję cotygodniowe raporty sprzedaży w Excelu dla 12 przedstawicieli handlowych",
+        "Korzystam z tabel przestawnych i funkcji WYSZUKAJ.PIONOWO",
+        "Uporządkowałam bazę 3 000 klientów i usunęłam duplikaty",
+        "Przygotowuję zestawienia do kwartalnych spotkań zarządu w PowerPoincie"
+      ]
+    },
+    {
+      "kind": "staż",
+      "role": "Stażystka w dziale finansów",
+      "company": "Biuro Usług Finansowych Kompas",
+      "location": "Gdańsk",
+      "start": "2024-02",
+      "end": "2024-05",
+      "achievements": ["Wprowadzałam faktury kosztowe do arkusza i uzgadniałam salda z wyciągami"]
+    }
+  ],
+  "education": [{ "school": "Akademia Ekonomiczna Pomorza", "degree": "licencjat", "field": "Ekonomia", "start": "2021-10", "end": "2024-07" }],
+  "skills": {
+    "narzędzia": ["MS Excel", "Power BI", "MS PowerPoint"],
+    "techniczne": ["SQL", "tabele przestawne"],
+    "miękkie": ["dokładność", "analityczne myślenie"]
+  },
+  "languages": [{ "name": "angielski", "level": "B2" }],
+  "certificates": [
+    { "kind": "kurs", "name": "SQL od podstaw (40 godzin)", "issuer": "kurs online", "date": "2025-02" },
+    { "kind": "kurs", "name": "Power BI dla początkujących", "issuer": "kurs online", "date": "2025-05" }
+  ]
+}

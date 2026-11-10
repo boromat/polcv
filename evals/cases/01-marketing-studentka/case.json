@@ -1,0 +1,10 @@
+{
+  "title": "Studentka marketingu na stanowisko młodszej specjalistki ds. marketingu online",
+  "level": "student",
+  "industry": "marketing",
+  "trap": "",
+  "forbidden": [
+    { "term": "Google Ads", "synonyms": ["AdWords"], "why": "Ogłoszenie wymaga kampanii Google Ads, a profil ich nie wspomina." },
+    { "term": "Meta Ads", "synonyms": ["Facebook Ads"], "why": "Profil ma tylko prowadzenie profili, bez płatnych kampanii." }
+  ]
+}

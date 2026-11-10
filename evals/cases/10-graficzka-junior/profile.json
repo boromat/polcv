@@ -1,0 +1,37 @@
+{
+  "pronouns": "ona",
+  "contact": { "fullName": "Aleksandra Grzybowska", "email": "aleksandra.grzybowska@example.com", "phone": "+48 500 000 110", "location": "Gdynia", "links": [{ "label": "Portfolio", "url": "https://example.com/ola-design" }] },
+  "headline": "Projektantka graficzna",
+  "experience": [
+    {
+      "kind": "freelance",
+      "role": "Projektantka graficzna",
+      "company": "",
+      "location": "Gdynia",
+      "start": "2024-07",
+      "current": true,
+      "achievements": [
+        "Zaprojektowałam identyfikacje wizualne (logo, kolory, typografia) dla 6 małych firm",
+        "Przygotowuję grafiki do social media dla dwóch stałych klientów",
+        "Przygotowuję pliki do druku: ulotki, wizytówki, roll-upy"
+      ]
+    }
+  ],
+  "education": [{ "school": "Wyższa Szkoła Projektowania w Gdańsku", "degree": "licencjat", "field": "Grafika projektowa", "start": "2021-10", "end": "2024-07", "details": "Praca dyplomowa: system identyfikacji dla festiwalu muzycznego" }],
+  "projects": [
+    {
+      "name": "Kampania plakatowa festiwalu Nadmorskie Dźwięki",
+      "role": "projektantka",
+      "start": "2024-03",
+      "end": "2024-05",
+      "description": "Seria plakatów i grafik na festiwal studencki.",
+      "technologies": ["Adobe Illustrator", "Adobe Photoshop"],
+      "achievements": ["Zaprojektowałam serię 5 plakatów i komplet grafik do mediów społecznościowych festiwalu"]
+    }
+  ],
+  "skills": {
+    "narzędzia": ["Adobe Illustrator", "Adobe Photoshop", "Adobe InDesign", "Figma"],
+    "techniczne": ["typografia", "przygotowanie do druku", "identyfikacja wizualna"]
+  },
+  "languages": [{ "name": "angielski", "level": "B1" }]
+}

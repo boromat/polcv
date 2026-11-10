@@ -1,0 +1,27 @@
+{
+  "pronouns": "on",
+  "contact": { "fullName": "Kamil Rybarczyk", "email": "kamil.rybarczyk@example.com", "phone": "+48 500 000 112", "location": "Rzeszów" },
+  "headline": "Student zarządzania, sprzedawca",
+  "experience": [
+    {
+      "role": "Sprzedawca",
+      "company": "ElektroPunkt Sp. z o.o.",
+      "location": "Rzeszów",
+      "start": "2023-06",
+      "current": true,
+      "description": "Sklep z elektroniką użytkową, praca w weekendy.",
+      "achievements": [
+        "Doradzam klientom przy wyborze laptopów i telefonów",
+        "Zrealizowałem 110% planu sprzedaży usług dodatkowych w 2024 roku",
+        "Przygotowuję ekspozycję promocji w strefie wejścia"
+      ]
+    }
+  ],
+  "education": [{ "school": "Podkarpacka Szkoła Biznesu", "degree": "licencjat", "field": "Zarządzanie", "start": "2022-10", "current": true, "details": "Studia niestacjonarne" }],
+  "skills": {
+    "miękkie": ["negocjacje", "komunikatywność", "obsługa klienta"],
+    "narzędzia": ["MS Excel", "system sprzedażowy POS"],
+    "inne": ["prawo jazdy kat. B"]
+  },
+  "languages": [{ "name": "angielski", "level": "B1" }]
+}

@@ -1,0 +1,34 @@
+{
+  "pronouns": "on",
+  "contact": { "fullName": "Paweł Grabowiecki", "email": "pawel.grabowiecki@example.com", "phone": "+48 500 000 106", "location": "Piaseczno" },
+  "headline": "Magazynier",
+  "experience": [
+    {
+      "role": "Magazynier",
+      "company": "Centrum Dystrybucji Mazowsze Sp. z o.o.",
+      "location": "Piaseczno",
+      "start": "2023-01",
+      "current": true,
+      "achievements": [
+        "Kompletuję zamówienia ze skanerem w systemie WMS",
+        "Rozładowuję dostawy wózkiem widłowym czołowym",
+        "Biorę udział w kwartalnych inwentaryzacjach",
+        "Pracuję w systemie trzyzmianowym"
+      ]
+    },
+    {
+      "role": "Pracownik produkcji",
+      "company": "Zakład Opakowań Karton-Pak",
+      "location": "Grodzisk Mazowiecki",
+      "start": "2021-04",
+      "end": "2022-12",
+      "achievements": ["Obsługiwałem linię pakującą i kontrolowałem jakość opakowań"]
+    }
+  ],
+  "education": [{ "school": "Branżowa Szkoła I stopnia w Piasecznie", "degree": "szkoła branżowa", "field": "Magazynier-logistyk", "start": "2018-09", "end": "2021-06" }],
+  "skills": {
+    "narzędzia": ["skaner magazynowy", "system WMS"],
+    "inne": ["wózek widłowy czołowy", "praca zmianowa"]
+  },
+  "certificates": [{ "kind": "certyfikat", "name": "Uprawnienia UDT na wózki jezdniowe podnośnikowe", "issuer": "Urząd Dozoru Technicznego", "date": "2022-11" }]
+}

@@ -1,0 +1,38 @@
+{
+  "pronouns": "on",
+  "contact": { "fullName": "Michał Sośnicki", "email": "michal.sosnicki@example.com", "phone": "+48 500 000 108", "location": "Katowice" },
+  "headline": "Kelner",
+  "experience": [
+    {
+      "role": "Kelner",
+      "company": "Restauracja Pod Dębem",
+      "location": "Katowice",
+      "start": "2021-05",
+      "current": true,
+      "achievements": [
+        "Obsługuję gości, także zagranicznych, po polsku i po angielsku",
+        "Rozwiązuję reklamacje gości i przekazuję uwagi kierownikowi zmiany",
+        "Rozliczam kasę fiskalną i terminal płatniczy",
+        "Szkoliłem 4 nowych kelnerów z obsługi systemu zamówień"
+      ]
+    },
+    {
+      "kind": "praca",
+      "role": "Pracownik recepcji (sezonowo)",
+      "company": "Hotel Bursztynowa Fala",
+      "location": "Mielno",
+      "start": "2020-06",
+      "end": "2020-09",
+      "achievements": ["Meldowałem gości i odpowiadałem na maile z pytaniami o rezerwacje"]
+    }
+  ],
+  "education": [{ "school": "Prywatne Liceum Językowe Lingwista w Katowicach", "degree": "liceum", "field": "profil językowy", "start": "2016-09", "end": "2020-06" }],
+  "skills": {
+    "miękkie": ["obsługa klienta", "rozwiązywanie konfliktów", "praca pod presją czasu"],
+    "narzędzia": ["system POS w gastronomii", "MS Office"]
+  },
+  "languages": [
+    { "name": "angielski", "level": "B2" },
+    { "name": "niemiecki", "level": "A2" }
+  ]
+}

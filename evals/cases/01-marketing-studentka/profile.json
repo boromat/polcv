@@ -1,0 +1,39 @@
+{
+  "pronouns": "ona",
+  "contact": { "fullName": "Zuzanna Wierzbicka", "email": "zuzanna.wierzbicka@example.com", "phone": "+48 500 000 101", "location": "Poznań" },
+  "headline": "Studentka marketingu",
+  "experience": [
+    {
+      "kind": "staż",
+      "role": "Stażystka ds. social media",
+      "company": "Kawiarnia Pod Lipą s.c.",
+      "location": "Poznań",
+      "start": "2025-07",
+      "end": "2025-09",
+      "achievements": [
+        "Prowadziłam profile kawiarni na Instagramie i Facebooku, publikując 3 posty tygodniowo",
+        "Przygotowywałam grafiki do postów i relacji w Canvie",
+        "Co miesiąc przygotowywałam raport zasięgów z Meta Business Suite dla właścicielki"
+      ]
+    },
+    {
+      "kind": "wolontariat",
+      "role": "Członkini zarządu koła naukowego marketingu",
+      "company": "Koło Naukowe Marketingu WSHiK",
+      "location": "Poznań",
+      "start": "2024-10",
+      "current": true,
+      "achievements": ["Współorganizowałam studencką konferencję marketingową dla 120 uczestników", "Prowadziłam kampanię promocyjną konferencji w mediach społecznościowych uczelni"]
+    }
+  ],
+  "education": [
+    { "school": "Wyższa Szkoła Handlu i Komunikacji w Poznaniu", "degree": "licencjat", "field": "Marketing i komunikacja", "start": "2023-10", "current": true, "details": "Specjalność: marketing internetowy" }
+  ],
+  "skills": {
+    "narzędzia": ["Canva", "Meta Business Suite", "Google Analytics 4", "MS Excel"],
+    "miękkie": ["komunikatywność", "praca w zespole", "kreatywność"]
+  },
+  "languages": [{ "name": "angielski", "level": "B2" }],
+  "certificates": [{ "kind": "kurs", "name": "Podstawy Google Analytics 4", "issuer": "kurs online", "date": "2025-03" }],
+  "interests": ["fotografia", "kawa specialty"]
+}

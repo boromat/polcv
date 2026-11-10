@@ -1,0 +1,43 @@
+{
+  "pronouns": "on",
+  "contact": { "fullName": "Igor Bąkowski", "email": "igor.bakowski@example.com", "phone": "+48 500 000 109", "location": "Łódź", "links": [{ "label": "Portfolio", "url": "https://example.com/igor" }] },
+  "headline": "Student informatyki, frontend",
+  "experience": [
+    {
+      "kind": "freelance",
+      "role": "Twórca stron internetowych",
+      "company": "",
+      "location": "Łódź",
+      "start": "2024-03",
+      "end": "2024-06",
+      "achievements": ["Zrobiłem stronę internetową dla lokalnego salonu fryzjerskiego na WordPressie, z formularzem rezerwacji"]
+    }
+  ],
+  "education": [{ "school": "Akademia Informatyki Stosowanej w Łodzi", "degree": "licencjat", "field": "Informatyka", "start": "2023-10", "current": true }],
+  "projects": [
+    {
+      "name": "Pogodynka",
+      "role": "autor",
+      "start": "2025-02",
+      "end": "2025-03",
+      "description": "Aplikacja pogodowa pobierająca prognozę z publicznego API.",
+      "technologies": ["Vue.js", "JavaScript", "HTML", "CSS"],
+      "link": "https://example.com/igor/pogodynka",
+      "achievements": ["Zbudowałem komponenty w Vue.js i obsługę błędów połączenia z API", "Dostosowałem widok do telefonów (responsywny CSS)"]
+    },
+    {
+      "name": "Portfolio",
+      "role": "autor",
+      "start": "2024-11",
+      "end": "2024-12",
+      "description": "Strona z moimi projektami.",
+      "technologies": ["HTML", "CSS", "JavaScript"],
+      "link": "https://example.com/igor"
+    }
+  ],
+  "skills": {
+    "techniczne": ["JavaScript", "Vue.js", "HTML", "CSS", "responsywny design"],
+    "narzędzia": ["Git", "WordPress", "Figma"]
+  },
+  "languages": [{ "name": "angielski", "level": "B2" }]
+}
