@@ -46,28 +46,29 @@ ewaluacji (pierwsze wymagają odpowiedzi kandydata, druga to osobny model ocenia
 ## Wyniki: 10.11.2026
 
 Model pisania CV i analizy ogłoszeń: `anthropic/claude-haiku-5.5`, czyli ten, którego autor używa na co dzień (w kodzie
-domyślnie do pisania jest ustawiony `anthropic/claude-sonnet-5.5`). Trzy przebiegi po 18 par tego samego dnia: pierwszy
-na kodzie z commita `a4e6a78`, drugi po poprawce kontroli podsumowania (`99479d7`), trzeci z nową kontrolą listy
-umiejętności (`8a17c49`); opisy niżej. Szczegóły dla każdej pary:
+domyślnie do pisania jest ustawiony `anthropic/claude-sonnet-5.5`). Cztery przebiegi po 18 par tego samego dnia: 1. na
+kodzie z commita `a4e6a78`, 2. po poprawce kontroli podsumowania (`99479d7`), 3. z nową kontrolą listy umiejętności
+(`8a17c49`), 4. po poprawce tej kontroli (`a37857b`); opisy niżej. Szczegóły dla każdej pary:
 [przebieg 1](results/2026-11-10_anthropic_claude-haiku-5.5.md),
 [przebieg 2](results/2026-11-10_anthropic_claude-haiku-5.5_po-poprawce.md),
-[przebieg 3](results/2026-11-10_anthropic_claude-haiku-5.5_kontrola-umiejetnosci.md).
+[przebieg 3](results/2026-11-10_anthropic_claude-haiku-5.5_kontrola-umiejetnosci.md),
+[przebieg 4](results/2026-11-10_anthropic_claude-haiku-5.5_poprawka-umiejetnosci.md).
 
-| Miara | Przebieg 1 | Przebieg 2 (podsumowanie) | Przebieg 3 (umiejętności) |
-|---|---|---|---|
-| CV przyjęte w 1. / 2. / 3. podejściu | 61% / 22% / 6% | 94% / 0% / 6% | 78% / 11% / 6% |
-| Nie powstało (3 odrzucone podejścia) | 11% (2 z 18) | 0% | 6% (1 z 18) |
-| Wpisy bez źródła w profilu odrzucone przez kontrolę | 0 | 0 | 0 |
-| Umiejętności spoza profilu odrzucone przez kontrolę | - | - | 5 |
-| Liczby spoza profilu zamienione w sugestie | 0 | 0 | 2 |
-| Pokrycie słów kluczowych (jak w ocenie ATS) | 56% | 59% | 55% |
-| CV na jednej stronie A4 | 100% (1 skrócone przez AI) | 100% (1 skrócone przez AI) | 100% (1 skrócone przez AI) |
-| Zakazane fakty: w treści / w sugestiach | 2 / 5 | 8 / 0 | 3 / 2 |
-| Koszt na CV | $0,0022 | $0,0019 | $0,0021 |
-| Czas na CV (średnio / najdłużej) | 8,9 s / 17,3 s | 8,1 s / 25,0 s | 9,1 s / 27,9 s |
+| Miara | 1 | 2 (podsumowanie) | 3 (umiejętności) | 4 (poprawka) |
+|---|---|---|---|---|
+| CV przyjęte w 1. / 2. / 3. podejściu | 61% / 22% / 6% | 94% / 0% / 6% | 78% / 11% / 6% | 89% / 11% / 0% |
+| Nie powstało (3 odrzucone podejścia) | 11% (2 z 18) | 0% | 6% (1 z 18) | 0% |
+| Wpisy bez źródła w profilu odrzucone przez kontrolę | 0 | 0 | 0 | 0 |
+| Umiejętności spoza profilu odrzucone przez kontrolę | - | - | 5 | 3 |
+| Liczby spoza profilu zamienione w sugestie | 0 | 0 | 2 | 0 |
+| Pokrycie słów kluczowych (jak w ocenie ATS) | 56% | 59% | 55% | 58% |
+| CV na jednej stronie A4 | 100% (1 skrócone przez AI) | 100% (1 skrócone) | 100% (1 skrócone) | 94% (1 skrócone, ale na 2 strony) |
+| Zakazane fakty: w treści / w sugestiach | 2 / 5 | 8 / 0 | 3 / 2 | 3 / 2 |
+| Koszt na CV | $0,0022 | $0,0019 | $0,0021 | $0,0018 |
+| Czas na CV (średnio / najdłużej) | 8,9 s / 17,3 s | 8,1 s / 25,0 s | 9,1 s / 27,9 s | 8,3 s / 21,2 s |
 
-Analiza 18 ogłoszeń (raz, potem zamrożona) kosztowała $0,018; pisanie CV $0,044 w pierwszym przebiegu, $0,034 w drugim
-i $0,039 w trzecim.
+Analiza 18 ogłoszeń (raz, potem zamrożona) kosztowała $0,018; pisanie CV $0,044 w pierwszym przebiegu, $0,034 w drugim,
+$0,039 w trzecim i $0,032 w czwartym.
 
 Porównania z innymi modelami jeszcze nie ma: przebiegi objęły tylko model używany na co dzień. Skrypt jest
 gotowy (`npm run eval -- --model <id>`, potem `--report`), a dla wybranego zestawu trzech modeli koszt szacowany był
@@ -130,7 +131,20 @@ Poprawka po przebiegu 3 (`a37857b`): pozycja wraca do modelu tylko wtedy, gdy ma
 nazwa techniczna, w CV po polsku też słowo z wielkiej litery w środku, jak „Ads” w „Google Ads”), albo gdy jest
 narzędziem lub nazwą z ogłoszenia. „CMR documentation” i „Obsługa systemu TMS” przechodzą, gdy profil ma „CMR” i „TMS”;
 pozostałe niepotwierdzone pozycje pokazuje tylko ostrzeżenie w edytorze. Wynik zapisuje teraz nazwy odrzuconych
-umiejętności (ostatnia kolumna tabeli dla każdej pary). Tej wersji ewaluacja jeszcze nie zmierzyła.
+umiejętności (ostatnia kolumna tabeli dla każdej pary).
+
+### Przebieg 4 (po poprawce kontroli umiejętności)
+
+- **Wszystkie CV powstały, 16 z 18 za pierwszym podejściem.** Para 14 (CV po angielsku) przeszła od razu, z pokryciem
+  słów kluczowych 65%.
+- **Kontrola złapała dokładnie to, co w przebiegu 2 przeszło:** „Google Ads” (01) oraz „React” i „TypeScript” (09).
+  W obu parach drugie podejście miało już listę bez nich. Innych odrzuceń za umiejętności nie było.
+- **Zakazane fakty jak w przebiegu 3:** w treści dwa tytuły CV z ogłoszenia i deklaracja „uzupełniając uprawnienia C+E”
+  w podsumowaniu, w sugestiach zdanie „Chciałbym rozwijać kompetencje backendowe w Javie 17 i Spring Boot”.
+  W umiejętnościach i punktach doświadczenia nie ma żadnego.
+- **Nowy problem, niezwiązany z kontrolą umiejętności:** długi profil (17) po skracaniu przez AI zajął 2 strony.
+  Skracanie jest jedno i potem nikt nie sprawdza liczby stron; w przebiegach 1-3 to jedno podejście wystarczało.
+  Kontrola umiejętności przy skracaniu nie odrzuca pozycji, które CV już miało, więc skracania nie blokuje.
 
 ## Ograniczenia
 

@@ -96,12 +96,12 @@ $0.05-0.15. The Settings page lists the models and shows what you have spent.
 
 ## Generation quality
 
-On 18 fictional profile and posting pairs in [`evals/`](evals/README.md), Claude Haiku 5.5 (10 Nov 2026, after a fix
-to the summary check) wrote a CV that passed the checks in all 18 cases, 17 on the first attempt. None had an entry
-or a number that is not in the profile, all fit on one A4 page, and a CV cost about $0.002 and took 8 s on average.
-In 3 CVs, though, the model added skills the profile does not have (React, for example). Since then the skills list
-is checked during generation too: in the next run no such skill got through, but the check also rejected translations
-in one CV in English, and that CV was not made. The fix to this check has not been measured yet. It is a small set prepared by the author of the tool: [evals/README.md](evals/README.md)
+On 18 fictional profile and posting pairs in [`evals/`](evals/README.md), Claude Haiku 5.5 (10 Nov 2026, after fixes
+to the summary and skills checks) wrote a CV that passed the checks in all 18 cases, 16 on the first attempt. None had
+an entry, a number or a skill that is not in the profile: the check rejected Google Ads, React and TypeScript, which the
+model added in 2 CVs, and the second attempt left them out. A CV cost about $0.002 and took 8 s on average. 17 of 18
+fit on one A4 page; a very long profile took 2 pages after the AI shortened it. The CV title is sometimes copied from
+the posting even when the candidate does not meet a requirement in it ("Junior Java Developer" without Java). It is a small set prepared by the author of the tool: [evals/README.md](evals/README.md)
 (in Polish) describes the method, the results for each pair and the limitations.
 
 ## Security
