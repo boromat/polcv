@@ -151,6 +151,28 @@ umiejętności (ostatnia kolumna tabeli dla każdej pary).
   zmieściło się na stronie, więc drugie się nie uruchomiło. Na prawdziwym modelu drugie skracanie jest więc dalej
   niesprawdzone, a testy pokazują je tylko na atrapie.
 
+### Tytuł CV jako sugestia (pary 15 i 18)
+
+We wszystkich czterech przebiegach zakazane fakty w treści to głównie tytuły przepisane z ogłoszenia („Junior Java
+Developer” bez Javy, „Kierowca… kat. C+E” przy kat. B). Od commita `87cbeba` tytuł, który wymienia narzędzie,
+certyfikat albo nazwaną umiejętność z ogłoszenia, której profil nie potwierdza, albo kategorię prawa jazdy, staje się
+żółtą sugestią, a w CV zostaje wersja bezpieczna (bez tej nazwy albo tytuł z profilu). Sprawdzenie na samych parach 15
+i 18 ([wynik](results/2026-11-10_anthropic_claude-haiku-5.5_tytul.md), $0,004; data w pliku to data UTC, przebieg był
+11.11.2026 tuż po północy):
+
+| Para | Zakazane fakty w treści: przebiegi 1 / 2 / 3 / 4 | Po zmianie | Gdzie są teraz |
+|---|---|---|---|
+| 15 (Java) | 1 / 3 / 1 / 1 | 0 | „Junior Java Developer” tylko w sugestii tytułu |
+| 18 (C+E) | 1 / 2 / 2 / 2 | 0 | „Kierowca zestawu ciągnik siodłowy z naczepą (kat. C+E)” tylko w sugestii tytułu |
+
+- W obu parach jedyny zakazany fakt jest w sugestii, którą kandydat musi zatwierdzić; deklaracji w podsumowaniu tym
+  razem nie było (to zmienność modelu, nie skutek zmiany).
+- W parze 15 kontrola umiejętności odrzuciła pierwsze podejście za „Java 17 (do nauki)”, „Spring Boot (do nauki)” i
+  „Kubernetes (podstawy)”; drugie było już bez nich.
+- Pokrycie słów kluczowych w parze 18 spadło z 45% do 35%: tytuł bezpieczny nie ma „kat. C+E”, a ocena liczy
+  oczekującą sugestię w wersji bezpiecznej. To uczciwy wynik dla kandydata z kat. B; po zaakceptowaniu tytułu słowo wraca.
+- Dwie pary to tylko sprawdzenie działania, nie pomiar: pełny przebieg z tą zmianą to porównanie modeli niżej.
+
 ## Ograniczenia
 
 - **Mały zbiór.** 18 par to za mało, żeby różnice o kilka punktów procentowych coś znaczyły; jedna para to 6%.

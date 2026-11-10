@@ -1,0 +1,131 @@
+{
+  "date": "2026-11-10",
+  "model": "anthropic/claude-haiku-5.5",
+  "label": "tytul",
+  "fastModel": "anthropic/claude-haiku-5.5",
+  "mock": false,
+  "parseCostUsd": 0,
+  "summary": {
+    "cases": 2,
+    "generated": 2,
+    "acceptedFirst": 0.5,
+    "acceptedSecond": 0.5,
+    "acceptedThird": 0,
+    "failed": 0,
+    "unsourcedCaught": 0,
+    "casesWithUnsourced": 0,
+    "skillsCaught": 3,
+    "numbersFlagged": 0,
+    "casesWithNumbersFlagged": 0,
+    "keywordCoverage": 0.38749999999999996,
+    "onePage": 1,
+    "shortened": 0,
+    "costPerCv": 0.00206205,
+    "costTotal": 0.0041241,
+    "secondsPerCv": 9.4415,
+    "secondsMax": 11.962,
+    "forbiddenCases": 2,
+    "forbiddenAsFact": 0,
+    "forbiddenAsSuggestion": 2
+  },
+  "cases": [
+    {
+      "id": "15-pulapka-java",
+      "title": "Junior Python developer na ogłoszenie, które wymaga Javy, Spring Boota i Kubernetesa",
+      "level": "junior",
+      "trap": true,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 2,
+      "attempts": 2,
+      "rejected": {
+        "unsourced": 0,
+        "skills": 3,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "rejectedSkills": [
+        "Java 17 (do nauki)",
+        "Spring Boot (do nauki)",
+        "Kubernetes (podstawy)"
+      ],
+      "shortened": false,
+      "shortenPasses": 0,
+      "numbersFlagged": 0,
+      "suggestions": 1,
+      "keywordCoverage": 0.425,
+      "keywordsMatched": 4,
+      "keywordsTotal": 11,
+      "mustMissing": [
+        "Java 17",
+        "Spring Boot",
+        "Kubernetes",
+        "code review",
+        "Junior Java Developer"
+      ],
+      "pages": 1,
+      "costUsd": 0.0028276,
+      "seconds": 11.962,
+      "forbiddenChecked": true,
+      "forbidden": [
+        {
+          "term": "Java",
+          "foundAs": "Java",
+          "where": "headline",
+          "status": "suggested",
+          "text": "Junior Java Developer"
+        }
+      ]
+    },
+    {
+      "id": "18-pulapka-kierowca-ce",
+      "title": "Kurier z prawem jazdy kat. B na ogłoszenie dla kierowcy kat. C+E",
+      "level": "praca fizyczna",
+      "trap": true,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "skills": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "rejectedSkills": [],
+      "shortened": false,
+      "shortenPasses": 0,
+      "numbersFlagged": 0,
+      "suggestions": 1,
+      "keywordCoverage": 0.35,
+      "keywordsMatched": 5,
+      "keywordsTotal": 13,
+      "mustMissing": [
+        "prawo jazdy kat. C+E",
+        "kwalifikacja wstępna",
+        "karta kierowcy",
+        "badania lekarskie",
+        "badania psychotechniczne",
+        "dokumentacja przewozowa",
+        "dbanie o pojazd"
+      ],
+      "pages": 1,
+      "costUsd": 0.0012965,
+      "seconds": 6.921,
+      "forbiddenChecked": true,
+      "forbidden": [
+        {
+          "term": "kategorii C",
+          "foundAs": "kat. C+E",
+          "where": "headline",
+          "status": "suggested",
+          "text": "Kierowca zestawu ciągnik siodłowy z naczepą (kat. C+E)"
+        }
+      ]
+    }
+  ]
+}
