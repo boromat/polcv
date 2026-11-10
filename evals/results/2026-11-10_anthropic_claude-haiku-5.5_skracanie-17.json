@@ -1,0 +1,67 @@
+{
+  "date": "2026-11-10",
+  "model": "anthropic/claude-haiku-5.5",
+  "label": "skracanie-17",
+  "fastModel": "anthropic/claude-haiku-5.5",
+  "mock": false,
+  "parseCostUsd": 0,
+  "summary": {
+    "cases": 1,
+    "generated": 1,
+    "acceptedFirst": 1,
+    "acceptedSecond": 0,
+    "acceptedThird": 0,
+    "failed": 0,
+    "unsourcedCaught": 0,
+    "casesWithUnsourced": 0,
+    "skillsCaught": 0,
+    "numbersFlagged": 0,
+    "casesWithNumbersFlagged": 0,
+    "keywordCoverage": 0.825,
+    "onePage": 1,
+    "shortened": 1,
+    "costPerCv": 0.005221,
+    "costTotal": 0.005221,
+    "secondsPerCv": 21.96,
+    "secondsMax": 21.96,
+    "forbiddenCases": 0,
+    "forbiddenAsFact": 0,
+    "forbiddenAsSuggestion": 0
+  },
+  "cases": [
+    {
+      "id": "17-pulapka-dlugi-profil",
+      "title": "Bardzo długi profil (8 stanowisk, 5 projektów, ponad 30 umiejętności) na stanowisko specjalisty e-commerce",
+      "level": "junior",
+      "trap": true,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "skills": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "rejectedSkills": [],
+      "shortened": true,
+      "shortenPasses": 1,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.825,
+      "keywordsMatched": 13,
+      "keywordsTotal": 14,
+      "mustMissing": [
+        "kampanie reklamowe"
+      ],
+      "pages": 1,
+      "costUsd": 0.005221,
+      "seconds": 21.96,
+      "forbiddenChecked": false,
+      "forbidden": []
+    }
+  ]
+}

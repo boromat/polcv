@@ -47,8 +47,8 @@ ewaluacji (pierwsze wymagają odpowiedzi kandydata, druga to osobny model ocenia
 
 Model pisania CV i analizy ogłoszeń: `anthropic/claude-haiku-5.5`, czyli ten, którego autor używa na co dzień (w kodzie
 domyślnie do pisania jest ustawiony `anthropic/claude-sonnet-5.5`). Cztery przebiegi po 18 par tego samego dnia: 1. na
-kodzie z commita `a4e6a78`, 2. po poprawce kontroli podsumowania (`99479d7`), 3. z nową kontrolą listy umiejętności
-(`8a17c49`), 4. po poprawce tej kontroli (`a37857b`); opisy niżej. Szczegóły dla każdej pary:
+kodzie z commita `3b0fb24`, 2. po poprawce kontroli podsumowania (`5f1f4a7`), 3. z nową kontrolą listy umiejętności
+(`97a148a`), 4. po poprawce tej kontroli (`7031f5b`); opisy niżej. Szczegóły dla każdej pary:
 [przebieg 1](results/2026-11-10_anthropic_claude-haiku-5.5.md),
 [przebieg 2](results/2026-11-10_anthropic_claude-haiku-5.5_po-poprawce.md),
 [przebieg 3](results/2026-11-10_anthropic_claude-haiku-5.5_kontrola-umiejetnosci.md),
@@ -114,7 +114,7 @@ zmieniło. W przebiegu 2:
 Po przebiegu 2 lista umiejętności jest sprawdzana przy pisaniu CV, przy „Popraw automatycznie” i przy wybranych
 zmianach z raportu. Konkretna pozycja, której profil nie potwierdza (nazwa techniczna jak „TypeScript” czy
 „Google Ads” albo umiejętność wymagana w ogłoszeniu jak „Java”), wraca do modelu, także z dopiskiem „(w nauce)”.
-Przy poprawie zostaje to, co CV już miało, np. umiejętność dopisana przez kandydata. W przebiegu 3 (`8a17c49`):
+Przy poprawie zostaje to, co CV już miało, np. umiejętność dopisana przez kandydata. W przebiegu 3 (`97a148a`):
 
 - **Lista umiejętności jest czysta.** Żaden zakazany fakt nie trafił do umiejętności (w przebiegu 2 były 4). Trzy
   trafienia w treści to znowu dwa tytuły CV przepisane z ogłoszenia („Junior Java Developer”, „Kierowca zestawu ciągnik
@@ -127,7 +127,7 @@ Przy poprawie zostaje to, co CV już miało, np. umiejętność dopisana przez k
 - Odrzucenia za umiejętności były też w parach 05 i 17 (po jednym, CV przeszło w 2. podejściu); liczba 5 w tabeli to
   niepotwierdzone pozycje w odrzuconych podejściach, policzone jeszcze starszą funkcją.
 
-Poprawka po przebiegu 3 (`a37857b`): pozycja wraca do modelu tylko wtedy, gdy ma nazwę, której profil nie ma (skrót,
+Poprawka po przebiegu 3 (`7031f5b`): pozycja wraca do modelu tylko wtedy, gdy ma nazwę, której profil nie ma (skrót,
 nazwa techniczna, w CV po polsku też słowo z wielkiej litery w środku, jak „Ads” w „Google Ads”), albo gdy jest
 narzędziem lub nazwą z ogłoszenia. „CMR documentation” i „Obsługa systemu TMS” przechodzą, gdy profil ma „CMR” i „TMS”;
 pozostałe niepotwierdzone pozycje pokazuje tylko ostrzeżenie w edytorze. Wynik zapisuje teraz nazwy odrzuconych
@@ -145,8 +145,11 @@ umiejętności (ostatnia kolumna tabeli dla każdej pary).
 - **Nowy problem, niezwiązany z kontrolą umiejętności:** długi profil (17) po skracaniu przez AI zajął 2 strony.
   Skracanie jest jedno i potem nikt nie sprawdza liczby stron; w przebiegach 1-3 to jedno podejście wystarczało.
   Kontrola umiejętności przy skracaniu nie odrzuca pozycji, które CV już miało, więc skracania nie blokuje.
-  Po przebiegu 4 AI skraca drugi raz, od skróconej wersji, gdy CV dalej wystaje; wynik zapisuje, ile razy skracało
-  (w tabeli dla każdej pary „skrócone 2 razy”). Tej zmiany ewaluacja jeszcze nie zmierzyła.
+  Po przebiegu 4 AI skraca drugi raz, od skróconej wersji, gdy CV dalej wystaje (`58a0c06`); wynik zapisuje, ile
+  razy skracało (w tabeli dla każdej pary „skrócone 2 razy”). Sprawdzenie samej pary 17 po tej zmianie
+  ([wynik](results/2026-11-10_anthropic_claude-haiku-5.5_skracanie-17.md), $0,005): jedno skracanie wystarczyło i CV
+  zmieściło się na stronie, więc drugie się nie uruchomiło. Na prawdziwym modelu drugie skracanie jest więc dalej
+  niesprawdzone, a testy pokazują je tylko na atrapie.
 
 ## Ograniczenia
 
