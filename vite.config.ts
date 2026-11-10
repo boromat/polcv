@@ -10,5 +10,6 @@ export default defineConfig({
   define: { __APP_VERSION__: JSON.stringify(version) },
   build: { outDir: '../dist', emptyOutDir: true },
   server: { port: 5173, proxy: { '/api': 'http://localhost:3000' } },
-  test: { root: '.', include: ['tests/**/*.test.ts'], testTimeout: 60000 },
+  // Testy komponentów (tests/ui/*.test.tsx) ustawiają sobie środowisko jsdom w pierwszej linii pliku.
+  test: { root: '.', include: ['tests/**/*.test.{ts,tsx}'], testTimeout: 60000 },
 } as any);

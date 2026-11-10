@@ -163,7 +163,7 @@ and makes only a handful of requests per role. City coordinates for the radius f
 npm install
 npx playwright install chromium
 npm run dev        # API on :3000 + Vite with hot reload on :5173
-npm test           # vitest: keywords, GDPR logic, PDF round trip, AI client, search, polanon bridge
+npm test           # vitest: keywords, GDPR logic, PDF round trip, AI client, search, polanon bridge, UI components
 npm run typecheck  # TypeScript 7 (the @typescript/native package)
 npm run lint       # ESLint with typescript-eslint; the typescript 6.0 package is only for its parser
 npm run eval -- --mock   # quality evaluation on a mock model; with --model <id> on the real API (evals/README.md)

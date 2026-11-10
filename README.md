@@ -157,7 +157,7 @@ Na 18 fikcyjnych parach profil + ogłoszenie z [`evals/`](evals/README.md) (11.1
 npm install
 npx playwright install chromium
 npm run dev        # serwer (3000) + interfejs z hot-reload (5173)
-npm test           # testy: słowa kluczowe, RODO, PDF w obie strony, klient AI, wyszukiwanie, mostek polanon
+npm test           # testy: słowa kluczowe, RODO, PDF w obie strony, klient AI, wyszukiwanie, mostek polanon, komponenty interfejsu
 npm run typecheck  # TypeScript 7 (pakiet @typescript/native)
 npm run lint       # ESLint z typescript-eslint; pakiet typescript 6.0 jest tylko dla jego parsera
 npm run eval -- --mock   # ewaluacja jakości na atrapie modelu; z --model <id> na prawdziwym API (evals/README.md)
