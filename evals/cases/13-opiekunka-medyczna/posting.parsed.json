@@ -1,0 +1,176 @@
+{
+  "title": "Opiekun / Opiekunka Medyczna",
+  "company": "Dom Pomocy Społecznej Zacisze",
+  "location": "Opole",
+  "workMode": "stacjonarnie",
+  "seniority": "brak informacji",
+  "industry": "opieka społeczna / zdrowie",
+  "language": "pl",
+  "cvLanguageRequired": "any",
+  "companyIsInternational": false,
+  "summary": "Dom Pomocy Społecznej Zacisze poszukuje opiekuna medycznego do opieki nad mieszkańcami w podeszłym wieku. Praca obejmuje pomoc w czynnościach codziennych, pomiary parametrów życiowych oraz współpracę z pielęgniarkami i rodzinami. Oferta dotyczy pracy zmianowej na podstawie umowy o pracę.",
+  "responsibilities": [
+    "pomoc mieszkańcom w czynnościach higienicznych i ubieraniu",
+    "pomoc przy posiłkach i karmienie",
+    "pomiar podstawowych parametrów życiowych",
+    "prowadzenie dokumentacji opieki",
+    "współpraca z pielęgniarkami i rodzinami mieszkańców"
+  ],
+  "requirementsMust": [
+    "dyplom opiekuna medycznego",
+    "doświadczenie w opiece nad osobami starszymi",
+    "empatia i cierpliwość",
+    "gotowość do pracy zmianowej, także w weekendy"
+  ],
+  "requirementsNice": [
+    "aktualny kurs pierwszej pomocy"
+  ],
+  "benefits": [
+    "umowa o pracę",
+    "dodatek za pracę w nocy",
+    "szkolenia"
+  ],
+  "keywords": [
+    {
+      "term": "opiekun medyczny",
+      "synonyms": [
+        "opiekunka medyczna",
+        "dyplom opiekuna medycznego"
+      ],
+      "importance": "must",
+      "category": "wykształcenie"
+    },
+    {
+      "term": "opieka nad osobami starszymi",
+      "synonyms": [
+        "opieka geriatryczna",
+        "opiekun osób starszych",
+        "praca z seniorami"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "czynności higieniczne",
+      "synonyms": [
+        "higiena osobista",
+        "pielęgnacja",
+        "toaleta pacjenta"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "pomiar parametrów życiowych",
+      "synonyms": [
+        "pomiar ciśnienia",
+        "pomiar temperatury",
+        "parametry życiowe",
+        "pomiar funkcji życiowych"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "dokumentacja opieki",
+      "synonyms": [
+        "dokumentacja medyczna",
+        "prowadzenie dokumentacji",
+        "karta opieki"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "praca zmianowa",
+      "synonyms": [
+        "system zmianowy",
+        "praca w weekendy",
+        "praca na zmiany"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "empatia",
+      "synonyms": [
+        "wrażliwość",
+        "zrozumienie",
+        "kompetencje interpersonalne"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "cierpliwość",
+      "synonyms": [
+        "opanowanie",
+        "wyrozumiałość"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "współpraca z pielęgniarkami",
+      "synonyms": [
+        "praca zespołowa",
+        "współpraca z personelem medycznym",
+        "zespół pielęgniarski"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "kurs pierwszej pomocy",
+      "synonyms": [
+        "pierwsza pomoc",
+        "PPP",
+        "pierwszej pomocy"
+      ],
+      "importance": "nice",
+      "category": "certyfikat"
+    },
+    {
+      "term": "karmienie",
+      "synonyms": [
+        "pomoc przy posiłkach",
+        "żywienie pacjenta"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "pomoc w ubieraniu",
+      "synonyms": [
+        "ubieranie pacjenta",
+        "czynności samoobsługowe"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "opieka nad mieszkańcami",
+      "synonyms": [
+        "opieka nad pensjonariuszami",
+        "opieka stacjonarna",
+        "DPS"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "Dom Pomocy Społecznej",
+      "synonyms": [
+        "DPS",
+        "dom opieki"
+      ],
+      "importance": "nice",
+      "category": "inne"
+    }
+  ],
+  "rodoClause": "Wyrażam zgodę na przetwarzanie moich danych osobowych przez Dom Pomocy Społecznej Zacisze w Opolu dla potrzeb niezbędnych do realizacji procesu rekrutacji.",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Brak szczegółowych instrukcji dotyczących formy aplikacji; w treści ogłoszenia występuje gotowa klauzula zgody na przetwarzanie danych do umieszczenia w CV."
+}

@@ -1,0 +1,158 @@
+{
+  "title": "Mechanik samochodowy",
+  "company": "Auto Centrum Wisła Sp. z o.o.",
+  "location": "Radom",
+  "workMode": "stacjonarnie",
+  "seniority": "mid",
+  "industry": "motoryzacja / serwis samochodowy",
+  "language": "pl",
+  "cvLanguageRequired": "any",
+  "companyIsInternational": false,
+  "summary": "Autoryzowana stacja obsługi poszukuje mechanika do działu serwisu samochodów osobowych. Kandydat będzie odpowiadał za przeglądy, naprawy mechaniczne oraz diagnostykę komputerową usterek. Oczekiwane jest doświadczenie min. 2 lata i sumienność w pracy.",
+  "responsibilities": [
+    "przeglądy okresowe i naprawy mechaniczne",
+    "diagnostyka komputerowa usterek",
+    "naprawy układów hamulcowych, zawieszenia i rozrządu",
+    "obsługa klimatyzacji",
+    "dbanie o porządek na stanowisku pracy"
+  ],
+  "requirementsMust": [
+    "minimum 2 lata doświadczenia jako mechanik",
+    "umiejętność diagnostyki komputerowej",
+    "prawo jazdy kat. B",
+    "sumienność i dokładność"
+  ],
+  "requirementsNice": [
+    "uprawnienia F-gazowe",
+    "wykształcenie techniczne w zawodzie"
+  ],
+  "benefits": [
+    "umowa o pracę",
+    "szkolenia producenta",
+    "premie od wyników warsztatu",
+    "odzież robocza"
+  ],
+  "keywords": [
+    {
+      "term": "mechanik samochodowy",
+      "synonyms": [
+        "mechanik",
+        "mechanik pojazdowy"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "mechanik",
+      "synonyms": [
+        "mechanik samochodowy"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "diagnostyka komputerowa",
+      "synonyms": [
+        "diagnostyka OBD",
+        "diagnostyka elektroniczna"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "przeglądy okresowe",
+      "synonyms": [
+        "przeglądy serwisowe",
+        "serwis"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "naprawy mechaniczne",
+      "synonyms": [
+        "naprawy mechaniczne pojazdów"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "układ hamulcowy",
+      "synonyms": [
+        "hamulce",
+        "naprawa hamulców"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "zawieszenie",
+      "synonyms": [
+        "naprawa zawieszenia",
+        "układ zawieszenia"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "rozrząd",
+      "synonyms": [
+        "naprawa rozrządu",
+        "układ rozrządu"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "klimatyzacja",
+      "synonyms": [
+        "obsługa klimatyzacji",
+        "A/C",
+        "układ klimatyzacji"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "prawo jazdy kat. B",
+      "synonyms": [
+        "prawo jazdy B",
+        "kategoria B"
+      ],
+      "importance": "must",
+      "category": "certyfikat"
+    },
+    {
+      "term": "sumienność",
+      "synonyms": [
+        "dokładność"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "uprawnienia F-gazowe",
+      "synonyms": [
+        "certyfikat F-gazowy",
+        "F-gazy",
+        "uprawnienia do czynników chłodniczych"
+      ],
+      "importance": "nice",
+      "category": "certyfikat"
+    },
+    {
+      "term": "wykształcenie techniczne",
+      "synonyms": [
+        "technik mechanik",
+        "wykształcenie w zawodzie"
+      ],
+      "importance": "nice",
+      "category": "wykształcenie"
+    }
+  ],
+  "rodoClause": "",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Brak szczegółowych instrukcji dotyczących aplikowania w ogłoszeniu."
+}

@@ -1,0 +1,188 @@
+{
+  "title": "Młodszy Specjalista / Młodsza Specjalistka ds. Rekrutacji",
+  "company": "Agencja Pracy Horyzont Sp. z o.o.",
+  "location": "Lublin",
+  "workMode": "brak informacji",
+  "seniority": "junior",
+  "industry": "Rekrutacja / agencja pracy",
+  "language": "pl",
+  "cvLanguageRequired": "any",
+  "companyIsInternational": false,
+  "summary": "Agencja Pracy Horyzont poszukuje osoby do rekrutacji pracowników dla firm produkcyjnych i usługowych w regionie lubelskim. Kandydat powinien lubić kontakt z ludźmi i chcieć rozwijać się w obszarze HR.",
+  "responsibilities": [
+    "publikowanie ogłoszeń i przeglądanie aplikacji",
+    "prowadzenie rozmów telefonicznych i spotkań z kandydatami",
+    "prowadzenie dokumentacji w systemie ATS",
+    "kontakt z klientami agencji i raportowanie postępów rekrutacji",
+    "organizacja dni otwartych dla kandydatów"
+  ],
+  "requirementsMust": [
+    "komunikatywność i łatwość nawiązywania kontaktów",
+    "dobra organizacja pracy",
+    "język angielski na poziomie min. B2",
+    "dobra znajomość MS Office"
+  ],
+  "requirementsNice": [
+    "doświadczenie w HR lub rekrutacji",
+    "znajomość LinkedIn Recruiter"
+  ],
+  "benefits": [
+    "szkolenie wdrożeniowe",
+    "umowa o pracę",
+    "premie za zamknięte rekrutacje"
+  ],
+  "keywords": [
+    {
+      "term": "rekrutacja",
+      "synonyms": [
+        "recruitment",
+        "recruiting"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "HR",
+      "synonyms": [
+        "human resources",
+        "zasoby ludzkie"
+      ],
+      "importance": "nice",
+      "category": "umiejętność"
+    },
+    {
+      "term": "ATS",
+      "synonyms": [
+        "applicant tracking system",
+        "system ATS"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "MS Office",
+      "synonyms": [
+        "Microsoft Office",
+        "Pakiet Office"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Excel",
+      "synonyms": [
+        "MS Excel",
+        "Microsoft Excel"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "angielski",
+      "synonyms": [
+        "English",
+        "język angielski"
+      ],
+      "importance": "must",
+      "category": "język"
+    },
+    {
+      "term": "LinkedIn Recruiter",
+      "synonyms": [
+        "LinkedIn",
+        "Recruiter"
+      ],
+      "importance": "nice",
+      "category": "narzędzie"
+    },
+    {
+      "term": "komunikatywność",
+      "synonyms": [
+        "communication skills",
+        "komunikacja"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "organizacja pracy",
+      "synonyms": [
+        "organizacja",
+        "time management",
+        "zarządzanie czasem"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "nawiązywanie kontaktów",
+      "synonyms": [
+        "networking",
+        "budowanie relacji"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "rozmowy kwalifikacyjne",
+      "synonyms": [
+        "rozmowy rekrutacyjne",
+        "interview",
+        "rozmowy z kandydatami"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "publikacja ogłoszeń",
+      "synonyms": [
+        "job posting",
+        "ogłoszenia o pracę"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "obsługa klienta",
+      "synonyms": [
+        "kontakt z klientem",
+        "client relations"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "raportowanie",
+      "synonyms": [
+        "reporting",
+        "raporty"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "dni otwarte",
+      "synonyms": [
+        "open day",
+        "open days"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "Młodszy Specjalista ds. Rekrutacji",
+      "synonyms": [
+        "Specjalista ds. rekrutacji",
+        "Recruiter",
+        "Rekruter"
+      ],
+      "importance": "must",
+      "category": "inne"
+    }
+  ],
+  "rodoClause": "",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Brak szczegółowych instrukcji aplikowania w ogłoszeniu."
+}

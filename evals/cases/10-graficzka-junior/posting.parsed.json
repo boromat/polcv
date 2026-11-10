@@ -1,0 +1,181 @@
+{
+  "title": "Junior Graphic Designer",
+  "company": "Studio Kreatywne Pastel",
+  "location": "Gdynia",
+  "workMode": "brak informacji",
+  "seniority": "junior",
+  "industry": "branding / projektowanie graficzne",
+  "language": "pl",
+  "cvLanguageRequired": "any",
+  "companyIsInternational": false,
+  "summary": "Małe studio brandingowe Pastel szuka juniora do projektowania materiałów do social media, przygotowania plików do druku oraz wsparcia w projektach identyfikacji wizualnej. Kandydat powinien mieć portfolio i dobrą znajomość pakietu Adobe oraz Figmy.",
+  "responsibilities": [
+    "projektowanie materiałów do mediów społecznościowych",
+    "przygotowywanie projektów do druku",
+    "udział w projektach identyfikacji wizualnej",
+    "przygotowywanie prostych makiet stron w Figmie"
+  ],
+  "requirementsMust": [
+    "portfolio z projektami",
+    "dobra znajomość Adobe Illustrator, Photoshop i InDesign",
+    "znajomość Figmy",
+    "wiedza o przygotowaniu plików do druku",
+    "wyczucie typografii"
+  ],
+  "requirementsNice": [
+    "podstawy animacji w After Effects",
+    "język angielski"
+  ],
+  "benefits": [
+    "praca w kameralnym zespole",
+    "projekty dla marek z całej Polski",
+    "budżet na kursy"
+  ],
+  "keywords": [
+    {
+      "term": "Junior Graphic Designer",
+      "synonyms": [
+        "junior graphic designer",
+        "grafik juniorski",
+        "projektant graficzny junior"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "Adobe Illustrator",
+      "synonyms": [
+        "Illustrator",
+        "AI"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Photoshop",
+      "synonyms": [
+        "Adobe Photoshop",
+        "PS"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "InDesign",
+      "synonyms": [
+        "Adobe InDesign",
+        "ID"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Figma",
+      "synonyms": [
+        "Figma design"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "portfolio",
+      "synonyms": [
+        "portfolio graficzne",
+        "portfolio projektów"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "przygotowanie plików do druku",
+      "synonyms": [
+        "pre-press",
+        "prepress",
+        "przygotowanie do druku",
+        "print-ready files"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "typografia",
+      "synonyms": [
+        "typography",
+        "wyczucie typograficzne"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "projektowanie social media",
+      "synonyms": [
+        "grafika social media",
+        "social media design",
+        "materiały do mediów społecznościowych"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "identyfikacja wizualna",
+      "synonyms": [
+        "visual identity",
+        "brand identity",
+        "branding"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "makiety stron",
+      "synonyms": [
+        "wireframe",
+        "prototypowanie",
+        "mockupy"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "After Effects",
+      "synonyms": [
+        "Adobe After Effects",
+        "AE"
+      ],
+      "importance": "nice",
+      "category": "narzędzie"
+    },
+    {
+      "term": "animacja",
+      "synonyms": [
+        "motion design",
+        "animacja graficzna"
+      ],
+      "importance": "nice",
+      "category": "umiejętność"
+    },
+    {
+      "term": "angielski",
+      "synonyms": [
+        "English",
+        "język angielski"
+      ],
+      "importance": "nice",
+      "category": "język"
+    },
+    {
+      "term": "opakowania",
+      "synonyms": [
+        "packaging",
+        "projektowanie opakowań"
+      ],
+      "importance": "nice",
+      "category": "umiejętność"
+    }
+  ],
+  "rodoClause": "",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Brak szczegółowych instrukcji dotyczących aplikacji; w ogłoszeniu nie podano sposobu zgłoszenia ani wymaganych dokumentów poza portfolio."
+}

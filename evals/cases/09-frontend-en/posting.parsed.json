@@ -1,0 +1,167 @@
+{
+  "title": "Junior Frontend Developer",
+  "company": "Brightway Labs",
+  "location": "Łódź lub zdalnie (Polska)",
+  "workMode": "zdalnie",
+  "seniority": "junior",
+  "industry": "IT / oprogramowanie dla klinik",
+  "language": "en",
+  "cvLanguageRequired": "en",
+  "companyIsInternational": true,
+  "summary": "Firma Brightway Labs, tworząca oprogramowanie do rezerwacji dla klinik w Europie, szuka Junior Frontend Developera do budowy interfejsów w React i TypeScript. Zespół jest międzynarodowy i pracuje po angielsku.",
+  "responsibilities": [
+    "Budowanie interfejsów użytkownika w React i TypeScript",
+    "Przekładanie projektów Figma na responsywne strony",
+    "Pisanie testów jednostkowych komponentów",
+    "Udział w code review"
+  ],
+  "requirementsMust": [
+    "Komercyjne lub projektowe doświadczenie z React",
+    "TypeScript",
+    "Solidna znajomość HTML i CSS",
+    "Git",
+    "Angielski na poziomie B2 lub wyższym"
+  ],
+  "requirementsNice": [
+    "Next.js",
+    "Testowanie w Jest lub Vitest",
+    "Portfolio z własnymi projektami"
+  ],
+  "benefits": [
+    "Mentoring",
+    "Budżet na naukę",
+    "Elastyczne godziny pracy"
+  ],
+  "keywords": [
+    {
+      "term": "React",
+      "synonyms": [
+        "ReactJS",
+        "React.js"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "TypeScript",
+      "synonyms": [
+        "TS"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "HTML",
+      "synonyms": [
+        "HTML5"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "CSS",
+      "synonyms": [
+        "CSS3"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "Git",
+      "synonyms": [
+        "system kontroli wersji"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "angielski",
+      "synonyms": [
+        "English",
+        "język angielski"
+      ],
+      "importance": "must",
+      "category": "język"
+    },
+    {
+      "term": "Figma",
+      "synonyms": [
+        "projektowanie UI"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "testy jednostkowe",
+      "synonyms": [
+        "unit testing",
+        "unit tests"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "code review",
+      "synonyms": [
+        "przegląd kodu"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "responsywność",
+      "synonyms": [
+        "responsive design",
+        "RWD"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "Frontend Developer",
+      "synonyms": [
+        "programista frontend",
+        "programista front-end"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "Next.js",
+      "synonyms": [
+        "Next"
+      ],
+      "importance": "nice",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Jest",
+      "synonyms": [
+        "testowanie Jest"
+      ],
+      "importance": "nice",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Vitest",
+      "synonyms": [
+        "testowanie Vitest"
+      ],
+      "importance": "nice",
+      "category": "narzędzie"
+    },
+    {
+      "term": "portfolio",
+      "synonyms": [
+        "własne projekty"
+      ],
+      "importance": "nice",
+      "category": "inne"
+    }
+  ],
+  "rodoClause": "",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Ogłoszenie jest po angielsku, więc CV należy przygotować w tym języku. Oferta obejmuje umowę o pracę lub B2B."
+}

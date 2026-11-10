@@ -1,0 +1,166 @@
+{
+  "title": "Specjalista / Specjalistka ds. E-commerce",
+  "company": "Zielarnia Natura Sp. z o.o.",
+  "location": "Kielce",
+  "workMode": "brak informacji",
+  "seniority": "mid",
+  "industry": "e-commerce / produkty zielarskie i suplementy",
+  "language": "pl",
+  "cvLanguageRequired": "any",
+  "companyIsInternational": false,
+  "summary": "Firma sprzedająca herbaty ziołowe i suplementy w sklepie internetowym oraz na marketplace'ach szuka osoby, która przejmie bieżące prowadzenie sklepu. Kandydat będzie odpowiedzialny za WooCommerce, kampanie reklamowe, analitykę oraz ofertę na Allegro.",
+  "responsibilities": [
+    "zarządzanie sklepem na WooCommerce (produkty, promocje, zamówienia)",
+    "prowadzenie kampanii Meta Ads i Google Ads",
+    "analiza ruchu i sprzedaży w Google Analytics 4",
+    "prowadzenie oferty na Allegro",
+    "przygotowywanie raportów sprzedaży w Excelu"
+  ],
+  "requirementsMust": [
+    "min. 2 lata doświadczenia w e-commerce",
+    "praktyczna znajomość WooCommerce lub Shopify",
+    "doświadczenie w kampaniach Meta Ads i Google Ads",
+    "znajomość Google Analytics 4",
+    "dobra znajomość Excela"
+  ],
+  "requirementsNice": [
+    "znajomość SEO",
+    "doświadczenie z Allegro i BaseLinkerem"
+  ],
+  "benefits": [
+    "umowa o pracę",
+    "premia od sprzedaży",
+    "produkty firmy w cenie hurtowej"
+  ],
+  "keywords": [
+    {
+      "term": "e-commerce",
+      "synonyms": [
+        "ecommerce",
+        "handel elektroniczny"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "WooCommerce",
+      "synonyms": [
+        "Woo",
+        "WordPress WooCommerce"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Shopify",
+      "synonyms": [],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Meta Ads",
+      "synonyms": [
+        "Facebook Ads",
+        "Facebook Ads Manager",
+        "Instagram Ads"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Google Ads",
+      "synonyms": [
+        "Google Adwords",
+        "AdWords",
+        "reklamy Google"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Google Analytics 4",
+      "synonyms": [
+        "GA4",
+        "Google Analytics"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Excel",
+      "synonyms": [
+        "MS Excel",
+        "Microsoft Excel"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Allegro",
+      "synonyms": [
+        "platforma Allegro",
+        "marketplace Allegro"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "kampanie reklamowe",
+      "synonyms": [
+        "kampanie płatne",
+        "performance marketing"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "raporty sprzedaży",
+      "synonyms": [
+        "raportowanie sprzedaży",
+        "analiza sprzedaży"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "analiza ruchu",
+      "synonyms": [
+        "analityka www",
+        "web analytics"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "SEO",
+      "synonyms": [
+        "pozycjonowanie",
+        "optymalizacja pod wyszukiwarki"
+      ],
+      "importance": "nice",
+      "category": "umiejętność"
+    },
+    {
+      "term": "BaseLinker",
+      "synonyms": [
+        "Baselinker"
+      ],
+      "importance": "nice",
+      "category": "narzędzie"
+    },
+    {
+      "term": "specjalista e-commerce",
+      "synonyms": [
+        "e-commerce specialist",
+        "specjalista ds. e-commerce"
+      ],
+      "importance": "must",
+      "category": "inne"
+    }
+  ],
+  "rodoClause": "",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Brak szczegółowych instrukcji dotyczących formy aplikacji."
+}

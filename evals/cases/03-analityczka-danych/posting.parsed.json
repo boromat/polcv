@@ -1,0 +1,184 @@
+{
+  "title": "Młodszy Analityk Danych (K/M)",
+  "company": "Sklepik Domowy S.A.",
+  "location": "Gdańsk",
+  "workMode": "brak informacji",
+  "seniority": "junior",
+  "industry": "handel detaliczny",
+  "language": "pl",
+  "cvLanguageRequired": "any",
+  "companyIsInternational": false,
+  "summary": "Sklepik Domowy S.A. rozbudowuje zespół analiz sprzedaży i szuka młodszego analityka danych do przygotowywania raportów sprzedaży i marży, budowy dashboardów w Power BI oraz analizy promocji. Kandydat powinien biegle posługiwać się Excelem, znać SQL i mieć doświadczenie z Power BI.",
+  "responsibilities": [
+    "przygotowywanie cyklicznych raportów sprzedaży i marży",
+    "budowa i rozwój dashboardów w Power BI",
+    "pisanie zapytań SQL do hurtowni danych",
+    "analiza wyników promocji i rekomendacje dla działu handlowego"
+  ],
+  "requirementsMust": [
+    "bardzo dobra znajomość Excela (tabele przestawne, funkcje wyszukiwania)",
+    "znajomość SQL na poziomie co najmniej podstawowym",
+    "doświadczenie w pracy z Power BI",
+    "analityczne myślenie i dokładność",
+    "język angielski na poziomie B2"
+  ],
+  "requirementsNice": [
+    "znajomość Pythona",
+    "doświadczenie w handlu"
+  ],
+  "benefits": [
+    "stabilne zatrudnienie",
+    "szkolenia",
+    "prywatna opieka medyczna"
+  ],
+  "keywords": [
+    {
+      "term": "Excel",
+      "synonyms": [
+        "MS Excel",
+        "Microsoft Excel"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "tabele przestawne",
+      "synonyms": [
+        "pivot tables",
+        "PivotTable"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "funkcje wyszukiwania",
+      "synonyms": [
+        "VLOOKUP",
+        "XLOOKUP",
+        "WYSZUKAJ.PIONOWO"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "SQL",
+      "synonyms": [
+        "zapytania SQL",
+        "Structured Query Language"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "Power BI",
+      "synonyms": [
+        "Microsoft Power BI",
+        "PBI"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "dashboardy",
+      "synonyms": [
+        "dashboard",
+        "pulpity raportowe"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "raporty sprzedaży",
+      "synonyms": [
+        "sales reporting",
+        "raportowanie sprzedaży"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "analiza marży",
+      "synonyms": [
+        "margin analysis",
+        "analiza rentowności"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "hurtownia danych",
+      "synonyms": [
+        "data warehouse",
+        "DWH"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "analiza promocji",
+      "synonyms": [
+        "promotion analysis"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "angielski",
+      "synonyms": [
+        "English",
+        "język angielski"
+      ],
+      "importance": "must",
+      "category": "język"
+    },
+    {
+      "term": "analityczne myślenie",
+      "synonyms": [
+        "analytical thinking",
+        "myślenie analityczne"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "dokładność",
+      "synonyms": [
+        "accuracy",
+        "precyzja"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "Python",
+      "synonyms": [
+        "język Python"
+      ],
+      "importance": "nice",
+      "category": "umiejętność"
+    },
+    {
+      "term": "handel",
+      "synonyms": [
+        "retail",
+        "sprzedaż detaliczna"
+      ],
+      "importance": "nice",
+      "category": "inne"
+    },
+    {
+      "term": "Analityk Danych",
+      "synonyms": [
+        "Data Analyst",
+        "analityk danych"
+      ],
+      "importance": "must",
+      "category": "inne"
+    }
+  ],
+  "rodoClause": "Wyrażam zgodę na przetwarzanie moich danych osobowych przez Sklepik Domowy S.A. w celu prowadzenia rekrutacji na stanowisko Młodszy Analityk Danych.",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Do CV należy dołączyć podaną klauzulę zgody na przetwarzanie danych osobowych."
+}

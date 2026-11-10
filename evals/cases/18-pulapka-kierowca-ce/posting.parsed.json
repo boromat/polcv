@@ -1,0 +1,159 @@
+{
+  "title": "Kierowca kat. C+E w transporcie krajowym",
+  "company": "Transport Pomorze Sp. z o.o.",
+  "location": "Słupsk",
+  "workMode": "stacjonarnie",
+  "seniority": "brak informacji",
+  "industry": "transport i logistyka",
+  "language": "pl",
+  "cvLanguageRequired": "any",
+  "companyIsInternational": false,
+  "summary": "Firma transportowa z 15-letnim doświadczeniem poszukuje kierowcy zestawu ciągnik siodłowy z naczepą do przewozów krajowych. Kandydat powinien posiadać uprawnienia C+E, kwalifikację wstępną oraz doświadczenie w zawodzie kierowcy.",
+  "responsibilities": [
+    "przewóz towarów na terenie Polski",
+    "dbanie o powierzony pojazd i ładunek",
+    "prowadzenie dokumentacji przewozowej",
+    "kontakt z dyspozytorem"
+  ],
+  "requirementsMust": [
+    "prawo jazdy kategorii C+E",
+    "kwalifikacja wstępna",
+    "karta kierowcy",
+    "aktualne badania lekarskie i psychotechniczne",
+    "doświadczenie jako kierowca"
+  ],
+  "requirementsNice": [],
+  "benefits": [
+    "stałe zatrudnienie",
+    "powroty do domu na weekendy",
+    "nowoczesna flota",
+    "premie za bezszkodową jazdę"
+  ],
+  "keywords": [
+    {
+      "term": "prawo jazdy kat. C+E",
+      "synonyms": [
+        "C+E",
+        "kategoria C+E",
+        "prawo jazdy C+E"
+      ],
+      "importance": "must",
+      "category": "certyfikat"
+    },
+    {
+      "term": "kwalifikacja wstępna",
+      "synonyms": [
+        "kwalifikacja wstępna kierowcy",
+        "kod 95",
+        "CPC"
+      ],
+      "importance": "must",
+      "category": "certyfikat"
+    },
+    {
+      "term": "karta kierowcy",
+      "synonyms": [
+        "karta kierowcy cyfrowa",
+        "tachograf"
+      ],
+      "importance": "must",
+      "category": "certyfikat"
+    },
+    {
+      "term": "badania lekarskie",
+      "synonyms": [
+        "badania medycyny pracy",
+        "orzeczenie lekarskie"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "badania psychotechniczne",
+      "synonyms": [
+        "psychotest",
+        "orzeczenie psychotechniczne"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "doświadczenie kierowcy",
+      "synonyms": [
+        "doświadczenie jako kierowca",
+        "kierowca zawodowy"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "kierowca",
+      "synonyms": [
+        "kierowca zawodowy",
+        "kierowca C+E"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "ciągnik siodłowy",
+      "synonyms": [
+        "zestaw ciągnik siodłowy z naczepą",
+        "ciężarówka"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "transport krajowy",
+      "synonyms": [
+        "przewozy krajowe",
+        "transport drogowy"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "dokumentacja przewozowa",
+      "synonyms": [
+        "dokumenty przewozowe",
+        "CMR",
+        "listy przewozowe"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "dbanie o pojazd",
+      "synonyms": [
+        "obsługa pojazdu",
+        "dbałość o pojazd"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "bezszkodowa jazda",
+      "synonyms": [
+        "bezpieczna jazda",
+        "jazda bez szkód"
+      ],
+      "importance": "nice",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "transport",
+      "synonyms": [
+        "logistyka",
+        "spedycja"
+      ],
+      "importance": "nice",
+      "category": "inne"
+    }
+  ],
+  "rodoClause": "",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Brak szczegółowych instrukcji dotyczących aplikacji w treści ogłoszenia."
+}

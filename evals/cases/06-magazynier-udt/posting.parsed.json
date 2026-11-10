@@ -1,0 +1,179 @@
+{
+  "title": "Operator wózka widłowego",
+  "company": "Logistyka Delta Sp. z o.o.",
+  "location": "Piaseczno",
+  "workMode": "stacjonarnie",
+  "seniority": "brak informacji",
+  "industry": "logistyka / magazynowanie",
+  "language": "pl",
+  "cvLanguageRequired": "any",
+  "companyIsInternational": false,
+  "summary": "Firma Logistyka Delta szuka operatorów wózków widłowych do nowego centrum logistycznego w Piasecznie. Kandydaci będą odpowiadać za załadunek, rozładunek, składowanie i kompletację towaru w systemie zmianowym. Wymagane są aktualne uprawnienia UDT na wózki jezdniowe podnośnikowe.",
+  "responsibilities": [
+    "załadunek i rozładunek towaru wózkiem widłowym",
+    "przyjmowanie dostaw i rozmieszczanie palet w strefach składowania",
+    "kompletacja zamówień przy użyciu skanera",
+    "udział w inwentaryzacjach"
+  ],
+  "requirementsMust": [
+    "aktualne uprawnienia UDT na wózki jezdniowe podnośnikowe",
+    "doświadczenie w pracy na magazynie",
+    "gotowość do pracy w systemie trzyzmianowym",
+    "dokładność i dbałość o bezpieczeństwo"
+  ],
+  "requirementsNice": [
+    "doświadczenie na wózku wysokiego składowania (reach truck)",
+    "znajomość systemu WMS"
+  ],
+  "benefits": [
+    "stabilne zatrudnienie",
+    "dodatek za pracę w nocy",
+    "darmowy dojazd z Warszawy",
+    "opieka medyczna"
+  ],
+  "keywords": [
+    {
+      "term": "operator wózka widłowego",
+      "synonyms": [
+        "operator wózków widłowych",
+        "wózkowy",
+        "operator wózka"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "uprawnienia UDT",
+      "synonyms": [
+        "UDT",
+        "uprawnienia UDT na wózki jezdniowe",
+        "dozór UDT"
+      ],
+      "importance": "must",
+      "category": "certyfikat"
+    },
+    {
+      "term": "wózek widłowy",
+      "synonyms": [
+        "wózek jezdniowy podnośnikowy",
+        "forklift",
+        "wózek jezdniowy"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "doświadczenie magazynowe",
+      "synonyms": [
+        "praca na magazynie",
+        "doświadczenie w magazynie",
+        "warehouse experience"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "praca zmianowa",
+      "synonyms": [
+        "system trzyzmianowy",
+        "praca na zmiany",
+        "shift work"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "dokładność",
+      "synonyms": [
+        "precyzja",
+        "accuracy"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "bezpieczeństwo pracy",
+      "synonyms": [
+        "BHP",
+        "przestrzeganie zasad bezpieczeństwa",
+        "health and safety"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "załadunek",
+      "synonyms": [
+        "rozładunek",
+        "loading",
+        "unloading"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "kompletacja zamówień",
+      "synonyms": [
+        "picking",
+        "kompletacja",
+        "order picking"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "skaner",
+      "synonyms": [
+        "skaner kodów kreskowych",
+        "scanner",
+        "czytnik kodów"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "inwentaryzacja",
+      "synonyms": [
+        "inventory",
+        "spis z natury"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "reach truck",
+      "synonyms": [
+        "wózek wysokiego składowania",
+        "reach-truck",
+        "wózek wysokiego składowania reach truck"
+      ],
+      "importance": "nice",
+      "category": "umiejętność"
+    },
+    {
+      "term": "WMS",
+      "synonyms": [
+        "system WMS",
+        "Warehouse Management System",
+        "system zarządzania magazynem"
+      ],
+      "importance": "nice",
+      "category": "narzędzie"
+    },
+    {
+      "term": "składowanie",
+      "synonyms": [
+        "strefy składowania",
+        "storage",
+        "magazynowanie"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    }
+  ],
+  "rodoClause": "",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Brak szczegółowych instrukcji dotyczących aplikowania w ogłoszeniu."
+}

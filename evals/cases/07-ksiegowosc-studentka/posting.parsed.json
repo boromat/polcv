@@ -1,0 +1,171 @@
+{
+  "title": "Asystent / Asystentka w biurze rachunkowym",
+  "company": "Biuro Rachunkowe Nowa Linia",
+  "location": "Kraków",
+  "workMode": "brak informacji",
+  "seniority": "junior / bez doświadczenia",
+  "industry": "księgowość i usługi finansowo-księgowe",
+  "language": "pl",
+  "cvLanguageRequired": "any",
+  "companyIsInternational": false,
+  "summary": "Biuro rachunkowe prowadzące księgowość małych firm szuka osoby do zespołu księgowych, która będzie się u nich uczyć zawodu. Kandydat będzie odpowiadał za księgowanie dokumentów w KPiR i ewidencji ryczałtu oraz przygotowywanie ewidencji VAT.",
+  "responsibilities": [
+    "Księgowanie dokumentów w KPiR i ewidencji ryczałtu",
+    "Przygotowywanie ewidencji VAT",
+    "Kontakt z klientami w sprawie brakujących dokumentów",
+    "Archiwizacja dokumentacji"
+  ],
+  "requirementsMust": [
+    "Studia ekonomiczne (także w trakcie)",
+    "Podstawowa wiedza z zakresu podatków",
+    "Dobra znajomość Excela",
+    "Dokładność i dobra organizacja pracy"
+  ],
+  "requirementsNice": [
+    "Znajomość programu Comarch ERP Optima",
+    "Znajomość plików JPK"
+  ],
+  "benefits": [
+    "Elastyczny grafik dla studentów",
+    "Szkolenia",
+    "Możliwość stałego zatrudnienia po studiach"
+  ],
+  "keywords": [
+    {
+      "term": "asystent księgowości",
+      "synonyms": [
+        "asystent w biurze rachunkowym",
+        "księgowy junior",
+        "junior księgowy"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "księgowanie",
+      "synonyms": [
+        "ewidencja księgowa",
+        "księgowość"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "KPiR",
+      "synonyms": [
+        "Księga Przychodów i Rozchodów",
+        "ewidencja przychodów"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "ewidencja ryczałtu",
+      "synonyms": [
+        "ryczałt",
+        "ewidencja przychodów ryczałtowych"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "ewidencja VAT",
+      "synonyms": [
+        "VAT",
+        "rejestr VAT",
+        "podatek VAT"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "podatki",
+      "synonyms": [
+        "prawo podatkowe",
+        "wiedza podatkowa"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "Excel",
+      "synonyms": [
+        "MS Excel",
+        "Microsoft Excel",
+        "arkusz kalkulacyjny"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "studia ekonomiczne",
+      "synonyms": [
+        "ekonomia",
+        "wykształcenie ekonomiczne"
+      ],
+      "importance": "must",
+      "category": "wykształcenie"
+    },
+    {
+      "term": "dokładność",
+      "synonyms": [
+        "precyzja",
+        "skrupulatność"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "organizacja pracy",
+      "synonyms": [
+        "dobra organizacja",
+        "zarządzanie czasem"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "archiwizacja dokumentów",
+      "synonyms": [
+        "archiwizacja",
+        "archiwum dokumentacji"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "obsługa klienta",
+      "synonyms": [
+        "kontakt z klientem",
+        "komunikacja z klientem"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "Comarch ERP Optima",
+      "synonyms": [
+        "Comarch Optima",
+        "Optima",
+        "ERP Optima"
+      ],
+      "importance": "nice",
+      "category": "narzędzie"
+    },
+    {
+      "term": "JPK",
+      "synonyms": [
+        "Jednolity Plik Kontrolny",
+        "pliki JPK",
+        "JPK_VAT"
+      ],
+      "importance": "nice",
+      "category": "umiejętność"
+    }
+  ],
+  "rodoClause": "",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Ogłoszenie nie zawiera szczegółowych instrukcji aplikowania. Oferta dotyczy umowy zlecenia lub umowy o pracę, również dla studentów."
+}

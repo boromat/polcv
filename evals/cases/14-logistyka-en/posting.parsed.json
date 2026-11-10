@@ -1,0 +1,178 @@
+{
+  "title": "Junior Logistics Coordinator",
+  "company": "Northbridge Freight",
+  "location": "Szczecin",
+  "workMode": "hybrydowo",
+  "seniority": "junior",
+  "industry": "logistyka / spedycja",
+  "language": "en",
+  "cvLanguageRequired": "en",
+  "companyIsInternational": true,
+  "summary": "Northbridge Freight, międzynarodowy spedytor z biurami w dziewięciu krajach Europy, szuka Junior Logistics Coordinator do koordynacji przewozów drogowych od zamówienia do dostawy. Kandydat będzie komunikował się z przewoźnikami i klientami po angielsku oraz przygotowywał dokumenty transportowe.",
+  "responsibilities": [
+    "koordynacja przewozów drogowych od zamówienia do dostawy",
+    "komunikacja z przewoźnikami i klientami w języku angielskim",
+    "przygotowywanie i sprawdzanie dokumentów transportowych",
+    "śledzenie przesyłek i rozwiązywanie opóźnień",
+    "aktualizacja danych o przesyłkach w systemach firmy"
+  ],
+  "requirementsMust": [
+    "wykształcenie kierunkowe: logistyka, transport lub pokrewne",
+    "język angielski na poziomie C1",
+    "dobra znajomość Excela",
+    "silne umiejętności organizacyjne"
+  ],
+  "requirementsNice": [
+    "doświadczenie z SAP",
+    "język niemiecki",
+    "staż w spedycji"
+  ],
+  "benefits": [
+    "model hybrydowy",
+    "prywatna opieka medyczna",
+    "jasna ścieżka rozwoju do stanowiska Logistics Coordinator"
+  ],
+  "keywords": [
+    {
+      "term": "logistyka",
+      "synonyms": [
+        "logistics"
+      ],
+      "importance": "must",
+      "category": "wykształcenie"
+    },
+    {
+      "term": "transport",
+      "synonyms": [
+        "transport logistics"
+      ],
+      "importance": "must",
+      "category": "wykształcenie"
+    },
+    {
+      "term": "spedycja",
+      "synonyms": [
+        "freight forwarding",
+        "freight forwarder"
+      ],
+      "importance": "nice",
+      "category": "umiejętność"
+    },
+    {
+      "term": "koordynacja przewozów",
+      "synonyms": [
+        "shipment coordination",
+        "transport coordination"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "dokumenty transportowe",
+      "synonyms": [
+        "transport documents",
+        "shipping documents"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "śledzenie przesyłek",
+      "synonyms": [
+        "shipment tracking",
+        "tracking"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "angielski",
+      "synonyms": [
+        "English"
+      ],
+      "importance": "must",
+      "category": "język"
+    },
+    {
+      "term": "niemiecki",
+      "synonyms": [
+        "German"
+      ],
+      "importance": "nice",
+      "category": "język"
+    },
+    {
+      "term": "Excel",
+      "synonyms": [
+        "MS Excel",
+        "Microsoft Excel"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "SAP",
+      "synonyms": [
+        "SAP ERP"
+      ],
+      "importance": "nice",
+      "category": "narzędzie"
+    },
+    {
+      "term": "organizacja pracy",
+      "synonyms": [
+        "organisational skills",
+        "organizational skills"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "komunikacja",
+      "synonyms": [
+        "communication"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "rozwiązywanie problemów",
+      "synonyms": [
+        "problem solving"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "staż",
+      "synonyms": [
+        "internship"
+      ],
+      "importance": "nice",
+      "category": "inne"
+    },
+    {
+      "term": "Logistics Coordinator",
+      "synonyms": [
+        "koordynator logistyki",
+        "koordynator ds. logistyki"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "przewoźnik",
+      "synonyms": [
+        "carrier",
+        "carriers"
+      ],
+      "importance": "must",
+      "category": "inne"
+    }
+  ],
+  "rodoClause": "",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Ogłoszenie nie zawiera szczegółowych instrukcji aplikacyjnych ani wymogu listu motywacyjnego. CV należy przygotować po angielsku."
+}

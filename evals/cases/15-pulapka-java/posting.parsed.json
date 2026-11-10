@@ -1,0 +1,141 @@
+{
+  "title": "Junior Java Developer",
+  "company": "Bankowe Systemy Tęcza S.A.",
+  "location": "Warszawa",
+  "workMode": "hybrydowo",
+  "seniority": "junior",
+  "industry": "finanse / bankowość",
+  "language": "pl",
+  "cvLanguageRequired": "any",
+  "companyIsInternational": false,
+  "summary": "Firma Bankowe Systemy Tęcza S.A. tworzy systemy rozliczeń dla banków spółdzielczych i szuka juniora do zespołu backendu. Kandydat będzie rozwijał mikroserwisy w Javie 17 i Spring Boot oraz wdrażał usługi na Kubernetes.",
+  "responsibilities": [
+    "rozwój mikroserwisów w Javie 17 i Spring Boot",
+    "pisanie zapytań SQL",
+    "wdrażanie usług na klastrze Kubernetes",
+    "udział w code review"
+  ],
+  "requirementsMust": [
+    "znajomość Javy 17",
+    "Spring Boot",
+    "podstawy Kubernetes",
+    "znajomość SQL",
+    "Git",
+    "język angielski na poziomie B2"
+  ],
+  "requirementsNice": [
+    "Apache Kafka",
+    "doświadczenie w finansach"
+  ],
+  "benefits": [
+    "program mentorski",
+    "certyfikacje",
+    "praca hybrydowa"
+  ],
+  "keywords": [
+    {
+      "term": "Java 17",
+      "synonyms": [
+        "Java",
+        "JDK 17",
+        "Java SE 17"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "Spring Boot",
+      "synonyms": [
+        "Spring",
+        "Spring Framework"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Kubernetes",
+      "synonyms": [
+        "K8s"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "SQL",
+      "synonyms": [
+        "zapytania SQL",
+        "bazy danych SQL"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "Git",
+      "synonyms": [
+        "system kontroli wersji"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "angielski",
+      "synonyms": [
+        "English",
+        "język angielski"
+      ],
+      "importance": "must",
+      "category": "język"
+    },
+    {
+      "term": "mikroserwisy",
+      "synonyms": [
+        "microservices",
+        "architektura mikroserwisowa"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "code review",
+      "synonyms": [
+        "przegląd kodu",
+        "review kodu"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "Apache Kafka",
+      "synonyms": [
+        "Kafka"
+      ],
+      "importance": "nice",
+      "category": "narzędzie"
+    },
+    {
+      "term": "finanse",
+      "synonyms": [
+        "bankowość",
+        "branża finansowa",
+        "fintech"
+      ],
+      "importance": "nice",
+      "category": "inne"
+    },
+    {
+      "term": "Junior Java Developer",
+      "synonyms": [
+        "Junior Java Developer",
+        "Młodszy programista Java",
+        "Junior Programista Java"
+      ],
+      "importance": "must",
+      "category": "inne"
+    }
+  ],
+  "rodoClause": "",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Brak szczegółowych instrukcji dotyczących aplikowania w treści ogłoszenia."
+}

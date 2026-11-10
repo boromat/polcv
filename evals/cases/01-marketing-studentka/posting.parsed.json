@@ -1,0 +1,205 @@
+{
+  "title": "Młodszy Specjalista / Młodsza Specjalistka ds. Marketingu Online",
+  "company": "Ogrodnik24 Sp. z o.o.",
+  "location": "Poznań",
+  "workMode": "hybrydowo",
+  "seniority": "junior",
+  "industry": "e-commerce / ogrodnictwo",
+  "language": "pl",
+  "cvLanguageRequired": "any",
+  "companyIsInternational": false,
+  "summary": "Ogrodnik24, sklep internetowy z artykułami ogrodniczymi, szuka osoby do wsparcia zespołu marketingu w prowadzeniu kanałów online. Kandydat będzie odpowiadał za social media, kampanie Google Ads oraz raportowanie wyników w GA4 i Excelu.",
+  "responsibilities": [
+    "Prowadzenie profili marki na Instagramie i Facebooku",
+    "Przygotowywanie grafik i krótkich materiałów wideo",
+    "Prowadzenie i optymalizacja kampanii Google Ads",
+    "Przygotowywanie raportów w Google Analytics 4 i MS Excel",
+    "Współpraca z działem obsługi klienta przy akcjach promocyjnych"
+  ],
+  "requirementsMust": [
+    "Doświadczenie w prowadzeniu social media (także staż lub praktyki)",
+    "Praktyczna znajomość Google Ads",
+    "Znajomość Google Analytics 4",
+    "Dobra znajomość MS Excel",
+    "Obsługa Canvy lub podobnego narzędzia graficznego",
+    "Język angielski na poziomie B2"
+  ],
+  "requirementsNice": [
+    "Doświadczenie z kampaniami Meta Ads",
+    "Umiejętność pisania tekstów sprzedażowych"
+  ],
+  "benefits": [
+    "Umowa o pracę",
+    "Praca hybrydowa (2 dni w biurze)",
+    "Budżet szkoleniowy",
+    "Rabat na produkty ze sklepu"
+  ],
+  "keywords": [
+    {
+      "term": "Google Ads",
+      "synonyms": [
+        "Google Adwords",
+        "kampanie Google",
+        "reklamy Google"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Google Analytics 4",
+      "synonyms": [
+        "GA4",
+        "Google Analytics"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "MS Excel",
+      "synonyms": [
+        "Excel",
+        "Microsoft Excel"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Canva",
+      "synonyms": [
+        "obsługa Canvy",
+        "narzędzia graficzne"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "social media",
+      "synonyms": [
+        "media społecznościowe",
+        "social media marketing",
+        "SMM"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "Instagram",
+      "synonyms": [
+        "IG",
+        "prowadzenie Instagrama"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Facebook",
+      "synonyms": [
+        "FB",
+        "prowadzenie Facebooka"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "grafika",
+      "synonyms": [
+        "projektowanie grafik",
+        "grafika marketingowa",
+        "graphic design"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "materiały wideo",
+      "synonyms": [
+        "video",
+        "wideo marketingowe",
+        "content wideo"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "raportowanie",
+      "synonyms": [
+        "raporty",
+        "reporting"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "angielski",
+      "synonyms": [
+        "English",
+        "język angielski"
+      ],
+      "importance": "must",
+      "category": "język"
+    },
+    {
+      "term": "Meta Ads",
+      "synonyms": [
+        "Facebook Ads",
+        "reklamy Meta",
+        "kampanie Meta"
+      ],
+      "importance": "nice",
+      "category": "narzędzie"
+    },
+    {
+      "term": "teksty sprzedażowe",
+      "synonyms": [
+        "copywriting",
+        "copywriting sprzedażowy",
+        "pisanie tekstów"
+      ],
+      "importance": "nice",
+      "category": "umiejętność"
+    },
+    {
+      "term": "optymalizacja kampanii",
+      "synonyms": [
+        "optymalizacja",
+        "campaign optimization"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "marketing online",
+      "synonyms": [
+        "marketing internetowy",
+        "digital marketing",
+        "e-marketing"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "promocja",
+      "synonyms": [
+        "akcje promocyjne",
+        "promotion"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "Specjalista ds. marketingu",
+      "synonyms": [
+        "marketing specialist",
+        "specjalista marketingu online",
+        "specjalistka ds. marketingu"
+      ],
+      "importance": "must",
+      "category": "inne"
+    }
+  ],
+  "rodoClause": "",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Brak szczegółowych instrukcji dotyczących aplikacji w treści ogłoszenia."
+}

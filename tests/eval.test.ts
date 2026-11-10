@@ -28,6 +28,8 @@ describe('npm run eval na atrapie modelu', () => {
   it('przechodzi całą ścieżkę i liczy podejścia, odrzucenia, liczby spoza profilu, słowa kluczowe, strony i zakazane fakty', async () => {
     // Dwa prawdziwe przypadki ze zbioru; ogłoszenie z fikstur, żeby były słowa kluczowe.
     const cases = loadCases(undefined, ['01', '16']).map((c) => ({ ...c, parsed: structuredClone(fixtures.posting) }));
+    const frozen = path.join(cases[0].dir, 'posting.parsed.json');
+    const frozenBefore = fs.existsSync(frozen) ? fs.readFileSync(frozen, 'utf8') : null;
     const marketing = cases[0].profile.contact.fullName;
     vi.stubGlobal('fetch', mockFetch({ invalidFirst: [marketing], extraSkills: { [marketing]: ['Google Ads'] } }));
     const outDir = path.join(dir, 'results');
@@ -54,8 +56,8 @@ describe('npm run eval na atrapie modelu', () => {
     expect(md).toContain('| CV przyjęte w 1. / 2. / 3. podejściu | 50% / 50% / 0% |');
     expect(md).toContain('Google Ads (fakt, skills)');
     expect(comparisonMarkdown([result, { ...result, model: 'inny/model' }])).toContain('| Miara | `mock/model` | `inny/model` |');
-    // Atrapa niczego nie zapisuje w zbiorze przypadków.
-    expect(fs.existsSync(path.join(cases[0].dir, 'posting.parsed.json'))).toBe(false);
+    // Atrapa niczego nie zapisuje w zbiorze przypadków (zamrożone ogłoszenie zostaje takie, jak było).
+    expect(fs.existsSync(frozen) ? fs.readFileSync(frozen, 'utf8') : null).toBe(frozenBefore);
   });
 });
 

@@ -1,0 +1,169 @@
+{
+  "title": "Elektryk Utrzymania Ruchu",
+  "company": "Zakład Produkcyjny Metalplast Sp. z o.o.",
+  "location": "Bielsko-Biała",
+  "workMode": "stacjonarnie",
+  "seniority": "brak informacji",
+  "industry": "produkcja / przemysł motoryzacyjny (tworzywa sztuczne)",
+  "language": "pl",
+  "cvLanguageRequired": "any",
+  "companyIsInternational": false,
+  "summary": "Zakład produkujący elementy z tworzyw sztucznych dla branży motoryzacyjnej poszukuje elektryka do działu utrzymania ruchu. Kandydat będzie odpowiadał za usuwanie awarii, przeglądy prewencyjne i modernizację instalacji w pracy zmianowej.",
+  "responsibilities": [
+    "usuwanie awarii elektrycznych maszyn i linii produkcyjnych",
+    "przeglądy prewencyjne urządzeń",
+    "montaż i modernizacja instalacji elektrycznych w zakładzie",
+    "prowadzenie dokumentacji napraw"
+  ],
+  "requirementsMust": [
+    "uprawnienia SEP E i D do 1 kV",
+    "umiejętność czytania schematów elektrycznych",
+    "doświadczenie w pracy jako elektryk",
+    "gotowość do pracy w systemie trzyzmianowym"
+  ],
+  "requirementsNice": [
+    "znajomość sterowników PLC",
+    "doświadczenie w utrzymaniu ruchu na produkcji"
+  ],
+  "benefits": [
+    "stabilne zatrudnienie",
+    "szkolenia z automatyki",
+    "premia kwartalna",
+    "dofinansowanie do obiadów"
+  ],
+  "keywords": [
+    {
+      "term": "elektryk",
+      "synonyms": [
+        "electrician",
+        "elektryk przemysłowy"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "utrzymanie ruchu",
+      "synonyms": [
+        "UR",
+        "maintenance"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "SEP E",
+      "synonyms": [
+        "uprawnienia SEP E",
+        "SEP grupa E"
+      ],
+      "importance": "must",
+      "category": "certyfikat"
+    },
+    {
+      "term": "SEP D",
+      "synonyms": [
+        "uprawnienia SEP D",
+        "SEP grupa D"
+      ],
+      "importance": "must",
+      "category": "certyfikat"
+    },
+    {
+      "term": "do 1 kV",
+      "synonyms": [
+        "1 kV",
+        "niskie napięcie"
+      ],
+      "importance": "must",
+      "category": "certyfikat"
+    },
+    {
+      "term": "schematy elektryczne",
+      "synonyms": [
+        "schematy",
+        "dokumentacja elektryczna",
+        "electrical schematics"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "praca zmianowa",
+      "synonyms": [
+        "system trzyzmianowy",
+        "shift work"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "awarie maszyn",
+      "synonyms": [
+        "usuwanie awarii",
+        "troubleshooting"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "instalacje elektryczne",
+      "synonyms": [
+        "instalacje elektryczne przemysłowe",
+        "electrical installations"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "przeglądy prewencyjne",
+      "synonyms": [
+        "przeglądy",
+        "preventive maintenance"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "modernizacja",
+      "synonyms": [
+        "modernization",
+        "retrofit"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "PLC",
+      "synonyms": [
+        "sterowniki PLC",
+        "sterownik programowalny",
+        "programmable logic controller"
+      ],
+      "importance": "nice",
+      "category": "narzędzie"
+    },
+    {
+      "term": "automatyka",
+      "synonyms": [
+        "automation",
+        "automatyka przemysłowa"
+      ],
+      "importance": "nice",
+      "category": "umiejętność"
+    },
+    {
+      "term": "produkcja",
+      "synonyms": [
+        "production",
+        "zakład produkcyjny"
+      ],
+      "importance": "nice",
+      "category": "inne"
+    }
+  ],
+  "rodoClause": "",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Brak szczegółowych instrukcji dotyczących aplikowania w treści ogłoszenia."
+}

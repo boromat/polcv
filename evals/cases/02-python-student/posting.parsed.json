@@ -1,0 +1,169 @@
+{
+  "title": "Junior Python Developer",
+  "company": "DataLoop Sp. z o.o.",
+  "location": "Wrocław lub zdalnie",
+  "workMode": "zdalnie / hybrydowo / stacjonarnie / brak informacji",
+  "seniority": "junior",
+  "industry": "oprogramowanie do analizy danych sprzedażowych dla sieci handlowych",
+  "language": "pl",
+  "cvLanguageRequired": "any",
+  "companyIsInternational": false,
+  "summary": "DataLoop szuka juniora do zespołu backendu, który rozwijał będzie API w Django REST Framework oraz pracował z bazą PostgreSQL. Oferta obejmuje mentoring i elastyczne godziny pracy, a kandydat powinien znać Pythona, SQL, Git, Dockera oraz mieć doświadczenie z Django lub DRF.",
+  "responsibilities": [
+    "rozwój API w Django REST Framework",
+    "pisanie zapytań SQL do bazy PostgreSQL",
+    "przygotowywanie środowisk w Dockerze",
+    "code review i praca z Gitem",
+    "pisanie testów automatycznych"
+  ],
+  "requirementsMust": [
+    "znajomość Pythona",
+    "znajomość SQL",
+    "praca z Gitem",
+    "doświadczenie z Django lub Django REST Framework",
+    "podstawy Dockera",
+    "język angielski na poziomie B2"
+  ],
+  "requirementsNice": [
+    "PostgreSQL",
+    "pytest",
+    "własne projekty na GitHubie"
+  ],
+  "benefits": [
+    "mentoring",
+    "praca zdalna lub w biurze we Wrocławiu",
+    "elastyczne godziny pracy"
+  ],
+  "keywords": [
+    {
+      "term": "Python",
+      "synonyms": [
+        "Python3",
+        "język Python"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "SQL",
+      "synonyms": [
+        "zapytania SQL",
+        "język SQL"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "Git",
+      "synonyms": [
+        "system kontroli wersji",
+        "GitHub"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Django",
+      "synonyms": [
+        "Django Framework"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Django REST Framework",
+      "synonyms": [
+        "DRF",
+        "Django REST"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Docker",
+      "synonyms": [
+        "Dockerfile",
+        "konteneryzacja"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "angielski",
+      "synonyms": [
+        "English",
+        "język angielski"
+      ],
+      "importance": "must",
+      "category": "język"
+    },
+    {
+      "term": "API",
+      "synonyms": [
+        "REST API",
+        "API REST"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "testy automatyczne",
+      "synonyms": [
+        "automated testing",
+        "testowanie automatyczne"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "code review",
+      "synonyms": [
+        "przegląd kodu",
+        "review kodu"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "PostgreSQL",
+      "synonyms": [
+        "Postgres",
+        "baza PostgreSQL"
+      ],
+      "importance": "nice",
+      "category": "narzędzie"
+    },
+    {
+      "term": "pytest",
+      "synonyms": [
+        "testy pytest"
+      ],
+      "importance": "nice",
+      "category": "narzędzie"
+    },
+    {
+      "term": "GitHub",
+      "synonyms": [
+        "własne projekty na GitHub",
+        "repozytorium GitHub"
+      ],
+      "importance": "nice",
+      "category": "narzędzie"
+    },
+    {
+      "term": "Junior Python Developer",
+      "synonyms": [
+        "Junior Python Developer",
+        "Python Developer",
+        "programista Python"
+      ],
+      "importance": "must",
+      "category": "inne"
+    }
+  ],
+  "rodoClause": "",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Brak szczegółowych instrukcji aplikowania w ogłoszeniu. Oferta dotyczy umowy o pracę lub B2B."
+}

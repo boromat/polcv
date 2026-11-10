@@ -1,0 +1,160 @@
+{
+  "title": "Sprzedawca - Kasjer / Sprzedawczyni - Kasjerka",
+  "company": "Drogeria Pod Lupą",
+  "location": "Toruń",
+  "workMode": "stacjonarnie",
+  "seniority": "brak informacji",
+  "industry": "handel detaliczny / drogerie",
+  "language": "pl",
+  "cvLanguageRequired": "any",
+  "companyIsInternational": false,
+  "summary": "Drogeria Pod Lupą szuka osoby do obsługi klientów w sklepie w centrum Torunia. Kandydat będzie odpowiadał za kasę, doradztwo kosmetyczne oraz porządek i ekspozycję towaru. Ważna jest uprzejmość, dokładność i gotowość do pracy w weekendy.",
+  "responsibilities": [
+    "obsługa kasy fiskalnej i terminala płatniczego",
+    "doradztwo klientom w wyborze kosmetyków",
+    "przyjmowanie dostaw i wykładanie towaru",
+    "dbanie o porządek i ekspozycję w sklepie",
+    "kontrola terminów ważności produktów"
+  ],
+  "requirementsMust": [
+    "doświadczenie w obsłudze klienta",
+    "umiejętność obsługi kasy fiskalnej",
+    "uprzejmość i dokładność",
+    "gotowość do pracy w weekendy"
+  ],
+  "requirementsNice": [
+    "doświadczenie w handlu",
+    "zainteresowanie kosmetykami"
+  ],
+  "benefits": [
+    "umowa o pracę",
+    "pełny etat",
+    "rabaty pracownicze",
+    "premia za wyniki sklepu"
+  ],
+  "keywords": [
+    {
+      "term": "obsługa klienta",
+      "synonyms": [
+        "customer service",
+        "obsługa klientów"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "obsługa kasy fiskalnej",
+      "synonyms": [
+        "kasa fiskalna",
+        "obsługa kasy"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "terminal płatniczy",
+      "synonyms": [
+        "terminal",
+        "płatności kartą"
+      ],
+      "importance": "must",
+      "category": "narzędzie"
+    },
+    {
+      "term": "uprzejmość",
+      "synonyms": [
+        "kultura osobista",
+        "życzliwość"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "dokładność",
+      "synonyms": [
+        "precyzja",
+        "rzetelność"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "praca w weekendy",
+      "synonyms": [
+        "praca weekendowa",
+        "dyspozycyjność"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "handel",
+      "synonyms": [
+        "sprzedaż detaliczna",
+        "retail"
+      ],
+      "importance": "nice",
+      "category": "umiejętność"
+    },
+    {
+      "term": "kosmetyki",
+      "synonyms": [
+        "kosmetologia",
+        "produkty kosmetyczne",
+        "drogeria"
+      ],
+      "importance": "nice",
+      "category": "inne"
+    },
+    {
+      "term": "doradztwo klientom",
+      "synonyms": [
+        "doradztwo sprzedażowe",
+        "konsultacja klienta"
+      ],
+      "importance": "nice",
+      "category": "umiejętność"
+    },
+    {
+      "term": "ekspozycja towaru",
+      "synonyms": [
+        "merchandising",
+        "wykładanie towaru"
+      ],
+      "importance": "nice",
+      "category": "umiejętność"
+    },
+    {
+      "term": "kontrola terminów ważności",
+      "synonyms": [
+        "terminy przydatności",
+        "rotacja towaru"
+      ],
+      "importance": "nice",
+      "category": "umiejętność"
+    },
+    {
+      "term": "sprzedawca",
+      "synonyms": [
+        "sprzedawczyni",
+        "shop assistant"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "kasjer",
+      "synonyms": [
+        "kasjerka",
+        "cashier"
+      ],
+      "importance": "must",
+      "category": "inne"
+    }
+  ],
+  "rodoClause": "",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Brak szczegółowych instrukcji dotyczących aplikowania w treści ogłoszenia."
+}

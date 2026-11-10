@@ -1,0 +1,170 @@
+{
+  "title": "Młodszy Przedstawiciel Handlowy / Młodsza Przedstawicielka Handlowa",
+  "company": "Hurtownia Napojów Orzeźwienie Sp. z o.o.",
+  "location": "Rzeszów i okolice",
+  "workMode": "stacjonarnie",
+  "seniority": "junior",
+  "industry": "hurtowa sprzedaż napojów / FMCG",
+  "language": "pl",
+  "cvLanguageRequired": "any",
+  "companyIsInternational": false,
+  "summary": "Firma hurtowa zaopatrująca sklepy i restauracje w regionie szuka osoby do regularnych wizyt u klientów oraz pozyskiwania nowych klientów B2B. Kandydat będzie odpowiedzialny za przyjmowanie zamówień, prowadzenie CRM i dbanie o ekspozycję produktów.",
+  "responsibilities": [
+    "regularne wizyty u klientów (sklepy, restauracje, hotele)",
+    "pozyskiwanie nowych klientów B2B",
+    "przyjmowanie zamówień i prowadzenie notatek w CRM",
+    "dbanie o ekspozycję produktów u klientów"
+  ],
+  "requirementsMust": [
+    "prawo jazdy kat. B",
+    "komunikatywność i umiejętność negocjacji",
+    "doświadczenie w sprzedaży lub obsłudze klienta",
+    "samodzielność w planowaniu pracy"
+  ],
+  "requirementsNice": [
+    "znajomość systemu CRM",
+    "doświadczenie w sprzedaży B2B"
+  ],
+  "benefits": [
+    "samochód służbowy do użytku prywatnego",
+    "telefon służbowy",
+    "laptop",
+    "system premiowy",
+    "umowa o pracę"
+  ],
+  "keywords": [
+    {
+      "term": "przedstawiciel handlowy",
+      "synonyms": [
+        "sales representative",
+        "przedstawicielka handlowa"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "sprzedaż",
+      "synonyms": [
+        "sales"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "obsługa klienta",
+      "synonyms": [
+        "customer service",
+        "customer care"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "negocjacje",
+      "synonyms": [
+        "negotiation",
+        "negocjowanie"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "komunikatywność",
+      "synonyms": [
+        "communication skills",
+        "komunikacja"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "prawo jazdy kat. B",
+      "synonyms": [
+        "prawo jazdy B",
+        "driving license B",
+        "kat. B"
+      ],
+      "importance": "must",
+      "category": "certyfikat"
+    },
+    {
+      "term": "samodzielność",
+      "synonyms": [
+        "self-reliance",
+        "independence"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "pozyskiwanie klientów",
+      "synonyms": [
+        "client acquisition",
+        "lead generation",
+        "new business"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "B2B",
+      "synonyms": [
+        "business to business",
+        "sprzedaż B2B"
+      ],
+      "importance": "nice",
+      "category": "umiejętność"
+    },
+    {
+      "term": "CRM",
+      "synonyms": [
+        "system CRM",
+        "customer relationship management"
+      ],
+      "importance": "nice",
+      "category": "narzędzie"
+    },
+    {
+      "term": "zamówienia",
+      "synonyms": [
+        "order processing",
+        "przyjmowanie zamówień"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "ekspozycja produktów",
+      "synonyms": [
+        "merchandising",
+        "product display"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "planowanie pracy",
+      "synonyms": [
+        "work planning",
+        "organizacja pracy",
+        "time management"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "wizyty u klientów",
+      "synonyms": [
+        "field sales",
+        "terenowa sprzedaż"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    }
+  ],
+  "rodoClause": "",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Brak szczegółowych instrukcji dotyczących aplikowania w treści ogłoszenia."
+}

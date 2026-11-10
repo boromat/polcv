@@ -16,6 +16,14 @@ describe('zbiór przypadków ewaluacji', () => {
     }
   });
 
+  it('ogłoszenia są przeanalizowane i zamrożone: każde ma słowa kluczowe, a angielskie dają CV po angielsku', () => {
+    for (const c of cases) {
+      expect(c.parsed, c.id).not.toBeNull();
+      expect(c.parsed!.keywords.length, c.id).toBeGreaterThan(5);
+    }
+    expect(cases.filter((c) => c.parsed!.language === 'en').map((c) => c.id)).toEqual(['09-frontend-en', '14-logistyka-en']);
+  });
+
   it('różne poziomy i co najmniej trzy pułapki', () => {
     const levels = new Set(cases.map((c) => c.meta.level));
     expect([...levels].sort()).toEqual(['junior', 'praca fizyczna', 'student', 'zmiana branży']);

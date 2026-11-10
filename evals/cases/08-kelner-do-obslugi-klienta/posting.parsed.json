@@ -1,0 +1,198 @@
+{
+  "title": "Konsultant / Konsultantka Obsługi Klienta z językiem angielskim",
+  "company": "Centrum Wsparcia Nordlink Sp. z o.o.",
+  "location": "Katowice",
+  "workMode": "hybrydowo",
+  "seniority": "brak informacji",
+  "industry": "obsługa klienta / call center",
+  "language": "pl",
+  "cvLanguageRequired": "any",
+  "companyIsInternational": true,
+  "summary": "Firma Nordlink szuka konsultanta obsługi klienta do wsparcia skandynawskich sklepów internetowych. Kandydat będzie odpowiadał klientom po angielsku przez telefon, czat i e-mail oraz rozwiązywał problemy z zamówieniami i zwrotami. Praca odbywa się na umowę o pracę w Katowicach, hybrydowo po wdrożeniu.",
+  "responsibilities": [
+    "Odpowiadanie na pytania klientów po angielsku (telefon, czat, e-mail)",
+    "Rozwiązywanie problemów z zamówieniami i zwrotami",
+    "Prowadzenie notatek w systemie CRM",
+    "Przekazywanie zgłoszeń do odpowiednich działów"
+  ],
+  "requirementsMust": [
+    "Język angielski na poziomie min. B2",
+    "Doświadczenie w pracy z klientem (handel, gastronomia, hotelarstwo)",
+    "Komunikatywność i cierpliwość",
+    "Podstawowa obsługa komputera"
+  ],
+  "requirementsNice": [
+    "Znajomość języka niemieckiego",
+    "Doświadczenie z systemem CRM"
+  ],
+  "benefits": [
+    "Płatne szkolenie wdrożeniowe",
+    "Praca hybrydowa po 3 miesiącach",
+    "Dodatek językowy"
+  ],
+  "keywords": [
+    {
+      "term": "obsługa klienta",
+      "synonyms": [
+        "customer service",
+        "customer support",
+        "BOK"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "angielski",
+      "synonyms": [
+        "English",
+        "język angielski"
+      ],
+      "importance": "must",
+      "category": "język"
+    },
+    {
+      "term": "B2",
+      "synonyms": [
+        "CEFR",
+        "poziom B2"
+      ],
+      "importance": "must",
+      "category": "język"
+    },
+    {
+      "term": "doświadczenie w handlu",
+      "synonyms": [
+        "sprzedaż",
+        "retail",
+        "handel"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "gastronomia",
+      "synonyms": [
+        "hospitality",
+        "restauracja"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "hotelarstwo",
+      "synonyms": [
+        "hotel",
+        "hospitality"
+      ],
+      "importance": "must",
+      "category": "inne"
+    },
+    {
+      "term": "komunikatywność",
+      "synonyms": [
+        "communication skills",
+        "komunikacja"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "cierpliwość",
+      "synonyms": [
+        "patience"
+      ],
+      "importance": "must",
+      "category": "kompetencja miękka"
+    },
+    {
+      "term": "obsługa komputera",
+      "synonyms": [
+        "MS Office",
+        "pakiet Office",
+        "komputer"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "system CRM",
+      "synonyms": [
+        "CRM",
+        "customer relationship management"
+      ],
+      "importance": "nice",
+      "category": "narzędzie"
+    },
+    {
+      "term": "niemiecki",
+      "synonyms": [
+        "German",
+        "język niemiecki"
+      ],
+      "importance": "nice",
+      "category": "język"
+    },
+    {
+      "term": "obsługa zwrotów",
+      "synonyms": [
+        "returns",
+        "zwroty",
+        "reklamacje"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "obsługa zamówień",
+      "synonyms": [
+        "zamówienia",
+        "order management",
+        "order support"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "czat",
+      "synonyms": [
+        "live chat",
+        "chat support"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "e-mail",
+      "synonyms": [
+        "email",
+        "korespondencja e-mail"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "telefon",
+      "synonyms": [
+        "call center",
+        "infolinia",
+        "phone support"
+      ],
+      "importance": "must",
+      "category": "umiejętność"
+    },
+    {
+      "term": "konsultant",
+      "synonyms": [
+        "consultant",
+        "specjalista obsługi klienta"
+      ],
+      "importance": "must",
+      "category": "inne"
+    }
+  ],
+  "rodoClause": "",
+  "mentionsFutureRecruitment": false,
+  "photoPreference": "unspecified",
+  "coverLetterRequired": false,
+  "applicationNotes": "Ogłoszenie nie zawiera dodatkowych instrukcji dotyczących aplikowania ani wymogu listu motywacyjnego."
+}
