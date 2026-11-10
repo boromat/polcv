@@ -14,6 +14,11 @@ async function freshStatus(reply: () => Promise<Response>) {
 }
 
 describe('nowa wersja PolCV', () => {
+  it('status podaje dokładne komendy, które Ustawienia pokażą przed aktualizacją', async () => {
+    const s = await freshStatus(async () => new Response(JSON.stringify({ tag_name: 'v99.0.0' })));
+    expect(s.commands).toEqual(['git pull --ff-only', 'npm install --no-audit --no-fund', 'npm run build']);
+  });
+
   it('nowsze wydanie na GitHubie: aktualizacja dostępna (numer bez "v")', async () => {
     const s = await freshStatus(async () => new Response(JSON.stringify({ tag_name: 'v99.0.0' })));
     expect(s).toMatchObject({ current: VERSION, latest: '99.0.0', updateAvailable: true, releasesUrl: 'https://github.com/boromat/polcv/releases' });

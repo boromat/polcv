@@ -48,8 +48,9 @@ settingsRouter.get('/settings/polanon', async (_req, res) => {
   res.json(await withUpdate(await polanonStatus(await store.getSettings())));
 });
 
-settingsRouter.post('/settings/polanon/ner', async (_req, res) => {
-  const r = await installNer(await store.getSettings());
+// Uruchamianie programów (pip, git, npm): `confirmed` to komendy, które kandydat zobaczył i zatwierdził w Ustawieniach.
+settingsRouter.post('/settings/polanon/ner', async (req, res) => {
+  const r = await installNer(await store.getSettings(), req.body?.confirmed);
   res.json({ ...r, status: await withUpdate(r.status) });
 });
 
@@ -57,12 +58,12 @@ settingsRouter.get('/settings/update', async (_req, res) => {
   res.json(await polcvUpdateStatus());
 });
 
-settingsRouter.post('/settings/update', async (_req, res) => {
-  res.json(await updatePolcv());
+settingsRouter.post('/settings/update', async (req, res) => {
+  res.json(await updatePolcv(req.body?.confirmed));
 });
 
-settingsRouter.post('/settings/polanon/install', async (_req, res) => {
-  const r = await installPolanon(await store.getSettings());
+settingsRouter.post('/settings/polanon/install', async (req, res) => {
+  const r = await installPolanon(await store.getSettings(), req.body?.confirmed);
   res.json({ ...r, status: await withUpdate(r.status) });
 });
 

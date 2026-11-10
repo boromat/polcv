@@ -60,6 +60,8 @@ export interface PolanonStatus {
   spacy: boolean;
   model: boolean;
   error: string;
+  /** dokładne komendy instalacji, do pokazania przed uruchomieniem (null bez Pythona) */
+  installCommands: { polanon: string[]; ner: string[] } | null;
   /** najnowsza wersja na PyPI (null bez sieci) */
   latest?: string | null;
   updateAvailable?: boolean;
@@ -72,6 +74,8 @@ export interface UpdateStatus {
   updateAvailable: boolean;
   canSelfUpdate: boolean;
   releasesUrl: string;
+  /** dokładne komendy aktualizacji, do pokazania przed uruchomieniem */
+  commands: string[];
 }
 
 export interface ModelInfo {
@@ -118,10 +122,11 @@ export const api = {
   saveSettings: (s: SettingsPatch) => req<SettingsView>('PUT', '/settings', s),
   checkKey: (apiKey?: string) => req<{ ok: boolean; message: string }>('POST', '/settings/check-key', { apiKey }),
   polanonStatus: () => req<PolanonStatus>('GET', '/settings/polanon'),
-  installPolanon: () => req<{ ok: boolean; output: string; status: PolanonStatus }>('POST', '/settings/polanon/install'),
-  installNer: () => req<{ ok: boolean; output: string; status: PolanonStatus }>('POST', '/settings/polanon/ner'),
+  // `confirmed`: komendy pokazane w potwierdzeniu - serwer uruchamia tylko dokładnie te.
+  installPolanon: (confirmed: string[]) => req<{ ok: boolean; output: string; status: PolanonStatus }>('POST', '/settings/polanon/install', { confirmed }),
+  installNer: (confirmed: string[]) => req<{ ok: boolean; output: string; status: PolanonStatus }>('POST', '/settings/polanon/ner', { confirmed }),
   updateStatus: () => req<UpdateStatus>('GET', '/settings/update'),
-  updatePolcv: () => req<{ ok: boolean; output: string; version: string }>('POST', '/settings/update'),
+  updatePolcv: (confirmed: string[]) => req<{ ok: boolean; output: string; version: string }>('POST', '/settings/update', { confirmed }),
   models: () => req<ModelInfo[]>('GET', '/models'),
   usage: () => req<UsageView>('GET', '/usage'),
 

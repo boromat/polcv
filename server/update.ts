@@ -6,6 +6,7 @@ import { VERSION } from './version';
 import { APP_UA } from './jobs/http';
 import { isNewer } from './privacy/polanon';
 import { tr } from './i18n';
+import { commandLine, requireConfirmed } from './commands';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 export const RELEASES_URL = 'https://github.com/boromat/polcv/releases';
@@ -50,23 +51,31 @@ async function isGitInstall(): Promise<boolean> {
   return r.code === 0 && /boromat\/polcv/i.test(r.out);
 }
 
+/** Kroki aktualizacji z czasem na każdy; dokładnie te komendy Ustawienia pokazują przed uruchomieniem. */
+const UPDATE_STEPS: [string, string[], number][] = [
+  ['git', ['pull', '--ff-only'], 120_000],
+  ['npm', ['install', '--no-audit', '--no-fund'], 600_000],
+  ['npm', ['run', 'build'], 300_000],
+];
+
+export const updateCommands = () => UPDATE_STEPS.map(([cmd, args]) => commandLine([cmd, ...args]));
+
 export async function polcvUpdateStatus() {
   const [latest, git] = await Promise.all([latestRelease(), isGitInstall()]);
-  return { current: VERSION, latest, updateAvailable: !!latest && isNewer(latest, VERSION), canSelfUpdate: git, releasesUrl: RELEASES_URL };
+  return { current: VERSION, latest, updateAvailable: !!latest && isNewer(latest, VERSION), canSelfUpdate: git, releasesUrl: RELEASES_URL, commands: updateCommands() };
 }
 
-/** `git pull`, `npm install` i budowa interfejsu. Nowy kod serwera zadziała dopiero po ponownym uruchomieniu PolCV. */
-export async function updatePolcv(): Promise<{ ok: boolean; output: string; version: string }> {
+/**
+ * `git pull`, `npm install` i budowa interfejsu, tylko po potwierdzeniu dokładnie tych komend (`confirmed`).
+ * Nowy kod serwera zadziała dopiero po ponownym uruchomieniu PolCV.
+ */
+export async function updatePolcv(confirmed: unknown): Promise<{ ok: boolean; output: string; version: string }> {
+  requireConfirmed(updateCommands(), confirmed);
   if (!(await isGitInstall())) {
     return { ok: false, output: tr('Ta kopia PolCV nie pochodzi z git clone, więc nie zaktualizuje się sama. Pobierz nową wersję ze strony {url}.', { url: RELEASES_URL }), version: VERSION };
   }
   let output = '';
-  const steps: [string, string[], number][] = [
-    ['git', ['pull', '--ff-only'], 120_000],
-    ['npm', ['install', '--no-audit', '--no-fund'], 600_000],
-    ['npm', ['run', 'build'], 300_000],
-  ];
-  for (const [cmd, args, timeout] of steps) {
+  for (const [cmd, args, timeout] of UPDATE_STEPS) {
     const r = await run(cmd, args, timeout);
     output += `> ${cmd} ${args.join(' ')}\n${r.out}\n`;
     if (r.code !== 0) return { ok: false, output: output.trim().slice(-2000), version: VERSION };

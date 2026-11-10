@@ -54,6 +54,12 @@ All notable changes to PolCV are recorded here. The format follows
   formats are fixed by the app without the AI. A CV that grows past one page is not shortened on
   its own, and the message lists what changed. The list needs a current score; after editing the
   CV, *Score again* comes first.
+- **Commands from Settings run only after you confirm them.** Updating PolCV (`git pull --ff-only`,
+  `npm install`, `npm run build`) and installing polanon or its spaCy model (`pip install`) first
+  show the exact commands the server is about to run, and the server runs them only when the
+  request carries exactly those confirmed commands. Before, the PolCV update dialog only
+  described the steps. The README has a new security section about this and the Host and Origin
+  checks.
 - **Posting links are fetched as PolCV.** The app now identifies itself as `PolCV/<version>` with a
   link to the repository when it fetches a posting, also in the Chromium fallback, instead of
   posing as a Chrome browser. When a site blocks automated requests (403, 429, 503 or a "verify you

@@ -8,6 +8,7 @@ import { HttpError } from '../storage/store';
 import { collectStrings, replaceStrings } from '../llm/strings';
 import { APP_UA } from '../jobs/http';
 import { tr } from '../i18n';
+import { commandLine, requireConfirmed } from '../commands';
 
 /**
  * Opcjonalne maskowanie danych osobowych przez polanon (pakiet Pythona, `pip install polanon`).
@@ -20,6 +21,12 @@ const ENV = { ...process.env, PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1' };
 const MIN_PYTHON = [3, 11];
 const TOKEN = /<[A-Z_]+_\d+>/g;
 
+/** Dokładne komendy, które Ustawienia pokazują przed instalacją i które serwer uruchamia po potwierdzeniu. */
+export interface InstallCommands {
+  polanon: string[];
+  ner: string[];
+}
+
 export interface PolanonStatus {
   /** Wersja Pythona, którego program użyje (null = nie znaleziono). */
   python: string | null;
@@ -29,11 +36,22 @@ export interface PolanonStatus {
   spacy: boolean;
   model: boolean;
   error: string;
+  /** null, gdy nie ma Pythona, którym dałoby się instalować */
+  installCommands: InstallCommands | null;
 }
 
-interface Found extends PolanonStatus {
-  cmd: string[];
-}
+type Found = Omit<PolanonStatus, 'installCommands'> & { cmd: string[] };
+
+const POLANON_STEP = ['-m', 'pip', 'install', '--upgrade', 'polanon'];
+const NER_STEPS = [
+  ['-m', 'pip', 'install', '--upgrade', 'polanon[ner]'],
+  ['-m', 'spacy', 'download', 'pl_core_news_md'],
+];
+
+export const installCommands = (cmd: string[]): InstallCommands => ({
+  polanon: [commandLine([...cmd, ...POLANON_STEP])],
+  ner: NER_STEPS.map((args) => commandLine([...cmd, ...args])),
+});
 
 // ---------- Ścieżka do Pythona z Ustawień ----------
 
@@ -139,8 +157,8 @@ async function findPython(pythonPath: string): Promise<Found> {
 }
 
 export async function polanonStatus(settings: Settings): Promise<PolanonStatus> {
-  const { cmd: _cmd, ...status } = await findPython(settings.pythonPath);
-  return status;
+  const { cmd, ...status } = await findPython(settings.pythonPath);
+  return { ...status, installCommands: status.python ? installCommands(cmd) : null };
 }
 
 const PYPI = 'https://pypi.org/pypi/polanon/json';
@@ -178,15 +196,17 @@ export async function polanonUpdate(installed: string | null): Promise<{ latest:
 
 /**
  * Model spaCy dla polanonu (rozpoznawanie miejsc i rzadszych nazw): `pip install "polanon[ner]"` i polski model
- * `pl_core_news_md` w znalezionym Pythonie. Pobranie modelu trwa kilka minut.
+ * `pl_core_news_md` w znalezionym Pythonie, tylko po potwierdzeniu dokładnie tych komend. Pobranie modelu trwa kilka minut.
  */
-export async function installNer(settings: Settings): Promise<{ ok: boolean; output: string; status: PolanonStatus }> {
+export async function installNer(settings: Settings, confirmed: unknown): Promise<{ ok: boolean; output: string; status: PolanonStatus }> {
   const found = await findPython(settings.pythonPath);
   if (!found.python) return { ok: false, output: found.error, status: await polanonStatus(settings) };
+  const commands = installCommands(found.cmd).ner;
+  requireConfirmed(commands, confirmed);
   let output = '';
-  for (const args of [['-m', 'pip', 'install', '--upgrade', 'polanon[ner]'], ['-m', 'spacy', 'download', 'pl_core_news_md']]) {
+  for (const [i, args] of NER_STEPS.entries()) {
     const r = await run(found.cmd, args, 900_000);
-    output += `> ${found.command} ${args.join(' ')}\n${r.stdout}\n${r.stderr}\n`;
+    output += `> ${commands[i]}\n${r.stdout}\n${r.stderr}\n`;
     if (r.code !== 0) break;
   }
   stopBridge();
@@ -194,11 +214,15 @@ export async function installNer(settings: Settings): Promise<{ ok: boolean; out
   return { ok: status.spacy && status.model, output: output.trim().slice(-1500), status };
 }
 
-/** `pip install --upgrade polanon` w znalezionym Pythonie (pip sam wybiera instalację dla użytkownika, gdy trzeba). */
-export async function installPolanon(settings: Settings): Promise<{ ok: boolean; output: string; status: PolanonStatus }> {
+/**
+ * `pip install --upgrade polanon` w znalezionym Pythonie (pip sam wybiera instalację dla użytkownika, gdy trzeba),
+ * tylko po potwierdzeniu dokładnie tej komendy.
+ */
+export async function installPolanon(settings: Settings, confirmed: unknown): Promise<{ ok: boolean; output: string; status: PolanonStatus }> {
   const found = await findPython(settings.pythonPath);
   if (!found.python) return { ok: false, output: found.error, status: await polanonStatus(settings) };
-  const r = await run(found.cmd, ['-m', 'pip', 'install', '--upgrade', 'polanon'], 300_000);
+  requireConfirmed(installCommands(found.cmd).polanon, confirmed);
+  const r = await run(found.cmd, POLANON_STEP, 300_000);
   stopBridge();
   const output = `${r.stdout}\n${r.stderr}`.trim().slice(-1500);
   return { ok: r.code === 0, output, status: await polanonStatus(settings) };

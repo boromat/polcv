@@ -74,9 +74,7 @@ $0.05-0.15. The Settings page lists the models and shows what you have spent.
 ## Privacy
 
 - Profiles, CVs, postings and the API key live in the `data/` folder next to the app, never in
-  this repository. The server listens on `127.0.0.1` only, the API answers only requests sent to
-  `localhost` (other names go in `CV_ALLOWED_HOSTS`), and requests that change data from other
-  websites are refused.
+  this repository.
 - The profile and posting text are sent to OpenRouter and the model you pick, and nothing else
   leaves your machine (apart from fetching the postings you link, and reading your public GitHub
   repositories when you import projects from them).
@@ -91,6 +89,21 @@ $0.05-0.15. The Settings page lists the models and shows what you have spent.
   newer release is out (for copies made with `git clone`). PolCV works the same without it; when masking is on but polanon is not
   working, nothing is sent at all. Masking is pseudonymisation, not anonymisation - see polanon's
   threat model.
+
+## Security
+
+- The server listens on `127.0.0.1` only. The API answers only requests sent to `localhost`,
+  `127.0.0.1` or `[::1]`, and requests that change data from other websites are refused (the app
+  checks the Host and Origin headers), so a page open in the same browser cannot read your profile
+  or run anything.
+- Settings can run programs on your computer: `git pull --ff-only`, `npm install` and
+  `npm run build` to update PolCV, and `pip install` for polanon and its spaCy model. The app shows
+  the exact commands first and waits for your confirmation, and the server runs only the commands
+  that were confirmed.
+- To use PolCV from your home network, set `CV_HOST=0.0.0.0` (everyone on that network can then
+  see your data); the API then also answers this computer's IP addresses and name. If you open
+  PolCV under another name, add it to `CV_ALLOWED_HOSTS`, comma-separated, e.g.
+  `CV_ALLOWED_HOSTS=polcv.lan`.
 
 ## Job portals
 

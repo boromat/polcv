@@ -297,7 +297,7 @@ export const profile: Record<string, string> = {
   'Instaluję… (kilka minut)': 'Installing… (a few minutes)',
   'Zainstaluj model spaCy': 'Install the spaCy model',
   'Albo sam:': 'Or yourself:',
-  'Zaktualizować PolCV do wersji {version}? Program pobierze zmiany (git pull), zainstaluje zależności i zbuduje interfejs. Twoje dane zostają bez zmian.': 'Update PolCV to version {version}? The app pulls the changes (git pull), installs dependencies and builds the interface. Your data stays as it is.',
+  'Zaktualizować PolCV do wersji {version}? Program pobierze zmiany, zainstaluje zależności i zbuduje interfejs. Twoje dane zostają bez zmian.': 'Update PolCV to version {version}? The app pulls the changes, installs dependencies and builds the interface. Your data stays as it is.',
   'Nowa wersja PolCV': 'New PolCV version',
   'Gotowe: PolCV {version}. Zamknij czarne okno PolCV i uruchom start.bat ponownie, żeby nowa wersja zadziałała.': 'Done: PolCV {version}. Close the black PolCV window and run start.bat again to start the new version.',
   'Aktualizuję… (kilka minut)': 'Updating… (a few minutes)',

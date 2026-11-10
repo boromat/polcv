@@ -71,18 +71,20 @@ function PrivacyCard({ settings, onSave }: { settings: SettingsView; onSave: (p:
 
   const refresh = () => {
     setStatus(null);
-    api.polanonStatus().then(setStatus).catch(() => setStatus({ python: null, command: null, polanon: null, spacy: false, model: false, error: t('Nie udało się sprawdzić.') }));
+    api.polanonStatus().then(setStatus).catch(() => setStatus({ python: null, command: null, polanon: null, spacy: false, model: false, error: t('Nie udało się sprawdzić.'), installCommands: null }));
   };
   useEffect(refresh, []);
 
-  // Instalacja i aktualizacja to to samo polecenie pip; różni się tylko pytanie.
+  // Instalacja i aktualizacja to to samo polecenie pip; różni się tylko pytanie. Komendy podaje serwer i uruchamia tylko te.
   const install = async () => {
+    const commands = status?.installCommands?.polanon;
+    if (!commands) return;
     const question = status?.polanon && status.latest ? t('Zaktualizować polanon do wersji {version}?', { version: status.latest }) : t('Zainstalować polanon z PyPI?');
-    if (!confirm(question + '\n\n' + t('Program uruchomi: {command}', { command: `${status?.command} -m pip install --upgrade polanon` }))) return;
+    if (!confirm(question + '\n\n' + t('Program uruchomi: {command}', { command: commands.join('\n') }))) return;
     setInstalling(true);
     setInstallLog(null);
     try {
-      const r = await api.installPolanon();
+      const r = await api.installPolanon(commands);
       setInstallLog(r);
       setStatus(r.status);
     } catch (e: any) {
@@ -93,12 +95,13 @@ function PrivacyCard({ settings, onSave }: { settings: SettingsView; onSave: (p:
   };
 
   const installNer = async () => {
-    const commands = [`${status?.command} -m pip install --upgrade "polanon[ner]"`, `${status?.command} -m spacy download pl_core_news_md`].join('\n');
-    if (!confirm(t('Zainstalować model spaCy dla polanonu? To ok. 50 MB i kilka minut.') + '\n\n' + t('Program uruchomi: {command}', { command: commands }))) return;
+    const commands = status?.installCommands?.ner;
+    if (!commands) return;
+    if (!confirm(t('Zainstalować model spaCy dla polanonu? To ok. 50 MB i kilka minut.') + '\n\n' + t('Program uruchomi: {command}', { command: commands.join('\n') }))) return;
     setInstalling(true);
     setInstallLog(null);
     try {
-      const r = await api.installNer();
+      const r = await api.installNer(commands);
       setInstallLog(r);
       setStatus(r.status);
     } catch (e: any) {
@@ -223,10 +226,12 @@ function UpdateCard() {
   if (!status?.updateAvailable && !log) return null;
 
   const update = async () => {
-    if (!confirm(t('Zaktualizować PolCV do wersji {version}? Program pobierze zmiany (git pull), zainstaluje zależności i zbuduje interfejs. Twoje dane zostają bez zmian.', { version: status?.latest ?? '' }))) return;
+    const commands = status?.commands ?? [];
+    const question = t('Zaktualizować PolCV do wersji {version}? Program pobierze zmiany, zainstaluje zależności i zbuduje interfejs. Twoje dane zostają bez zmian.', { version: status?.latest ?? '' });
+    if (!confirm(question + '\n\n' + t('Program uruchomi: {command}', { command: commands.join('\n') }))) return;
     setBusy(true);
     try {
-      setLog(await api.updatePolcv());
+      setLog(await api.updatePolcv(commands));
     } catch (e: any) {
       setLog({ ok: false, output: e.message, version: status?.current ?? '' });
     } finally {

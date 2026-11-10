@@ -224,5 +224,7 @@ export const EN: Record<string, string> = {
   'format dat': 'date format',
   'AI nie znalazło nic do zmiany w zaznaczonych miejscach, więc nowa wersja nie powstała.': 'The AI found nothing to change in the selected parts, so no new version was created.',
   'Zmienione: {items}.': 'Changed: {items}.',
+  'Program uruchamia polecenia dopiero po potwierdzeniu dokładnie tych komend. Odśwież stronę i potwierdź je ponownie.':
+    'The app runs commands only after you confirm exactly these commands. Reload the page and confirm them again.',
   'CV nie mieści się już na jednej stronie: usuń coś w edytorze albo kliknij „Skróć do 1 strony”.':'The CV no longer fits on one page: remove something in the editor or click "Shorten to 1 page".',
 };

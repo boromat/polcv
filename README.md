@@ -123,6 +123,12 @@ Kopia zapasowa = skopiowanie folderu `data`.
 - **Okno `start.bat` zamyka się od razu** - uruchom je ponownie i przeczytaj komunikat; zwykle brakuje Node.js.
 - **Port 3000 zajęty** - zamknij inne okno PolCV albo ustaw inny port: w `start.bat` przed `call npm start` dopisz `set PORT=3001`.
 
+## Bezpieczeństwo
+
+- Serwer nasłuchuje tylko na `127.0.0.1`. API odpowiada tylko pod `localhost`, `127.0.0.1` i `[::1]`, a zapytania zmieniające dane wysłane z innych stron dostają odmowę (program sprawdza nagłówki Host i Origin). Obca strona otwarta w tej samej przeglądarce nie odczyta więc Twojego profilu i niczego nie uruchomi.
+- Ustawienia mogą uruchomić programy na Twoim komputerze: `git pull --ff-only`, `npm install` i `npm run build` przy aktualizacji PolCV oraz `pip install` przy instalacji polanonu i modelu spaCy. Przed uruchomieniem program pokazuje dokładne komendy i czeka na Twoje potwierdzenie, a serwer uruchamia tylko komendy, które zostały potwierdzone.
+- Żeby udostępnić PolCV w sieci domowej, ustaw `CV_HOST=0.0.0.0` (wtedy każdy w tej sieci widzi Twoje dane); API odpowiada wtedy także pod adresami IP i nazwą tego komputera. Jeśli otwierasz PolCV pod inną nazwą, dopisz ją po przecinku w `CV_ALLOWED_HOSTS`, np. `CV_ALLOWED_HOSTS=polcv.lan`.
+
 ## Zastrzeżenia
 
 - PolCV nie jest powiązany z pracuj.pl, justjoin.it, nofluffjobs, GoWork, OpenRouter ani dostawcami modeli AI - ich nazwy służą tylko do opisu, z czym program współpracuje.
@@ -144,6 +150,4 @@ npm run typecheck
 - `client/` - interfejs React.
 - `shared/schemas.ts` - wspólne schematy danych (zod), z których powstają też schematy JSON dla AI.
 
-Serwer nasłuchuje tylko na `127.0.0.1`. Żeby udostępnić go w sieci domowej, ustaw `CV_HOST=0.0.0.0` (wtedy każdy w tej sieci widzi Twoje dane).
-
-API odpowiada tylko pod `localhost`, `127.0.0.1` i `[::1]` (z `CV_HOST` także pod adresami IP i nazwą tego komputera), a zapytania zmieniające dane z obcych stron dostają odmowę. Jeśli otwierasz PolCV pod inną nazwą, dopisz ją po przecinku w `CV_ALLOWED_HOSTS`, np. `CV_ALLOWED_HOSTS=polcv.lan`.
+Adres i dozwolone nazwy serwera (`CV_HOST`, `CV_ALLOWED_HOSTS`) opisuje sekcja [Bezpieczeństwo](#bezpieczeństwo).
