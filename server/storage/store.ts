@@ -110,8 +110,9 @@ const writeJson = (file: string, data: unknown): Promise<void> => withFileLock(f
 /**
  * Odczyt, zmiana i zapis pod jedną blokadą - równoległe zapytania nie nadpisują sobie zmian.
  * fn zmienia obiekt w miejscu albo zwraca nowy; gdy nic się nie zmieniło, plik nie jest zapisywany.
+ * `toDisk`: co z obiektu trafia do pliku (np. profil bez klucza API).
  */
-function updateJson<T>(file: string, read: () => Promise<T>, fn: Updater<T>, stamp: (next: T) => T = (x) => x): Promise<T> {
+function updateJson<T>(file: string, read: () => Promise<T>, fn: Updater<T>, stamp: (next: T) => T = (x) => x, toDisk: (x: T) => unknown = (x) => x): Promise<T> {
   return withFileLock(file, async () => {
     const cur = await read();
     const before = JSON.stringify(cur);
@@ -119,7 +120,7 @@ function updateJson<T>(file: string, read: () => Promise<T>, fn: Updater<T>, sta
     const next = res === undefined ? cur : (res as T);
     if (JSON.stringify(next) === before) return next;
     const out = stamp(next);
-    await writeJsonNow(file, out);
+    await writeJsonNow(file, toDisk(out));
     return out;
   });
 }
@@ -132,6 +133,7 @@ const settingsFile = () => path.join(DATA_DIR, 'settings.json');
 
 export const DEFAULT_SETTINGS: Settings = {
   apiKey: '',
+  profileKeys: {},
   mainModel: 'anthropic/claude-sonnet-5.5',
   fastModel: 'anthropic/claude-haiku-5.5',
   jobSearch: false,
@@ -141,15 +143,60 @@ export const DEFAULT_SETTINGS: Settings = {
 };
 
 export async function getSettings(): Promise<Settings> {
-  return { ...DEFAULT_SETTINGS, ...((await readJson<Partial<Settings>>(settingsFile())) ?? {}) };
+  const saved = (await readJson<Partial<Settings>>(settingsFile())) ?? {};
+  return { ...DEFAULT_SETTINGS, ...saved, profileKeys: { ...saved.profileKeys } };
 }
 
 export async function saveSettings(patch: Partial<Settings>): Promise<Settings> {
+  return updateSettings((s) => ({ ...s, ...patch }));
+}
+
+/** Zmiana ustawień na świeżo odczytanych danych, pod blokadą pliku. */
+export async function updateSettings(fn: (s: Settings) => Settings | void): Promise<Settings> {
   return withFileLock(settingsFile(), async () => {
-    const next = { ...(await getSettings()), ...patch };
+    const cur = await getSettings();
+    const next = fn(cur) ?? cur;
     await writeJsonNow(settingsFile(), next);
     return next;
   });
+}
+
+// ---------- Klucze OpenRouter ----------
+// Jedno miejsce na klucze: settings.json (klucz z Ustawień w `apiKey`, własne klucze profili w `profileKeys`).
+// profile.json ich nie przechowuje; Profile.apiKey to tylko widok klucza tego profilu z settings.json.
+// Klucz ze zmiennej środowiskowej OPENROUTER_API_KEY ma pierwszeństwo i nigdy nie jest zapisywany na dysku.
+
+export const envApiKey = (): string => process.env.OPENROUTER_API_KEY?.trim() ?? '';
+
+async function setProfileKey(id: string, key: string): Promise<void> {
+  if (((await getSettings()).profileKeys[id] ?? '') === key) return;
+  await updateSettings((s) => {
+    if (key) s.profileKeys[id] = key;
+    else delete s.profileKeys[id];
+  });
+}
+
+/** Profil do zapisu w profile.json: bez klucza. */
+const withoutKey = (p: Profile): Profile => ({ ...p, apiKey: '' });
+
+/**
+ * Jednorazowo przy starcie: klucze, które starsze wersje zapisywały w profile.json, przechodzą do settings.json,
+ * a profile.json zostaje bez klucza. Zwraca, ile kluczy przeniesiono.
+ */
+export async function migrateProfileKeys(): Promise<number> {
+  const root = path.join(DATA_DIR, 'profiles');
+  let moved = 0;
+  for (const d of await fs.readdir(root).catch(() => [] as string[])) {
+    const file = path.join(root, d, 'profile.json');
+    await withFileLock(file, async () => {
+      const raw = await readListed<Profile>(file);
+      if (!raw?.apiKey || !raw.id) return;
+      if (!(await getSettings()).profileKeys[raw.id]) await setProfileKey(raw.id, raw.apiKey);
+      await writeJsonNow(file, withoutKey(raw));
+      moved++;
+    });
+  }
+  return moved;
 }
 
 // ---------- Profile ----------
@@ -181,13 +228,17 @@ export function emptyProfile(displayName: string): Profile {
   };
 }
 
+/** Klucz profilu z settings.json; starszy profile.json (przed migracją) mógł mieć go u siebie. */
+const keyOf = (p: Profile, keys: Settings['profileKeys']) => keys[p.id] || p.apiKey || '';
+
 export async function listProfiles(): Promise<Profile[]> {
   const root = path.join(DATA_DIR, 'profiles');
   const dirs = await fs.readdir(root).catch(() => [] as string[]);
+  const { profileKeys } = await getSettings();
   const out: Profile[] = [];
   for (const d of dirs) {
     const p = await readListed<Profile>(path.join(root, d, 'profile.json'));
-    if (p) out.push(p);
+    if (p) out.push({ ...p, apiKey: keyOf(p, profileKeys) });
   }
   return out.sort((a, b) => String(a.createdAt ?? '').localeCompare(String(b.createdAt ?? '')));
 }
@@ -195,22 +246,26 @@ export async function listProfiles(): Promise<Profile[]> {
 export async function getProfile(id: string): Promise<Profile> {
   const p = await readJson<Profile>(profileFile(id));
   if (!p) throw new HttpError(404, tr('Nie znaleziono profilu'));
-  return { ...emptyProfile(p.displayName), ...p };
+  return { ...emptyProfile(p.displayName), ...p, apiKey: keyOf(p, (await getSettings()).profileKeys) };
 }
 
 export async function saveProfile(p: Profile): Promise<Profile> {
   const next = { ...p, updatedAt: nowIso() };
-  await writeJson(profileFile(p.id), next);
+  await setProfileKey(p.id, p.apiKey ?? '');
+  await writeJson(profileFile(p.id), withoutKey(next));
   return next;
 }
 
-/** Zmiana profilu na świeżo odczytanych danych, np. po długim wywołaniu AI. */
+/** Zmiana profilu na świeżo odczytanych danych, np. po długim wywołaniu AI. Klucz trafia do settings.json, nie do profilu. */
 export async function updateProfile(id: string, fn: Updater<Profile>): Promise<Profile> {
-  return updateJson(profileFile(id), () => getProfile(id), fn, (p) => ({ ...p, updatedAt: nowIso() }));
+  const out = await updateJson(profileFile(id), () => getProfile(id), fn, (p) => ({ ...p, updatedAt: nowIso() }), withoutKey);
+  await setProfileKey(id, out.apiKey ?? '');
+  return out;
 }
 
 export async function deleteProfile(id: string): Promise<void> {
   await withFileLock(profileFile(id), () => fs.rm(profileDir(id), { recursive: true, force: true, maxRetries: 5 }));
+  await setProfileKey(id, '');
 }
 
 export const profileFilesDir = (id: string) => path.join(profileDir(id), 'files');

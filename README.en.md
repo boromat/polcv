@@ -67,14 +67,18 @@ npm run setup   # npm install + Chromium for PDFs + build
 npm start       # http://localhost:3000
 ```
 
-Then open **Ustawienia** (Settings) and paste an OpenRouter API key. The defaults are Claude
+Then open **Ustawienia** (Settings) and paste an OpenRouter API key. It is stored **in plain text in
+`data/settings.json`**. To keep it off the disk, set the `OPENROUTER_API_KEY` environment variable
+instead: it takes precedence over the key from Settings and over per-profile keys, and the app never
+writes it anywhere. The defaults are Claude
 Sonnet for writing and Claude Haiku for parsing; one CV with its report costs roughly
 $0.05-0.15. The Settings page lists the models and shows what you have spent.
 
 ## Privacy
 
-- Profiles, CVs, postings and the API key live in the `data/` folder next to the app, never in
-  this repository.
+- Profiles, CVs and postings live in the `data/` folder next to the app, never in this repository.
+  The OpenRouter key is in plain text in `data/settings.json`, together with any per-profile keys
+  (profile files do not hold keys, and the browser only gets them masked).
 - The profile and posting text are sent to OpenRouter and the model you pick, and nothing else
   leaves your machine (apart from fetching the postings you link, and reading your public GitHub
   repositories when you import projects from them).
@@ -96,6 +100,8 @@ $0.05-0.15. The Settings page lists the models and shows what you have spent.
   `127.0.0.1` or `[::1]`, and requests that change data from other websites are refused (the app
   checks the Host and Origin headers), so a page open in the same browser cannot read your profile
   or run anything.
+- The OpenRouter key is stored in plain text in `data/settings.json`; the `OPENROUTER_API_KEY`
+  environment variable takes precedence and is never written to disk.
 - Settings can run programs on your computer: `git pull --ff-only`, `npm install` and
   `npm run build` to update PolCV, and `pip install` for polanon and its spaCy model. The app shows
   the exact commands first and waits for your confirmation, and the server runs only the commands

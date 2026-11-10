@@ -702,7 +702,7 @@ export function ProfilePage() {
         <div className="card">
           <h2>{t('Własny klucz OpenRouter (opcjonalnie)')}</h2>
           <p className="faint" style={{ marginTop: 4 }}>
-            {t('Jeśli ten profil ma płacić ze swojego konta (np. profil kolegi), wklej tu jego klucz. Puste = używany jest klucz z Ustawień.')}
+            {t('Jeśli ten profil ma płacić ze swojego konta (np. profil kolegi), wklej tu jego klucz. Puste = używany jest klucz z Ustawień. Klucz trafia do data/settings.json, a zmienna OPENROUTER_API_KEY ma przed nim pierwszeństwo.')}
           </p>
           <input type="password" style={{ marginTop: 10 }} value={p.apiKey} onChange={(e) => set({ apiKey: e.target.value })} placeholder="sk-or-…" autoComplete="off" />
         </div>

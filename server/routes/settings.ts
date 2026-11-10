@@ -12,12 +12,17 @@ export const maskKey = (k: string) => (k ? `${k.slice(0, 8)}…${k.slice(-4)}` :
 
 export const settingsRouter = Router();
 
-const view = async ({ apiKey, ...rest }: Settings) => ({
-  apiKeyMasked: maskKey(apiKey),
-  hasKey: !!apiKey,
-  ...rest,
-  searchPortals: Object.values(activeSearchers()).map((s) => s.name),
-});
+// Klucze profili nigdy nie wracają do przeglądarki; klucz ze zmiennej OPENROUTER_API_KEY tylko zamaskowany.
+const view = async ({ apiKey, profileKeys: _profileKeys, ...rest }: Settings) => {
+  const env = store.envApiKey();
+  return {
+    apiKeyMasked: maskKey(env || apiKey),
+    hasKey: !!(env || apiKey),
+    keyFromEnv: !!env,
+    ...rest,
+    searchPortals: Object.values(activeSearchers()).map((s) => s.name),
+  };
+};
 
 settingsRouter.get('/settings', async (_req, res) => {
   res.json(await view(await store.getSettings()));
@@ -68,7 +73,7 @@ settingsRouter.post('/settings/polanon/install', async (req, res) => {
 });
 
 settingsRouter.post('/settings/check-key', async (req, res) => {
-  const key = String(req.body?.apiKey || '').trim() || (await store.getSettings()).apiKey;
+  const key = String(req.body?.apiKey || '').trim() || store.envApiKey() || (await store.getSettings()).apiKey;
   if (!key) return res.json({ ok: false, message: tr('Brak klucza.') });
   res.json(await checkKey(key));
 });

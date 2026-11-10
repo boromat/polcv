@@ -41,6 +41,8 @@ async function req<T>(method: string, url: string, body?: unknown): Promise<T> {
 export interface SettingsView {
   apiKeyMasked: string;
   hasKey: boolean;
+  /** klucz pochodzi ze zmiennej OPENROUTER_API_KEY (ma pierwszeństwo, nie jest zapisany na dysku) */
+  keyFromEnv: boolean;
   mainModel: string;
   fastModel: string;
   jobSearch: boolean;
@@ -51,7 +53,7 @@ export interface SettingsView {
   searchPortals: string[];
 }
 
-export type SettingsPatch = Partial<Omit<SettingsView, 'apiKeyMasked' | 'hasKey' | 'searchPortals'> & { apiKey: string }>;
+export type SettingsPatch = Partial<Omit<SettingsView, 'apiKeyMasked' | 'hasKey' | 'keyFromEnv' | 'searchPortals'> & { apiKey: string }>;
 
 export interface PolanonStatus {
   python: string | null;

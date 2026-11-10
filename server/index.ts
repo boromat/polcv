@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { exec } from 'node:child_process';
 import express, { type NextFunction, type Request, type Response } from 'express';
-import { HttpError, DATA_DIR } from './storage/store';
+import { HttpError, DATA_DIR, migrateProfileKeys } from './storage/store';
 import { settingsRouter } from './routes/settings';
 import { profilesRouter } from './routes/profiles';
 import { applicationsRouter } from './routes/applications';
@@ -42,6 +42,13 @@ if (fs.existsSync(path.join(dist, 'index.html'))) {
   app.use(express.static(dist));
   app.get(/^(?!\/api).*/, (_req, res) => res.sendFile(path.join(dist, 'index.html')));
 }
+
+// Klucze, które starsze wersje zapisywały w profile.json, przechodzą do settings.json (jedno miejsce na klucze).
+const movedKeys = await migrateProfileKeys().catch((e) => {
+  console.warn(`[dane] Nie udało się przenieść kluczy z profili: ${e?.message ?? e}`);
+  return 0;
+});
+if (movedKeys) console.log(`[dane] Przeniesiono klucze OpenRouter z ${movedKeys} profili do settings.json.`);
 
 const server = app.listen(PORT, HOST, () => {
   const url = `http://localhost:${PORT}`;

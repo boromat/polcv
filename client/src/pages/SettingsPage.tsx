@@ -327,7 +327,7 @@ export function SettingsPage() {
           <h2>{t('Klucz OpenRouter')}</h2>
           {settings.hasKey ? (
             <div className="callout good">
-              {t('Klucz zapisany:')} <code>{settings.apiKeyMasked}</code>{' '}
+              {settings.keyFromEnv ? t('Klucz ze zmiennej OPENROUTER_API_KEY:') : t('Klucz zapisany:')} <code>{settings.apiKeyMasked}</code>{' '}
               <button className="btn ghost sm" onClick={async () => setCheck(await api.checkKey())}>
                 {t('Sprawdź')}
               </button>
@@ -347,6 +347,11 @@ export function SettingsPage() {
             </button>
           </div>
           {check && <div className={`callout ${check.ok ? 'good' : 'error'}`}>{check.message}</div>}
+          <p className="faint small">
+            {settings.keyFromEnv
+              ? t('Klucz ze zmiennej środowiskowej OPENROUTER_API_KEY ma pierwszeństwo przed kluczem wpisanym tutaj i przed kluczami profili, i nie jest zapisywany na dysku.')
+              : t('Wpisany klucz program zapisuje zwykłym tekstem w pliku data/settings.json na tym komputerze. Żeby nie trzymać go na dysku, uruchom PolCV ze zmienną środowiskową OPENROUTER_API_KEY.')}
+          </p>
         </div>
 
         <div className="card stack">

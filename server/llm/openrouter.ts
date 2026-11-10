@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { appendUsage, getProfile, getSettings, HttpError, nowIso } from '../storage/store';
+import { appendUsage, envApiKey, getProfile, getSettings, HttpError, nowIso } from '../storage/store';
 import { maskForAi, profileTerms, TOKENS_NOTE, type ProfileTerm } from '../privacy/polanon';
 import { cleanTail, plainDashes } from './strings';
 import { tr } from '../i18n';
@@ -33,15 +33,15 @@ const DASH_NOTE = `
 
 W tekstach nie używaj długiej pauzy (—) ani półpauzy (–). Zamiast nich wstaw przecinek, dwukropek, nawias albo zwykły myślnik (-), także w zakresach dat i liczb (np. "03.2024 - 06.2025", "2-3").`;
 
-/** Klucz z profilu ma pierwszeństwo przed globalnym (żeby kolega płacił za swoje). */
+/**
+ * Klucz do OpenRoutera: OPENROUTER_API_KEY ze zmiennej środowiskowej ma pierwszeństwo (nigdy nie trafia na dysk),
+ * potem własny klucz profilu (żeby kolega płacił za swoje), potem klucz z Ustawień. Oba ostatnie leżą w settings.json.
+ */
 async function resolveKey(profileId: string): Promise<string> {
-  const settings = await getSettings();
-  let key = settings.apiKey;
-  if (profileId) {
-    const p = await getProfile(profileId).catch(() => null);
-    if (p?.apiKey) key = p.apiKey;
-  }
-  key ||= process.env.OPENROUTER_API_KEY || '';
+  const env = envApiKey();
+  if (env) return env;
+  const own = profileId ? (await getProfile(profileId).catch(() => null))?.apiKey : '';
+  const key = own || (await getSettings()).apiKey;
   if (!key) throw new HttpError(400, tr('Brak klucza OpenRouter. Wklej go w Ustawieniach.'));
   return key;
 }

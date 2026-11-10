@@ -49,6 +49,8 @@ OpenRouter to jedno konto, przez które program korzysta z modeli AI (np. Claude
 3. W zakładce **Keys** kliknij **Create Key** i skopiuj klucz (zaczyna się od `sk-or-`).
 4. W programie wejdź w **Ustawienia**, wklej klucz i kliknij **Sprawdź i zapisz**.
 
+Klucz zapisuje się **zwykłym tekstem w pliku `data/settings.json`** na Twoim komputerze. Jeśli wolisz nie trzymać go na dysku, ustaw zmienną środowiskową `OPENROUTER_API_KEY` (w ustawieniach systemu albo w terminalu przed `npm start`): ma pierwszeństwo przed kluczem z Ustawień i kluczami profili, a program nigdzie jej nie zapisuje.
+
 ### Ile to kosztuje
 
 Przy domyślnych modelach (Claude Sonnet do pisania i oceny, Claude Haiku do analizy) jedno CV z oceną to zwykle **ok. 0,05-0,15 $** (20-60 gr). Automatyczna poprawka, przygotowanie do rozmowy i list motywacyjny kosztują podobnie. W **Ustawieniach** widać dokładne wydatki i można wybrać tańsze lub mocniejsze modele.
@@ -97,7 +99,7 @@ Włączając je, bierzesz na siebie korzystanie zgodne z regulaminem portalu: ty
 
 ## Udostępnianie koledze
 
-**Na tym samym komputerze:** kolega tworzy własny profil (lista profili w prawym górnym rogu). W jego profilu można wkleić jego własny klucz OpenRouter - wtedy płaci za siebie.
+**Na tym samym komputerze:** kolega tworzy własny profil (lista profili w prawym górnym rogu). W jego profilu można wkleić jego własny klucz OpenRouter - wtedy płaci za siebie. Ten klucz też leży w `data/settings.json`, nie w plikach profilu.
 
 **Na jego komputerze:** skopiuj cały folder programu **bez folderów `data` i `node_modules`** (np. spakuj do ZIP). Kolega instaluje Node.js i uruchamia `start.bat`. Folder `data` zawiera Twoje CV i dane osobowe - nie wysyłaj go nikomu.
 
@@ -105,7 +107,7 @@ Włączając je, bierzesz na siebie korzystanie zgodne z regulaminem portalu: ty
 
 Folder `data` obok programu:
 
-- `settings.json` - klucz OpenRouter, wybrane modele i przełączniki (wyszukiwanie, maskowanie),
+- `settings.json` - klucz OpenRouter z Ustawień i własne klucze profili (zwykłym tekstem; klucz ze zmiennej `OPENROUTER_API_KEY` nie trafia do żadnego pliku), wybrane modele i przełączniki (wyszukiwanie, maskowanie),
 - `geocache.json` - zapamiętane współrzędne miast (do filtra promienia),
 - `profiles/<id>/profile.json` - profil, `files/` - wgrane CV, zdjęcie,
 - `profiles/<id>/career.json` - rozmowa z doradcą, preferencje, propozycje i znalezione oferty,
@@ -126,6 +128,7 @@ Kopia zapasowa = skopiowanie folderu `data`.
 ## Bezpieczeństwo
 
 - Serwer nasłuchuje tylko na `127.0.0.1`. API odpowiada tylko pod `localhost`, `127.0.0.1` i `[::1]`, a zapytania zmieniające dane wysłane z innych stron dostają odmowę (program sprawdza nagłówki Host i Origin). Obca strona otwarta w tej samej przeglądarce nie odczyta więc Twojego profilu i niczego nie uruchomi.
+- Klucz OpenRouter leży zwykłym tekstem w `data/settings.json`, razem z własnymi kluczami profili (`profile.json` ich nie zawiera, a przeglądarka dostaje je tylko zamaskowane). Zmienna środowiskowa `OPENROUTER_API_KEY` ma pierwszeństwo i nie jest zapisywana na dysku.
 - Ustawienia mogą uruchomić programy na Twoim komputerze: `git pull --ff-only`, `npm install` i `npm run build` przy aktualizacji PolCV oraz `pip install` przy instalacji polanonu i modelu spaCy. Przed uruchomieniem program pokazuje dokładne komendy i czeka na Twoje potwierdzenie, a serwer uruchamia tylko komendy, które zostały potwierdzone.
 - Żeby udostępnić PolCV w sieci domowej, ustaw `CV_HOST=0.0.0.0` (wtedy każdy w tej sieci widzi Twoje dane); API odpowiada wtedy także pod adresami IP i nazwą tego komputera. Jeśli otwierasz PolCV pod inną nazwą, dopisz ją po przecinku w `CV_ALLOWED_HOSTS`, np. `CV_ALLOWED_HOSTS=polcv.lan`.
 

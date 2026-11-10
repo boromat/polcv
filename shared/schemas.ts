@@ -360,7 +360,10 @@ export const ApplicationSchema = z.object({
 });
 
 export const SettingsSchema = z.object({
+  /** Klucz OpenRouter z Ustawień (zwykły tekst w data/settings.json); OPENROUTER_API_KEY ma pierwszeństwo. */
   apiKey: z.string(),
+  /** Własne klucze profili (id profilu → klucz): w tym samym pliku, nie w profile.json. */
+  profileKeys: z.record(z.string(), z.string()),
   mainModel: z.string(),
   fastModel: z.string(),
   /** Automatyczne wyszukiwanie ofert na portalach - wyłączone, dopóki użytkownik świadomie go nie włączy. */

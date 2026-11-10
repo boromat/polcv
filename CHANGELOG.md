@@ -54,6 +54,11 @@ All notable changes to PolCV are recorded here. The format follows
   formats are fixed by the app without the AI. A CV that grows past one page is not shortened on
   its own, and the message lists what changed. The list needs a current score; after editing the
   CV, *Score again* comes first.
+- **One place for OpenRouter keys, and an environment variable that wins.** All keys now live in
+  `data/settings.json`: the key from Settings and the keys of profiles that pay from their own
+  account, which used to be stored in each `profile.json` and are moved over on the first start.
+  `OPENROUTER_API_KEY` now takes precedence over both instead of being the last fallback, and it
+  is never written to disk. Settings and both READMEs say plainly where the key is kept.
 - **Commands from Settings run only after you confirm them.** Updating PolCV (`git pull --ff-only`,
   `npm install`, `npm run build`) and installing polanon or its spaCy model (`pip install`) first
   show the exact commands the server is about to run, and the server runs them only when the

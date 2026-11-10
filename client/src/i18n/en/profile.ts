@@ -149,8 +149,8 @@ export const profile: Record<string, string> = {
   znam: 'I know it',
   'nie znam': "I don't know it",
   'Własny klucz OpenRouter (opcjonalnie)': 'Own OpenRouter key (optional)',
-  'Jeśli ten profil ma płacić ze swojego konta (np. profil kolegi), wklej tu jego klucz. Puste = używany jest klucz z Ustawień.':
-    "If this profile should pay from its own account (e.g. a friend's profile), paste that key here. Leave it empty to use the key from Settings.",
+  'Jeśli ten profil ma płacić ze swojego konta (np. profil kolegi), wklej tu jego klucz. Puste = używany jest klucz z Ustawień. Klucz trafia do data/settings.json, a zmienna OPENROUTER_API_KEY ma przed nim pierwszeństwo.':
+    "If this profile should pay from its own account (e.g. a friend's profile), paste that key here. Leave it empty to use the key from Settings. The key is stored in data/settings.json, and the OPENROUTER_API_KEY variable takes precedence over it.",
 
   // SettingsPage: modele
   '{model} (niedostępny na liście)': '{model} (not in the list)',
@@ -214,6 +214,11 @@ export const profile: Record<string, string> = {
   zapisano: 'saved',
   'Klucz OpenRouter': 'OpenRouter key',
   'Klucz zapisany:': 'Key saved:',
+  'Klucz ze zmiennej OPENROUTER_API_KEY:': 'Key from the OPENROUTER_API_KEY variable:',
+  'Klucz ze zmiennej środowiskowej OPENROUTER_API_KEY ma pierwszeństwo przed kluczem wpisanym tutaj i przed kluczami profili, i nie jest zapisywany na dysku.':
+    'The key from the OPENROUTER_API_KEY environment variable takes precedence over the key entered here and over profile keys, and it is never written to disk.',
+  'Wpisany klucz program zapisuje zwykłym tekstem w pliku data/settings.json na tym komputerze. Żeby nie trzymać go na dysku, uruchom PolCV ze zmienną środowiskową OPENROUTER_API_KEY.':
+    'The app stores the key you enter as plain text in data/settings.json on this computer. To keep it off the disk, start PolCV with the OPENROUTER_API_KEY environment variable.',
   Sprawdź: 'Check',
   'Jak zdobyć klucz:': 'How to get a key:',
   'wejdź na': 'go to',
