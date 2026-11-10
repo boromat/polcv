@@ -56,6 +56,12 @@ describe('npm run eval na atrapie modelu', () => {
     expect(md).toContain('| CV przyjęte w 1. / 2. / 3. podejściu | 50% / 50% / 0% |');
     expect(md).toContain('Google Ads (fakt, skills)');
     expect(comparisonMarkdown([result, { ...result, model: 'inny/model' }])).toContain('| Miara | `mock/model` | `inny/model` |');
+    // Drugi przebieg tego samego dnia z opisem nie nadpisuje pierwszego.
+    const again = await runEval({ model: 'mock/model', fastModel: 'mock/fast', cases: cases.slice(1), outDir, mock: true, label: 'po-poprawce' });
+    expect(again.files.map((f) => path.basename(f))).toEqual([`${result.date}_mock_model_po-poprawce.json`, `${result.date}_mock_model_po-poprawce.md`]);
+    expect(fs.existsSync(files[0])).toBe(true);
+    expect(fs.readFileSync(again.files[1], 'utf8')).toContain('# Ewaluacja: mock/model (po-poprawce)');
+    expect(comparisonMarkdown([result, again.result])).toContain('| Miara | `mock/model` | `mock/model` (po-poprawce) |');
     // Atrapa niczego nie zapisuje w zbiorze przypadków (zamrożone ogłoszenie zostaje takie, jak było).
     expect(fs.existsSync(frozen) ? fs.readFileSync(frozen, 'utf8') : null).toBe(frozenBefore);
   });

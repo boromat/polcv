@@ -1,5 +1,5 @@
 // Ewaluacja jakości generowania CV.
-//   npm run eval -- --model <id> [--fast-model <id>] [--cases 01,02] [--concurrency 3] [--out evals/results]
+//   npm run eval -- --model <id> [--fast-model <id>] [--cases 01,02] [--concurrency 3] [--out evals/results] [--label po-poprawce]
 //   npm run eval -- --mock            atrapa modelu zamiast OpenRouter (bez kosztów; sprawdza skrypt, nie model)
 //   npm run eval -- --report          tabela porównawcza wszystkich wyników z evals/results
 // Klucz: zmienna OPENROUTER_API_KEY (nie trafia na dysk). Dane robocze w folderze tymczasowym, nie w data/.
@@ -17,6 +17,7 @@ const { values } = parseArgs({
     out: { type: 'string' },
     mock: { type: 'boolean', default: false },
     report: { type: 'boolean', default: false },
+    label: { type: 'string', default: '' },
   },
 });
 
@@ -58,6 +59,7 @@ async function main(): Promise<void> {
       // Ogłoszenia analizujemy raz i zamrażamy, żeby każdy model dostał to samo; atrapa niczego nie zapisuje.
       writeParsed: !mock,
       mock,
+      label: values.label,
       log: (line) => console.log(`  ${line}`),
     });
     console.log(`\n${toMarkdown(result)}`);

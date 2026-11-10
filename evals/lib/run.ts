@@ -75,6 +75,8 @@ export interface EvalSummary {
 export interface EvalResult {
   date: string;
   model: string;
+  /** opis przebiegu (np. "po poprawce"), także w nazwie pliku; pusty dla zwykłego przebiegu */
+  label: string;
   fastModel: string;
   mock: boolean;
   /** koszt analizy ogłoszeń, gdy nie były jeszcze zamrożone (nie wchodzi do kosztu CV) */
@@ -92,6 +94,8 @@ export interface EvalOptions {
   /** zapisać ogłoszenia przeanalizowane w tym przebiegu jako posting.parsed.json (zamrożone dla kolejnych modeli) */
   writeParsed?: boolean;
   mock?: boolean;
+  /** opis przebiegu, np. "po poprawce": trafia do nazwy pliku, więc kolejny przebieg tego samego dnia nie nadpisze poprzedniego */
+  label?: string;
   log?: (line: string) => void;
 }
 
@@ -246,6 +250,9 @@ export function summarize(cases: CaseResult[]): EvalSummary {
   };
 }
 
+/** Model i opis przebiegu, np. "anthropic/claude-haiku-5.5 (po poprawce)". */
+const runName = (r: EvalResult) => (r.label ? `${r.model} (${r.label})` : r.model);
+
 const pct = (x: number | null) => (x === null ? '-' : `${Math.round(x * 100)}%`);
 const usd = (x: number | null) => (x === null ? '-' : `$${x.toFixed(4)}`);
 const sec = (x: number | null) => (x === null ? '-' : `${x.toFixed(1)} s`);
@@ -254,7 +261,7 @@ const sec = (x: number | null) => (x === null ? '-' : `${x.toFixed(1)} s`);
 export function toMarkdown(r: EvalResult): string {
   const s = r.summary;
   const lines = [
-    `# Ewaluacja: ${r.model}${r.mock ? ' (atrapa modelu)' : ''}`,
+    `# Ewaluacja: ${runName(r)}${r.mock ? ' (atrapa modelu)' : ''}`,
     '',
     `Data: ${r.date}. Model pisania CV: \`${r.model}\`. Analiza ogłoszeń: \`${r.fastModel}\`. Przypadków: ${s.cases}.`,
     '',
@@ -285,7 +292,7 @@ export function toMarkdown(r: EvalResult): string {
 export function comparisonMarkdown(results: EvalResult[]): string {
   const row = (label: string, f: (s: EvalSummary) => string) => `| ${label} | ${results.map((r) => f(r.summary)).join(' | ')} |`;
   return [
-    `| Miara | ${results.map((r) => `\`${r.model}\``).join(' | ')} |`,
+    `| Miara | ${results.map((r) => (r.label ? `\`${r.model}\` (${r.label})` : `\`${r.model}\``)).join(' | ')} |`,
     `|---|${results.map(() => '---').join('|')}|`,
     row('CV przyjęte w 1. / 2. / 3. podejściu', (s) => `${pct(s.acceptedFirst)} / ${pct(s.acceptedSecond)} / ${pct(s.acceptedThird)}`),
     row('Nie powstało', (s) => pct(s.failed)),
@@ -327,6 +334,7 @@ export async function runEval(opts: EvalOptions): Promise<{ result: EvalResult; 
   const result: EvalResult = {
     date: new Date().toISOString().slice(0, 10),
     model: opts.model,
+    label: opts.label?.trim() ?? '',
     fastModel: opts.fastModel,
     mock: !!opts.mock,
     parseCostUsd,
@@ -334,7 +342,7 @@ export async function runEval(opts: EvalOptions): Promise<{ result: EvalResult; 
     cases: results,
   };
   fs.mkdirSync(opts.outDir, { recursive: true });
-  const name = `${result.date}_${slug(opts.model)}`;
+  const name = `${result.date}_${slug(opts.model)}${result.label ? `_${slug(result.label)}` : ''}`;
   const files = [path.join(opts.outDir, `${name}.json`), path.join(opts.outDir, `${name}.md`)];
   fs.writeFileSync(files[0], `${JSON.stringify(result, null, 2)}\n`);
   fs.writeFileSync(files[1], toMarkdown(result));
