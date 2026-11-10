@@ -50,6 +50,27 @@ describe('klient OpenRouter', () => {
     expect(sent[0].model).toBe('anthropic/claude-haiku-5.5');
   });
 
+  it('obserwator (dla evals/) widzi każdą próbę: odrzuconą z powodem i surowym JSON-em, potem przyjętą, z kosztem', async () => {
+    const { observeCalls } = await import('../server/llm/openrouter');
+    const seen: { attempt: number; accepted: boolean; raw: unknown; error: string; cost: number; task: string }[] = [];
+    observeCalls((a) => seen.push({ attempt: a.attempt, accepted: a.accepted, raw: a.raw, error: a.error, cost: a.cost, task: a.ctx.task }));
+    try {
+      replies = [ok('{"name":"A","score":"siedem"}', 0.002), ok('{"name":"A","score":7}', 0.003)];
+      expect(await call()).toEqual({ name: 'A', score: 7 });
+    } finally {
+      observeCalls(null);
+    }
+    expect(seen).toMatchObject([
+      { attempt: 1, accepted: false, raw: { name: 'A', score: 'siedem' }, cost: 0.002, task: 'test' },
+      { attempt: 2, accepted: true, raw: { name: 'A', score: 7 }, error: '', cost: 0.003 },
+    ]);
+    expect(seen[0].error).toContain('score');
+    // Bez obserwatora nic się nie zmienia.
+    replies = [ok('{"name":"B","score":1}')];
+    expect(await call()).toEqual({ name: 'B', score: 1 });
+    expect(seen).toHaveLength(2);
+  });
+
   it('zapętlona/ucięta albo pusta odpowiedź → nowa próba od zera, bez odsyłania śmieci', async () => {
     replies = [ok('{"name":"A","score":1,"name2":"AAAAAAAA', 0.001, 'length'), ok(''), ok('{"name":"A","score":2}')];
     expect(await call()).toEqual({ name: 'A', score: 2 });

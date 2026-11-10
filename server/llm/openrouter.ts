@@ -89,6 +89,36 @@ interface ChatResponse {
   reasoningTokens: number;
 }
 
+/** Jedna próba modelu w callJson: to, co widzi ewaluacja jakości (evals/). */
+export interface CallAttempt {
+  ctx: LlmContext;
+  schemaName: string;
+  /** 1-3 */
+  attempt: number;
+  /** odpowiedź przeszła walidację schematu i kontroli (np. sourceId z profilu) */
+  accepted: boolean;
+  /** JSON z odpowiedzi przed walidacją (null, gdy to nie był JSON) */
+  raw: unknown;
+  /** powód odrzucenia (pusty przy accepted) */
+  error: string;
+  model: string;
+  cost: number;
+  tokensIn: number;
+  tokensOut: number;
+  /** czas tego zapytania w ms */
+  ms: number;
+}
+
+let observer: ((a: CallAttempt) => void) | null = null;
+
+/**
+ * Podgląd każdej próby modelu, tylko dla ewaluacji jakości (evals/run.ts): ile podejść potrzebowało CV, co odrzuciły
+ * kontrole, ile to kosztowało. Aplikacja go nie ustawia. null wyłącza podgląd.
+ */
+export function observeCalls(fn: ((a: CallAttempt) => void) | null): void {
+  observer = fn;
+}
+
 async function chat(key: string, body: Record<string, unknown>, attempt = 0): Promise<ChatResponse> {
   let res: Response;
   try {
@@ -185,7 +215,7 @@ Zwróć WYŁĄCZNIE jeden obiekt JSON zgodny z podanym schematem, bez komentarzy
       tokensOut: r.tokensOut,
     });
 
-  const send = async (extra: { role: string; content: string }[], temp: number): Promise<ChatResponse> => {
+  const send = async (extra: { role: string; content: string }[], temp: number): Promise<ChatResponse & { ms: number }> => {
     const body: Record<string, unknown> = {
       model,
       max_tokens: opts.maxTokens ?? 8000,
@@ -201,9 +231,10 @@ Zwróć WYŁĄCZNIE jeden obiekt JSON zgodny z podanym schematem, bez komentarzy
       if (requireParams) body.provider = { require_parameters: true };
     }
     try {
+      const started = Date.now();
       const r = await chat(key, body);
       await record(r);
-      return r;
+      return { ...r, ms: Date.now() - started };
     } catch (e: any) {
       if (reasoning && e instanceof HttpError && e.status === 400 && /reasoning/i.test(e.message)) {
         // "Reasoning is mandatory" (np. gpt-5-nano): niech myśli krótko; gdy i to nie przejdzie, bez tego parametru.
@@ -229,14 +260,16 @@ ${JSON.stringify(jsonSchema)}`;
     }
   };
 
-  const tryParse = (r: ChatResponse): { ok: true; data: T } | { ok: false; error: string } => {
-    if (!r.content.trim()) return { ok: false, error: 'pusta odpowiedź' };
+  const tryParse = (r: ChatResponse): ({ ok: true; data: T } | { ok: false; error: string }) & { raw: unknown } => {
+    if (!r.content.trim()) return { ok: false, error: 'pusta odpowiedź', raw: null };
+    let raw: unknown = null;
     try {
-      const parsed = opts.schema.safeParse(extractJson(r.content));
-      if (parsed.success) return { ok: true, data: parsed.data };
-      return { ok: false, error: z.prettifyError(parsed.error).slice(0, 2000) };
+      raw = extractJson(r.content);
+      const parsed = opts.schema.safeParse(raw);
+      if (parsed.success) return { ok: true, data: parsed.data, raw };
+      return { ok: false, error: z.prettifyError(parsed.error).slice(0, 2000), raw };
     } catch (e) {
-      return { ok: false, error: `Niepoprawny JSON: ${errorMessage(e)}` };
+      return { ok: false, error: `Niepoprawny JSON: ${errorMessage(e)}`, raw };
     }
   };
 
@@ -245,6 +278,19 @@ ${JSON.stringify(jsonSchema)}`;
   let lastBroken = false;
   for (let attempt = 1; attempt <= 3; attempt++) {
     const parsed = tryParse(res);
+    observer?.({
+      ctx: opts.ctx,
+      schemaName: opts.schemaName,
+      attempt,
+      accepted: parsed.ok,
+      raw: parsed.raw,
+      error: parsed.ok ? '' : parsed.error,
+      model: res.model,
+      cost: res.cost,
+      tokensIn: res.tokensIn,
+      tokensOut: res.tokensOut,
+      ms: res.ms,
+    });
     if (parsed.ok) {
       const data = masked ? await masked.restore(parsed.data) : parsed.data;
       return opts.verbatim ? data : cleanTail(plainDashes(data));
