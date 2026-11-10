@@ -16,7 +16,8 @@
     "setup": "npm install && npx playwright install chromium && npm run build",
     "test": "vitest run",
     "typecheck": "node node_modules/@typescript/native/bin/tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "eval": "tsx evals/run.ts"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans": "^5.3.0",
