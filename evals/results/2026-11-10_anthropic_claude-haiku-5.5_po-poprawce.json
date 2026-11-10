@@ -1,0 +1,700 @@
+{
+  "date": "2026-11-10",
+  "model": "anthropic/claude-haiku-5.5",
+  "label": "po-poprawce",
+  "fastModel": "anthropic/claude-haiku-5.5",
+  "mock": false,
+  "parseCostUsd": 0,
+  "summary": {
+    "cases": 18,
+    "generated": 18,
+    "acceptedFirst": 0.9444444444444444,
+    "acceptedSecond": 0,
+    "acceptedThird": 0.05555555555555555,
+    "failed": 0,
+    "unsourcedCaught": 0,
+    "casesWithUnsourced": 0,
+    "numbersFlagged": 0,
+    "casesWithNumbersFlagged": 0,
+    "keywordCoverage": 0.5944444444444443,
+    "onePage": 1,
+    "shortened": 1,
+    "costPerCv": 0.0018944777777777774,
+    "costTotal": 0.034100599999999995,
+    "secondsPerCv": 8.09388888888889,
+    "secondsMax": 25.024,
+    "forbiddenCases": 5,
+    "forbiddenAsFact": 8,
+    "forbiddenAsSuggestion": 0
+  },
+  "cases": [
+    {
+      "id": "01-marketing-studentka",
+      "title": "Studentka marketingu na stanowisko młodszej specjalistki ds. marketingu online",
+      "level": "student",
+      "trap": false,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": false,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.625,
+      "keywordsMatched": 11,
+      "keywordsTotal": 17,
+      "mustMissing": [
+        "materiały wideo",
+        "optymalizacja kampanii",
+        "promocja",
+        "Specjalista ds. marketingu"
+      ],
+      "pages": 1,
+      "costUsd": 0.0015123,
+      "seconds": 7.695,
+      "forbiddenChecked": true,
+      "forbidden": [
+        {
+          "term": "Google Ads",
+          "foundAs": "Google Ads",
+          "where": "skills",
+          "status": "fact",
+          "text": "Google Ads"
+        }
+      ]
+    },
+    {
+      "id": "02-python-student",
+      "title": "Student informatyki z projektami w Pythonie na stanowisko junior Python developera",
+      "level": "student",
+      "trap": false,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": false,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.525,
+      "keywordsMatched": 7,
+      "keywordsTotal": 14,
+      "mustMissing": [
+        "Django",
+        "Django REST Framework",
+        "Docker",
+        "testy automatyczne",
+        "code review"
+      ],
+      "pages": 1,
+      "costUsd": 0.0014297,
+      "seconds": 7.334,
+      "forbiddenChecked": true,
+      "forbidden": []
+    },
+    {
+      "id": "03-analityczka-danych",
+      "title": "Asystentka sprzedaży z Excelem i podstawami SQL na stanowisko młodszej analityczki danych",
+      "level": "junior",
+      "trap": false,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": false,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.575,
+      "keywordsMatched": 10,
+      "keywordsTotal": 16,
+      "mustMissing": [
+        "dashboardy",
+        "analiza marży",
+        "hurtownia danych",
+        "analiza promocji"
+      ],
+      "pages": 1,
+      "costUsd": 0.0014695,
+      "seconds": 7.317,
+      "forbiddenChecked": false,
+      "forbidden": []
+    },
+    {
+      "id": "04-nauczycielka-do-hr",
+      "title": "Nauczycielka angielskiego przechodząca do rekrutacji",
+      "level": "zmiana branży",
+      "trap": false,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": false,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.45,
+      "keywordsMatched": 8,
+      "keywordsTotal": 16,
+      "mustMissing": [
+        "ATS",
+        "Excel",
+        "nawiązywanie kontaktów",
+        "publikacja ogłoszeń",
+        "obsługa klienta",
+        "raportowanie"
+      ],
+      "pages": 1,
+      "costUsd": 0.0014132,
+      "seconds": 6.219,
+      "forbiddenChecked": false,
+      "forbidden": []
+    },
+    {
+      "id": "05-mechanik-samochodowy",
+      "title": "Mechanik samochodowy z warsztatu na stanowisko w ASO",
+      "level": "praca fizyczna",
+      "trap": false,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": false,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.75,
+      "keywordsMatched": 10,
+      "keywordsTotal": 13,
+      "mustMissing": [
+        "zawieszenie",
+        "sumienność"
+      ],
+      "pages": 1,
+      "costUsd": 0.0014152,
+      "seconds": 6.624,
+      "forbiddenChecked": false,
+      "forbidden": []
+    },
+    {
+      "id": "06-magazynier-udt",
+      "title": "Magazynier z uprawnieniami UDT na stanowisko operatora wózka widłowego",
+      "level": "praca fizyczna",
+      "trap": false,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": false,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.725,
+      "keywordsMatched": 10,
+      "keywordsTotal": 14,
+      "mustMissing": [
+        "doświadczenie magazynowe",
+        "dokładność",
+        "bezpieczeństwo pracy"
+      ],
+      "pages": 1,
+      "costUsd": 0.0014022,
+      "seconds": 6.369,
+      "forbiddenChecked": false,
+      "forbidden": []
+    },
+    {
+      "id": "07-ksiegowosc-studentka",
+      "title": "Studentka finansów i rachunkowości po praktykach w biurze rachunkowym",
+      "level": "student",
+      "trap": false,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": false,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.7,
+      "keywordsMatched": 9,
+      "keywordsTotal": 14,
+      "mustMissing": [
+        "asystent księgowości",
+        "ewidencja ryczałtu",
+        "organizacja pracy",
+        "obsługa klienta"
+      ],
+      "pages": 1,
+      "costUsd": 0.0013531,
+      "seconds": 5.676,
+      "forbiddenChecked": false,
+      "forbidden": []
+    },
+    {
+      "id": "08-kelner-do-obslugi-klienta",
+      "title": "Kelner przechodzący do obsługi klienta z językiem angielskim",
+      "level": "zmiana branży",
+      "trap": false,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": false,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.65,
+      "keywordsMatched": 11,
+      "keywordsTotal": 17,
+      "mustMissing": [
+        "doświadczenie w handlu",
+        "komunikatywność",
+        "cierpliwość",
+        "czat",
+        "telefon"
+      ],
+      "pages": 1,
+      "costUsd": 0.0013978,
+      "seconds": 6.629,
+      "forbiddenChecked": false,
+      "forbidden": []
+    },
+    {
+      "id": "09-frontend-en",
+      "title": "Student z projektami w Vue.js, ogłoszenie po angielsku na junior frontend developera (React)",
+      "level": "student",
+      "trap": true,
+      "language": "en",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": false,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.55,
+      "keywordsMatched": 10,
+      "keywordsTotal": 15,
+      "mustMissing": [
+        "testy jednostkowe",
+        "code review"
+      ],
+      "pages": 1,
+      "costUsd": 0.0014936,
+      "seconds": 7.857,
+      "forbiddenChecked": true,
+      "forbidden": [
+        {
+          "term": "React",
+          "foundAs": "React",
+          "where": "skills",
+          "status": "fact",
+          "text": "React"
+        },
+        {
+          "term": "TypeScript",
+          "foundAs": "TypeScript",
+          "where": "skills",
+          "status": "fact",
+          "text": "TypeScript"
+        }
+      ]
+    },
+    {
+      "id": "10-graficzka-junior",
+      "title": "Absolwentka grafiki z praktyką freelance na stanowisko junior graphic designer",
+      "level": "junior",
+      "trap": false,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": false,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.725,
+      "keywordsMatched": 10,
+      "keywordsTotal": 15,
+      "mustMissing": [
+        "portfolio",
+        "makiety stron"
+      ],
+      "pages": 1,
+      "costUsd": 0.0014139,
+      "seconds": 6.446,
+      "forbiddenChecked": false,
+      "forbidden": []
+    },
+    {
+      "id": "11-elektryk-utrzymanie-ruchu",
+      "title": "Elektryk instalator na stanowisko elektryka utrzymania ruchu",
+      "level": "praca fizyczna",
+      "trap": false,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": false,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.475,
+      "keywordsMatched": 7,
+      "keywordsTotal": 14,
+      "mustMissing": [
+        "SEP D",
+        "praca zmianowa",
+        "awarie maszyn",
+        "przeglądy prewencyjne",
+        "modernizacja"
+      ],
+      "pages": 1,
+      "costUsd": 0.0013213,
+      "seconds": 5.668,
+      "forbiddenChecked": false,
+      "forbidden": []
+    },
+    {
+      "id": "12-handlowiec-student",
+      "title": "Student zarządzania ze sprzedaży w sklepie na stanowisko młodszego przedstawiciela handlowego",
+      "level": "student",
+      "trap": false,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": false,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.525,
+      "keywordsMatched": 9,
+      "keywordsTotal": 14,
+      "mustMissing": [
+        "samodzielność",
+        "zamówienia",
+        "planowanie pracy",
+        "wizyty u klientów"
+      ],
+      "pages": 1,
+      "costUsd": 0.0012771,
+      "seconds": 6.423,
+      "forbiddenChecked": false,
+      "forbidden": []
+    },
+    {
+      "id": "13-opiekunka-medyczna",
+      "title": "Opiekunka osób starszych po kursie opiekuna medycznego na stanowisko w domu pomocy społecznej",
+      "level": "praca fizyczna",
+      "trap": false,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": false,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.5,
+      "keywordsMatched": 8,
+      "keywordsTotal": 14,
+      "mustMissing": [
+        "dokumentacja opieki",
+        "praca zmianowa",
+        "współpraca z pielęgniarkami",
+        "pomoc w ubieraniu",
+        "opieka nad mieszkańcami"
+      ],
+      "pages": 1,
+      "costUsd": 0.0014473,
+      "seconds": 6.341,
+      "forbiddenChecked": false,
+      "forbidden": []
+    },
+    {
+      "id": "14-logistyka-en",
+      "title": "Absolwent logistyki po stażu w spedycji, ogłoszenie po angielsku w firmie międzynarodowej",
+      "level": "junior",
+      "trap": true,
+      "language": "en",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": false,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.75,
+      "keywordsMatched": 14,
+      "keywordsTotal": 16,
+      "mustMissing": [
+        "organizacja pracy",
+        "rozwiązywanie problemów"
+      ],
+      "pages": 1,
+      "costUsd": 0.0012725,
+      "seconds": 6.142,
+      "forbiddenChecked": false,
+      "forbidden": []
+    },
+    {
+      "id": "15-pulapka-java",
+      "title": "Junior Python developer na ogłoszenie, które wymaga Javy, Spring Boota i Kubernetesa",
+      "level": "junior",
+      "trap": true,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 3,
+      "attempts": 3,
+      "rejected": {
+        "unsourced": 0,
+        "style": 2,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": false,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.475,
+      "keywordsMatched": 5,
+      "keywordsTotal": 11,
+      "mustMissing": [
+        "Spring Boot",
+        "Kubernetes",
+        "mikroserwisy",
+        "code review"
+      ],
+      "pages": 1,
+      "costUsd": 0.0040987,
+      "seconds": 15.776,
+      "forbiddenChecked": true,
+      "forbidden": [
+        {
+          "term": "Java",
+          "foundAs": "Java",
+          "where": "headline",
+          "status": "fact",
+          "text": "Junior Java Developer"
+        },
+        {
+          "term": "Java",
+          "foundAs": "Java",
+          "where": "summary",
+          "status": "fact",
+          "text": "Jestem inżynierem informatyki po Warszawskiej Wyższej Szkole Informatyki Praktycznej, który w trakcie stażu backendowego rozwijał endpointy REST i pisał zapytania SQL do PostgreSQL. Znam Git i podstawy architektury usług sieciowych, a na co dzień pracuję w języku Python i Flask. Chcę rozwijać się w zespole backendu jako programista Java, wnosząc doświadczenie z pracy z API, bazami danych i testami automatycznymi."
+        },
+        {
+          "term": "Java",
+          "foundAs": "Java",
+          "where": "skills",
+          "status": "fact",
+          "text": "Java (w nauce)"
+        }
+      ]
+    },
+    {
+      "id": "16-pulapka-bez-liczb",
+      "title": "Baristka bez żadnych liczb w profilu na stanowisko sprzedawczyni-kasjerki",
+      "level": "praca fizyczna",
+      "trap": true,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": false,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.525,
+      "keywordsMatched": 8,
+      "keywordsTotal": 13,
+      "mustMissing": [
+        "uprzejmość",
+        "praca w weekendy"
+      ],
+      "pages": 1,
+      "costUsd": 0.001309,
+      "seconds": 5.838,
+      "forbiddenChecked": false,
+      "forbidden": []
+    },
+    {
+      "id": "17-pulapka-dlugi-profil",
+      "title": "Bardzo długi profil (8 stanowisk, 5 projektów, ponad 30 umiejętności) na stanowisko specjalisty e-commerce",
+      "level": "junior",
+      "trap": true,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": true,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.825,
+      "keywordsMatched": 12,
+      "keywordsTotal": 14,
+      "mustMissing": [
+        "kampanie reklamowe",
+        "analiza ruchu"
+      ],
+      "pages": 1,
+      "costUsd": 0.0077107,
+      "seconds": 25.024,
+      "forbiddenChecked": false,
+      "forbidden": []
+    },
+    {
+      "id": "18-pulapka-kierowca-ce",
+      "title": "Kurier z prawem jazdy kat. B na ogłoszenie dla kierowcy kat. C+E",
+      "level": "praca fizyczna",
+      "trap": true,
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "acceptedAt": 1,
+      "attempts": 1,
+      "rejected": {
+        "unsourced": 0,
+        "style": 0,
+        "schools": 0,
+        "format": 0
+      },
+      "shortened": false,
+      "numbersFlagged": 0,
+      "suggestions": 0,
+      "keywordCoverage": 0.35,
+      "keywordsMatched": 5,
+      "keywordsTotal": 13,
+      "mustMissing": [
+        "kwalifikacja wstępna",
+        "karta kierowcy",
+        "badania lekarskie",
+        "badania psychotechniczne",
+        "doświadczenie kierowcy",
+        "dokumentacja przewozowa",
+        "dbanie o pojazd"
+      ],
+      "pages": 1,
+      "costUsd": 0.0013635,
+      "seconds": 6.312,
+      "forbiddenChecked": true,
+      "forbidden": [
+        {
+          "term": "kategorii C",
+          "foundAs": "kat. C+E",
+          "where": "headline",
+          "status": "fact",
+          "text": "Kierowca zestawu ciągnik siodłowy z naczepą (kat. C+E)"
+        },
+        {
+          "term": "kategorii C",
+          "foundAs": "kat. C+E",
+          "where": "summary",
+          "status": "fact",
+          "text": "Jestem kurierem z kilkuletnim doświadczeniem w prowadzeniu pojazdów dostawczych na trasach Słupska i okolic. Znam tereny Pomorza, planuję trasy i rozliczam płatności przy odbiorze. Posiadam prawo jazdy kat. B i chcę uzyskać uprawnienia C+E do prowadzenia zestawu ciągnik siodłowy z naczepą w transporcie krajowym."
+        }
+      ]
+    }
+  ]
+}

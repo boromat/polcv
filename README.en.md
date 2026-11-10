@@ -96,12 +96,12 @@ $0.05-0.15. The Settings page lists the models and shows what you have spent.
 
 ## Generation quality
 
-On 18 fictional profile and posting pairs in [`evals/`](evals/README.md), Claude Haiku 5.5 (10 Nov 2026) wrote a CV
-that passed the checks in 16 cases (89%, 61% on the first attempt). None had an entry or a number that is not in the
-profile, all fit on one A4 page, and a CV cost about $0.002 and took 9 s on average. Two CVs were not produced
-because the summary check rejected a gendered past tense three times. It is a small set prepared by the author of
-the tool: [evals/README.md](evals/README.md) (in Polish) describes the method, the results for each pair and the
-limitations.
+On 18 fictional profile and posting pairs in [`evals/`](evals/README.md), Claude Haiku 5.5 (10 Nov 2026, after a fix
+to the summary check) wrote a CV that passed the checks in all 18 cases, 17 on the first attempt. None had an entry
+or a number that is not in the profile, all fit on one A4 page, and a CV cost about $0.002 and took 8 s on average.
+In 3 CVs, though, the model added skills the profile does not have (React, for example), which the checks during
+generation do not catch yet. It is a small set prepared by the author of the tool: [evals/README.md](evals/README.md)
+(in Polish) describes the method, the results for each pair and the limitations.
 
 ## Security
 
