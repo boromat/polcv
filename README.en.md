@@ -100,8 +100,8 @@ On 18 fictional profile and posting pairs in [`evals/`](evals/README.md), Claude
 to the summary check) wrote a CV that passed the checks in all 18 cases, 17 on the first attempt. None had an entry
 or a number that is not in the profile, all fit on one A4 page, and a CV cost about $0.002 and took 8 s on average.
 In 3 CVs, though, the model added skills the profile does not have (React, for example). Since then the skills list
-is checked during generation too and goes back to the model, but the evaluation has not measured the effect of this
-check yet. It is a small set prepared by the author of the tool: [evals/README.md](evals/README.md)
+is checked during generation too: in the next run no such skill got through, but the check also rejected translations
+in one CV in English, and that CV was not made. The fix to this check has not been measured yet. It is a small set prepared by the author of the tool: [evals/README.md](evals/README.md)
 (in Polish) describes the method, the results for each pair and the limitations.
 
 ## Security

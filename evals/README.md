@@ -46,24 +46,28 @@ ewaluacji (pierwsze wymagają odpowiedzi kandydata, druga to osobny model ocenia
 ## Wyniki: 10.11.2026
 
 Model pisania CV i analizy ogłoszeń: `anthropic/claude-haiku-5.5`, czyli ten, którego autor używa na co dzień (w kodzie
-domyślnie do pisania jest ustawiony `anthropic/claude-sonnet-5.5`). Dwa przebiegi po 18 par tego samego dnia: pierwszy
-na kodzie z commita `a4e6a78`, drugi po poprawce kontroli podsumowania (`99479d7`, opis niżej). Szczegóły dla każdej
-pary: [przebieg 1](results/2026-11-10_anthropic_claude-haiku-5.5.md),
-[przebieg 2](results/2026-11-10_anthropic_claude-haiku-5.5_po-poprawce.md).
+domyślnie do pisania jest ustawiony `anthropic/claude-sonnet-5.5`). Trzy przebiegi po 18 par tego samego dnia: pierwszy
+na kodzie z commita `a4e6a78`, drugi po poprawce kontroli podsumowania (`99479d7`), trzeci z nową kontrolą listy
+umiejętności (`8a17c49`); opisy niżej. Szczegóły dla każdej pary:
+[przebieg 1](results/2026-11-10_anthropic_claude-haiku-5.5.md),
+[przebieg 2](results/2026-11-10_anthropic_claude-haiku-5.5_po-poprawce.md),
+[przebieg 3](results/2026-11-10_anthropic_claude-haiku-5.5_kontrola-umiejetnosci.md).
 
-| Miara | Przebieg 1 | Przebieg 2 (po poprawce) |
-|---|---|---|
-| CV przyjęte w 1. / 2. / 3. podejściu | 61% / 22% / 6% | 94% / 0% / 6% |
-| Nie powstało (3 odrzucone podejścia) | 11% (2 z 18) | 0% |
-| Wpisy bez źródła w profilu odrzucone przez kontrolę | 0 | 0 |
-| Liczby spoza profilu zamienione w sugestie | 0 | 0 |
-| Pokrycie słów kluczowych (jak w ocenie ATS) | 56% | 59% |
-| CV na jednej stronie A4 | 100% (1 skrócone przez AI) | 100% (1 skrócone przez AI) |
-| Zakazane fakty: w treści / w sugestiach | 2 / 5 | 8 / 0 |
-| Koszt na CV | $0,0022 | $0,0019 |
-| Czas na CV (średnio / najdłużej) | 8,9 s / 17,3 s | 8,1 s / 25,0 s |
+| Miara | Przebieg 1 | Przebieg 2 (podsumowanie) | Przebieg 3 (umiejętności) |
+|---|---|---|---|
+| CV przyjęte w 1. / 2. / 3. podejściu | 61% / 22% / 6% | 94% / 0% / 6% | 78% / 11% / 6% |
+| Nie powstało (3 odrzucone podejścia) | 11% (2 z 18) | 0% | 6% (1 z 18) |
+| Wpisy bez źródła w profilu odrzucone przez kontrolę | 0 | 0 | 0 |
+| Umiejętności spoza profilu odrzucone przez kontrolę | - | - | 5 |
+| Liczby spoza profilu zamienione w sugestie | 0 | 0 | 2 |
+| Pokrycie słów kluczowych (jak w ocenie ATS) | 56% | 59% | 55% |
+| CV na jednej stronie A4 | 100% (1 skrócone przez AI) | 100% (1 skrócone przez AI) | 100% (1 skrócone przez AI) |
+| Zakazane fakty: w treści / w sugestiach | 2 / 5 | 8 / 0 | 3 / 2 |
+| Koszt na CV | $0,0022 | $0,0019 | $0,0021 |
+| Czas na CV (średnio / najdłużej) | 8,9 s / 17,3 s | 8,1 s / 25,0 s | 9,1 s / 27,9 s |
 
-Analiza 18 ogłoszeń (raz, potem zamrożona) kosztowała $0,018; pisanie CV $0,044 w pierwszym przebiegu i $0,034 w drugim.
+Analiza 18 ogłoszeń (raz, potem zamrożona) kosztowała $0,018; pisanie CV $0,044 w pierwszym przebiegu, $0,034 w drugim
+i $0,039 w trzecim.
 
 Porównania z innymi modelami jeszcze nie ma: przebiegi objęły tylko model używany na co dzień. Skrypt jest
 gotowy (`npm run eval -- --model <id>`, potem `--report`), a dla wybranego zestawu trzech modeli koszt szacowany był
@@ -104,22 +108,36 @@ zmieniło. W przebiegu 2:
   rozstrzyga. Wniosek dla programu: listę umiejętności trzeba sprawdzać względem profilu już przy generowaniu, tak jak
   pozycje i liczby, a nie liczyć na to, że model zawsze posłucha promptu.
 
-### Kontrola umiejętności (jeszcze bez pomiaru)
+### Kontrola umiejętności i przebieg 3
 
 Po przebiegu 2 lista umiejętności jest sprawdzana przy pisaniu CV, przy „Popraw automatycznie” i przy wybranych
 zmianach z raportu. Konkretna pozycja, której profil nie potwierdza (nazwa techniczna jak „TypeScript” czy
 „Google Ads” albo umiejętność wymagana w ogłoszeniu jak „Java”), wraca do modelu, także z dopiskiem „(w nauce)”.
-W CV po angielsku z polskiego profilu sprawdzane są tylko nazwy techniczne i narzędzia z ogłoszenia, bo tłumaczenia
-miękkich umiejętności nie da się pewnie porównać z profilem. Przy poprawie zostaje to, co CV już miało, np. umiejętność
-dopisana przez kandydata. Ewaluacja liczy te odrzucenia w kolumnie „umiejętności”, ale przebiegu z tą kontrolą jeszcze
-nie było, więc nie wiadomo, ile kosztuje dodatkowych podejść i czy usuwa wszystkie 4 trafienia z przebiegu 2.
+Przy poprawie zostaje to, co CV już miało, np. umiejętność dopisana przez kandydata. W przebiegu 3 (`8a17c49`):
+
+- **Lista umiejętności jest czysta.** Żaden zakazany fakt nie trafił do umiejętności (w przebiegu 2 były 4). Trzy
+  trafienia w treści to znowu dwa tytuły CV przepisane z ogłoszenia („Junior Java Developer”, „Kierowca zestawu ciągnik
+  siodłowy z naczepą (kat. C+E)”) i uczciwa deklaracja „chcę zdobyć uprawnienia C+E”. Dwie sugestie to zdanie „Nie mam
+  jeszcze doświadczenia w Javie ani w Spring Boot, dlatego chcę rozwijać się w Javie 17 i Spring Boot”.
+- **Kontrola była za ostra dla CV po angielsku.** W parze 14 (absolwent logistyki, ogłoszenie po angielsku) odrzuciła
+  wszystkie 3 podejścia i CV nie powstało. Wynik nie zapisywał jeszcze nazw odrzuconych pozycji, ale ta wersja kontroli
+  porównywała z polskim profilem całą frazę z nazwą techniczną, więc tłumaczenia jak „CMR documentation” (z „dokumenty
+  CMR”) czy „TMS system” (z „system TMS”) nie miały jak przejść, a model nie może ich napisać po polsku.
+- Odrzucenia za umiejętności były też w parach 05 i 17 (po jednym, CV przeszło w 2. podejściu); liczba 5 w tabeli to
+  niepotwierdzone pozycje w odrzuconych podejściach, policzone jeszcze starszą funkcją.
+
+Poprawka po przebiegu 3 (`a37857b`): pozycja wraca do modelu tylko wtedy, gdy ma nazwę, której profil nie ma (skrót,
+nazwa techniczna, w CV po polsku też słowo z wielkiej litery w środku, jak „Ads” w „Google Ads”), albo gdy jest
+narzędziem lub nazwą z ogłoszenia. „CMR documentation” i „Obsługa systemu TMS” przechodzą, gdy profil ma „CMR” i „TMS”;
+pozostałe niepotwierdzone pozycje pokazuje tylko ostrzeżenie w edytorze. Wynik zapisuje teraz nazwy odrzuconych
+umiejętności (ostatnia kolumna tabeli dla każdej pary). Tej wersji ewaluacja jeszcze nie zmierzyła.
 
 ## Ograniczenia
 
 - **Mały zbiór.** 18 par to za mało, żeby różnice o kilka punktów procentowych coś znaczyły; jedna para to 6%.
 - **Dane przygotował autor narzędzia.** Profile i ogłoszenia mogą nieświadomie pasować do tego, co PolCV robi dobrze.
   Nie są to prawdziwe CV ani ogłoszenia.
-- **Jeden przebieg na wersję.** Model pisze z temperaturą 0,4, więc kolejny przebieg da inne liczby; dwa przebiegi
+- **Jeden przebieg na wersję.** Model pisze z temperaturą 0,4, więc kolejny przebieg da inne liczby; przebiegi 1 i 2
   powyżej różnią się np. liczbą zakazanych faktów w umiejętnościach (0 i 4). Wyniki nie mają przedziałów ufności.
 - **Metryki są automatyczne.** Nie oceniają, czy CV dobrze się czyta i czy rekruter zaprosiłby kandydata.
   Pokrycie słów kluczowych zależy też od jakości jednorazowej analizy ogłoszeń przez Haiku.
