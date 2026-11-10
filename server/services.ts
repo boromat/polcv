@@ -492,7 +492,8 @@ export function unverifiedSkills(cv: CvVersion, profile: Profile, posting: JobPo
 }
 
 export function pendingSuggestions(cv: CvVersion): number {
-  const all = [cv.content.summary, ...cv.content.experience.flatMap((e) => e.bullets), ...cv.content.projects.flatMap((p) => p.bullets)];
+  const c = cv.content;
+  const all = [...(c.headlineSuggestion ? [c.headlineSuggestion] : []), c.summary, ...c.experience.flatMap((e) => e.bullets), ...c.projects.flatMap((p) => p.bullets)];
   return all.filter((t) => t.status === 'suggested' && !cv.decisions[t.id]).length;
 }
 

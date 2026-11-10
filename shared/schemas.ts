@@ -217,6 +217,15 @@ export const CvContentSchema = z.object({
   notes: z.string().describe('krótka notatka dla kandydata: co podkreślono, czego brakuje'),
 });
 
+/**
+ * Zapisane CV: to, co pisze model (CvContentSchema, schemat odpowiedzi), i to, co dopisuje program. Tytuł z ogłoszenia,
+ * którego profil nie potwierdza (np. "Junior Java Developer" bez Javy), czeka w "headlineSuggestion" na decyzję
+ * kandydata, a "headline" ma do tego czasu wersję bezpieczną ("fallbackText" tej sugestii).
+ */
+export const SavedCvContentSchema = CvContentSchema.extend({
+  headlineSuggestion: CvTextSchema.optional(),
+});
+
 export const TemplateIds = ['classic', 'modern', 'compact'] as const;
 export type TemplateId = (typeof TemplateIds)[number];
 
@@ -225,7 +234,7 @@ export const CvVersionSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   origin: z.enum(['generated', 'improved', 'synced']),
-  content: CvContentSchema,
+  content: SavedCvContentSchema,
   /** Elementy profilu z chwili powstania wersji (starsze wersje ich nie mają): po nich widać, co doszło. */
   profileIds: z.array(z.string()).optional(),
   /** Pozycje profilu z chwili powstania wersji: po nich widać, co w pozycji z CV się zmieniło (nazwa, daty, nowe osiągnięcia). */
@@ -396,7 +405,7 @@ export type GapQuestion = z.infer<typeof GapQuestionSchema>;
 export type GapAnalysis = z.infer<typeof GapAnalysisSchema>;
 export type GapAnswer = z.infer<typeof GapAnswerSchema>;
 export type CvText = z.infer<typeof CvTextSchema>;
-export type CvContent = z.infer<typeof CvContentSchema>;
+export type CvContent = z.infer<typeof SavedCvContentSchema>;
 export type CvVersion = z.infer<typeof CvVersionSchema>;
 export type SectionKey = (typeof SectionKeys)[number];
 export type AiReview = z.infer<typeof AiReviewSchema>;

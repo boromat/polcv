@@ -6,6 +6,18 @@ All notable changes to PolCV are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- **The CV title no longer claims what your profile does not confirm.** The title is still copied
+  from the posting, but when it names a tool, certificate or named skill from the posting, or a
+  driving licence category, that your profile (with your *I have this* answers) does not confirm,
+  it becomes a yellow suggestion like a number from outside the profile. The CV keeps a safe title
+  without that name ("Junior Developer" instead of "Junior Java Developer", "Kierowca zawodowy"
+  instead of "Kierowca zawodowy kat. C+E"), or the title from your profile, until you choose *It's
+  true, keep it* or *Use the safe version*. Words that only describe the job ("Kierowca
+  zawodowy", "Logistics Coordinator") are not checked. A title you accepted or typed yourself is
+  not questioned again when the CV is improved or shortened.
+
 ## [1.2.0] - 2026-11-10
 
 ### Added

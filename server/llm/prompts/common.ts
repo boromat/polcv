@@ -43,8 +43,13 @@ export function applyDecisions(cv: CvVersion): CvContent {
   };
   const c = cv.content;
   const summary = resolve(c.summary) ?? { ...c.summary, text: '', status: 'fact' as const };
+  // Sugestia tytułu po decyzji: zaakceptowana staje się tytułem, odrzucona znika (tytuł ma już wersję bezpieczną).
+  const hs = c.headlineSuggestion;
+  const hd = hs && cv.decisions[hs.id];
+  const headline = hs && hd ? { headline: hd === 'accepted' ? hs.text : hs.fallbackText, headlineSuggestion: undefined } : {};
   return {
     ...c,
+    ...headline,
     summary,
     experience: c.experience.map((e) => ({ ...e, bullets: e.bullets.map(resolve).filter((b) => b !== null) })),
     projects: c.projects.map((p) => ({ ...p, bullets: p.bullets.map(resolve).filter((b) => b !== null) })),

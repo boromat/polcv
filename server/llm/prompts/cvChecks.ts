@@ -205,9 +205,11 @@ interface SkillFinding {
  * "CMR documents"), więc liczą się nazwy, które się nie tłumaczą, narzędzia z ogłoszenia ("React") i, tylko do
  * ostrzeżenia, nazwy z wielkich liter ("Power Query").
  */
-function skillFindings(c: CvContent, profile: Profile, keywords: Keyword[]): SkillFinding[] {
+/** Teksty profilu, które potwierdzają umiejętności i nazwy (z odpowiedziami "mam" z extraFacts). */
+function claimSource(profile: Profile): string {
   const facts = profile.extraFacts.filter((f) => f.has).map(factEvidence);
-  const source = [
+  return [
+    profile.headline,
     ...profile.skills.map((s) => s.name),
     ...profile.experience.flatMap((e) => [e.role, e.description, ...e.achievements]),
     ...profile.projects.flatMap((p) => [p.name, p.description, ...p.technologies, ...p.achievements]),
@@ -217,6 +219,10 @@ function skillFindings(c: CvContent, profile: Profile, keywords: Keyword[]): Ski
     profile.summary,
     ...facts,
   ].join(' \n ');
+}
+
+function skillFindings(c: CvContent, profile: Profile, keywords: Keyword[]): SkillFinding[] {
+  const source = claimSource(profile);
   const tokens = tokenize(source);
   const found = (v: string) => countPhrase(tokens, v) > 0;
   const translated = c.language === 'en' && looksPolish(source);
@@ -270,6 +276,102 @@ export function skillIssues(c: CvContent, profile: Profile, keywords: Keyword[] 
     path: ['skills'],
     message: `Umiejętności spoza profilu: „${bad.join('”, „')}”. W "skills" wpisuj tylko umiejętności z PROFILU KANDYDATA albo z "extraFacts" (has=true), także gdy ogłoszenie ich wymaga, i bez dopisków typu "(w nauce)". Usuń je z listy: braki kandydat zobaczy w raporcie. Skróty i nazwy narzędzi z profilu (np. "TMS", "CMR", "Excel") zapisuj tak jak w profilu, także w CV po angielsku.`,
   }];
+}
+
+// ---------- Tytuł CV ----------
+
+/** Id sugestii tytułu: CV ma jeden tytuł, więc id jest stałe. */
+export const HEADLINE_ID = 'headline';
+
+/** Kategoria prawa jazdy: "kat. C+E", "kategorii C", "kat. D1". */
+const LICENSE = /(?<![\p{L}\p{N}])kat(?:\.|egorii|egoria|egorię)?\s*([A-D]1?(?:\s*\+\s*E)?)(?![\p{L}\p{N}+])/giu;
+const licenseCats = (s: string) => [...s.matchAll(LICENSE)].map((m) => m[1].replace(/\s+/g, '').toUpperCase());
+
+/**
+ * Nazwy w tytule, których profil nie potwierdza: słowo kluczowe ogłoszenia, które jest narzędziem, certyfikatem albo
+ * umiejętnością o nazwie własnej ("Java" w "Junior Java Developer", "C+E" z "prawo jazdy kat. C+E"), i kategoria prawa
+ * jazdy. Słowa o samym stanowisku ("Kierowca zawodowy", "Logistics Coordinator") nie są twierdzeniem o kandydacie.
+ */
+export function unconfirmedHeadlineNames(headline: string, profile: Profile, keywords: Keyword[] = []): string[] {
+  const source = claimSource(profile);
+  const tokens = tokenize(source);
+  const found = (v: string) => countPhrase(tokens, v) > 0;
+  const inHeadline = tokenize(headline);
+  const out: string[] = [];
+  for (const k of keywords) {
+    if (!['narzędzie', 'certyfikat', 'umiejętność'].includes(k.category) || isSoftSkill(k)) continue;
+    const variants = [k.term, ...k.synonyms].filter((v) => v.trim());
+    const named = k.category !== 'umiejętność' || variants.some((v) => /^\p{Lu}/u.test(v.trim()) || skillWords(v).some(isNameWord));
+    const contained = variants.filter((v) => countPhrase(inHeadline, v) > 0);
+    if (!named || !contained.length) continue;
+    if (variants.flatMap(aliasVariants).some(found)) continue;
+    out.push(contained.sort((a, b) => b.length - a.length)[0]);
+  }
+  const have = new Set(licenseCats(source));
+  for (const m of headline.matchAll(LICENSE)) {
+    const cat = m[1].replace(/\s+/g, '').toUpperCase();
+    if (!have.has(cat) && !(cat.length > 1 && found(cat))) out.push(m[0].trim());
+  }
+  // "C+E" i "kat. C+E" to ta sama rzecz: zostaje dłuższa.
+  const uniq = [...new Set(out)];
+  return uniq.filter((n) => !uniq.some((o) => o !== n && normalize(o).includes(normalize(n))));
+}
+
+const EDGE_WORDS = new Set(['kat', 'kategorii', 'kategoria', 'z', 'ze', 'w', 'we', 'i', 'oraz', 'dla', 'with', 'and', 'or', 'in', 'for', 'of', '-']);
+
+/** Tytuł bez podanych nazw: "Junior Java Developer" bez "Java" → "Junior Developer". */
+function withoutNames(headline: string, names: string[]): string {
+  const pattern = (n: string) => new RegExp(`(?<![\\p{L}\\p{N}])${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}\\p{N}+])`, 'giu');
+  // Nawias z niepotwierdzoną nazwą znika w całości: "(kat. C+E)", "(Spring Boot)".
+  let s = headline.replace(/\s*\([^()]*\)/g, (m) => (names.some((n) => pattern(n).test(m)) ? '' : m));
+  for (const n of [...names].sort((a, b) => b.length - a.length)) s = s.replace(pattern(n), ' ');
+  const words = s
+    .split(/\s+/)
+    .map((w) => w.replace(/^[/|,]+|[/|,]+$/g, ''))
+    .filter(Boolean);
+  const edge = (w: string) => EDGE_WORDS.has(normalize(w).replace(/\.$/, ''));
+  while (words.length && edge(words[0])) words.shift();
+  while (words.length && edge(words[words.length - 1])) words.pop();
+  return words.join(' ');
+}
+
+/**
+ * Bezpieczna wersja tytułu: bez niepotwierdzonych nazw, gdy zostają co najmniej 2 słowa; inaczej tytuł z profilu
+ * (w CV po angielsku tylko angielski), a w ostateczności to jedno słowo albo pusty tytuł.
+ */
+export function safeHeadline(headline: string, names: string[], profile: Profile, lang: Lang, keywords: Keyword[] = []): string {
+  const clean = (s: string) => !unconfirmedHeadlineNames(s, profile, keywords).length;
+  const cut = withoutNames(headline, names);
+  if (cut.split(' ').length >= 2 && clean(cut)) return cut;
+  const own = profile.headline.trim();
+  if (own && clean(own) && (lang === 'pl' || !looksPolish(own))) return own;
+  return cut && clean(cut) ? cut : '';
+}
+
+/**
+ * Tytuł z ogłoszenia, którego profil nie potwierdza, staje się żółtą sugestią (jak liczba spoza profilu), a w CV zostaje
+ * wersja bezpieczna. Tytuł, którego AI nie zmieniło (przy poprawie, skracaniu, poleceniu), zostaje razem z sugestią
+ * czekającą na decyzję; tak samo, gdy AI przepisało do tytułu samą sugestię.
+ */
+function groundHeadline(c: CvContent, profile: Profile, opts: GroundOptions): Pick<CvContent, 'headline' | 'headlineSuggestion'> {
+  const cur = opts.current;
+  if (cur && (c.headline === cur.headline || (cur.headlineSuggestion && c.headline === cur.headlineSuggestion.text))) {
+    return { headline: cur.headline, headlineSuggestion: cur.headlineSuggestion };
+  }
+  const names = c.headline.trim() ? unconfirmedHeadlineNames(c.headline, profile, opts.keywords) : [];
+  if (!names.length) return { headline: c.headline, headlineSuggestion: undefined };
+  const safe = safeHeadline(c.headline, names, profile, opts.lang, opts.keywords);
+  return {
+    headline: safe,
+    headlineSuggestion: {
+      id: HEADLINE_ID,
+      text: c.headline,
+      status: 'suggested',
+      reason: tr('Tytuł z ogłoszenia, a profil nie potwierdza: {names}. Zostaw go tylko, jeśli to prawda.', { names: names.join(', ') }),
+      fallbackText: safe,
+      sourceIds: [],
+    },
+  };
 }
 
 /** Szkoły z profilu zostają w CV zawsze: przy skracaniu model potrafił po cichu wyciąć technikum. */
@@ -487,6 +589,10 @@ export interface GroundOptions {
   confirmed?: string[];
   /** Nazwy z liczbą, które nie są ilością (zob. numberedNames). */
   names?: string[];
+  /** Słowa kluczowe ogłoszenia: po nich poznajemy w tytule nazwy, które profil musi potwierdzić. */
+  keywords?: Keyword[];
+  /** Obecne CV przy poprawie, skracaniu, poleceniu i synchronizacji: niezmieniony tytuł zostaje z sugestią. */
+  current?: CvContent;
 }
 
 /**
@@ -512,6 +618,7 @@ export function groundCv(c: CvContent, profile: Profile, opts: GroundOptions): C
 
   return {
     ...c,
+    ...groundHeadline(c, profile, opts),
     summary: check(c.summary),
     experience: c.experience.map((e) => {
       const src = exp.get(e.sourceId);

@@ -88,6 +88,11 @@ describe('zakazane fakty', () => {
     expect(forbiddenInCv(c, docker).map((v) => v.status)).toEqual(['suggested', 'fact']);
   });
 
+  it('tytuł z ogłoszenia czekający w sugestii liczy się jako sugestia, a tytuł w CV jako fakt', () => {
+    const c = { ...cv(), headline: 'Junior Developer', headlineSuggestion: { id: 'headline', text: 'Junior Docker Developer', status: 'suggested' as const, reason: '', fallbackText: 'Junior Developer', sourceIds: [] } };
+    expect(forbiddenInCv(c, docker)).toEqual([expect.objectContaining({ where: 'headline', status: 'suggested', text: 'Junior Docker Developer' })]);
+  });
+
   it('kategoria prawa jazdy: "kat. B" nie pasuje do zakazanego "kat. C"', () => {
     const c = cv();
     c.skills[0].items.push('Prawo jazdy kat. B');

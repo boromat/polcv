@@ -98,7 +98,7 @@ function textOf(t: CvText, decisions: CvVersion['decisions'], mode: RenderMode):
 export function withoutPending(cv: CvVersion): CvVersion {
   const decisions = { ...cv.decisions };
   const c = cv.content;
-  for (const t of [c.summary, ...c.experience.flatMap((e) => e.bullets), ...c.projects.flatMap((p) => p.bullets)]) {
+  for (const t of [...(c.headlineSuggestion ? [c.headlineSuggestion] : []), c.summary, ...c.experience.flatMap((e) => e.bullets), ...c.projects.flatMap((p) => p.bullets)]) {
     if (t.status === 'suggested' && !decisions[t.id]) decisions[t.id] = 'rejected';
   }
   return { ...cv, decisions };
@@ -244,6 +244,14 @@ window.__cvFit=function(){
 <body><div class="sheet">${body}</div>${fitter}${guide}</body></html>`;
 }
 
+/** Tytuł jako HTML: sugestia tytułu jak każda inna (w podglądzie na żółto), bez niej zwykły tekst. */
+function headlineHtml(c: CvContent, decisions: CvVersion['decisions'], mode: RenderMode): string {
+  const s = c.headlineSuggestion;
+  if (!s) return esc(cleanHeadline(c.headline));
+  return textOf({ ...s, text: cleanHeadline(s.text), fallbackText: cleanHeadline(s.fallbackText) }, decisions, mode) ?? '';
+}
+
+/** `headline`: gotowy HTML (zob. headlineHtml). */
 function headerHtml(profile: Profile, headline: string, photoDataUri: string | null): string {
   const c = profile.contact;
   const parts = [
@@ -254,7 +262,7 @@ function headerHtml(profile: Profile, headline: string, photoDataUri: string | n
   ].filter(Boolean);
   return `<header class="cv-header"><div class="id">
 <h1 class="name">${esc(c.fullName || profile.displayName)}</h1>
-${headline ? `<div class="headline">${esc(headline)}</div>` : ''}
+${headline ? `<div class="headline">${headline}</div>` : ''}
 <div class="contact">${parts.join('<span class="sep">|</span>')}</div>
 </div>${photoDataUri ? `<img class="photo" src="${photoDataUri}" alt="">` : ''}</header>`;
 }
@@ -339,7 +347,7 @@ export function renderCvHtml(cv: CvVersion, profile: Profile, photo: string | nu
   // Sekcje spoza sectionOrder (np. dodane ręcznie) dokładamy na końcu, żeby nic nie zginęło.
   const order = [...new Set([...c.sectionOrder, ...ALL_SECTIONS])];
   const body = [
-    headerHtml(profile, cleanHeadline(c.headline), cv.photo ? photo : null),
+    headerHtml(profile, headlineHtml(c, cv.decisions, mode), cv.photo ? photo : null),
     ...order.map((k) => sectionHtml(k, c, cv.decisions, mode)),
     cv.rodo.include && cv.rodo.text ? `<div class="rodo">${esc(cv.rodo.text)}</div>` : '',
   ].join('\n');

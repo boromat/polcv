@@ -156,6 +156,9 @@ export function keepUntouched(applied: CvContent, checked: CvContent, touched: S
   const pick = (t: CvText) => (touched.has(t.id) ? (byId.get(t.id) ?? t) : t);
   return {
     ...applied,
+    // Tytuł po kontroli: zmieniony przez AI i niepotwierdzony wraca jako sugestia, niezmieniony zostaje jak był.
+    headline: checked.headline,
+    headlineSuggestion: checked.headlineSuggestion,
     summary: pick(applied.summary),
     experience: applied.experience.map((x) => ({ ...x, bullets: x.bullets.map(pick) })),
     projects: applied.projects.map((x) => ({ ...x, bullets: x.bullets.map(pick) })),

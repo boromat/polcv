@@ -39,7 +39,9 @@ What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish applicat
 2. **Asks about the gaps** between the posting and your profile, and remembers your answers for
    the next CV.
 3. **Writes the CV without inventing anything.** Every line points at a fact in your profile;
-   bolder wording is marked yellow and needs your approval before the PDF can be exported.
+   bolder wording is marked yellow and needs your approval before the PDF can be exported. So does a
+   title copied from the posting that names something your profile does not confirm ("Junior Java
+   Developer" without Java).
 4. **Scores it 0-100:** keywords (40 pts, computed locally with Polish inflection and synonyms),
    ATS readability (20 pts, checked on text extracted back from the generated PDF) and an AI
    recruiter review (40 pts) with concrete fixes - plus an *Improve automatically* button. Click a

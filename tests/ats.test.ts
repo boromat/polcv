@@ -17,7 +17,7 @@ import { toStrictJsonSchema } from '../server/llm/openrouter';
 import { CvContentSchema, type AiReview, type AtsReport, type CvContent, type Keyword } from '../shared/schemas';
 import { checkFormat, FORMAT_MAX, withoutClause } from '../server/ats/formatChecks';
 import { aiScore, buildReport, honestReport } from '../server/ats/score';
-import { shortCompany } from '../server/services';
+import { pendingSuggestions, shortCompany } from '../server/services';
 import { blankContent, cv, posting, profile, review } from './fixtures';
 
 const fact = (text: string, id = 'x') => ({ id, text, status: 'fact' as const, reason: '', fallbackText: '', sourceIds: [] });
@@ -456,6 +456,19 @@ describe('render do oceny', () => {
     expect(cleanHeadline(raw)).toBe(clean);
   });
 
+  it('sugestia tytułu: w podglądzie na żółto, do oceny wersja bezpieczna, po decyzji tytuł z wybranej wersji', () => {
+    const suggestion = { id: 'headline', text: 'Junior Java Developer (K/M)', status: 'suggested' as const, reason: 'Profil nie potwierdza: Java.', fallbackText: 'Junior Developer', sourceIds: [] };
+    const withTitle = { ...cv, content: { ...cv.content, headline: 'Junior Developer', headlineSuggestion: suggestion } };
+    expect(renderCvHtml(withTitle, profile, null, 'preview')).toContain('<div class="headline"><mark class="suggested" data-id="headline">Junior Java Developer</mark></div>');
+    expect(renderCvHtml(withTitle, profile, null, 'ats')).toContain('<div class="headline">Junior Developer</div>');
+    expect(pendingSuggestions(withTitle)).toBe(pendingSuggestions(cv) + 1);
+    expect(applyDecisions(withoutPending(withTitle))).toMatchObject({ headline: 'Junior Developer', headlineSuggestion: undefined });
+    expect(applyDecisions({ ...withTitle, decisions: { headline: 'accepted' } })).toMatchObject({ headline: 'Junior Java Developer (K/M)', headlineSuggestion: undefined });
+    // Bez wersji bezpiecznej i po odrzuceniu: CV bez tytułu pod nazwiskiem.
+    const noSafe = { ...withTitle, content: { ...withTitle.content, headline: '', headlineSuggestion: { ...suggestion, fallbackText: '' } } };
+    expect(renderCvHtml(noSafe, profile, null, 'ats')).not.toContain('class="headline"');
+  });
+
   it('nagłówek w PDF bez oznaczenia płci', () => {
     const html = renderCvHtml({ ...cv, content: { ...cv.content, headline: 'Specjalista ds. Marketingu (K/M)' } }, profile, null, 'pdf');
     expect(html).toContain('Specjalista ds. Marketingu</div>');
@@ -476,5 +489,7 @@ describe('sugestie i schemat', () => {
     expect(s.additionalProperties).toBe(false);
     expect(s.required).toEqual(Object.keys(s.properties));
     expect(s.properties.experience.items.properties.bullets.items.additionalProperties).toBe(false);
+    // Sugestię tytułu dopisuje program, nie model: schemat odpowiedzi jej nie ma.
+    expect(s.properties.headlineSuggestion).toBeUndefined();
   });
 });

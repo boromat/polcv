@@ -122,6 +122,7 @@ export const EN: Record<string, string> = {
 
   // llm/prompts/cvChecks.ts
   'Liczba spoza profilu ({numbers}) - potwierdź albo odrzuć.': 'A number that is not in your profile ({numbers}). Confirm or reject it.',
+  'Tytuł z ogłoszenia, a profil nie potwierdza: {names}. Zostaw go tylko, jeśli to prawda.': 'The title comes from the posting, and your profile does not confirm: {names}. Keep it only if it is true.',
 
   // llm/prompts/improvePlan.ts: co kandydat może dopisać w profilu
   '„{term}” (wymagane w ogłoszeniu): jeśli to znasz, dopisz w profilu, gdzie i jak tego używasz.':

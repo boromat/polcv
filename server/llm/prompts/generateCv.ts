@@ -43,7 +43,7 @@ export async function generateCv(
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nNapisz CV (language="${lang}").`,
     ctx,
   });
-  return groundCv(content, profile, { lang, confirmed, names: numberedNames(posting) });
+  return groundCv(content, profile, { lang, confirmed, names: numberedNames(posting), keywords: posting.keywords });
 }
 
 const IMPROVE_EXTRA = () => `
@@ -88,7 +88,7 @@ export async function improveCv(
   });
   const applied = applyEdits(current, edits, allowed, freshId);
   // Liczby z punktów, które kandydat już zaakceptował, są potwierdzone; sprawdzamy tylko teksty, które AI zmieniło.
-  const checked = groundCv(applied.content, profile, { lang, confirmed: factTexts(current), names: numberedNames(posting) });
+  const checked = groundCv(applied.content, profile, { lang, confirmed: factTexts(current), names: numberedNames(posting), keywords: posting.keywords, current });
   return { content: keepUntouched(applied.content, checked, applied.touched), changes: applied.changes, notes: edits.notes.trim() };
 }
 
@@ -116,7 +116,7 @@ export async function syncCv(profile: Profile, posting: JobPosting, current: CvC
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nOBECNE CV:\n${json(current)}\n\nNOWE W PROFILU:\n${json(news)}\n\nZwróć CV uzupełnione o trafne nowości z profilu.`,
     ctx,
   });
-  return groundCv(content, profile, { lang, confirmed: factTexts(current), names: numberedNames(posting) });
+  return groundCv(content, profile, { lang, confirmed: factTexts(current), names: numberedNames(posting), keywords: posting.keywords, current });
 }
 
 const INSTRUCT_EXTRA = () => `
@@ -141,7 +141,7 @@ export async function instructCv(profile: Profile, posting: JobPosting, current:
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nOBECNE CV:\n${json(current)}\n\nPOLECENIE:\n"""\n${instruction}\n"""`,
     ctx,
   });
-  return groundCv(content, profile, { lang, confirmed: factTexts(current), names: numberedNames(posting) });
+  return groundCv(content, profile, { lang, confirmed: factTexts(current), names: numberedNames(posting), keywords: posting.keywords, current });
 }
 
 const SHORTEN_EXTRA = (cut: number) => `
@@ -174,5 +174,5 @@ export async function shortenCv(
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nOBECNE CV:\n${json(current)}\n\nSkróć CV, żeby zmieściło się na jednej stronie.`,
     ctx,
   });
-  return groundCv(content, profile, { lang, confirmed: [...confirmed, ...factTexts(current)], names: numberedNames(posting) });
+  return groundCv(content, profile, { lang, confirmed: [...confirmed, ...factTexts(current)], names: numberedNames(posting), keywords: posting.keywords, current });
 }

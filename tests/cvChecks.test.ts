@@ -12,10 +12,12 @@ import {
   lostKeywordIssues,
   numberFinder,
   rejectedSkillItems,
+  safeHeadline,
   skillIssues,
   sourceIssues,
   styleIssues,
   summaryPersonIssues,
+  unconfirmedHeadlineNames,
   unverifiedSkillItems,
   withoutNumbers,
 } from '../server/llm/prompts/cvChecks';
@@ -234,6 +236,66 @@ describe('umiejętności spoza profilu', () => {
     expect(r.success).toBe(false);
     expect(r.error!.issues.map((i) => i.message).join('\n')).toContain('„Power BI”');
     expect(skillIssues(added, profile, [], ['Canva', 'Tableau', 'Power BI'])).toEqual([]);
+  });
+});
+
+describe('tytuł CV', () => {
+  // Jak pary 15 i 18 z evals/: kandydat bez Javy i kierowca z kat. B.
+  const java: Keyword = { term: 'Java 17', synonyms: ['Java', 'JDK 17'], importance: 'must', category: 'umiejętność' };
+  const python: Profile = { ...profile, headline: 'Junior Python Developer', skills: [{ id: 's1', name: 'Python', category: 'techniczne', level: '' }], extraFacts: [] };
+  const ce: Keyword = { term: 'prawo jazdy kat. C+E', synonyms: ['C+E', 'kategoria C+E', 'prawo jazdy C+E'], importance: 'must', category: 'certyfikat' };
+  const driving: Keyword = { term: 'doświadczenie kierowcy', synonyms: ['kierowca zawodowy'], importance: 'must', category: 'umiejętność' };
+  const courier: Profile = { ...profile, headline: 'Kurier', skills: [{ id: 's1', name: 'Prawo jazdy kat. B', category: 'inne', level: '' }], extraFacts: [] };
+
+  it('nazwa z ogłoszenia, której profil nie ma, i kategoria prawa jazdy to twierdzenie o kandydacie', () => {
+    expect(unconfirmedHeadlineNames('Junior Java Developer', python, [java])).toEqual(['Java']);
+    expect(unconfirmedHeadlineNames('Kierowca zawodowy kat. C+E', courier, [ce, driving])).toEqual(['kat. C+E']);
+    expect(unconfirmedHeadlineNames('Kierowca kat. C', courier)).toEqual(['kat. C']);
+    expect(unconfirmedHeadlineNames('Kierowca kat. B', courier)).toEqual([]);
+    expect(unconfirmedHeadlineNames('Junior Python Developer', python, [java])).toEqual([]);
+    // Odpowiedź "mam" potwierdza tak samo jak profil.
+    const withJava = { ...python, extraFacts: [{ id: 'x1', topic: 'Java', has: true, answer: 'Kurs Javy i projekt na zaliczenie', source: '', date: '2026-11-01' }] };
+    expect(unconfirmedHeadlineNames('Junior Java Developer', withJava, [java])).toEqual([]);
+  });
+
+  it('słowa o samym stanowisku nie są twierdzeniem: zostają bez sugestii', () => {
+    const role: Keyword = { term: 'Logistics Coordinator', synonyms: [], importance: 'must', category: 'inne' };
+    expect(unconfirmedHeadlineNames('Junior Logistics Coordinator', python, [role, driving])).toEqual([]);
+    expect(unconfirmedHeadlineNames('Kierowca zawodowy w transporcie krajowym', courier, [driving])).toEqual([]);
+    expect(unconfirmedHeadlineNames('Specjalista ds. HR', python)).toEqual([]);
+  });
+
+  it('wersja bezpieczna: bez niepotwierdzonej nazwy, a gdy zostaje jedno słowo, tytuł z profilu', () => {
+    expect(safeHeadline('Junior Java Developer', ['Java'], python, 'pl', [java])).toBe('Junior Developer');
+    expect(safeHeadline('Kierowca zawodowy kat. C+E', ['kat. C+E'], courier, 'pl', [ce])).toBe('Kierowca zawodowy');
+    expect(safeHeadline('Kierowca zestawu ciągnik siodłowy z naczepą (kat. C+E)', ['kat. C+E'], courier, 'pl', [ce])).toBe('Kierowca zestawu ciągnik siodłowy z naczepą');
+    expect(safeHeadline('Java Developer', ['Java'], python, 'pl', [java])).toBe('Junior Python Developer');
+    // CV po angielsku nie dostaje polskiego tytułu z profilu.
+    expect(safeHeadline('Java Developer', ['Java'], { ...python, headline: 'Młodszy programista' }, 'en', [java])).toBe('Developer');
+  });
+
+  it('groundCv: niepotwierdzony tytuł staje się żółtą sugestią, a w CV zostaje wersja bezpieczna', () => {
+    const c = groundCv(cv({ headline: 'Junior Java Developer' }), python, { lang: 'pl', keywords: [java] });
+    expect(c.headline).toBe('Junior Developer');
+    expect(c.headlineSuggestion).toMatchObject({ id: 'headline', text: 'Junior Java Developer', status: 'suggested', fallbackText: 'Junior Developer' });
+    expect(c.headlineSuggestion!.reason).toContain('Java');
+    expect(groundCv(cv({ headline: 'Junior Python Developer' }), python, { lang: 'pl', keywords: [java] }).headlineSuggestion).toBeUndefined();
+  });
+
+  it('przy poprawie: niezmieniony tytuł zostaje z sugestią, przepisana sugestia nie przechodzi po cichu, nowy tytuł jest sprawdzany', () => {
+    const current = groundCv(cv({ headline: 'Junior Java Developer' }), python, { lang: 'pl', keywords: [java] });
+    const opts = { lang: 'pl' as const, keywords: [java], current };
+    const same = groundCv(cv({ headline: current.headline }), python, opts);
+    expect(same.headlineSuggestion).toEqual(current.headlineSuggestion);
+    const copied = groundCv(cv({ headline: 'Junior Java Developer' }), python, opts);
+    expect(copied.headline).toBe('Junior Developer');
+    expect(copied.headlineSuggestion).toEqual(current.headlineSuggestion);
+    const changed = groundCv(cv({ headline: 'Junior Backend Developer (Python)' }), python, opts);
+    expect(changed.headline).toBe('Junior Backend Developer (Python)');
+    expect(changed.headlineSuggestion).toBeUndefined();
+    // Tytuł zaakceptowany przez kandydata (bez sugestii) nie wraca jako sugestia przy kolejnej poprawie.
+    const accepted = { ...current, headline: 'Junior Java Developer', headlineSuggestion: undefined };
+    expect(groundCv(cv({ headline: 'Junior Java Developer' }), python, { ...opts, current: accepted }).headlineSuggestion).toBeUndefined();
   });
 });
 

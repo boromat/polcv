@@ -218,7 +218,8 @@ async function runCase(c: EvalCase, opts: EvalOptions, attempts: Map<string, Cal
   }
   if (!cv) return { result: base, parseCost };
 
-  const texts: CvText[] = [cv.content.summary, ...cv.content.experience.flatMap((e) => e.bullets), ...cv.content.projects.flatMap((p) => p.bullets)];
+  const out = cv.content;
+  const texts: CvText[] = [...(out.headlineSuggestion ? [out.headlineSuggestion] : []), out.summary, ...out.experience.flatMap((e) => e.bullets), ...out.projects.flatMap((p) => p.bullets)];
   const kw = scoreKeywords(applyDecisions(withoutPending(cv)), posting.keywords);
   const { pages } = await htmlToPdf(renderCvHtml(cv, profile, null, 'pdf'));
   return {

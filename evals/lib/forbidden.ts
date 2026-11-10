@@ -33,7 +33,9 @@ const textPiece = (where: string, t: CvText): Piece[] =>
 function cvPieces(c: CvContent): Piece[] {
   const fact = (where: string, text: string): Piece => ({ where, status: 'fact', text });
   return [
+    // Tytuł w CV to wersja bezpieczna; tytuł z ogłoszenia, którego profil nie potwierdza, czeka w sugestii.
     fact('headline', c.headline),
+    ...(c.headlineSuggestion ? [{ where: 'headline', status: 'suggested' as const, text: c.headlineSuggestion.text }] : []),
     ...textPiece('summary', c.summary),
     ...c.experience.flatMap((e) => [fact('experience', `${e.role} ${e.company}`), ...e.bullets.flatMap((b) => textPiece('bullet', b))]),
     ...c.projects.flatMap((p) => [fact('projects', `${p.name} ${p.role}`), ...p.technologies.map((t) => fact('technologies', t)), ...p.bullets.flatMap((b) => textPiece('bullet', b))]),

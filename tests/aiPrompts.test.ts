@@ -223,6 +223,28 @@ describe('pisanie i poprawa CV', () => {
     expect(cv.experience[0].bullets[0].text).toBe('Raporty z kampanii marketingowych');
   });
 
+  const withGa4: JobPosting = { ...posting, keywords: [{ term: 'Google Analytics 4', synonyms: ['GA4'], importance: 'must', category: 'narzędzie' }] };
+
+  it('tytuł z ogłoszenia z narzędziem, którego profil nie ma: w CV wersja bezpieczna, a tytuł z ogłoszenia czeka w sugestii', async () => {
+    replies = [{ content: JSON.stringify({ ...content(['Przygotowywanie raportów z kampanii']), headline: 'Specjalista ds. marketingu z GA4' }) }];
+    const cv = await generateCv(profile, withGa4, 'pl', ctx);
+    expect(cv.headline).toBe('Specjalista ds. marketingu');
+    expect(cv.headlineSuggestion).toMatchObject({ text: 'Specjalista ds. marketingu z GA4', status: 'suggested', fallbackText: 'Specjalista ds. marketingu' });
+  });
+
+  it('przy poprawie: tytuł zmieniony przez AI jest sprawdzany, a niezmieniony zostaje z sugestią czekającą na decyzję', async () => {
+    const pending = { id: 'headline', text: 'Specjalista ds. marketingu z GA4', status: 'suggested' as const, reason: 'x', fallbackText: 'Specjalista ds. marketingu', sourceIds: [] };
+    const current = { ...content(['Przygotowywanie raportów z kampanii']), headline: 'Specjalista ds. marketingu', headlineSuggestion: pending };
+    const plan = { ...improvePlan(report(), profile, withGa4, current), criteria: [clarity] };
+    replies = [edits([{ item: 'crit:clarity', action: 'replace', target: 'b1', text: 'Raporty z kampanii' }])];
+    const kept = await improveCv(profile, withGa4, current, plan, ctx, freshId);
+    expect(kept.content).toMatchObject({ headline: 'Specjalista ds. marketingu', headlineSuggestion: pending });
+    replies = [edits([{ item: 'crit:clarity', action: 'replace', target: 'headline', text: 'Analityk Google Analytics 4' }])];
+    const changed = await improveCv(profile, withGa4, current, plan, ctx, freshId);
+    expect(changed.content.headlineSuggestion).toMatchObject({ text: 'Analityk Google Analytics 4', status: 'suggested' });
+    expect(changed.content.headline).not.toContain('Google Analytics');
+  });
+
   it('instrukcja podsumowania: z zaimkami czas przeszły w formie kandydata, bez nich bez czasu przeszłego z rodzajem', async () => {
     const written = JSON.stringify(content(['Przygotowywanie raportów']));
     replies = [{ content: written }, { content: written }];

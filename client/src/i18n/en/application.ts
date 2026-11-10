@@ -72,6 +72,7 @@ export const application: Record<string, string> = {
   'Dlaczego do sprawdzenia:': 'Why it needs checking:',
   'Bezpieczna wersja:': 'Safe version:',
   'usunięcie tego punktu': 'remove this bullet',
+  'CV bez tytułu pod nazwiskiem': 'no title under your name',
   'To prawda - zostaw': "It's true, keep it",
   'Użyj bezpiecznej wersji': 'Use the safe version',
   'Usuń punkt': 'Remove bullet',

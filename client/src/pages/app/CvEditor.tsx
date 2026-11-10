@@ -24,20 +24,24 @@ function resolveText(item: CvText, d: Decision): CvText | null {
 function withDecisions(c: CvContent, decisions: CvVersion['decisions']): CvContent {
   const r = (x: CvText) => (x.status === 'suggested' && decisions[x.id] ? resolveText(x, decisions[x.id]) : x);
   const keep = (items: CvText[]) => items.map(r).filter((x): x is CvText => x !== null);
+  // Sugestia tytułu: zaakceptowana staje się tytułem, odrzucona znika (tytuł ma już wersję bezpieczną).
+  const hs = c.headlineSuggestion;
+  const hd = hs && decisions[hs.id];
   return {
     ...c,
+    ...(hs && hd ? { headline: hd === 'accepted' ? hs.text : hs.fallbackText, headlineSuggestion: undefined } : {}),
     summary: r(c.summary) ?? { ...c.summary, text: '', status: 'fact', reason: '', fallbackText: '' },
     experience: c.experience.map((e) => ({ ...e, bullets: keep(e.bullets) })),
     projects: c.projects.map((p) => ({ ...p, bullets: keep(p.bullets) })),
   };
 }
 
-const allTexts = (c: CvContent) => [c.summary, ...c.experience.flatMap((e) => e.bullets), ...c.projects.flatMap((p) => p.bullets)];
+const allTexts = (c: CvContent) => [...(c.headlineSuggestion ? [c.headlineSuggestion] : []), c.summary, ...c.experience.flatMap((e) => e.bullets), ...c.projects.flatMap((p) => p.bullets)];
 
 /** Liczba sugestii bez decyzji - to samo liczy serwer (pendingSuggestions). */
 export const pendingCount = (cv: Pick<CvVersion, 'content' | 'decisions'>) => allTexts(cv.content).filter((x) => x.status === 'suggested' && !cv.decisions[x.id]).length;
 
-function Suggestion({ item, focus, onDecide }: { item: CvText; focus: boolean; onDecide: (d: 'accepted' | 'rejected') => void }) {
+function Suggestion({ item, focus, onDecide, isHeadline = false }: { item: CvText; focus: boolean; onDecide: (d: 'accepted' | 'rejected') => void; isHeadline?: boolean }) {
   const { t } = useT();
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -50,7 +54,7 @@ function Suggestion({ item, focus, onDecide }: { item: CvText; focus: boolean; o
         <b>{t('Dlaczego do sprawdzenia:')}</b> {item.reason}
       </div>
       <div className="alt">
-        {t('Bezpieczna wersja:')} {item.fallbackText ? t('„{text}”', { text: item.fallbackText }) : <i>{t('usunięcie tego punktu')}</i>}
+        {t('Bezpieczna wersja:')} {item.fallbackText ? t('„{text}”', { text: item.fallbackText }) : <i>{isHeadline ? t('CV bez tytułu pod nazwiskiem') : t('usunięcie tego punktu')}</i>}
       </div>
       <div className="row">
         <button className="btn sm primary" onClick={() => onDecide('accepted')}>
@@ -153,7 +157,7 @@ export function CvEditor({
             </p>
           </div>
           {pending.map((s) => (
-            <Suggestion key={s.id} item={s} focus={focusId === s.id} onDecide={(d) => decide(s.id, d)} />
+            <Suggestion key={s.id} item={s} focus={focusId === s.id} onDecide={(d) => decide(s.id, d)} isHeadline={s === c.headlineSuggestion} />
           ))}
         </div>
       )}
@@ -199,7 +203,8 @@ export function CvEditor({
 
       <Section title={t('Nagłówek i podsumowanie')}>
         <Field label={t('Stanowisko pod nazwiskiem')}>
-          <LazyText value={c.headline} onCommit={(headline) => setC({ headline })} />
+          {/* Ręczna zmiana tytułu = kandydat bierze go na siebie: sugestia tytułu znika. */}
+          <LazyText value={c.headline} onCommit={(headline) => setC({ headline, headlineSuggestion: undefined })} />
         </Field>
         <Field label={t('Podsumowanie')}>
           <LazyText multiline rows={4} value={c.summary.text} onCommit={(text) => setC({ summary: { ...c.summary, text, status: 'fact', reason: '', fallbackText: '' } })} />
