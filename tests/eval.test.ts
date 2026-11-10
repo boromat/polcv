@@ -31,30 +31,36 @@ describe('npm run eval na atrapie modelu', () => {
     const frozen = path.join(cases[0].dir, 'posting.parsed.json');
     const frozenBefore = fs.existsSync(frozen) ? fs.readFileSync(frozen, 'utf8') : null;
     const marketing = cases[0].profile.contact.fullName;
-    vi.stubGlobal('fetch', mockFetch({ invalidFirst: [marketing], extraSkills: { [marketing]: ['Google Ads'] } }));
+    // Pierwsza odpowiedź: pozycja i umiejętność spoza profilu (kontrola odrzuca); w każdej: punkt z zakazanym faktem
+    // (punktów doświadczenia ta kontrola nie sprawdza, więc przechodzi i ma go wyłapać ewaluacja).
+    vi.stubGlobal(
+      'fetch',
+      mockFetch({ invalidFirst: [marketing], extraSkillsFirst: { [marketing]: ['Google Ads'] }, extraBullet: { [marketing]: 'Prowadzenie kampanii Google Ads' } }),
+    );
     const outDir = path.join(dir, 'results');
     const { result, files } = await runEval({ model: 'mock/model', fastModel: 'mock/fast', cases, outDir, concurrency: 2, mock: true });
 
     const [first, second] = result.cases;
-    expect(first).toMatchObject({ id: '01-marketing-studentka', ok: true, acceptedAt: 2, attempts: 2, rejected: { unsourced: 1, format: 0 }, pages: 1, language: 'pl' });
+    expect(first).toMatchObject({ id: '01-marketing-studentka', ok: true, acceptedAt: 2, attempts: 2, rejected: { unsourced: 1, skills: 1, format: 0 }, pages: 1, language: 'pl' });
     expect(second).toMatchObject({ id: '16-pulapka-bez-liczb', ok: true, acceptedAt: 1, attempts: 1, pages: 1 });
     // Atrapa wpisuje liczbę spoza profilu: kontrola zamienia ją w żółtą sugestię.
     expect(first.numbersFlagged).toBe(1);
     expect(second.numbersFlagged).toBe(1);
     expect(first.keywordCoverage).toBeGreaterThan(0);
     expect(first.keywordsTotal).toBe(fixtures.posting.keywords.length);
-    // "Google Ads" wpisane przez atrapę do umiejętności: zakazany fakt, który przeszedł.
-    expect(first.forbidden).toEqual([expect.objectContaining({ term: 'Google Ads', status: 'fact', where: 'skills' })]);
+    // "Google Ads" w punkcie doświadczenia: zakazany fakt, który przeszedł; z umiejętności kontrola go usunęła.
+    expect(first.forbidden).toEqual([expect.objectContaining({ term: 'Google Ads', status: 'fact', where: 'bullet' })]);
     expect(second.forbiddenChecked).toBe(false);
     expect(first.costUsd).toBeCloseTo(0.002);
     expect(first.seconds).toBeGreaterThan(0);
 
-    expect(result.summary).toMatchObject({ cases: 2, generated: 2, acceptedFirst: 0.5, acceptedSecond: 0.5, acceptedThird: 0, failed: 0, unsourcedCaught: 1, onePage: 1, forbiddenAsFact: 1 });
+    expect(result.summary).toMatchObject({ cases: 2, generated: 2, acceptedFirst: 0.5, acceptedSecond: 0.5, acceptedThird: 0, failed: 0, unsourcedCaught: 1, skillsCaught: 1, onePage: 1, forbiddenAsFact: 1 });
     expect(files.map((f) => path.basename(f))).toEqual([`${result.date}_mock_model.json`, `${result.date}_mock_model.md`]);
     expect(JSON.parse(fs.readFileSync(files[0], 'utf8')).summary.cases).toBe(2);
     const md = fs.readFileSync(files[1], 'utf8');
     expect(md).toContain('| CV przyjęte w 1. / 2. / 3. podejściu | 50% / 50% / 0% |');
-    expect(md).toContain('Google Ads (fakt, skills)');
+    expect(md).toContain('Google Ads (fakt, bullet)');
+    expect(md).toContain('| 01-marketing-studentka | 2 | 1 / 1 / 0 / 0 / 0 |');
     expect(comparisonMarkdown([result, { ...result, model: 'inny/model' }])).toContain('| Miara | `mock/model` | `inny/model` |');
     // Drugi przebieg tego samego dnia z opisem nie nadpisuje pierwszego.
     const again = await runEval({ model: 'mock/model', fastModel: 'mock/fast', cases: cases.slice(1), outDir, mock: true, label: 'po-poprawce' });

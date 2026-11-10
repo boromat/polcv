@@ -11,9 +11,11 @@ import {
   knownNumbers,
   lostKeywordIssues,
   numberFinder,
+  skillIssues,
   sourceIssues,
   styleIssues,
   summaryPersonIssues,
+  unverifiedSkillItems,
   withoutNumbers,
 } from '../server/llm/prompts/cvChecks';
 import { withLang } from '../server/i18n';
@@ -156,6 +158,49 @@ describe('podsumowanie pisane przez kandydata', () => {
     c.summary = { ...c.summary, text: 'Zna Excel i tworzy raporty.', status: 'suggested', fallbackText: 'Posiada wiedzę o Excelu.' };
     expect(styleIssues(c, 'pl').map((i) => i.path.join('.'))).toEqual(['summary.text', 'summary.fallbackText']);
     expect(styleIssues(c, 'en')).toEqual([]);
+  });
+});
+
+describe('umiejętności spoza profilu', () => {
+  const react: Keyword = { term: 'React', synonyms: ['ReactJS'], importance: 'must', category: 'narzędzie' };
+
+  const java: Keyword = { term: 'Java', synonyms: ['Java 17'], importance: 'must', category: 'umiejętność' };
+
+  it('lista umiejętności: tylko z profilu albo z odpowiedzi "mam"; dopisek w nawiasie nie ratuje', () => {
+    const c = cv({ skills: [{ category: 'Narzędzia', items: ['Google Analytics 4', 'Canva', 'Google Ads', 'SQL', 'Java (w nauce)'] }] });
+    // Google Ads potwierdza odpowiedź "mam", SQL ma odpowiedź "nie mam".
+    expect(unverifiedSkillItems(c, profile)).toEqual(['SQL', 'Java (w nauce)']);
+    const r = checkedCvSchema(profile, 'pl', [java]).safeParse(c);
+    expect(r.success).toBe(false);
+    expect(r.error!.issues.map((i) => i.message).join('\n')).toContain('Umiejętności spoza profilu: „SQL”, „Java (w nauce)”');
+    expect(checkedCvSchema(profile, 'pl').safeParse(cv({ skills: [{ category: 'Narzędzia', items: ['Google Analytics 4', 'Canva'] }] })).success).toBe(true);
+  });
+
+  it('do poprawki wracają tylko konkretne nazwy; przeformułowaną cechę pokazuje samo ostrzeżenie w edytorze', () => {
+    const c = cv({ skills: [{ category: 'Kompetencje', items: ['Współpraca zespołowa', 'Java'] }] });
+    expect(unverifiedSkillItems(c, profile, [java])).toEqual(['Współpraca zespołowa', 'Java']);
+    // "Java" jest wymagana w ogłoszeniu, więc to konkretne twierdzenie; bez ogłoszenia to zwykłe słowo.
+    expect(skillIssues(c, profile, [java]).map((i) => i.message).join('')).toContain('„Java”');
+    expect(skillIssues(c, profile, [java]).map((i) => i.message).join('')).not.toContain('Współpraca');
+    expect(skillIssues(c, profile)).toEqual([]);
+  });
+
+  it('CV po angielsku z polskiego profilu: narzędzia z ogłoszenia i nazwy techniczne tak, zwykłe słowa (tłumaczenia) nie', () => {
+    const c = cv({ language: 'en', skills: [{ category: 'Skills', items: ['React', 'TypeScript', 'Teamwork', 'Canva'] }] });
+    expect(unverifiedSkillItems(c, profile, [react])).toEqual(['React', 'TypeScript']);
+    // Bez słowa kluczowego z ogłoszenia "React" wygląda jak zwykłe słowo: jak dotąd go nie ruszamy.
+    expect(unverifiedSkillItems(c, profile)).toEqual(['TypeScript']);
+  });
+
+  it('przy poprawie umiejętność, którą CV już miało, zostaje; nowa spoza profilu wraca do modelu', () => {
+    const current = cv({ skills: [{ category: 'Narzędzia', items: ['Canva', 'Tableau'] }] });
+    const schema = checkedImproveSchema(profile, 'pl', current, []);
+    expect(schema.safeParse(current).success).toBe(true);
+    const added = cv({ skills: [{ category: 'Narzędzia', items: ['Canva', 'Tableau', 'Power BI'] }] });
+    const r = schema.safeParse(added);
+    expect(r.success).toBe(false);
+    expect(r.error!.issues.map((i) => i.message).join('\n')).toContain('„Power BI”');
+    expect(skillIssues(added, profile, [], ['Canva', 'Tableau', 'Power BI'])).toEqual([]);
   });
 });
 

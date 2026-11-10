@@ -15,14 +15,14 @@ import { unifyDates } from './cv/improveEdits';
 import { evaluateCv } from './llm/prompts/evaluateCv';
 import { courseAdvice, coverLetter, interviewPrep } from './llm/prompts/extras';
 import { applyDecisions } from './llm/prompts/common';
-import { factTexts } from './llm/prompts/cvChecks';
-import { factEvidence, hasWork, improveOptions, improvePlan, selectPlan } from './llm/prompts/improvePlan';
+import { factTexts, unverifiedSkillItems } from './llm/prompts/cvChecks';
+import { hasWork, improveOptions, improvePlan, selectPlan } from './llm/prompts/improvePlan';
 import { decideLanguage, decidePhoto, decideRodo } from './cv/rodo';
 import { photoDataUri, renderCvHtml, renderLetterHtml, withoutPending, type RenderMode } from './cv/render';
 import { htmlToPdf } from './cv/pdf';
 import { syncCvEdit } from './cv/profileSync';
 import { buildReport, honestReport, notWorse } from './ats/score';
-import { aliasVariants, countPhrase, looksPolish, normalize, tokenize } from './ats/keywords';
+import { normalize } from './ats/keywords';
 import { fetchGithub, githubProject, knownRepo, mergeGithubProjects, parseGithubUser, type GithubMerge } from './cv/github';
 import { describeGithubRepos, profileLanguage } from './llm/prompts/githubProjects';
 import { tr, withLang } from './i18n';
@@ -475,42 +475,11 @@ export async function improve(profileId: string, appId: string, items: string[])
 }
 
 /**
- * Umiejętności z CV, których nie da się znaleźć w profilu - ostrzeżenie dla kandydata. Odpowiedniki się liczą:
- * aliasy ("VLOOKUP" = "WYSZUKAJ.PIONOWO", "Microsoft Excel" = "MS Excel") oraz term i synonimy słowa kluczowego ogłoszenia.
+ * Umiejętności z CV, których nie da się znaleźć w profilu - ostrzeżenie dla kandydata w edytorze (ta sama reguła,
+ * co przy generowaniu: unverifiedSkillItems w cvChecks.ts).
  */
 export function unverifiedSkills(cv: CvVersion, profile: Profile, posting: JobPosting | null = null): string[] {
-  const facts = profile.extraFacts.filter((f) => f.has).map(factEvidence);
-  const source = [
-    ...profile.skills.map((s) => s.name),
-    ...profile.experience.flatMap((e) => [e.role, e.description, ...e.achievements]),
-    ...profile.projects.flatMap((p) => [p.name, p.description, ...p.technologies, ...p.achievements]),
-    ...profile.education.flatMap((e) => [e.field, e.details]),
-    ...profile.certificates.map((c) => `${c.name} ${c.issuer}`),
-    ...profile.languages.map((l) => l.name),
-    profile.summary,
-    ...facts,
-  ].join(' \n ');
-  const tokens = tokenize(source);
-  // CV po angielsku z polskiego profilu: zwykłe słowa ("Teamwork") są tłumaczeniami, więc
-  // sprawdzamy tylko nazwy techniczne (wielkie litery w środku, cyfry, znaki typu C++/CI/CD).
-  const profileIsPolish = looksPolish(source);
-  const technical = (s: string) => /\d|[+#/.]|\S[A-Z]|\s[A-Z]/.test(s);
-  const keywords = posting?.keywords ?? [];
-  // Pozycja = słowo kluczowe ogłoszenia, gdy to ta sama fraza co jego term albo synonim (w obie strony).
-  const equivalents = (base: string): string[] => {
-    const t = tokenize(base);
-    const same = (v: string) => !!v.trim() && countPhrase(t, v) > 0 && countPhrase(tokenize(v), base) > 0;
-    const fromPosting = keywords.filter((k) => [k.term, ...k.synonyms].some(same)).flatMap((k) => [k.term, ...k.synonyms]);
-    return [...new Set([base, ...fromPosting].flatMap(aliasVariants))];
-  };
-  return cv.content.skills
-    .flatMap((g) => g.items)
-    .filter((item) => {
-      const base = item.replace(/\s*\(.*?\)\s*/g, ' ').trim(); // "Power BI (raporty)" → "Power BI"
-      if (!base) return false;
-      if (cv.content.language === 'en' && profileIsPolish && !technical(base)) return false;
-      return equivalents(base).every((v) => countPhrase(tokens, v) === 0);
-    });
+  return unverifiedSkillItems(cv.content, profile, posting?.keywords ?? []);
 }
 
 export function pendingSuggestions(cv: CvVersion): number {

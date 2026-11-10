@@ -34,7 +34,7 @@ export async function generateCv(
   confirmed: string[] = [],
 ): Promise<CvContent> {
   const content = await callJson({
-    schema: checkedCvSchema(profile, lang),
+    schema: checkedCvSchema(profile, lang, posting.keywords),
     schemaName: 'cv',
     tier: 'main',
     temperature: 0.4,

@@ -127,7 +127,7 @@ Kopia zapasowa = skopiowanie folderu `data`.
 
 ## Jakość generowania
 
-Na 18 fikcyjnych parach profil + ogłoszenie z [`evals/`](evals/README.md) Claude Haiku 5.5 (10.11.2026, po poprawce kontroli podsumowania) napisał CV, które przeszło kontrole, we wszystkich 18 przypadkach, w 17 za pierwszym podejściem. Żadne nie miało pozycji ani liczby spoza profilu, wszystkie zmieściły się na jednej stronie A4, a jedno CV kosztowało ok. $0,002 i powstawało średnio 8 s. W 3 CV model dopisał jednak do umiejętności technologie, których profil nie ma (np. React), a kontrola przy generowaniu jeszcze tego nie łapie. To mały zbiór przygotowany przez autora programu: metody, wyniki dla każdej pary i ograniczenia opisuje [evals/README.md](evals/README.md).
+Na 18 fikcyjnych parach profil + ogłoszenie z [`evals/`](evals/README.md) Claude Haiku 5.5 (10.11.2026, po poprawce kontroli podsumowania) napisał CV, które przeszło kontrole, we wszystkich 18 przypadkach, w 17 za pierwszym podejściem. Żadne nie miało pozycji ani liczby spoza profilu, wszystkie zmieściły się na jednej stronie A4, a jedno CV kosztowało ok. $0,002 i powstawało średnio 8 s. W 3 CV model dopisał jednak do umiejętności technologie, których profil nie ma (np. React). Od tego czasu lista umiejętności też jest sprawdzana przy generowaniu i wraca do modelu, ale efektu tej kontroli ewaluacja jeszcze nie zmierzyła. To mały zbiór przygotowany przez autora programu: metody, wyniki dla każdej pary i ograniczenia opisuje [evals/README.md](evals/README.md).
 
 ## Bezpieczeństwo
 

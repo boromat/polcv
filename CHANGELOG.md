@@ -83,6 +83,14 @@ All notable changes to PolCV are recorded here. The format follows
 
 ### Fixed
 
+- The skills list is now checked against your profile in a new CV, after *Improve automatically* and
+  after the changes you pick from the report. A specific skill the profile does not confirm (a
+  technical name such as "TypeScript" or "Google Ads", or a skill the posting asks for, such as
+  "Java") goes back to the model, also with a note such as "(w nauce)", and missing skills show
+  up in the report instead. Before, only the editor warned about it, and in the quality evaluation
+  Claude Haiku 5.5 added such skills to 3 of 18 CVs. A CV in English made from a Polish profile
+  checks technical names and tools from the posting only, and skills the CV already had, such as
+  ones you added yourself, are kept when it is improved.
 - The CV summary may use the past tense in the candidate's own form when the profile says how they
   refer to themselves, for example "Ukończyłam technikum" for *ona*. The check used to reject every
   gendered past form, which in the quality evaluation made Claude Haiku 5.5 give up on 2 of 18 CVs

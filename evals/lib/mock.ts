@@ -6,8 +6,10 @@ import type { Profile } from '../../shared/schemas';
 export interface MockOptions {
   /** imiona i nazwiska kandydatów, dla których pierwsza odpowiedź ma pozycję spoza profilu (do sprawdzenia podejść) */
   invalidFirst?: string[];
-  /** dodatkowe umiejętności wpisane do CV kandydata (do sprawdzenia zakazanych faktów) */
-  extraSkills?: Record<string, string[]>;
+  /** umiejętności spoza profilu dopisane tylko w pierwszej odpowiedzi (kontrola ma je odrzucić) */
+  extraSkillsFirst?: Record<string, string[]>;
+  /** dodatkowy punkt w pierwszej pozycji doświadczenia, w każdej odpowiedzi (do sprawdzenia zakazanych faktów) */
+  extraBullet?: Record<string, string>;
 }
 
 type PromptProfile = Omit<Profile, 'id' | 'displayName' | 'apiKey' | 'files' | 'photo' | 'createdAt' | 'updatedAt'>;
@@ -21,9 +23,12 @@ const between = (text: string, start: string, end: string): string | null => {
 
 const bullet = (id: string, text: string, sourceIds: string[]) => ({ id, text, status: 'fact', reason: '', fallbackText: '', sourceIds });
 
-function mockCv(p: PromptProfile, lang: 'pl' | 'en', opts: MockOptions, invalid: boolean) {
+function mockCv(p: PromptProfile, lang: 'pl' | 'en', opts: MockOptions, first: boolean) {
   const pl = lang === 'pl';
-  const extra = opts.extraSkills?.[p.contact.fullName] ?? [];
+  const name = p.contact.fullName;
+  const invalid = first && (opts.invalidFirst ?? []).includes(name);
+  const extra = first ? (opts.extraSkillsFirst?.[name] ?? []) : [];
+  const extraBullet = opts.extraBullet?.[name];
   return {
     language: lang,
     headline: p.headline || (pl ? 'Kandydat' : 'Candidate'),
@@ -40,6 +45,7 @@ function mockCv(p: PromptProfile, lang: 'pl' | 'en', opts: MockOptions, invalid:
           bullet(`e${i}`, pl ? 'Realizacja bieżących zadań na stanowisku' : 'Handled day-to-day tasks in the role', [e.id]),
           // Liczba, której nie ma w profilu: groundCv ma ją zamienić w żółtą sugestię.
           ...(i === 0 ? [bullet('n1', pl ? 'Obsługa 937 zamówień dziennie' : 'Handled 937 orders a day', [e.id])] : []),
+          ...(i === 0 && extraBullet ? [bullet('x1', extraBullet, [e.id])] : []),
         ],
       })),
       ...(invalid ? [{ sourceId: 'zmyslona-firma', role: pl ? 'Kierownik' : 'Manager', company: 'Nieistniejąca Firma', location: '', dates: '', bullets: [] }] : []),
@@ -96,9 +102,8 @@ export function mockFetch(opts: MockOptions = {}): typeof fetch {
     else {
       const profile = JSON.parse(between(user, 'PROFIL KANDYDATA:\n', '\n\nNapisz CV') ?? '{}') as PromptProfile;
       const lang = /language="en"/.test(user) ? 'en' : 'pl';
-      // Pierwsza próba (bez prośby o poprawkę) może mieć pozycję spoza profilu.
-      const invalid = messages.length === 2 && (opts.invalidFirst ?? []).includes(profile.contact.fullName);
-      content = mockCv(profile, lang, opts, invalid);
+      // Pierwsza próba to ta bez prośby o poprawkę.
+      content = mockCv(profile, lang, opts, messages.length === 2);
     }
     return new Response(
       JSON.stringify({

@@ -1,7 +1,8 @@
 import { CvContentSchema, type CvContent, type CvText, type JobPosting, type Keyword, type Profile } from '../../../shared/schemas';
-import { cvKeywordSources, findKeyword } from '../../ats/keywords';
+import { aliasVariants, countPhrase, cvKeywordSources, findKeyword, isSoftSkill, looksPolish, normalize, tokenize } from '../../ats/keywords';
 import { tr } from '../../i18n';
 import { profileForPrompt } from './common';
+import { factEvidence } from './improvePlan';
 
 // Kontrole CV od modelu: część wraca do poprawki (checkedCvSchema), resztę poprawiamy w kodzie (groundCv).
 
@@ -165,6 +166,76 @@ export function sourceIssues(c: CvContent, profile: Profile): CvIssue[] {
 }
 
 /** Schemat CV dla modelu: punkty w 1. osobie i wpisy spoza profilu wracają do poprawki. Schemat JSON się nie zmienia. */
+// ---------- Umiejętności spoza profilu ----------
+
+/**
+ * Pozycje z listy umiejętności w CV, których nie da się znaleźć w profilu (ani w odpowiedziach "mam" z extraFacts).
+ * Odpowiedniki się liczą: aliasy ("VLOOKUP" = "WYSZUKAJ.PIONOWO", "Microsoft Excel" = "MS Excel") oraz term i synonimy
+ * słowa kluczowego ogłoszenia. CV po angielsku z polskiego profilu: zwykłe słowa ("Teamwork") to tłumaczenia, więc
+ * sprawdzamy tylko nazwy techniczne (wielkie litery w środku, cyfry, znaki typu C++/CI/CD) i narzędzia z ogłoszenia
+ * ("React"), bo te się nie tłumaczą.
+ */
+export function unverifiedSkillItems(c: CvContent, profile: Profile, keywords: Keyword[] = []): string[] {
+  const facts = profile.extraFacts.filter((f) => f.has).map(factEvidence);
+  const source = [
+    ...profile.skills.map((s) => s.name),
+    ...profile.experience.flatMap((e) => [e.role, e.description, ...e.achievements]),
+    ...profile.projects.flatMap((p) => [p.name, p.description, ...p.technologies, ...p.achievements]),
+    ...profile.education.flatMap((e) => [e.field, e.details]),
+    ...profile.certificates.map((x) => `${x.name} ${x.issuer}`),
+    ...profile.languages.map((l) => l.name),
+    profile.summary,
+    ...facts,
+  ].join(' \n ');
+  const tokens = tokenize(source);
+  const profileIsPolish = looksPolish(source);
+  const technical = (s: string) => /\d|[+#/.]|\S[A-Z]|\s[A-Z]/.test(s);
+  // Pozycja = słowo kluczowe ogłoszenia, gdy to ta sama fraza co jego term albo synonim (w obie strony).
+  const sameAs = (base: string) => {
+    const t = tokenize(base);
+    return (v: string) => !!v.trim() && countPhrase(t, v) > 0 && countPhrase(tokenize(v), base) > 0;
+  };
+  const postingMatches = (base: string) => keywords.filter((k) => [k.term, ...k.synonyms].some(sameAs(base)));
+  const equivalents = (base: string): string[] => [...new Set([base, ...postingMatches(base).flatMap((k) => [k.term, ...k.synonyms])].flatMap(aliasVariants))];
+  const postingTool = (base: string) => postingMatches(base).some((k) => k.category === 'narzędzie');
+  return c.skills
+    .flatMap((g) => g.items)
+    .filter((item) => {
+      const base = item.replace(/\s*\(.*?\)\s*/g, ' ').trim(); // "Power BI (raporty)" → "Power BI"
+      if (!base) return false;
+      if (c.language === 'en' && profileIsPolish && !technical(base) && !postingTool(base)) return false;
+      return equivalents(base).every((v) => countPhrase(tokens, v) === 0);
+    });
+}
+
+/**
+ * Pozycja, która twierdzi coś konkretnego: nazwa techniczna ("SQL", "Google Ads", "Power BI") albo narzędzie lub
+ * umiejętność wymagana w ogłoszeniu ("Java", "React"). Przeformułowana cecha z profilu ("Współpraca zespołowa" zamiast
+ * "praca w zespole") tu nie wchodzi: tę pokazuje tylko ostrzeżenie w edytorze.
+ */
+function claimLike(item: string, keywords: Keyword[]): boolean {
+  const base = item.replace(/\s*\(.*?\)\s*/g, ' ').trim();
+  if (/\d|[+#/.]|\S[A-Z]|\s[A-Z]/.test(base)) return true;
+  const t = tokenize(base);
+  return keywords.some(
+    (k) => k.category !== 'język' && !isSoftSkill(k) && [k.term, ...k.synonyms].some((v) => !!v.trim() && countPhrase(t, v) > 0 && countPhrase(tokenize(v), base) > 0),
+  );
+}
+
+/**
+ * Konkretne umiejętności spoza profilu (nazwy techniczne, narzędzia i umiejętności z ogłoszenia) wracają do poprawki.
+ * `keep`: pozycje, które CV już miało (np. dopisane przez kandydata), nie są ruszane przy poprawie.
+ */
+export function skillIssues(c: CvContent, profile: Profile, keywords: Keyword[] = [], keep: string[] = []): CvIssue[] {
+  const kept = new Set(keep.map(normalize));
+  const bad = unverifiedSkillItems(c, profile, keywords).filter((s) => !kept.has(normalize(s)) && claimLike(s, keywords));
+  if (!bad.length) return [];
+  return [{
+    path: ['skills'],
+    message: `Umiejętności spoza profilu: „${bad.join('”, „')}”. W "skills" wpisuj tylko umiejętności z PROFILU KANDYDATA albo z "extraFacts" (has=true), także gdy ogłoszenie ich wymaga, i bez dopisków typu "(w nauce)". Usuń je z listy: braki kandydat zobaczy w raporcie.`,
+  }];
+}
+
 /** Szkoły z profilu zostają w CV zawsze: przy skracaniu model potrafił po cichu wyciąć technikum. */
 export function educationIssues(c: CvContent, profile: Profile): CvIssue[] {
   const inCv = new Set(c.education.map((e) => e.sourceId));
@@ -176,11 +247,16 @@ export function educationIssues(c: CvContent, profile: Profile): CvIssue[] {
     }));
 }
 
-export function checkedCvSchema(profile: Profile, lang: Lang) {
+/** `keywords`: słowa kluczowe ogłoszenia, żeby ich odpowiedniki z profilu liczyły się przy sprawdzaniu umiejętności. */
+export function checkedCvSchema(profile: Profile, lang: Lang, keywords: Keyword[] = []) {
   return CvContentSchema.superRefine((c, ctx) => {
-    for (const issue of [...styleIssues(c, lang, undefined, profile.pronouns), ...sourceIssues(c, profile), ...educationIssues(c, profile)]) ctx.addIssue({ code: 'custom', ...issue });
+    const issues = [...styleIssues(c, lang, undefined, profile.pronouns), ...sourceIssues(c, profile), ...educationIssues(c, profile), ...skillIssues(c, profile, keywords)];
+    for (const issue of issues) ctx.addIssue({ code: 'custom', ...issue });
   });
 }
+
+/** Pozycje z listy umiejętności obecnej wersji CV: przy poprawie zostają, nawet jeśli profil ich nie potwierdza. */
+export const cvSkillItems = (c: CvContent) => c.skills.flatMap((g) => g.items);
 
 // ---------- Słowa kluczowe przy poprawie ----------
 
@@ -204,7 +280,8 @@ export function checkedImproveSchema(profile: Profile, lang: Lang, current: CvCo
   const keep = currentTexts(current);
   return CvContentSchema.superRefine((c, ctx) => {
     const schools = keepSchools ? educationIssues(c, profile) : [];
-    for (const issue of [...styleIssues(c, lang, keep, profile.pronouns), ...sourceIssues(c, profile), ...schools, ...lostKeywordIssues(c, current, keywords)]) {
+    const skills = skillIssues(c, profile, keywords, cvSkillItems(current));
+    for (const issue of [...styleIssues(c, lang, keep, profile.pronouns), ...sourceIssues(c, profile), ...schools, ...skills, ...lostKeywordIssues(c, current, keywords)]) {
       ctx.addIssue({ code: 'custom', ...issue });
     }
   });

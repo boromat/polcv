@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { CvContent, CvText, Keyword, Profile } from '../../shared/schemas';
 import { normalize } from '../ats/keywords';
 import { tr, type Lang } from '../i18n';
-import { currentTexts, cvDateRange, lostKeywordIssues, styleIssues } from '../llm/prompts/cvChecks';
+import { currentTexts, cvDateRange, cvSkillItems, lostKeywordIssues, skillIssues, styleIssues } from '../llm/prompts/cvChecks';
 import { parseCvDates } from './profileSync';
 
 // "Popraw automatycznie" nie przepisuje całego CV: AI zwraca listę zmian w konkretnych miejscach, każdą przypisaną do
@@ -143,6 +143,8 @@ export function checkedEditsSchema(base: CvContent, profile: Profile, lang: Lang
       if (unknown.length) add(`Nowy punkt „${short(ed.text)}” ma w "sourceIds" id spoza profilu (${unknown.join(', ')}). Wpisz id z PROFILU KANDYDATA.`);
     }
     for (const i of styleIssues(r.content, lang, keep, profile.pronouns)) add(`${i.path.join('.')}: ${i.message}`);
+    // Umiejętność dopisana przez AI musi wynikać z profilu; te, które CV już miało, zostają.
+    for (const i of skillIssues(r.content, profile, keywords, cvSkillItems(base))) add(i.message);
     for (const i of lostKeywordIssues(r.content, base, keywords)) add(i.message);
   });
 }

@@ -6,7 +6,7 @@ import * as store from '../../server/storage/store';
 import * as svc from '../../server/services';
 import { observeCalls, type CallAttempt } from '../../server/llm/openrouter';
 import { parsePosting } from '../../server/llm/prompts/parsePosting';
-import { educationIssues, sourceIssues, styleIssues } from '../../server/llm/prompts/cvChecks';
+import { educationIssues, sourceIssues, styleIssues, unverifiedSkillItems } from '../../server/llm/prompts/cvChecks';
 import { applyDecisions } from '../../server/llm/prompts/common';
 import { renderCvHtml, withoutPending } from '../../server/cv/render';
 import { htmlToPdf } from '../../server/cv/pdf';
@@ -29,8 +29,11 @@ export interface CaseResult {
   /** podejście pisania CV, które przeszło walidację (1-3); null = nie przeszło żadne */
   acceptedAt: number | null;
   attempts: number;
-  /** powody odrzuceń w nieudanych podejściach: wpisy bez źródła w profilu, styl (osoba, forma punktów), brak szkoły, zły format */
-  rejected: { unsourced: number; style: number; schools: number; format: number };
+  /**
+   * powody odrzuceń w nieudanych podejściach: wpisy bez źródła w profilu, umiejętności spoza profilu, styl (osoba, forma
+   * punktów), brak szkoły, zły format (wyniki sprzed 11.11.2026 nie mają `skills`)
+   */
+  rejected: { unsourced: number; skills?: number; style: number; schools: number; format: number };
   /** CV było za długie i AI je skracało */
   shortened: boolean;
   /** liczby spoza profilu, które kontrola zamieniła w żółte sugestie */
@@ -58,6 +61,8 @@ export interface EvalSummary {
   failed: number;
   unsourcedCaught: number;
   casesWithUnsourced: number;
+  /** umiejętności spoza profilu odrzucone przez kontrolę (brak w wynikach sprzed 11.11.2026) */
+  skillsCaught?: number;
   numbersFlagged: number;
   casesWithNumbersFlagged: number;
   keywordCoverage: number | null;
@@ -111,11 +116,12 @@ async function pool<T>(items: T[], limit: number, fn: (item: T) => Promise<void>
 }
 
 /** Powody odrzucenia jednego podejścia, policzone tymi samymi kontrolami, które odrzuciły odpowiedź modelu. */
-function rejectionReasons(a: CallAttempt, c: EvalCase, lang: 'pl' | 'en'): CaseResult['rejected'] {
+function rejectionReasons(a: CallAttempt, c: EvalCase, lang: 'pl' | 'en', keywords: JobPosting['keywords']): Required<CaseResult['rejected']> {
   const parsed = CvContentSchema.safeParse(a.raw);
-  if (!parsed.success) return { unsourced: 0, style: 0, schools: 0, format: 1 };
+  if (!parsed.success) return { unsourced: 0, skills: 0, style: 0, schools: 0, format: 1 };
   return {
     unsourced: sourceIssues(parsed.data, c.profile).length,
+    skills: unverifiedSkillItems(parsed.data, c.profile, keywords).length,
     style: styleIssues(parsed.data, lang, undefined, c.profile.pronouns).length,
     schools: educationIssues(parsed.data, c.profile).length,
     format: 0,
@@ -161,7 +167,7 @@ async function runCase(c: EvalCase, opts: EvalOptions, attempts: Map<string, Cal
     error: '',
     acceptedAt: null,
     attempts: 0,
-    rejected: { unsourced: 0, style: 0, schools: 0, format: 0 },
+    rejected: { unsourced: 0, skills: 0, style: 0, schools: 0, format: 0 },
     shortened: false,
     numbersFlagged: 0,
     suggestions: 0,
@@ -192,8 +198,9 @@ async function runCase(c: EvalCase, opts: EvalOptions, attempts: Map<string, Cal
   base.shortened = seen.some((a) => a.ctx.task === 'skracanie CV');
   const lang = cv?.content.language ?? posting.language;
   for (const a of writing.filter((x) => !x.accepted)) {
-    const r = rejectionReasons(a, c, lang);
+    const r = rejectionReasons(a, c, lang, posting.keywords);
     base.rejected.unsourced += r.unsourced;
+    base.rejected.skills = (base.rejected.skills ?? 0) + r.skills;
     base.rejected.style += r.style;
     base.rejected.schools += r.schools;
     base.rejected.format += r.format;
@@ -235,6 +242,7 @@ export function summarize(cases: CaseResult[]): EvalSummary {
     failed: share(cases.filter((c) => c.acceptedAt === null).length, cases.length),
     unsourcedCaught: cases.reduce((s, c) => s + c.rejected.unsourced, 0),
     casesWithUnsourced: cases.filter((c) => c.rejected.unsourced > 0).length,
+    skillsCaught: cases.reduce((s, c) => s + (c.rejected.skills ?? 0), 0),
     numbersFlagged: ok.reduce((s, c) => s + c.numbersFlagged, 0),
     casesWithNumbersFlagged: ok.filter((c) => c.numbersFlagged > 0).length,
     keywordCoverage: mean(coverage),
@@ -270,6 +278,7 @@ export function toMarkdown(r: EvalResult): string {
     `| CV przyjęte w 1. / 2. / 3. podejściu | ${pct(s.acceptedFirst)} / ${pct(s.acceptedSecond)} / ${pct(s.acceptedThird)} |`,
     `| Nie powstało (3 odrzucone podejścia albo błąd) | ${pct(s.failed)} |`,
     `| Wpisy bez źródła w profilu odrzucone przez kontrolę | ${s.unsourcedCaught} (w ${s.casesWithUnsourced} przypadkach) |`,
+    `| Umiejętności spoza profilu odrzucone przez kontrolę | ${s.skillsCaught ?? '-'} |`,
     `| Liczby spoza profilu zamienione w sugestie | ${s.numbersFlagged} (w ${s.casesWithNumbersFlagged} CV) |`,
     `| Pokrycie słów kluczowych (jak w ocenie ATS) | ${pct(s.keywordCoverage)} |`,
     `| CV na jednej stronie A4 | ${pct(s.onePage)} (skracane przez AI: ${s.shortened}) |`,
@@ -277,11 +286,11 @@ export function toMarkdown(r: EvalResult): string {
     `| Koszt na CV / razem | ${usd(s.costPerCv)} / ${usd(s.costTotal)} |`,
     `| Czas na CV (średnio / najdłużej) | ${sec(s.secondsPerCv)} / ${sec(s.secondsMax)} |`,
     '',
-    '| Przypadek | Podejście | Odrzucone: bez źródła / styl / szkoła / format | Liczby spoza profilu | Słowa kluczowe | Strony | Koszt | Czas | Zakazane fakty |',
+    '| Przypadek | Podejście | Odrzucone: bez źródła / umiejętności / styl / szkoła / format | Liczby spoza profilu | Słowa kluczowe | Strony | Koszt | Czas | Zakazane fakty |',
     '|---|---|---|---|---|---|---|---|---|',
     ...r.cases.map((c) => {
       const forbidden = !c.forbiddenChecked ? '' : c.forbidden.length ? c.forbidden.map((v) => `${v.foundAs} (${v.status === 'fact' ? 'fakt' : 'sugestia'}, ${v.where})`).join('; ') : 'brak';
-      return `| ${c.id} | ${c.acceptedAt ?? `nie (${c.error.slice(0, 60)})`} | ${c.rejected.unsourced} / ${c.rejected.style} / ${c.rejected.schools} / ${c.rejected.format} | ${c.numbersFlagged} | ${pct(c.keywordCoverage)} (${c.keywordsMatched}/${c.keywordsTotal}) | ${c.pages ?? '-'}${c.shortened ? ' (skrócone)' : ''} | ${usd(c.costUsd)} | ${sec(c.seconds)} | ${forbidden} |`;
+      return `| ${c.id} | ${c.acceptedAt ?? `nie (${c.error.slice(0, 60)})`} | ${c.rejected.unsourced} / ${c.rejected.skills ?? '-'} / ${c.rejected.style} / ${c.rejected.schools} / ${c.rejected.format} | ${c.numbersFlagged} | ${pct(c.keywordCoverage)} (${c.keywordsMatched}/${c.keywordsTotal}) | ${c.pages ?? '-'}${c.shortened ? ' (skrócone)' : ''} | ${usd(c.costUsd)} | ${sec(c.seconds)} | ${forbidden} |`;
     }),
     '',
   ];
@@ -297,6 +306,7 @@ export function comparisonMarkdown(results: EvalResult[]): string {
     row('CV przyjęte w 1. / 2. / 3. podejściu', (s) => `${pct(s.acceptedFirst)} / ${pct(s.acceptedSecond)} / ${pct(s.acceptedThird)}`),
     row('Nie powstało', (s) => pct(s.failed)),
     row('Wpisy bez źródła odrzucone przez kontrolę', (s) => String(s.unsourcedCaught)),
+    row('Umiejętności spoza profilu odrzucone przez kontrolę', (s) => String(s.skillsCaught ?? '-')),
     row('Liczby spoza profilu zamienione w sugestie', (s) => `${s.numbersFlagged} (w ${s.casesWithNumbersFlagged} CV)`),
     row('Pokrycie słów kluczowych', (s) => pct(s.keywordCoverage)),
     row('CV na jednej stronie A4', (s) => pct(s.onePage)),

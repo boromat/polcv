@@ -24,7 +24,7 @@ jest skracane do jednej strony A4. Potem skrypt liczy:
 | Miara | Jak |
 |---|---|
 | CV przyjęte w 1., 2., 3. podejściu | która odpowiedź modelu przeszła walidację (`observeCalls` w `server/llm/openrouter.ts`) |
-| Odrzucenia: bez źródła / styl / szkoła / format | te same kontrole, które odrzuciły odpowiedź (`sourceIssues`, `styleIssues`, `educationIssues` z `cvChecks.ts`) |
+| Odrzucenia: bez źródła / umiejętności / styl / szkoła / format | te same kontrole, które odrzuciły odpowiedź (`sourceIssues`, `skillIssues`, `styleIssues`, `educationIssues` z `cvChecks.ts`) |
 | Liczby spoza profilu | punkty, które `groundCv` zamienił w żółte sugestie |
 | Pokrycie słów kluczowych | `scoreKeywords`, ta sama funkcja co w ocenie ATS: punkty / maksimum |
 | Jedna strona A4 | liczba stron PDF wydrukowanego jak w aplikacji |
@@ -103,6 +103,16 @@ zmieniło. W przebiegu 2:
 - **Ta różnica to najpewniej zmienność modelu, nie skutek poprawki**, ale jeden przebieg na wersję tego nie
   rozstrzyga. Wniosek dla programu: listę umiejętności trzeba sprawdzać względem profilu już przy generowaniu, tak jak
   pozycje i liczby, a nie liczyć na to, że model zawsze posłucha promptu.
+
+### Kontrola umiejętności (jeszcze bez pomiaru)
+
+Po przebiegu 2 lista umiejętności jest sprawdzana przy pisaniu CV, przy „Popraw automatycznie” i przy wybranych
+zmianach z raportu. Konkretna pozycja, której profil nie potwierdza (nazwa techniczna jak „TypeScript” czy
+„Google Ads” albo umiejętność wymagana w ogłoszeniu jak „Java”), wraca do modelu, także z dopiskiem „(w nauce)”.
+W CV po angielsku z polskiego profilu sprawdzane są tylko nazwy techniczne i narzędzia z ogłoszenia, bo tłumaczenia
+miękkich umiejętności nie da się pewnie porównać z profilem. Przy poprawie zostaje to, co CV już miało, np. umiejętność
+dopisana przez kandydata. Ewaluacja liczy te odrzucenia w kolumnie „umiejętności”, ale przebiegu z tą kontrolą jeszcze
+nie było, więc nie wiadomo, ile kosztuje dodatkowych podejść i czy usuwa wszystkie 4 trafienia z przebiegu 2.
 
 ## Ograniczenia
 
