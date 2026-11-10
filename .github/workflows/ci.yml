@@ -21,7 +21,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Windows, bo większość użytkowników uruchamia PolCV przez start.bat.
+        # Windows, bo program ma na nim osobne ścieżki: start.bat, wyszukiwanie Pythona przez "py",
+        # uruchamianie npm.cmd przez powłokę, nazwy plików bez rozróżniania wielkości liter i Chromium do PDF.
         os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
