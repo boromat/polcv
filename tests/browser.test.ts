@@ -6,6 +6,7 @@ vi.mock('playwright', () => ({ chromium: { launch: vi.fn() } }));
 
 const { chromium } = await import('playwright');
 const { withPage, closeBrowser } = await import('../server/cv/browser');
+const { APP_UA } = await import('../server/jobs/http');
 const launch = vi.mocked(chromium.launch);
 
 function fakeBrowser() {
@@ -53,5 +54,14 @@ describe('współdzielona przeglądarka Chromium', () => {
     await withPage(async () => null);
     expect(launch).toHaveBeenCalledTimes(2);
     expect(second.newContext).toHaveBeenCalledTimes(1);
+  });
+
+  it('przedstawia się stronom jako PolCV, a nie jako Chrome', async () => {
+    const b = fakeBrowser();
+    launch.mockResolvedValue(b as any);
+    await withPage(async () => null);
+    expect(b.newContext).toHaveBeenCalledWith({ locale: 'pl-PL', userAgent: APP_UA });
+    expect(APP_UA).toMatch(/^PolCV\//);
+    expect(APP_UA).not.toMatch(/Mozilla|Chrome|Safari/);
   });
 });

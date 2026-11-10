@@ -9,6 +9,8 @@ vi.mock('../server/cv/browser', () => ({
 
 const { fetchPosting } = await import('../server/jobs/fetchPosting');
 const { withPage } = await import('../server/cv/browser');
+const { APP_UA } = await import('../server/jobs/http');
+const { VERSION } = await import('../server/version');
 
 /** Najprostszy PDF z jedną stroną tekstu (Helvetica, same znaki ASCII). */
 function tinyPdf(lines: string[]): Uint8Array<ArrayBuffer> {
@@ -80,12 +82,27 @@ describe('pobieranie ogłoszenia z linku do pliku', () => {
     expect(withPage).not.toHaveBeenCalled();
   });
 
-  it('zwykła strona HTML działa jak dotąd', async () => {
+  it('zwykła strona HTML działa jak dotąd, a program przedstawia się jako PolCV z linkiem do repozytorium', async () => {
     // Strona musi mieć min. 600 znaków treści, inaczej program uznaje ją za pustą i próbuje przeglądarką.
     const html = `<html><body><main><h1>Analityk danych</h1>${[...POSTING, ...POSTING].map((l) => `<p>${l}</p>`).join('')}</main></body></html>`;
-    serve(html, 'text/html; charset=utf-8');
+    const fetchMock = serve(html, 'text/html; charset=utf-8');
     const res = await fetchPosting('https://example.com/oferta');
     expect(res.method).toBe('html');
     expect(res.text).toContain('Power BI');
+    const headers = (fetchMock.mock.calls[0] as unknown as [URL, RequestInit])[1].headers as Record<string, string>;
+    expect(headers['User-Agent']).toBe(APP_UA);
+    expect(APP_UA).toBe(`PolCV/${VERSION} (+https://github.com/boromat/polcv)`);
+  });
+});
+
+describe('strona, która blokuje automaty', () => {
+  it.each([
+    ['403', '<html><body>Forbidden</body></html>', 403],
+    ['429', '<html><body>Too many requests</body></html>', 429],
+    ['weryfikacja Cloudflare przy 200', '<html><head><title>Just a moment...</title></head><body>cf-chl-bypass</body></html>', 200],
+  ])('%s: prośba o wklejenie treści, bez drugiej próby przeglądarką', async (_name, html, status) => {
+    serve(html, 'text/html', status);
+    await expect(fetchPosting('https://example.com/oferta')).rejects.toMatchObject({ status: 422, message: expect.stringContaining('wklej') });
+    expect(withPage).not.toHaveBeenCalled();
   });
 });

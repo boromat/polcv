@@ -1,5 +1,6 @@
 import { chromium, type Browser, type Page } from 'playwright';
 import { tr } from '../i18n';
+import { APP_UA } from '../jobs/http';
 
 let browserPromise: Promise<Browser> | null = null;
 
@@ -29,11 +30,8 @@ function getBrowser(): Promise<Browser> {
 
 export async function withPage<T>(fn: (page: Page) => Promise<T>): Promise<T> {
   const browser = await getBrowser();
-  const context = await browser.newContext({
-    locale: 'pl-PL',
-    userAgent:
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
-  });
+  // Stronom przedstawiamy się jako PolCV, tak samo jak przy zwykłym pobieraniu, a nie jako czyjś Chrome.
+  const context = await browser.newContext({ locale: 'pl-PL', userAgent: APP_UA });
   const page = await context.newPage();
   try {
     return await fn(page);

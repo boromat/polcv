@@ -84,7 +84,7 @@ Pod nazwą firmy (przy ofertach, w Historii i w aplikacji) jest link **opinie na
 
 W **Ustawieniach** możesz włączyć wyszukiwanie, w którym program sam przeszukuje nofluffjobs (jedyny z tych portali, którego plik `robots.txt` na to pozwala), odrzuca oferty niepasujące do preferencji (seniorzy, zła umowa, za niska stawka), ocenia dopasowanie pozostałych przez AI, a **Zrób CV pod to** od razu zaczyna CV pod wybraną ofertę.
 
-Włączając je, bierzesz na siebie korzystanie zgodne z regulaminem portalu: tylko na własny użytek i z umiarem. Program przedstawia się jako `PolCV/1.0` i wysyła kilka zapytań na stanowisko. Współrzędne miast do filtra promienia pochodzą z OpenStreetMap Nominatim (© autorzy OpenStreetMap) i są zapamiętywane lokalnie. Oferty bez podanego wynagrodzenia nie są odrzucane przez filtr kwoty.
+Włączając je, bierzesz na siebie korzystanie zgodne z regulaminem portalu: tylko na własny użytek i z umiarem. Program przedstawia się jako `PolCV/<wersja>` z linkiem do tego repozytorium i wysyła kilka zapytań na stanowisko. Współrzędne miast do filtra promienia pochodzą z OpenStreetMap Nominatim (© autorzy OpenStreetMap) i są zapamiętywane lokalnie. Oferty bez podanego wynagrodzenia nie są odrzucane przez filtr kwoty.
 
 ## Ochrona danych osobowych (polanon) - opcjonalnie
 
@@ -118,7 +118,7 @@ Kopia zapasowa = skopiowanie folderu `data`.
 
 - **„Brak klucza OpenRouter”** - wklej klucz w Ustawieniach.
 - **„Brak środków na koncie OpenRouter”** - doładuj konto na openrouter.ai.
-- **Link z ogłoszeniem się nie pobiera** - kliknij „Link nie działa? Wklej treść ogłoszenia”, zaznacz całą stronę ogłoszenia (Ctrl+A), skopiuj i wklej.
+- **Link z ogłoszeniem się nie pobiera** - kliknij „Link nie działa? Wklej treść ogłoszenia”, zaznacz całą stronę ogłoszenia (Ctrl+A), skopiuj i wklej. Program pobiera ogłoszenie jako `PolCV/<wersja>` (nie udaje przeglądarki), a gdy strona blokuje takie pobieranie, nie próbuje tego obejść, tylko prosi o wklejenie treści.
 - **„Z tego pliku nie da się odczytać tekstu”** - Twoje CV jest skanem/obrazkiem. Zapisz je ponownie jako PDF z Worda albo Google Docs.
 - **Okno `start.bat` zamyka się od razu** - uruchom je ponownie i przeczytaj komunikat; zwykle brakuje Node.js.
 - **Port 3000 zajęty** - zamknij inne okno PolCV albo ustaw inny port: w `start.bat` przed `call npm start` dopisz `set PORT=3001`.

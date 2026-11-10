@@ -79,6 +79,8 @@ $0.05-0.15. The Settings page lists the models and shows what you have spent.
 - The profile and posting text are sent to OpenRouter and the model you pick, and nothing else
   leaves your machine (apart from fetching the postings you link, and reading your public GitHub
   repositories when you import projects from them).
+- A posting link is fetched as `PolCV/<version>`, not as a disguised browser. When a site blocks
+  automated requests, the app does not try to get around it and asks you to paste the posting text.
 - **Optional: [polanon](https://github.com/boromat/polanon).** If Python 3.11+ and
   `pip install polanon` are available, *Ustawienia → Ochrona danych osobowych* can mask your name,
   e-mail, phone, address, company names and profile links as tokens such as `<OSOBA_1>` before
@@ -99,8 +101,8 @@ opens a search for employer reviews on GoWork.pl.
 An **automated search** that fetches, filters and AI-ranks offers is available for nofluffjobs -
 the one portal whose `robots.txt` allows it. It is **off by default**; switching it on in Settings
 means you accept responsibility for using it in line with the portal's terms, for personal use and
-at a modest pace. The app identifies itself as `PolCV/1.0` and makes only a handful of requests
-per role. City coordinates for the radius filter come from
+at a modest pace. The app identifies itself as `PolCV/<version>` with a link to this repository
+and makes only a handful of requests per role. City coordinates for the radius filter come from
 [OpenStreetMap Nominatim](https://nominatim.org) (© OpenStreetMap contributors, cached locally).
 
 ## Disclaimer

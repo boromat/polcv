@@ -54,6 +54,11 @@ All notable changes to PolCV are recorded here. The format follows
   formats are fixed by the app without the AI. A CV that grows past one page is not shortened on
   its own, and the message lists what changed. The list needs a current score; after editing the
   CV, *Score again* comes first.
+- **Posting links are fetched as PolCV.** The app now identifies itself as `PolCV/<version>` with a
+  link to the repository when it fetches a posting, also in the Chromium fallback, instead of
+  posing as a Chrome browser. When a site blocks automated requests (403, 429, 503 or a "verify you
+  are human" page), the app asks you to paste the posting text right away instead of trying again
+  with a browser.
 - **No en dashes either.** Besides the long dash (—), the CV, cover letters and everything the AI
   writes now use a plain hyphen instead of the en dash (–): dates read "07.2025 - 09.2025", ranges
   "2-3", and the template separates role and company with " - ". Older versions are shown and

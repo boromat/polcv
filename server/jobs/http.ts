@@ -1,4 +1,7 @@
 import { VERSION } from '../version';
 
-/** Jak program przedstawia się serwisom, o które pyta automatycznie (wyszukiwanie ofert, geokodowanie). */
+/**
+ * Jedyny napis, którym program przedstawia się innym serwisom: pobieranie ogłoszeń (także przez przeglądarkę),
+ * wyszukiwanie ofert, geokodowanie, GitHub i PyPI.
+ */
 export const APP_UA = `PolCV/${VERSION} (+https://github.com/boromat/polcv)`;

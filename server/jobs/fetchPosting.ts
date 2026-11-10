@@ -5,9 +5,8 @@ import { HttpError } from '../storage/store';
 import { withPage } from '../cv/browser';
 import { pdfToText } from '../cv/importCv';
 import { tr } from '../i18n';
+import { APP_UA } from './http';
 
-const UA =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36';
 const MAX_CHARS = 18_000;
 const MIN_USEFUL = 600;
 /** PDF to sama treść ogłoszenia, bez menu strony - wystarczy mniej tekstu. Mniej zwykle oznacza skan. */
@@ -154,11 +153,12 @@ export async function fetchPosting(rawUrl: string): Promise<FetchedPosting> {
       tr('Nie udało się pobrać treści ogłoszenia z tego linku (strona mogła zablokować pobieranie). Skopiuj tekst ogłoszenia i wklej go w pole poniżej.'),
     );
 
-  // 1-2. Zwykłe pobranie: JSON-LD + główna treść.
+  // 1-2. Zwykłe pobranie: JSON-LD + główna treść. Program przedstawia się jako PolCV (APP_UA), nie jako przeglądarka.
   let fileText: string | null = null; // link prowadzi do pliku, nie do strony
+  let blocked = false;
   try {
     const res = await fetch(url, {
-      headers: { 'User-Agent': UA, 'Accept-Language': 'pl-PL,pl;q=0.9,en;q=0.8', Accept: 'text/html,application/xhtml+xml' },
+      headers: { 'User-Agent': APP_UA, 'Accept-Language': 'pl-PL,pl;q=0.9,en;q=0.8', Accept: 'text/html,application/xhtml+xml' },
       redirect: 'follow',
       signal: AbortSignal.timeout(20_000),
     });
@@ -169,21 +169,24 @@ export async function fetchPosting(rawUrl: string): Promise<FetchedPosting> {
     else if (res.ok && !isTextual(type)) fileText = '';
     else {
       const html = new TextDecoder().decode(buf);
-      if (res.ok && !looksBlocked(res.status, html)) {
+      blocked = looksBlocked(res.status, html);
+      if (res.ok && !blocked) {
         const text = combine(html);
         if (text.length >= MIN_USEFUL) return { text, method: jsonLdToText(html) ? 'json-ld' : 'html' };
       }
     }
   } catch {
-    /* spróbujemy przeglądarką */
+    /* np. przekroczony czas: spróbujemy przeglądarką */
   }
+  // Strona nie chce automatów: nie obchodzimy blokady, tylko prosimy o wklejenie treści.
+  if (blocked) throw pasteText();
   if (fileText !== null) {
     // Przeglądarka nic tu nie pomoże (plik by się tylko pobrał), więc od razu prosimy o wklejenie tekstu.
     if (fileText.length >= MIN_PDF) return { text: fileText, method: 'pdf' };
     throw pasteText();
   }
 
-  // 3. Strony renderowane JavaScriptem - prawdziwa przeglądarka (bez obchodzenia zabezpieczeń).
+  // 3. Strony, które treść ogłoszenia dokładają JavaScriptem: przeglądarka, która też przedstawia się jako PolCV.
   try {
     const html = await withPage(async (page) => {
       await page.setExtraHTTPHeaders({ 'Accept-Language': 'pl-PL,pl;q=0.9' });
