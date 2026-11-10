@@ -223,6 +223,16 @@ describe('pisanie i poprawa CV', () => {
     expect(cv.experience[0].bullets[0].text).toBe('Raporty z kampanii marketingowych');
   });
 
+  it('instrukcja podsumowania: z zaimkami czas przeszły w formie kandydata, bez nich bez czasu przeszłego z rodzajem', async () => {
+    const written = JSON.stringify(content(['Przygotowywanie raportów']));
+    replies = [{ content: written }, { content: written }];
+    await generateCv({ ...profile, pronouns: 'ona' }, posting, 'pl', ctx);
+    await generateCv(profile, posting, 'pl', ctx);
+    expect(sent[0].messages[0].content).toContain('Czas przeszły (np. o ukończonej szkole albo skończonym projekcie) tylko w formach żeńskich');
+    expect(sent[0].messages[0].content).not.toContain('Bez czasu przeszłego z rodzajem');
+    expect(sent[1].messages[0].content).toContain('Bez czasu przeszłego z rodzajem ("pracowałem", "zbudowałam")');
+  });
+
   it('nowe CV: liczby z potwierdzonych tekstów wcześniejszych wersji zostają faktami', async () => {
     const written = JSON.stringify(content(['Obsługa 40 zgłoszeń dziennie']));
     replies = [{ content: written }, { content: written }];

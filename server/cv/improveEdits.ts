@@ -142,7 +142,7 @@ export function checkedEditsSchema(base: CvContent, profile: Profile, lang: Lang
       const unknown = ed.action === 'add' ? ed.sourceIds.filter((id) => !ids.has(id)) : [];
       if (unknown.length) add(`Nowy punkt „${short(ed.text)}” ma w "sourceIds" id spoza profilu (${unknown.join(', ')}). Wpisz id z PROFILU KANDYDATA.`);
     }
-    for (const i of styleIssues(r.content, lang, keep)) add(`${i.path.join('.')}: ${i.message}`);
+    for (const i of styleIssues(r.content, lang, keep, profile.pronouns)) add(`${i.path.join('.')}: ${i.message}`);
     for (const i of lostKeywordIssues(r.content, base, keywords)) add(i.message);
   });
 }

@@ -49,16 +49,31 @@ const THIRD_PERSON = new Set([
 const NOMINAL_OPENER = /^[^\p{L}]*(student|studentka|absolwent|absolwentka|stażysta|stażystka|praktykant|praktykantka|technik|inżynier|programista|programistka|analityk|analityczka|specjalista|specjalistka)(?!\p{L})/iu;
 const PARTICIPLE_AFTER_COMMA = /,\s*(\p{L}+(?:ący|ąca))(?!\p{L})/gu;
 
-/** Słowa podsumowania po polsku, które nie pasują do CV pisanego przez kandydata: 3. osoba, czas przeszły z rodzajem, równoważnik. */
-export function summaryPersonIssues(text: string): { thirdPerson: string[]; gendered: string[]; nominal: string[] } {
+/** Końcówka 1. osoby czasu przeszłego zgodna z tym, jak kandydat się określa ("zrobiłem", "zrobiłam"). */
+const OWN_PAST: Record<NonNullable<Profile['pronouns']>, RegExp> = { on: /łem$/u, ona: /łam$/u, ono: /łom$/u };
+
+/**
+ * Słowa podsumowania po polsku, które nie pasują do CV pisanego przez kandydata: 3. osoba, czas przeszły z rodzajem,
+ * równoważnik. Gdy kandydat podał, jak się określa (`pronouns`), czas przeszły w 1. osobie w jego formie jest w porządku
+ * ("Ukończyłam technikum"); zostają formy innego rodzaju i 2. osoba. Bez tej informacji każda forma z rodzajem to zgadywanie.
+ */
+export function summaryPersonIssues(text: string, pronouns?: Profile['pronouns']): { thirdPerson: string[]; gendered: string[]; nominal: string[] } {
   const words = text.split(/\s+/).map((w) => w.replace(/^[^\p{L}]+|[^\p{L}]+$/gu, '')).filter(Boolean);
   const lower = (w: string) => w.toLowerCase();
+  const own = pronouns ? OWN_PAST[pronouns] : null;
   return {
     thirdPerson: [...new Set(words.filter((w) => THIRD_PERSON.has(lower(w))))],
-    gendered: [...new Set(words.filter((w) => PAST_PERSONAL.test(lower(w)) && !NOUNS_LEM.has(lower(w))))],
+    gendered: [...new Set(words.filter((w) => PAST_PERSONAL.test(lower(w)) && !NOUNS_LEM.has(lower(w)) && !own?.test(lower(w))))],
     nominal: [...new Set([NOMINAL_OPENER.exec(text)?.[1], ...[...text.matchAll(PARTICIPLE_AFTER_COMMA)].map((m) => m[1])].filter((w): w is string => !!w))],
   };
 }
+
+/** Jak opisać kandydatowi formę czasu przeszłego, której ma użyć (do komunikatu dla modelu). */
+const OWN_PAST_EXAMPLE: Record<NonNullable<Profile['pronouns']>, string> = {
+  on: 'męskiej, np. „ukończyłem”, „pracowałem”',
+  ona: 'żeńskiej, np. „ukończyłam”, „pracowałam”',
+  ono: 'nijakiej, np. „ukończyłom”, „pracowałom”',
+};
 
 const bulletsOf = (c: CvContent) => [
   ...c.experience.flatMap((e, i) => e.bullets.map((b, j) => ({ b, path: ['experience', i, 'bullets', j] }))),
@@ -74,13 +89,16 @@ export function currentTexts(c: CvContent): Set<string> {
   return new Set([c.summary, ...bulletsOf(c).map((x) => x.b)].flatMap((t) => [t.text, t.fallbackText]).filter((t) => t.trim()));
 }
 
-/** `keep`: teksty, które zostają bez zmian z obecnej wersji (np. napisane przez kandydata) - ich styl nie wraca do poprawki. */
-export function styleIssues(c: CvContent, lang: Lang, keep: Set<string> = new Set()): CvIssue[] {
+/**
+ * `keep`: teksty, które zostają bez zmian z obecnej wersji (np. napisane przez kandydata) - ich styl nie wraca do poprawki.
+ * `pronouns`: jak kandydat się określa; wtedy czas przeszły w jego formie jest dozwolony w podsumowaniu.
+ */
+export function styleIssues(c: CvContent, lang: Lang, keep: Set<string> = new Set(), pronouns?: Profile['pronouns']): CvIssue[] {
   const out: CvIssue[] = [];
   if (lang === 'pl') {
     for (const field of ['text', 'fallbackText'] as const) {
       if (keep.has(c.summary[field])) continue;
-      const { thirdPerson, gendered, nominal } = summaryPersonIssues(c.summary[field]);
+      const { thirdPerson, gendered, nominal } = summaryPersonIssues(c.summary[field], pronouns);
       if (thirdPerson.length) {
         out.push({
           path: ['summary', field],
@@ -96,7 +114,9 @@ export function styleIssues(c: CvContent, lang: Lang, keep: Set<string> = new Se
       if (gendered.length) {
         out.push({
           path: ['summary', field],
-          message: `Podsumowanie w czasie przeszłym z rodzajem („${gendered.join('”, „')}”). Pisz w czasie teraźniejszym („Tworzę…”, „Rozwijam…”) albo bez czasownika („Doświadczenie w…”), bez zgadywania płci.`,
+          message: pronouns
+            ? `Podsumowanie ma czas przeszły w formie, która nie pasuje do kandydata („${gendered.join('”, „')}”). Kandydat określa się jako „${pronouns}”: czas przeszły tylko w 1. osobie w formie ${OWN_PAST_EXAMPLE[pronouns]}, a najlepiej czas teraźniejszy („Tworzę…”, „Rozwijam…”).`
+            : `Podsumowanie w czasie przeszłym z rodzajem („${gendered.join('”, „')}”). Pisz w czasie teraźniejszym („Tworzę…”, „Rozwijam…”) albo bez czasownika („Doświadczenie w…”), bez zgadywania płci.`,
         });
       }
     }
@@ -158,7 +178,7 @@ export function educationIssues(c: CvContent, profile: Profile): CvIssue[] {
 
 export function checkedCvSchema(profile: Profile, lang: Lang) {
   return CvContentSchema.superRefine((c, ctx) => {
-    for (const issue of [...styleIssues(c, lang), ...sourceIssues(c, profile), ...educationIssues(c, profile)]) ctx.addIssue({ code: 'custom', ...issue });
+    for (const issue of [...styleIssues(c, lang, undefined, profile.pronouns), ...sourceIssues(c, profile), ...educationIssues(c, profile)]) ctx.addIssue({ code: 'custom', ...issue });
   });
 }
 
@@ -184,7 +204,7 @@ export function checkedImproveSchema(profile: Profile, lang: Lang, current: CvCo
   const keep = currentTexts(current);
   return CvContentSchema.superRefine((c, ctx) => {
     const schools = keepSchools ? educationIssues(c, profile) : [];
-    for (const issue of [...styleIssues(c, lang, keep), ...sourceIssues(c, profile), ...schools, ...lostKeywordIssues(c, current, keywords)]) {
+    for (const issue of [...styleIssues(c, lang, keep, profile.pronouns), ...sourceIssues(c, profile), ...schools, ...lostKeywordIssues(c, current, keywords)]) {
       ctx.addIssue({ code: 'custom', ...issue });
     }
   });

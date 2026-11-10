@@ -83,6 +83,11 @@ All notable changes to PolCV are recorded here. The format follows
 
 ### Fixed
 
+- The CV summary may use the past tense in the candidate's own form when the profile says how they
+  refer to themselves, for example "Ukończyłam technikum" for *ona*. The check used to reject every
+  gendered past form, which in the quality evaluation made Claude Haiku 5.5 give up on 2 of 18 CVs
+  after three attempts. Forms of another gender and the second person still go back to the model,
+  and profiles without a choice keep the present tense only.
 - The career advisor now writes a job, internship or volunteering you describe in the chat into the
   *Experience* section of your profile (role, company, dates, achievements). Before, it was saved
   only as loose facts, so the profile's *Experience* stayed empty. The same company under another

@@ -128,6 +128,29 @@ describe('podsumowanie pisane przez kandydata', () => {
     }
   });
 
+  it('z podanymi zaimkami czas przeszły w 1. osobie w formie kandydata przechodzi, inny rodzaj i 2. osoba nie', () => {
+    const t = 'Ukończyłam technikum ekonomiczne i pracuję w sprzedaży.';
+    expect(summaryPersonIssues(t, 'ona').gendered).toEqual([]);
+    expect(summaryPersonIssues(t, 'on').gendered).toEqual(['Ukończyłam']);
+    expect(summaryPersonIssues(t).gendered).toEqual(['Ukończyłam']);
+    expect(summaryPersonIssues('Zaprojektowałem aplikację w FastAPI.', 'on').gendered).toEqual([]);
+    expect(summaryPersonIssues('Zrobiłaś projekt i zrobiłeś stronę.', 'ona').gendered).toEqual(['Zrobiłaś', 'zrobiłeś']);
+    expect(summaryPersonIssues('Pracowałem i pracowałam.', 'ono').gendered).toEqual(['Pracowałem', 'pracowałam']);
+    // Rzeczowniki na -łem nadal nie są czasownikami.
+    expect(summaryPersonIssues('Współpracuję z działem sprzedaży.', 'on').gendered).toEqual([]);
+  });
+
+  it('schemat CV przepuszcza czas przeszły zgodny z zaimkami profilu i podaje modelowi właściwą formę', () => {
+    const c = withBullets();
+    c.summary = { ...c.summary, text: 'Ukończyłam staż w marketingu i rozwijam się w analityce.' };
+    expect(checkedCvSchema({ ...profile, pronouns: 'ona' }, 'pl').safeParse(c).success).toBe(true);
+    const wrong = checkedCvSchema({ ...profile, pronouns: 'on' }, 'pl').safeParse(c);
+    expect(wrong.success).toBe(false);
+    expect(wrong.error!.issues.map((i) => i.message).join('\n')).toContain('określa się jako „on”');
+    // Bez zaimków jak dotąd: bez zgadywania płci.
+    expect(checkedCvSchema({ ...profile, pronouns: undefined }, 'pl').safeParse(c).success).toBe(false);
+  });
+
   it('po polsku podsumowanie w 3. osobie wraca do poprawki (także wersja bezpieczna), po angielsku nie', () => {
     const c = withBullets();
     c.summary = { ...c.summary, text: 'Zna Excel i tworzy raporty.', status: 'suggested', fallbackText: 'Posiada wiedzę o Excelu.' };

@@ -112,7 +112,7 @@ function rejectionReasons(a: CallAttempt, c: EvalCase, lang: 'pl' | 'en'): CaseR
   if (!parsed.success) return { unsourced: 0, style: 0, schools: 0, format: 1 };
   return {
     unsourced: sourceIssues(parsed.data, c.profile).length,
-    style: styleIssues(parsed.data, lang).length,
+    style: styleIssues(parsed.data, lang, undefined, c.profile.pronouns).length,
     schools: educationIssues(parsed.data, c.profile).length,
     format: 0,
   };
