@@ -5,6 +5,7 @@ import { api } from '../api';
 import { useApp } from '../ctx';
 import { Busy, ErrorBox, Field, LazyText, PRONOUNS } from '../components/ui';
 import { plFew, useT } from '../i18n';
+import { errorMessage } from '../../../shared/errors';
 
 const rid = () => Math.random().toString(36).slice(2, 12);
 
@@ -251,8 +252,8 @@ export function ProfilePage() {
           ? t('AI wypełniło profil na podstawie CV i zapisało go. Sprawdź dane i popraw, co trzeba.')
           : t('AI połączyło nowe CV z profilem i zapisało zmiany. Nowe pozycje są oznaczone na zielono - sprawdź je.'),
       );
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e));
     } finally {
       setBusy(null);
     }
@@ -300,8 +301,8 @@ export function ProfilePage() {
           ? t('Wszystkie projekty z GitHuba są już w profilu - nie ma nic nowego do dodania.')
           : `${k ? t('Dodano {projects} i {skills} z GitHuba.', { projects, skills }) : t('Dodano {projects} z GitHuba.', { projects })} ${t('Nowe pozycje są oznaczone na zielono - sprawdź je.')}`,
       );
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e));
     } finally {
       setBusy(null);
     }
@@ -317,8 +318,8 @@ export function ProfilePage() {
       const saved = await api.uploadPhoto(p.id, file);
       local((x) => ({ ...x, photo: saved.photo }));
       setPhotoBust(String(Date.now()));
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e));
     } finally {
       setBusy(null);
     }
@@ -330,8 +331,8 @@ export function ProfilePage() {
       await flush();
       await api.deletePhoto(p.id);
       local((x) => ({ ...x, photo: '' }));
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e));
     }
   };
 

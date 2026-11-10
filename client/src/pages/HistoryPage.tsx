@@ -5,6 +5,7 @@ import { api } from '../api';
 import { useApp } from '../ctx';
 import { useT } from '../i18n';
 import { ErrorBox, fmtDate, GoworkLink, newsLabel, ScoreBadge, STATUS_LABELS, STATUSES, statusTone, usd } from '../components/ui';
+import { errorMessage } from '../../../shared/errors';
 
 export function HistoryPage() {
   const { current } = useApp();
@@ -27,8 +28,8 @@ export function HistoryPage() {
     try {
       await api.patchApplication(current.id, a.id, { status });
       setApps((prev) => prev?.map((x) => (x.id === a.id ? { ...x, status: status as any } : x)) ?? null);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e));
     }
   };
 
@@ -47,8 +48,8 @@ export function HistoryPage() {
       const cv = await api.generate(current.id, a.id);
       setNotice(t('„{title}”: nowa wersja CV {v}.', { title: a.posting?.title ?? '', v: cv.version }));
       await load();
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e));
     } finally {
       setSyncing(null);
     }
@@ -66,8 +67,8 @@ export function HistoryPage() {
           : res.message,
       );
       await load();
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e));
     } finally {
       setSyncing(null);
     }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { AtsReport, ImproveOption, ImproveOptions } from '../../../../shared/schemas';
 import { ErrorBox, scoreColor } from '../../components/ui';
 import { useT } from '../../i18n';
+import { errorMessage } from '../../../../shared/errors';
 
 type T = ReturnType<typeof useT>['t'];
 
@@ -66,8 +67,8 @@ function FactForm({ question, placeholder, onSave, onCancel }: { question: strin
     setError(null);
     try {
       await onSave(text.trim());
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e));
       setBusy(false);
     }
   };

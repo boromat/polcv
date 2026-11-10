@@ -4,6 +4,7 @@ import { api } from '../api';
 import { useApp } from '../ctx';
 import { Busy, ErrorBox, Field } from '../components/ui';
 import { useT } from '../i18n';
+import { errorMessage } from '../../../shared/errors';
 
 export function NewApplicationPage() {
   const { t } = useT();
@@ -24,8 +25,8 @@ export function NewApplicationPage() {
     try {
       const app = await api.createApplication(current.id, url, showText ? text : '');
       nav(`/app/${app.id}`);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e));
       // Gdy link nie działa, od razu pokazujemy pole na wklejenie tekstu.
       if (!showText) setShowText(true);
     } finally {

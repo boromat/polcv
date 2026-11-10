@@ -3,6 +3,7 @@ import { appendUsage, envApiKey, getProfile, getSettings, HttpError, nowIso } fr
 import { maskForAi, profileTerms, TOKENS_NOTE, type ProfileTerm } from '../privacy/polanon';
 import { cleanTail, plainDashes } from './strings';
 import { tr } from '../i18n';
+import { errorMessage } from '../../shared/errors';
 
 const API = 'https://openrouter.ai/api/v1';
 
@@ -234,8 +235,8 @@ ${JSON.stringify(jsonSchema)}`;
       const parsed = opts.schema.safeParse(extractJson(r.content));
       if (parsed.success) return { ok: true, data: parsed.data };
       return { ok: false, error: z.prettifyError(parsed.error).slice(0, 2000) };
-    } catch (e: any) {
-      return { ok: false, error: `Niepoprawny JSON: ${e.message}` };
+    } catch (e) {
+      return { ok: false, error: `Niepoprawny JSON: ${errorMessage(e)}` };
     }
   };
 

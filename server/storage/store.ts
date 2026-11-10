@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { nanoid } from 'nanoid';
 import type { Application, CvVersion, Profile, Settings, UsageEntry, AtsReport, InterviewPrep, CoverLetter, CourseAdvice, Career } from '../../shared/schemas';
 import { tr } from '../i18n';
+import { errorMessage } from '../../shared/errors';
 
 export const DATA_DIR = path.resolve(process.env.CV_DATA_DIR || path.join(process.cwd(), 'data'));
 
@@ -32,8 +33,8 @@ async function retryBusy<T>(fn: () => Promise<T>): Promise<T> {
   for (let attempt = 0; ; attempt++) {
     try {
       return await fn();
-    } catch (e: any) {
-      if (attempt >= 5 || !RETRY_CODES.has(e?.code)) throw e;
+    } catch (e) {
+      if (attempt >= 5 || !RETRY_CODES.has((e as NodeJS.ErrnoException)?.code ?? '')) throw e;
       await sleep(25 * 2 ** attempt);
     }
   }
@@ -67,15 +68,16 @@ async function readJson<T>(file: string): Promise<T | null> {
   let raw: string;
   try {
     raw = await retryBusy(() => fs.readFile(file, 'utf8'));
-  } catch (e: any) {
-    if (e.code === 'ENOENT' || e.code === 'ENOTDIR') return null;
+  } catch (e) {
+    const code = (e as NodeJS.ErrnoException)?.code;
+    if (code === 'ENOENT' || code === 'ENOTDIR') return null;
     throw e;
   }
   try {
     // BOM dopisuje np. starszy Notatnik przy ręcznej edycji.
     return JSON.parse(raw.replace(/^\uFEFF/, '')) as T;
-  } catch (e: any) {
-    throw new Error(tr('Plik {file} jest uszkodzony i nie da się go odczytać ({error}).', { file, error: e.message }));
+  } catch (e) {
+    throw new Error(tr('Plik {file} jest uszkodzony i nie da się go odczytać ({error}).', { file, error: errorMessage(e) }), { cause: e });
   }
 }
 
@@ -85,8 +87,8 @@ async function readListed<T>(file: string): Promise<T | null> {
     const v = await readJson<T>(file);
     if (v === null || typeof v === 'object') return v;
     throw new Error('to nie jest obiekt JSON');
-  } catch (e: any) {
-    console.warn(`[dane] Pomijam plik, którego nie da się odczytać: ${file} (${e?.message ?? e})`);
+  } catch (e) {
+    console.warn(`[dane] Pomijam plik, którego nie da się odczytać: ${file} (${errorMessage(e)})`);
     return null;
   }
 }

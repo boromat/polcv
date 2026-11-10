@@ -9,6 +9,7 @@ import { GapStep } from './app/GapStep';
 import { CvEditor, pendingCount } from './app/CvEditor';
 import { ReportView } from './app/ReportView';
 import { CoursesView, InterviewView, LetterView, PostingView } from './app/ExtrasViews';
+import { errorMessage } from '../../../shared/errors';
 
 type Tab = 'cv' | 'report' | 'posting' | 'interview' | 'letter' | 'courses';
 type Patch = Partial<Pick<CvVersion, 'content' | 'decisions' | 'template' | 'photo' | 'rodo'>>;
@@ -77,8 +78,8 @@ export function ApplicationPage() {
           // Lokalna treść CV jest źródłem prawdy podczas edycji; z serwera bierzemy tylko wyliczenia.
           setVd((prev) => (prev && prev.cv.version === v ? { ...fresh, cv: prev.cv, pending: pendingCount(prev.cv) } : prev));
           setBust(String(Date.now()));
-        } catch (e: any) {
-          setError(e.message);
+        } catch (e) {
+          setError(errorMessage(e));
         }
       });
     },
@@ -102,8 +103,8 @@ export function ApplicationPage() {
     try {
       await flushSaves();
       await fn((m, h) => setBusy({ message: m, hint: h }));
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e));
     } finally {
       setBusy(null);
     }
@@ -298,8 +299,8 @@ export function ApplicationPage() {
       try {
         await api.patchApplication(pid, aid, { notes });
         setDetail((d) => (d ? { ...d, application: { ...d.application, notes } } : d));
-      } catch (e: any) {
-        setError(e.message);
+      } catch (e) {
+        setError(errorMessage(e));
       }
     });
   };

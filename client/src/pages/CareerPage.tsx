@@ -5,6 +5,7 @@ import { api } from '../api';
 import { useApp } from '../ctx';
 import { Busy, ErrorBox, Field, fmtDate, GoworkLink, scoreTone } from '../components/ui';
 import { useT } from '../i18n';
+import { errorMessage } from '../../../shared/errors';
 
 const CONTRACTS = ['umowa o pracę', 'umowa zlecenie', 'B2B', 'staż / praktyki'] as const;
 const RADII = [10, 20, 30, 50, 75, 100];
@@ -540,8 +541,8 @@ export function CareerPage() {
       setCareer(c);
       setTab('offers');
       roles = c.proposals?.roles ?? [];
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e));
     } finally {
       setBusy(null);
     }
@@ -555,8 +556,8 @@ export function CareerPage() {
     try {
       const c = await api.careerOffers(pid, roleId);
       setCareer((prev) => (prev ? { ...prev, offers: { ...prev.offers, [roleId]: c.offers[roleId] } } : c));
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e));
     } finally {
       setSearching((s) => {
         const n = new Set(s);
@@ -580,8 +581,8 @@ export function CareerPage() {
     try {
       const app = await api.createApplication(pid, lead.url, '');
       nav(`/app/${app.id}`);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e));
       setBusy(null);
     }
   };

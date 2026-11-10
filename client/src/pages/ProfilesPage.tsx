@@ -5,6 +5,7 @@ import { api } from '../api';
 import { useApp } from '../ctx';
 import { useT } from '../i18n';
 import { ErrorBox, fmtDate, PRONOUNS } from '../components/ui';
+import { errorMessage } from '../../../shared/errors';
 
 export function ProfilesPage() {
   const { profiles, current, select, reloadProfiles } = useApp();
@@ -23,8 +24,8 @@ export function ProfilesPage() {
       setName('');
       setPronouns('');
       nav('/profile');
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e));
     }
   };
 
@@ -34,8 +35,8 @@ export function ProfilesPage() {
       await api.deleteProfile(id);
       if (current?.id === id) select(null);
       await reloadProfiles();
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e));
     }
   };
 

@@ -3,6 +3,7 @@ import { api, type ModelInfo, type PolanonStatus, type SettingsPatch, type Setti
 import { useApp } from '../ctx';
 import { ErrorBox, Field, usd } from '../components/ui';
 import { useT } from '../i18n';
+import { errorMessage } from '../../../shared/errors';
 
 function ModelSelect({ value, models, onChange }: { value: string; models: ModelInfo[]; onChange: (v: string) => void }) {
   const { t } = useT();
@@ -87,8 +88,8 @@ function PrivacyCard({ settings, onSave }: { settings: SettingsView; onSave: (p:
       const r = await api.installPolanon(commands);
       setInstallLog(r);
       setStatus(r.status);
-    } catch (e: any) {
-      setInstallLog({ ok: false, output: e.message });
+    } catch (e) {
+      setInstallLog({ ok: false, output: errorMessage(e) });
     } finally {
       setInstalling(false);
     }
@@ -104,8 +105,8 @@ function PrivacyCard({ settings, onSave }: { settings: SettingsView; onSave: (p:
       const r = await api.installNer(commands);
       setInstallLog(r);
       setStatus(r.status);
-    } catch (e: any) {
-      setInstallLog({ ok: false, output: e.message });
+    } catch (e) {
+      setInstallLog({ ok: false, output: errorMessage(e) });
     } finally {
       setInstalling(false);
     }
@@ -232,8 +233,8 @@ function UpdateCard() {
     setBusy(true);
     try {
       setLog(await api.updatePolcv(commands));
-    } catch (e: any) {
-      setLog({ ok: false, output: e.message, version: status?.current ?? '' });
+    } catch (e) {
+      setLog({ ok: false, output: errorMessage(e), version: status?.current ?? '' });
     } finally {
       setBusy(false);
     }
@@ -295,8 +296,8 @@ export function SettingsPage() {
       await api.saveSettings({ apiKey: key.trim() });
       setKey('');
       await reloadSettings();
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e));
     }
   };
 
@@ -306,8 +307,8 @@ export function SettingsPage() {
       await reloadSettings();
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e));
     }
   };
 
