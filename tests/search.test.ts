@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { activeSearchers, cleanPhrase, filterLeads, mapContract, parseNofluff, parseSalaryText, screenLeads, toMonthly } from '../server/jobs/search';
+import { activeSearchers, cleanPhrase, mapContract, parseNofluff, parseSalaryText, screenLeads, toMonthly } from '../server/jobs/search';
 import { distanceKm } from '../server/jobs/geocode';
 import type { CareerPrefs, JobLead } from '../shared/schemas';
 
@@ -76,6 +76,9 @@ describe('wynagrodzenia i umowy z portali', () => {
     expect(l.url).toBe('https://nofluffjobs.com/pl/job/acme-junior-analyst-warszawa');
   });
 });
+
+/** Tylko oferty, które przeszły filtry. */
+const filterLeads = (...args: Parameters<typeof screenLeads>) => screenLeads(...args).kept;
 
 describe('filtry ofert z preferencji', () => {
   it('odrzuca seniorów, duplikaty i niechciane umowy', () => {

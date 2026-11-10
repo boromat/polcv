@@ -238,13 +238,6 @@ export async function updateVersion(
   return { cv: next, profileUpdates };
 }
 
-export async function setCurrentVersion(profileId: string, appId: string, v: number): Promise<Application> {
-  await store.getVersion(profileId, appId, v);
-  return store.updateApplication(profileId, appId, (a) => {
-    a.currentVersion = v;
-  });
-}
-
 async function renderCv(profile: Profile, cv: CvVersion, mode: RenderMode): Promise<string> {
   const photo = photoDataUri(store.profileDir(profile.id), profile.photo);
   return renderCvHtml(cv, profile, photo, mode);

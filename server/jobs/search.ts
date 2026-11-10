@@ -174,8 +174,6 @@ export function screenLeads(leads: JobLead[], prefs: CareerPrefs, seniority: Sen
   return out;
 }
 
-export const filterLeads = (leads: JobLead[], prefs: CareerPrefs, seniority: Seniority) => screenLeads(leads, prefs, seniority).kept;
-
 // Jawne granice słów - \b w JS nie rozumie polskich liter ("staż").
 const NOISE_WORDS = /(?<=^|[\s,/(-])(junior|senior|mid|regular|młodszy|młodsza|starszy|starsza|stażysta|stażystka|staż|praktyki|praktykant|intern|internship|trainee|praca|zdalna|zdalnie|remote|hybrydowa|hybrid|k\/m|m\/k)(?=$|[\s,/)-])/gi;
 
