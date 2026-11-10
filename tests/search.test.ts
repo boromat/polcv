@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cleanPhrase, filterLeads, mapContract, parseNofluff, parseSalaryText, screenLeads, toMonthly } from '../server/jobs/search';
+import { activeSearchers, cleanPhrase, filterLeads, mapContract, parseNofluff, parseSalaryText, screenLeads, toMonthly } from '../server/jobs/search';
 import { distanceKm } from '../server/jobs/geocode';
 import type { CareerPrefs, JobLead } from '../shared/schemas';
 
@@ -128,6 +128,11 @@ describe('filtry ofert z preferencji', () => {
     const out = parseNofluff(html, { point: pruszkow, km: 30 });
     expect(out.map((l) => l.location)).toEqual(['Warszawa (~15 km)']);
     expect(Math.round(distanceKm(pruszkow, { lat: 50.0647, lon: 19.945 }))).toBeGreaterThan(200);
+  });
+
+  it('program sam przeszukuje tylko nofluffjobs: żadnych dodatkowych modułów z innymi portalami', () => {
+    // Inne portale nie pozwalają na automatyczne pobieranie ofert (blokada albo robots.txt), więc program ich nie wczytuje.
+    expect(Object.values(activeSearchers()).map((s) => s.name)).toEqual(['nofluffjobs']);
   });
 
   it('wymiar etatu', () => {

@@ -189,24 +189,13 @@ export function cleanPhrase(p: string): string {
 export type Searcher = (q: SearchQuery) => Promise<JobLead[]>;
 type Searchers = Record<string, { name: string; run: Searcher }>;
 
-// Tylko portale, których robots.txt pozwala automatowi na wyszukiwanie. pracuj.pl blokuje automaty,
-// a justjoin.it zabrania /api/ - dla nich program podaje gotowe linki do otwarcia w przeglądarce.
-const PUBLIC_SEARCHERS: Searchers = { nofluff: { name: 'nofluffjobs', run: searchNofluff } };
+// Program sam przeszukuje tylko portale, których robots.txt na to pozwala: dziś jest to nofluffjobs.
+// pracuj.pl blokuje automaty, a justjoin.it zabrania /api/, więc dla nich są tylko linki, które kandydat
+// otwiera sam w przeglądarce. Innych źródeł ofert program nie wczytuje.
+const SEARCHERS: Searchers = { nofluff: { name: 'nofluffjobs', run: searchNofluff } };
 
-// Opcjonalny moduł z dodatkowymi źródłami ofert (eksport SEARCHERS); bez niego działa samo nofluffjobs.
-const EXTRA_MODULE = './local/portals.ts';
-let extraSearchers: Promise<Searchers> | null = null;
-const loadExtra = (): Promise<Searchers> =>
-  (extraSearchers ??= import(EXTRA_MODULE).then(
-    (m) => m.SEARCHERS ?? {},
-    (e) => {
-      if (e?.code !== 'ERR_MODULE_NOT_FOUND') console.warn(`[szukaj] Nie udało się wczytać ${EXTRA_MODULE}: ${e?.message}`);
-      return {};
-    },
-  ));
-
-export async function activeSearchers(): Promise<Searchers> {
-  return { ...PUBLIC_SEARCHERS, ...(await loadExtra()) };
+export function activeSearchers(): Searchers {
+  return SEARCHERS;
 }
 
 async function pool<T>(tasks: (() => Promise<T>)[], limit: number): Promise<PromiseSettledResult<T>[]> {
@@ -234,7 +223,7 @@ export async function searchRole(role: RoleProposal, prefs: CareerPrefs): Promis
 
   // Po usunięciu "junior" z "junior AI" zostaje samo "AI" - zbyt ogólne, pomijamy frazy krótsze niż 4 znaki.
   const phrases = [...new Set([...role.keywords, role.title].map(cleanPhrase).filter((p) => p.length > 3))].slice(0, 3);
-  const searchers = Object.values(await activeSearchers());
+  const searchers = Object.values(activeSearchers());
   const jobs = phrases.flatMap((phrase) =>
     scopes.flatMap((scope) =>
       searchers.map((s) => ({ portal: s.name, run: () => s.run({ phrase, scope, seniority: role.seniority, prefs }) })),

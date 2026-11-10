@@ -16,7 +16,7 @@ const view = async ({ apiKey, ...rest }: Settings) => ({
   apiKeyMasked: maskKey(apiKey),
   hasKey: !!apiKey,
   ...rest,
-  searchPortals: Object.values(await activeSearchers()).map((s) => s.name),
+  searchPortals: Object.values(activeSearchers()).map((s) => s.name),
 });
 
 settingsRouter.get('/settings', async (_req, res) => {
