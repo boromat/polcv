@@ -108,5 +108,9 @@ describe('próbna rozmowa: mocniejsza wersja nie może niczego wymyślać', () =
     expect(factualErrorIssues([{ claim: 'AI Act nakazuje anonimizację', correction: 'Obowiązek wynika z art. 32 RODO.', whereToCheck: 'tekst rozporządzenia' }], answer).join('\n')).toContain('32');
     expect(factualErrorIssues([{ claim: 'AI Act nakazuje anonimizację', correction: 'To przepisy o ochronie danych, nie AI Act.', whereToCheck: 'https://eur-lex.europa.eu' }], answer).join('\n')).toContain('link');
     expect(factualErrorIssues([{ claim: 'AI Act nakazuje anonimizację', correction: 'Zasady ochrony danych osobowych wynikają z RODO, a nie z AI Act.', whereToCheck: 'oficjalny tekst RODO' }], answer)).toEqual([]);
+    expect(factualErrorIssues([{ claim: 'x', correction: 'To rozporządzenie 2016/679.', whereToCheck: 'Dz.U. 2018 poz. 1000' }], answer).join('\n')).toMatch(/2016\/679.*Dz\.U\. 2018|Dz\.U\. 2018.*2016\/679/);
+    // Zwykła liczba (stawka, próg) może być w poprawce; numer artykułu z odpowiedzi kandydata też.
+    expect(factualErrorIssues([{ claim: 'Stawka VAT to 25%', correction: 'Podstawowa stawka VAT w Polsce to 23%.', whereToCheck: 'ustawa o VAT' }], 'Stawka VAT to 25%.')).toEqual([]);
+    expect(factualErrorIssues([{ claim: 'art. 6 RODO', correction: 'Art. 6 dotyczy podstaw przetwarzania, nie anonimizacji.', whereToCheck: 'tekst RODO' }], 'Anonimizację nakazuje art. 6 RODO.')).toEqual([]);
   });
 });

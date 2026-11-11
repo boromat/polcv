@@ -258,18 +258,22 @@ export function strongerIssues(text: string, kind: MockQuestionKind, src: FactSo
   return issues;
 }
 
+/** Odwołanie do przepisu z numerem: "art. 32", "ust. 2", "§ 4", "Dz.U. 2019", "2016/679" (numer aktu prawnego). */
+const LEGAL_REF = /(?:(?<!\p{L})(?:art\.?|artykuł\p{L}*|ust\.?|ustęp\p{L}*|§|pkt\.?|dz\.\s?u\.?|poz\.?|sec\.?|section|article)\s*\d+[a-z]?|\b\d{4}\/\d{1,4}\b)/giu;
+
 /**
- * Błąd merytoryczny wskazany przez ocenę: poprawka i podpowiedź, gdzie to sprawdzić, bez numerów (artykułów, ustaw,
- * dat) spoza odpowiedzi kandydata i bez linków, bo tych model najczęściej nie zna na pewno.
+ * Błąd merytoryczny wskazany przez ocenę: poprawka i podpowiedź, gdzie to sprawdzić, bez numerów artykułów, ustępów,
+ * paragrafów i aktów prawnych spoza odpowiedzi kandydata i bez linków, bo tych model często nie zna na pewno. Zwykła
+ * liczba w poprawce (np. stawka albo próg) zostaje.
  */
 export function factualErrorIssues(errors: { claim: string; correction: string; whereToCheck: string }[], answer: string): string[] {
-  const find = numberFinder(knownNumbers([answer]));
+  const inAnswer = new Set([...answer.matchAll(LEGAL_REF)].map((m) => normalize(m[0])));
   const issues: string[] = [];
   for (const e of errors) {
     const text = `${e.correction} ${e.whereToCheck}`;
-    const numbers = [...new Set(find(text).map((h) => h.token))];
-    if (numbers.length) {
-      issues.push(`Poprawka błędu „${e.claim}” ma numery spoza odpowiedzi kandydata (${numbers.join(', ')}). Nie podawaj numerów artykułów, ustaw ani dat: opisz poprawkę słowami i wskaż rodzaj źródła (np. oficjalny tekst przepisu).`);
+    const refs = [...new Set([...text.matchAll(LEGAL_REF)].map((m) => m[0]))].filter((r) => !inAnswer.has(normalize(r)));
+    if (refs.length) {
+      issues.push(`Poprawka błędu „${e.claim}” podaje numery przepisów spoza odpowiedzi kandydata (${refs.join(', ')}). Nie podawaj numerów artykułów, ustępów ani aktów prawnych: opisz poprawkę słowami i wskaż rodzaj źródła (np. oficjalny tekst przepisu).`);
     }
     if (/https?:\/\/|www\./i.test(text)) issues.push(`Poprawka błędu „${e.claim}” ma link. Bez linków: wskaż rodzaj źródła słowami.`);
   }
