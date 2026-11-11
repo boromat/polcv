@@ -286,3 +286,14 @@ Co nie działa (poprawki opisane niżej):
 - „B2B” liczę jako wymyślony fakt według listy przypadku, ale padło w pytaniu o brak, gdzie nazwy z dziedziny są
   dozwolone; zapis nie miał jeszcze treści mocniejszych wersji, więc nie da się sprawdzić, czy to deklaracja, czy
   przypisanie doświadczenia (od teraz wynik zapisuje te teksty).
+
+Poprawki po przebiegu 1 (jeszcze bez pomiaru na prawdziwym modelu):
+
+- długość odpowiedzi liczy program z liczby słów (45-180 to pełny wynik), model ocenia tylko cztery pozostałe
+  kryteria (`1d81f4d`),
+- prompt opisuje każdy stopień kryterium „konkret i liczby”, a program zostawia dopytanie tylko wtedy, gdy model sam
+  ocenił je na 1 albo 2 (`9d54685`),
+- kontrola nazw bierze synonimy z ogłoszenia, każdy skrót sprawdza tylko w odpowiedziach o doświadczeniu, a model
+  dostaje listę nazw z ogłoszenia, których kandydat nie ma (`29c6a3d`),
+- po trzech odrzuconych mocniejszych wersjach ocena wraca bez niej, zamiast przerywać rozmowę; ewaluacja liczy takie
+  oceny (`52bd2c3`).
