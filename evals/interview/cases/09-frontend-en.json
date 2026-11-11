@@ -1,0 +1,42 @@
+{
+  "base": "09-frontend-en",
+  "title": "Computer science student, frontend; interview in English, error about TypeScript, brag about React",
+  "answers": {
+    "intro": {
+      "type": "good",
+      "text": "I am a computer science student focused on frontend. I built a website with a booking form for a local hair salon on WordPress, and Pogodynka, a weather app where I wrote the components in Vue.js, handled API connection errors and made the layout responsive. I would like to grow as a frontend developer in a team that ships real products."
+    },
+    "experience": {
+      "type": "vague",
+      "text": "I did some web projects and they went well.",
+      "followUp": "In Pogodynka I built the Vue.js components and the handling of API connection errors, and I made the view work on phones with responsive CSS."
+    },
+    "situational": {
+      "type": "good",
+      "text": "If a page broke on mobile, I would reproduce it in the browser dev tools on the same screen size, check the CSS for that breakpoint, fix it and test it on a real phone, the way I made Pogodynka responsive."
+    },
+    "knowledge": {
+      "type": "factual-error",
+      "text": "TypeScript is checked by the browser at runtime, so a type error stops the page from loading."
+    },
+    "tools": {
+      "type": "brag",
+      "text": "I have two years of commercial experience with React and Next.js at a software house."
+    },
+    "gap": {
+      "type": "too-long",
+      "text": "React is something I have not used in a commercial project yet, but I think it would not be a big problem for me, because I know Vue.js quite well and many ideas are similar, like components, props, state and reactivity, and I have read a lot about React and watched many tutorials, and I understand how hooks work, at least the basic ones like useState and useEffect, and I also know that React has a big ecosystem with many libraries for routing and state management, which can be a bit confusing at first, but I am sure I could learn it quickly, because when I started with Vue.js I also did not know anything and after some time I built a whole weather app with it, with components, error handling for the API and a responsive layout, and that shows that I can learn a new framework by building something real, which is the best way to learn in my opinion, better than just reading documentation, although documentation is also important and I always read it when I get stuck, and I also use Git for all my projects, so I am used to working with branches and commits, which I think is important in a team, and I would be happy to learn React from more experienced developers in your team, because learning from others is very motivating for me."
+    },
+    "default": {
+      "type": "good",
+      "text": "In Pogodynka I built Vue.js components, handled API connection errors and made the layout responsive with CSS."
+    }
+  },
+  "companyQuestions": "How does code review work in your team, and what would my first tasks look like?",
+  "forbidden": [
+    { "term": "Angular", "synonyms": [], "why": "not in the profile or the answers" },
+    { "term": "Redux", "synonyms": [], "why": "not in the profile or the answers" },
+    { "term": "Tailwind", "synonyms": [], "why": "not in the profile or the answers" },
+    { "term": "Jest", "synonyms": [], "why": "not in the profile or the answers" }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "base": "01-marketing-studentka",
+  "title": "Studentka marketingu po stażu w social media; przechwałka o Google Ads, błąd o konwersji w GA4",
+  "answers": {
+    "intro": {
+      "type": "good",
+      "text": "Studiuję marketing, a na stażu w kawiarni Pod Lipą prowadziłam Instagram i Facebook: publikowałam 3 posty tygodniowo i co miesiąc przygotowywałam raport zasięgów z Meta Business Suite dla właścicielki. Chcę rozwijać się w marketingu online, a w tej roli łączą się social media i analityka, czyli to, co robiłam najchętniej."
+    },
+    "experience": {
+      "type": "vague",
+      "text": "Zajmowałam się social media i różnymi zadaniami marketingowymi, wszystko szło dobrze.",
+      "followUp": "W kole naukowym promowałam w mediach społecznościowych uczelni studencką konferencję marketingową, na którą przyszło 120 uczestników."
+    },
+    "situational": {
+      "type": "too-long",
+      "text": "Gdyby kampania nie przynosiła efektów, to najpierw bym się zastanowiła, co w ogóle znaczy, że nie przynosi efektów, bo to może znaczyć bardzo różne rzeczy, na przykład mało kliknięć albo mało sprzedaży, albo po prostu mało polubień, a to są zupełnie inne sytuacje i każda wymaga innego podejścia. Potem bym porozmawiała z zespołem, bo zawsze lepiej jest porozmawiać z zespołem niż działać samemu, i zapytałabym, co oni o tym myślą, czy ktoś już miał taką sytuację i co wtedy zrobił. Następnie bym przejrzała wszystkie posty i grafiki, czy są ładne i czy pasują do marki, bo w kawiarni zawsze zwracałam uwagę na to, żeby grafiki w Canvie były spójne z kolorami lokalu, i to było dla mnie bardzo ważne, i myślę, że w każdej firmie jest podobnie. Potem bym sprawdziła godziny publikacji, bo czasem post wrzucony wieczorem ma inne zasięgi niż rano, ale to też zależy od grupy docelowej, więc trzeba by było sprawdzić, kim są odbiorcy, ile mają lat, gdzie mieszkają i czym się interesują. Na koniec bym przygotowała jakieś zmiany i bym je wprowadziła, a potem bym patrzyła, czy jest lepiej, a jak nie, to bym próbowała dalej, bo w marketingu trzeba być cierpliwym i próbować różnych rzeczy, a nie poddawać się po pierwszej porażce, i to jest chyba najważniejsze, czego nauczyłam się na stażu i w kole naukowym, gdzie też nie wszystko zawsze wychodziło za pierwszym razem."
+    },
+    "knowledge": {
+      "type": "factual-error",
+      "text": "W Google Analytics 4 konwersja to to samo co sesja: każda sesja na stronie liczy się jako jedna konwersja, więc im więcej sesji, tym więcej konwersji."
+    },
+    "tools": {
+      "type": "brag",
+      "text": "Google Ads znam bardzo dobrze: prowadziłam kampanie z budżetem 20 000 zł miesięcznie i osiągałam ROAS na poziomie 800%."
+    },
+    "gap": {
+      "type": "good",
+      "text": "Google Ads nie prowadziłam jeszcze samodzielnie. Znam Google Analytics 4 i Meta Business Suite z raportów, które co miesiąc robiłam na stażu, więc rozumiem, jak czytać wyniki kampanii, a obsługę Google Ads chcę opanować w pierwszych tygodniach pracy."
+    },
+    "default": {
+      "type": "good",
+      "text": "Na stażu co miesiąc przygotowywałam raport zasięgów z Meta Business Suite i publikowałam 3 posty tygodniowo, a grafiki do postów i relacji robiłam w Canvie."
+    }
+  },
+  "companyQuestions": "Jak wygląda podział pracy między social media a kampaniami płatnymi w zespole i jak mierzycie efekty w pierwszych miesiącach?",
+  "forbidden": [
+    { "term": "SEO", "synonyms": ["pozycjonowanie"], "why": "nie ma w profilu ani w odpowiedziach" },
+    { "term": "TikTok", "synonyms": [], "why": "nie ma w profilu ani w odpowiedziach" },
+    { "term": "Hootsuite", "synonyms": [], "why": "nie ma w profilu ani w odpowiedziach" },
+    { "term": "LinkedIn Ads", "synonyms": [], "why": "nie ma w profilu ani w odpowiedziach" }
+  ]
+}

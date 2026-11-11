@@ -86,6 +86,52 @@ function mockPosting(text: string) {
   };
 }
 
+// ---------- Próbna rozmowa ----------
+
+const KINDS = ['intro', 'experience', 'situational', 'knowledge', 'tools', 'gap', 'probe'];
+
+function mockInterviewPlan(system: string) {
+  const en = system.includes('Język pytań: angielski');
+  const oneEn = system.includes('dokładnie jednym pytaniem po angielsku');
+  return {
+    questions: KINDS.map((kind, i) => {
+      const lang = en || (oneEn && kind === 'tools') ? 'en' : 'pl';
+      return { kind, text: lang === 'en' ? `Please tell us about topic ${i + 1}.` : `Proszę opowiedzieć o temacie ${i + 1}.`, lang, why: 'sprawdzenie' };
+    }),
+    companyChecks: ['Czym firma zajmuje się poza tym, co jest w ogłoszeniu'],
+  };
+}
+
+// Błędy merytoryczne z odpowiedzi przypadków w evals/interview (atrapa rozpoznaje je po słowach).
+const FACTUAL_ERROR = /AI Act|25%|at runtime|to samo co (sesja|narzut)|tylko wtedy, gdy wycieka/i;
+
+/** Ocena według prostych reguł: liczby i długość odpowiedzi, dopytanie przy ogólnikowej, błąd po słowach. */
+function mockInterviewGrade(system: string, user: string) {
+  const answer = /OSTATNIA ODPOWIEDŹ[^\n]*:\n"""\n([\s\S]*?)\n"""\n\nOceń odpowiedź\./.exec(user)?.[1] ?? '';
+  const en = system.includes('"followUp" po angielsku');
+  const words = answer.split(/\s+/).filter(Boolean).length;
+  const numbers = /\d/.test(answer);
+  const vague = !numbers && words < 25;
+  const error = FACTUAL_ERROR.test(answer);
+  return {
+    criteria: { concrete: numbers ? 4 : vague ? 1 : 3, fit: vague ? 2 : 4, structure: vague ? 2 : 3, correctness: error ? 1 : 4, length: words > 180 || vague ? 2 : 4 },
+    good: [en ? 'Clear answer.' : 'Jasna odpowiedź.'],
+    missing: [en ? 'More specifics.' : 'Więcej konkretów.'],
+    stronger: en ? 'My task was [describe the task], and the result was [what changed].' : 'Moim zadaniem było [opisz zadanie], a efekt to [jaki był efekt].',
+    factualErrors: error ? [{ claim: answer.slice(0, 80), correction: en ? 'This is not correct; check the definition.' : 'To nie jest poprawne: sprawdź definicję.', whereToCheck: en ? 'official documentation' : 'oficjalna dokumentacja' }] : [],
+    companyChecks: [],
+    newFacts: [],
+    followUp: vague && system.includes('TYLKO wtedy') ? (en ? 'Could you give a specific example and its result?' : 'Proszę podać konkretny przykład i jego efekt.') : '',
+  };
+}
+
+const mockInterviewSummary = () => ({
+  strengths: ['Konkretne przykłady z profilu', 'Jasne odpowiedzi', 'Motywacja do roli'],
+  improvements: ['Więcej liczb', 'Krótsze odpowiedzi', 'Sprawdzić definicje'],
+  topicsToReview: [{ topic: 'Wymagania z ogłoszenia', why: 'słabsze odpowiedzi' }],
+  candidateQuestions: 'Dobre pytania o wdrożenie.',
+});
+
 /** fetch odpowiadający jak OpenRouter: lista modeli niedostępna (404), czat zwraca JSON zgodny ze schematem zadania. */
 export function mockFetch(opts: MockOptions = {}): typeof fetch {
   return (async (input: string | URL | Request, init?: RequestInit) => {
@@ -98,6 +144,9 @@ export function mockFetch(opts: MockOptions = {}): typeof fetch {
     const name: string = body.response_format?.json_schema?.name ?? '';
     let content: unknown;
     if (name === 'job_posting') content = mockPosting(user);
+    else if (name === 'mock_interview_plan') content = mockInterviewPlan(system);
+    else if (name === 'mock_interview_grade') content = mockInterviewGrade(system, user);
+    else if (name === 'mock_interview_summary') content = mockInterviewSummary();
     else if (system.includes('SKRACANIE DO JEDNEJ STRONY')) content = JSON.parse(between(user, 'OBECNE CV:\n', '\n\n') ?? '{}');
     else {
       const profile = JSON.parse(between(user, 'PROFIL KANDYDATA:\n', '\n\nNapisz CV') ?? '{}') as PromptProfile;

@@ -9,6 +9,7 @@ kontrole PolCV, trzyma się profilu i pasuje do ogłoszenia.
 npm run eval -- --model anthropic/claude-haiku-5.5   # wymaga zmiennej OPENROUTER_API_KEY, kosztuje
 npm run eval -- --mock                              # atrapa modelu, bez kosztów (sprawdza skrypt, nie model)
 npm run eval -- --report                            # tabela porównawcza wszystkich wyników z results/
+npm run eval -- --interview --mock                  # próbna rozmowa na atrapie (opis na końcu tego pliku)
 ```
 
 Opcje: `--fast-model <id>` (analiza ogłoszeń, domyślnie Haiku 5.5), `--cases 01,15` (tylko wybrane przypadki),
@@ -224,3 +225,29 @@ Przebieg Sonneta kosztował $0,56, GPT $0,32 (razem $0,88, mniej niż szacowane 
   Pokrycie słów kluczowych zależy też od jakości jednorazowej analizy ogłoszeń przez Haiku.
 - **Zakazane fakty to dopasowanie słów.** Złapie też uczciwą deklarację („chcę się nauczyć Javy”), dlatego wynik
   podaje, gdzie i w jakiej formie fakt się pojawił, a tabela dla każdej pary pokazuje to miejsce.
+
+## Próbna rozmowa
+
+`npm run eval -- --interview --model <id>` (z `--mock` na atrapie, bez kosztów; `--cases 01,09` zawęża) przeprowadza
+próbne rozmowy przez ten sam kod co aplikacja (`server/mockInterview.ts`): plan pytań, ocena każdej odpowiedzi,
+dopytanie, podsumowanie. W CI działa tylko atrapa (`tests/evalInterview.test.ts`).
+
+**Zbiór.** 6 fikcyjnych kandydatów w `interview/cases/`: każdy bierze profil i zamrożone ogłoszenie z pary w `cases/`
+(01 marketing, 03 analiza danych, 05 mechanik, 07 księgowość, 09 frontend po angielsku, 12 handlowiec) i ma gotowe
+odpowiedzi według rodzaju pytania z planu: dobrą z liczbami z profilu, ogólnikową (z odpowiedzią na dopytanie), z błędem
+merytorycznym (np. „anonimizację nakazuje AI Act”, „stawka VAT to 25%”, „TypeScript sprawdza przeglądarka”),
+przechwałkę bez pokrycia w profilu i zbyt długą. CV to wierna kopia profilu bez AI, bo oceniamy odpowiedzi, a nie CV.
+
+**Miary:**
+
+| Miara | Jak |
+|---|---|
+| Ogólnikowa odpowiedź dostała dopytanie | czy po odpowiedzi „ogólnikowej” rekruter zadał dopytanie |
+| Błąd merytoryczny wskazany | czy ocena odpowiedzi z błędem ma co najmniej jeden `factualErrors` |
+| Dobra wyżej niż ogólnikowa | w ilu rozmowach średni wynik dobrych odpowiedzi jest wyższy niż ogólnikowych |
+| Wymyślone fakty w mocniejszych wersjach | liczone niezależnie od kontroli w kodzie: zakazane nazwy z listy przypadku (z odmianą) i liczby spoza profilu, CV i odpowiedzi kandydata, bez miejsc w nawiasach |
+| Odrzucone odpowiedzi modelu | ile razy kontrole (plan, mocniejsza wersja, dopytanie) kazały modelowi poprawić odpowiedź |
+| Koszt i czas jednej rozmowy | koszt z zapisu zużycia (zadanie „próbna rozmowa”), czas od planu do podsumowania |
+
+Wyników na prawdziwym modelu jeszcze nie ma: przebieg wymaga zgody na koszt (szacunkowo ok. $0,02 na rozmowę na
+`anthropic/claude-haiku-5.5`).

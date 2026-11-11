@@ -184,6 +184,7 @@ npm test           # vitest: keywords, GDPR logic, PDF round trip, AI client, se
 npm run typecheck  # TypeScript 7 (the @typescript/native package)
 npm run lint       # ESLint with typescript-eslint; the typescript 6.0 package is only for its parser
 npm run eval -- --mock   # quality evaluation on a mock model; with --model <id> on the real API (evals/README.md)
+npm run eval -- --interview --mock   # mock interview evaluation on a mock model
 ```
 
 - `server/` - Express API: posting fetchers and job search (`jobs/`), prompts (`llm/prompts/`),

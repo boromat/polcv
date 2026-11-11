@@ -1,0 +1,41 @@
+{
+  "base": "05-mechanik-samochodowy",
+  "title": "Mechanik samochodowy; ogólnikowe przedstawienie się, błąd o płynie hamulcowym, przechwałka o uprawnieniach",
+  "answers": {
+    "intro": {
+      "type": "vague",
+      "text": "Jestem mechanikiem, lubię samochody i chcę się rozwijać.",
+      "followUp": "W Auto Naprawie Lipiec diagnozuję usterki testerem komputerowym OBD, wymieniam rozrządy, sprzęgła i układy hamulcowe i serwisuję klimatyzację."
+    },
+    "experience": {
+      "type": "good",
+      "text": "W Auto Naprawie Lipiec wymieniam rozrządy, sprzęgła i układy hamulcowe w osobówkach i dostawczakach, diagnozuję usterki testerem OBD i serwisuję klimatyzację. Przyjmuję też auta od klientów i tłumaczę im, co trzeba naprawić i dlaczego."
+    },
+    "situational": {
+      "type": "too-long",
+      "text": "Jakby klient przyjechał z autem, które szarpie przy ruszaniu, to najpierw bym go wypytał, od kiedy to się dzieje, czy na zimnym, czy na ciepłym silniku, czy przy każdym ruszaniu, czy tylko czasem, czy coś było ostatnio robione przy aucie, bo często jest tak, że ktoś gdzieś coś robił i potem są problemy, a klient o tym nie mówi, dopóki się go nie zapyta. Potem bym się przejechał z klientem albo sam, żeby poczuć, jak to szarpanie wygląda, bo co innego jest, jak klient opowiada, a co innego, jak się samemu poczuje, czy to sprzęgło, czy może silnik, czy poduszki silnika, czy coś z zapłonem. Potem bym podłączył tester OBD i sprawdził błędy, ale nie zawsze błędy wszystko pokazują, więc bym jeszcze popatrzył na parametry na żywo, na obroty, na mieszankę, na czujniki. Jakby to było sprzęgło, to bym sprawdził, czy się ślizga, czy docisk jest dobry, czy dwumasa nie stuka, a jakby poduszki, to bym obejrzał je na podnośniku. Na koniec bym wytłumaczył klientowi, co jest do zrobienia, ile to kosztuje i ile potrwa, bo klienci nie lubią niespodzianek, i zawsze staram się mówić prosto, bez fachowych słów, żeby klient rozumiał, za co płaci, i żeby wrócił do warsztatu następnym razem, bo zadowolony klient to podstawa w tej pracy."
+    },
+    "knowledge": {
+      "type": "factual-error",
+      "text": "Płyn hamulcowy wymienia się tylko wtedy, gdy wycieka, bo sam z siebie nie traci właściwości."
+    },
+    "tools": {
+      "type": "brag",
+      "text": "Mam uprawnienia SEP i jestem diagnostą stacji kontroli pojazdów z 10-letnim stażem."
+    },
+    "gap": {
+      "type": "good",
+      "text": "Z pojazdami elektrycznymi jeszcze nie pracowałem. Na co dzień diagnozuję usterki testerem OBD, więc z elektroniką samochodową jestem obeznany, i chętnie przeszedłbym szkolenie z napraw aut elektrycznych."
+    },
+    "default": {
+      "type": "good",
+      "text": "Diagnozuję usterki testerem OBD i wymieniam rozrządy, sprzęgła i układy hamulcowe w osobówkach i dostawczakach."
+    }
+  },
+  "companyQuestions": "Jakie marki aut najczęściej trafiają do warsztatu i czy jest możliwość szkoleń z nowych układów?",
+  "forbidden": [
+    { "term": "ASO", "synonyms": [], "why": "nie ma w profilu ani w odpowiedziach" },
+    { "term": "spawanie", "synonyms": ["spawacz"], "why": "nie ma w profilu ani w odpowiedziach" },
+    { "term": "lakierowanie", "synonyms": ["lakiernik"], "why": "nie ma w profilu ani w odpowiedziach" }
+  ]
+}

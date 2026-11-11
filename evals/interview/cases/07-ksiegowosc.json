@@ -1,0 +1,41 @@
+{
+  "base": "07-ksiegowosc-studentka",
+  "title": "Studentka rachunkowości po praktykach; błąd o stawce VAT i KPiR, przechwałka o sprawozdaniach",
+  "answers": {
+    "intro": {
+      "type": "good",
+      "text": "Studiuję finanse i rachunkowość. Na praktykach w Biurze Rachunkowym Bilans księgowałam faktury zakupu i sprzedaży w KPiR dla jednoosobowych firm i wprowadzałam dokumenty do Comarch ERP Optima. Chcę pracować w biurze rachunkowym, bo to praktyczne przedłużenie moich studiów."
+    },
+    "experience": {
+      "type": "vague",
+      "text": "Na praktykach robiłam różne rzeczy z dokumentami i fakturami.",
+      "followUp": "Księgowałam faktury zakupu i sprzedaży w KPiR, wprowadzałam je do Comarch ERP Optima i przygotowywałam dokumenty do archiwizacji."
+    },
+    "situational": {
+      "type": "too-long",
+      "text": "Jeśli klient dostarczyłby dokumenty po terminie, to najpierw bym się zastanowiła, ile jest czasu do złożenia deklaracji, bo to najważniejsze, żeby nie przekroczyć terminu, a potem bym zadzwoniła do klienta i grzecznie przypomniała, że dokumenty są potrzebne, i zapytała, kiedy może je dostarczyć, bo czasem klienci po prostu zapominają albo nie wiedzą, które dokumenty są potrzebne, więc dobrze jest im to wyjaśnić. Potem bym porozmawiała z przełożoną, czy w takiej sytuacji mamy jakąś procedurę, bo każde biuro ma swoje zasady, i nie chciałabym robić czegoś po swojemu, jeśli jest ustalony sposób. Jeśli dokumenty przyszłyby w ostatniej chwili, to bym je od razu zaksięgowała, sprawdzając dwa razy kwoty i daty, bo w pośpiechu łatwo o błąd, a błąd w deklaracji to potem dużo więcej pracy przy korekcie. Na koniec zaproponowałabym klientowi, żeby w przyszłości przesyłał dokumenty na bieżąco, na przykład co tydzień, i może przypomnienie mailem kilka dni przed terminem, bo to ułatwia pracę i biuru, i klientowi, a ja lubię, jak wszystko jest poukładane i zrobione na czas, co wyniosłam też z pracy w kinie, gdzie na koniec każdej zmiany rozliczałam kasę i wszystko musiało się zgadzać co do grosza."
+    },
+    "knowledge": {
+      "type": "factual-error",
+      "text": "Podstawowa stawka VAT w Polsce wynosi 25%, a KPiR prowadzą przede wszystkim spółki z o.o."
+    },
+    "tools": {
+      "type": "good",
+      "text": "Na praktykach wprowadzałam dokumenty do Comarch ERP Optima, a Excela używam do zestawień. Na koniec każdej zmiany w kinie rozliczałam kasę, więc pilnuję, żeby kwoty się zgadzały."
+    },
+    "gap": {
+      "type": "brag",
+      "text": "Samodzielnie sporządzałam sprawozdania finansowe i deklaracje CIT dla 30 spółek."
+    },
+    "default": {
+      "type": "good",
+      "text": "Księgowałam faktury w KPiR dla jednoosobowych firm i wprowadzałam dokumenty do Comarch ERP Optima."
+    }
+  },
+  "companyQuestions": "Ilu klientów obsługuje jedna osoba w zespole i jak wygląda wdrożenie nowej osoby?",
+  "forbidden": [
+    { "term": "Symfonia", "synonyms": [], "why": "nie ma w profilu ani w odpowiedziach" },
+    { "term": "enova", "synonyms": [], "why": "nie ma w profilu ani w odpowiedziach" },
+    { "term": "ACCA", "synonyms": [], "why": "nie ma w profilu ani w odpowiedziach" }
+  ]
+}

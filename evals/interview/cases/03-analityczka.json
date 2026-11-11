@@ -1,0 +1,42 @@
+{
+  "base": "03-analityczka-danych",
+  "title": "Asystentka sprzedaży przechodząca do analizy danych; błąd o AI Act, przechwałka o SQL",
+  "answers": {
+    "intro": {
+      "type": "good",
+      "text": "Pracuję jako asystentka ds. sprzedaży w Hurtowni Bałtyk: co tydzień przygotowuję raporty sprzedaży w Excelu dla 12 przedstawicieli handlowych, korzystam z tabel przestawnych i WYSZUKAJ.PIONOWO, a ostatnio uporządkowałam bazę 3 000 klientów i usunęłam duplikaty. Chcę przejść do analizy danych na pełen etat, bo najwięcej satysfakcji dają mi właśnie raporty."
+    },
+    "experience": {
+      "type": "too-long",
+      "text": "Moje doświadczenie to przede wszystkim praca w hurtowni, gdzie robię bardzo dużo różnych rzeczy związanych z danymi i raportami, ale też z obsługą przedstawicieli, z telefonami, z mailami i z przygotowaniem spotkań, więc tak naprawdę mój dzień jest bardzo różnorodny i nigdy nie wiem, co mnie czeka. Najważniejsze są raporty sprzedaży, które robię co tydzień w Excelu, i tam używam tabel przestawnych, funkcji wyszukiwania i formatowania warunkowego, żeby wszystko było czytelne, bo przedstawiciele nie lubią czytać długich tabel i wolą, jak od razu widać, co jest dobrze, a co źle. Do tego przygotowuję zestawienia na spotkania zarządu w PowerPoincie, co też zajmuje sporo czasu, bo trzeba wszystko sprawdzić kilka razy i dopasować wykresy do szablonu firmy, który nie zawsze jest wygodny. Wcześniej byłam na stażu w biurze usług finansowych, gdzie wprowadzałam faktury do arkusza i uzgadniałam salda z wyciągami, i tam nauczyłam się dokładności, bo jedna pomyłka w kwocie potrafiła zepsuć całe zestawienie i trzeba było szukać błędu przez pół dnia. Uważam, że to wszystko razem daje mi dobre podstawy do pracy analityka, bo znam dane od strony praktycznej, wiem, czego potrzebują ludzie, którzy z tych raportów korzystają, i wiem, jak ważne jest, żeby liczby się zgadzały, a do tego jestem osobą dokładną i analityczną, co zawsze podkreślali moi przełożeni."
+    },
+    "situational": {
+      "type": "vague",
+      "text": "Jakby dane się nie zgadzały, to bym to jakoś sprawdziła i poprawiła.",
+      "followUp": "Przy porządkowaniu bazy 3 000 klientów porównywałam rekordy funkcją WYSZUKAJ.PIONOWO i usuwałam duplikaty, a potem sprawdzałam sumy w tabeli przestawnej."
+    },
+    "knowledge": {
+      "type": "factual-error",
+      "text": "Dane osobowe klientów w raportach zawsze anonimizuję, bo anonimizację danych nakazuje AI Act, więc w każdym raporcie usuwam nazwiska."
+    },
+    "tools": {
+      "type": "good",
+      "text": "Na co dzień pracuję w Excelu: tabele przestawne i WYSZUKAJ.PIONOWO w cotygodniowych raportach dla 12 przedstawicieli. Power BI znam z kursu i chcę w nim robić dashboardy zamiast statycznych tabel."
+    },
+    "gap": {
+      "type": "brag",
+      "text": "SQL znam bardzo dobrze: pisałam procedury składowane i optymalizowałam zapytania na bazie 5 milionów rekordów."
+    },
+    "default": {
+      "type": "good",
+      "text": "Przygotowuję cotygodniowe raporty sprzedaży dla 12 przedstawicieli i zestawienia na kwartalne spotkania zarządu."
+    }
+  },
+  "companyQuestions": "Na jakich danych będę pracować na początku i kto będzie odbiorcą moich raportów?",
+  "forbidden": [
+    { "term": "Python", "synonyms": [], "why": "nie ma w profilu ani w odpowiedziach" },
+    { "term": "Tableau", "synonyms": [], "why": "nie ma w profilu ani w odpowiedziach" },
+    { "term": "BigQuery", "synonyms": [], "why": "nie ma w profilu ani w odpowiedziach" },
+    { "term": "Looker", "synonyms": ["Looker Studio"], "why": "nie ma w profilu ani w odpowiedziach" }
+  ]
+}

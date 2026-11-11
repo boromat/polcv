@@ -1,0 +1,41 @@
+{
+  "base": "12-handlowiec-student",
+  "title": "Student zarządzania, sprzedawca w elektromarkecie; przechwałka o wynikach, błąd o marży i narzucie",
+  "answers": {
+    "intro": {
+      "type": "good",
+      "text": "Studiuję zarządzanie i pracuję jako sprzedawca w ElektroPunkcie: doradzam klientom przy wyborze laptopów i telefonów, a w 2024 roku zrealizowałem 110% planu sprzedaży usług dodatkowych. Chcę przejść do sprzedaży w terenie, bo najlepiej czuję się w rozmowie z klientem i lubię mieć jasny cel."
+    },
+    "experience": {
+      "type": "brag",
+      "text": "Byłem najlepszym sprzedawcą w całej sieci ElektroPunkt w Polsce i prowadziłem zespół 8 osób."
+    },
+    "situational": {
+      "type": "vague",
+      "text": "Jakby klient się wahał, to bym go jakoś przekonał.",
+      "followUp": "Doradzając przy laptopach, pytam najpierw, do czego klient będzie go używał, i proponuję usługę dodatkową, która pasuje do tego zastosowania; dzięki temu w 2024 roku zrealizowałem 110% planu usług dodatkowych."
+    },
+    "knowledge": {
+      "type": "factual-error",
+      "text": "Marża to to samo co narzut: jeśli kupuję za 100 zł i sprzedaję za 150 zł, to marża wynosi 50%."
+    },
+    "tools": {
+      "type": "too-long",
+      "text": "W pracy korzystam głównie z systemu sprzedażowego POS, w którym sprawdzam dostępność towaru, ceny, promocje i historię zamówień, i to jest podstawowe narzędzie, bez którego nie da się obsłużyć klienta, bo wszystko jest tam zapisane, a do tego czasem używam Excela, kiedy kierownik prosi o zestawienie sprzedaży usług dodatkowych albo kiedy trzeba porównać wyniki z poprzednim miesiącem, choć to nie zdarza się codziennie. Uważam, że szybko uczę się nowych programów, bo POS-a opanowałem w kilka dni, mimo że na początku wydawał się skomplikowany, a teraz pokazuję go nowym osobom w sklepie, kiedy przychodzą na zmianę i nie wiedzą, gdzie co jest. Jeśli w nowej pracy byłby system CRM do planowania wizyt i notowania rozmów z klientami, to myślę, że też szybko bym go opanował, bo zasada jest podobna: trzeba wiedzieć, gdzie są dane klienta, co już było ustalone i co trzeba zrobić dalej, a ja lubię mieć porządek w notatkach i wiedzieć, na czym stoję z każdym klientem, bo to buduje zaufanie i pomaga sprzedawać więcej, a w sprzedaży zaufanie klienta jest chyba najważniejsze, zaraz po dobrej znajomości oferty, którą zawsze staram się znać jak najlepiej."
+    },
+    "gap": {
+      "type": "good",
+      "text": "W terenie jeszcze nie pracowałem, ale mam prawo jazdy kat. B i w sklepie sam przygotowuję ekspozycję promocji w strefie wejścia, więc samodzielne planowanie pracy nie jest dla mnie nowe."
+    },
+    "default": {
+      "type": "good",
+      "text": "W 2024 roku zrealizowałem 110% planu sprzedaży usług dodatkowych, doradzając klientom przy wyborze laptopów i telefonów."
+    }
+  },
+  "companyQuestions": "Jak wygląda rejon, który miałbym obsługiwać, i ile wizyt dziennie jest standardem?",
+  "forbidden": [
+    { "term": "Salesforce", "synonyms": [], "why": "nie ma w profilu ani w odpowiedziach" },
+    { "term": "Pipedrive", "synonyms": [], "why": "nie ma w profilu ani w odpowiedziach" },
+    { "term": "B2B", "synonyms": [], "why": "nie ma w profilu ani w odpowiedziach" }
+  ]
+}

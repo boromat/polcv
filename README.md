@@ -168,6 +168,7 @@ npm test           # testy: słowa kluczowe, RODO, PDF w obie strony, klient AI,
 npm run typecheck  # TypeScript 7 (pakiet @typescript/native)
 npm run lint       # ESLint z typescript-eslint; pakiet typescript 6.0 jest tylko dla jego parsera
 npm run eval -- --mock   # ewaluacja jakości na atrapie modelu; z --model <id> na prawdziwym API (evals/README.md)
+npm run eval -- --interview --mock   # ewaluacja próbnej rozmowy na atrapie modelu
 ```
 
 - `server/` - Express: pobieranie ogłoszeń i wyszukiwanie (`jobs/`), prompty AI (`llm/prompts/`), szablony i PDF (`cv/`), ocena ATS (`ats/`), mostek do polanonu (`privacy/`), zapis plików (`storage/`).
