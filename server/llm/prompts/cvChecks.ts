@@ -168,10 +168,10 @@ export function sourceIssues(c: CvContent, profile: Profile): CvIssue[] {
 // ---------- Umiejętności spoza profilu ----------
 
 /** "Power BI (raporty)" → "Power BI": dopisek w nawiasie nie zmienia tego, jaką umiejętność pozycja deklaruje. */
-const skillBase = (item: string) => item.replace(/\s*\(.*?\)\s*/g, ' ').trim();
+export const skillBase = (item: string) => item.replace(/\s*\(.*?\)\s*/g, ' ').trim();
 
 /** Słowa pozycji bez znaków wokół: "(TMS)," → "TMS", "C++" i ".NET" zostają. */
-const skillWords = (s: string) =>
+export const skillWords = (s: string) =>
   s
     .split(/[\s,;]+/)
     .map((w) => w.replace(/^[^\p{L}\p{N}.]+|[^\p{L}\p{N}+#]+$/gu, ''))
@@ -181,7 +181,7 @@ const skillWords = (s: string) =>
  * Słowa, które się nie tłumaczą: skróty i wielka litera w środku (CMR, TMS, SQL, TypeScript), cyfry i znaki
  * (GA4, C++, C+E, CI/CD, Node.js). "CMR documents" to tłumaczenie "dokumenty CMR", ale "CMR" musi być w profilu.
  */
-const isNameWord = (w: string) => /\p{Lu}.*\p{Lu}|\d|[+#/]|\p{L}\.\p{L}/u.test(w);
+export const isNameWord = (w: string) => /\p{Lu}.*\p{Lu}|\d|[+#/]|\p{L}\.\p{L}/u.test(w);
 
 /** Pozycja = słowo kluczowe ogłoszenia, gdy to ta sama fraza co jego term albo synonim (w obie strony). */
 function postingMatches(base: string, keywords: Keyword[]): Keyword[] {

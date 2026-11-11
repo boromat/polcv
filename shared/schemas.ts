@@ -320,6 +320,21 @@ export const InterviewPrepSchema = z.object({
   weakSpots: z.array(z.object({ issue: z.string(), howToAddress: z.string() })),
 });
 
+// ---------- Próbna rozmowa ----------
+
+/**
+ * Rodzaje pytań próbnej rozmowy: przedstawienie się i motywacja, doświadczenie najbliższe roli, zadanie sytuacyjne
+ * z obowiązków, wiedza z wymagań obowiązkowych, narzędzia z mile widzianych, trudne pytanie o brak, dopytanie o coś z CV.
+ */
+export const MockQuestionKinds = ['intro', 'experience', 'situational', 'knowledge', 'tools', 'gap', 'probe'] as const;
+
+/** Rzecz z CV i profilu, o którą rekruter dopyta (liczona w kodzie, nie przez AI). */
+export const MockProbeSchema = z.object({
+  kind: z.enum(['skill', 'numbers', 'dates']),
+  item: z.string(),
+  detail: z.string(),
+});
+
 export const CourseCosts = ['bezpłatny', 'płatny', 'częściowo płatny'] as const;
 
 export const CourseAdviceSchema = z.object({
@@ -411,6 +426,8 @@ export type SectionKey = (typeof SectionKeys)[number];
 export type AiReview = z.infer<typeof AiReviewSchema>;
 export type AtsReport = z.infer<typeof AtsReportSchema>;
 export type InterviewPrep = z.infer<typeof InterviewPrepSchema>;
+export type MockQuestionKind = (typeof MockQuestionKinds)[number];
+export type MockProbe = z.infer<typeof MockProbeSchema>;
 export type CoverLetter = z.infer<typeof CoverLetterSchema>;
 export type CourseAdvice = z.infer<typeof CourseAdviceSchema>;
 export type Application = z.infer<typeof ApplicationSchema>;

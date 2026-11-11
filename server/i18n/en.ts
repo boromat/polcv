@@ -124,6 +124,18 @@ export const EN: Record<string, string> = {
   'Liczba spoza profilu ({numbers}) - potwierdź albo odrzuć.': 'A number that is not in your profile ({numbers}). Confirm or reject it.',
   'Tytuł z ogłoszenia, a profil nie potwierdza: {names}. Zostaw go tylko, jeśli to prawda.': 'The title comes from the posting, and your profile does not confirm: {names}. Keep it only if it is true.',
 
+  // llm/prompts/mockChecks.ts: o co rekruter dopyta na próbnej rozmowie
+  'Umiejętność „{skill}” jest w CV, ale nie pokazuje jej żaden punkt doświadczenia ani projekt: rekruter zapyta, gdzie jej użyto i z jakim efektem.':
+    'The skill "{skill}" is in your CV, but no experience point or project shows it: the recruiter will ask where you used it and with what result.',
+  'Punkt „{text}” ({where}) nie ma żadnej liczby: rekruter dopyta o skalę i efekt (ile, jak często, co się zmieniło).':
+    'The point "{text}" ({where}) has no number: the recruiter will ask about scale and result (how many, how often, what changed).',
+  'Daty projektu „{name}” w CV ({cv}) różnią się od dat repozytorium GitHub w profilu ({profile}): rekruter może zapytać, kiedy naprawdę nad nim pracowano.':
+    'The dates of the project "{name}" in your CV ({cv}) differ from the GitHub repository dates in your profile ({profile}): the recruiter may ask when you really worked on it.',
+  'Daty projektu „{name}” w CV ({cv}) różnią się od profilu ({profile}): rekruter może zapytać, kiedy naprawdę nad nim pracowano.':
+    'The dates of the project "{name}" in your CV ({cv}) differ from your profile ({profile}): the recruiter may ask when you really worked on it.',
+  '„{name}”: data końca ({end}) jest wcześniejsza niż początek ({start}).': '"{name}": the end date ({end}) is earlier than the start ({start}).',
+  '„{name}”: początek ({start}) jest w przyszłości.': '"{name}": the start ({start}) is in the future.',
+
   // llm/prompts/improvePlan.ts: co kandydat może dopisać w profilu
   '„{term}” (wymagane w ogłoszeniu): jeśli to znasz, dopisz w profilu, gdzie i jak tego używasz.':
     '"{term}" (required in the job posting): if you know it, add to your profile where and how you use it.',
