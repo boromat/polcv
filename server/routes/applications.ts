@@ -5,6 +5,7 @@ import { ApplicationStatuses, CoverLetterSchema, CvVersionSchema, GapAnswerSchem
 import * as store from '../storage/store';
 import { HttpError } from '../storage/store';
 import * as svc from '../services';
+import * as mock from '../mockInterview';
 import { honestReport } from '../ats/score';
 import { tr } from '../i18n';
 
@@ -195,6 +196,38 @@ applicationsRouter.get(`${base}/:aid/interview`, async (req, res) => {
 
 applicationsRouter.post(`${base}/:aid/interview`, async (req, res) => {
   res.json(await svc.makeInterviewPrep(req.params.pid, req.params.aid));
+});
+
+// Próbna rozmowa: pytania po jednym, ocena każdej odpowiedzi, podsumowanie (server/mockInterview.ts).
+applicationsRouter.get(`${base}/:aid/mock`, async (req, res) => {
+  res.json(await mock.getMock(req.params.pid, req.params.aid));
+});
+
+applicationsRouter.post(`${base}/:aid/mock/start`, async (req, res) => {
+  res.json(await mock.startMock(req.params.pid, req.params.aid, req.body?.restart === true));
+});
+
+applicationsRouter.post(`${base}/:aid/mock/answer`, async (req, res) => {
+  const text = typeof req.body?.text === 'string' ? req.body.text : '';
+  res.json(await mock.answerMock(req.params.pid, req.params.aid, text));
+});
+
+applicationsRouter.post(`${base}/:aid/mock/skip`, async (req, res) => {
+  res.json(await mock.skipMock(req.params.pid, req.params.aid));
+});
+
+applicationsRouter.post(`${base}/:aid/mock/finish`, async (req, res) => {
+  res.json(await mock.finishMock(req.params.pid, req.params.aid));
+});
+
+applicationsRouter.post(`${base}/:aid/mock/facts`, async (req, res) => {
+  const parsed = z.object({ answerId: z.string(), index: z.number().int().min(0) }).safeParse(req.body ?? {});
+  if (!parsed.success) throw new HttpError(400, tr('Niepoprawne dane faktu'));
+  res.json(await mock.addMockFact(req.params.pid, req.params.aid, parsed.data.answerId, parsed.data.index));
+});
+
+applicationsRouter.delete(`${base}/:aid/mock`, async (req, res) => {
+  res.json(await mock.clearMock(req.params.pid, req.params.aid));
 });
 
 applicationsRouter.get(`${base}/:aid/courses`, async (req, res) => {

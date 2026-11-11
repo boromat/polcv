@@ -151,4 +151,29 @@ describe.skipIf(!withPolanon)('maskowanie przez polanon', () => {
     expect(masked.text).toContain('Kraków');
     expect(await masked.restore({ t: masked.text })).toEqual({ t: text });
   });
+
+  it('próbna rozmowa: dane osobowe z odpowiedzi kandydata idą do oceny tylko jako tokeny', async () => {
+    const { mockGrade } = await import('../server/llm/prompts/mockInterview');
+    sent.length = 0;
+    const answer = 'Nazywam się Zofia Żółkiewska, mój e-mail to zofia.zolkiewska@example.com, telefon +48 600 100 200. Robiłam raporty w Power BI.';
+    const at = new Date().toISOString();
+    const interview = {
+      id: 'm1', startedAt: at, status: 'active' as const, language: 'pl' as const, cvText: 'CV', probes: [],
+      plan: { questions: [{ id: 'q1', kind: 'experience' as const, text: 'Proszę opowiedzieć o raportach.', lang: 'pl' as const, why: '' }], companyChecks: [] },
+      turns: [
+        { id: 't1', role: 'interviewer' as const, kind: 'question' as const, questionId: 'q1', content: 'Proszę opowiedzieć o raportach.', at },
+        { id: 't2', role: 'candidate' as const, kind: 'answer' as const, questionId: 'q1', content: answer, at },
+      ],
+      grades: [], summary: null,
+    };
+    // Profil zapisany jak w aplikacji: jego dane polanon maskuje zawsze (profileTerms).
+    const saved = await store.saveProfile({ ...profile, id: store.newId() });
+    // Atrapa odsyła JSON spoza schematu oceny: wystarczy nam pierwsze zapytanie, ocena po 3 próbach się nie uda.
+    await mockGrade({ profile: saved, posting: (await import('./fixtures')).posting, cvText: 'CV', interview, questionId: 'q1', answers: [answer], followUpAllowed: true, ctx: { profileId: saved.id, task: 'test' } }).catch(() => {});
+    const prompt = JSON.stringify(sent[0].messages);
+    expect(prompt).not.toContain('Żółkiewska');
+    expect(prompt).not.toContain('zofia.zolkiewska@example.com');
+    expect(prompt).not.toContain('600 100 200');
+    expect(prompt).toContain('Power BI');
+  });
 });

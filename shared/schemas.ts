@@ -335,6 +335,101 @@ export const MockProbeSchema = z.object({
   detail: z.string(),
 });
 
+/** Odpowiedź modelu: plan rozmowy. */
+export const MockPlanSchema = z.object({
+  questions: z.array(z.object({
+    kind: z.enum(MockQuestionKinds),
+    text: z.string().describe('pytanie rekrutera, 1-2 zdania'),
+    lang: z.enum(['pl', 'en']),
+    why: z.string().describe('co rekruter chce sprawdzić'),
+  })),
+  companyChecks: z.array(z.string()).describe('rzeczy o firmie, których ogłoszenie nie mówi: do sprawdzenia przed rozmową'),
+});
+
+const Score = z.number().int().min(1).max(5);
+
+/** Odpowiedź modelu: ocena jednej odpowiedzi kandydata. */
+export const MockGradeSchema = z.object({
+  criteria: z.object({
+    concrete: Score.describe('konkret i liczby'),
+    fit: Score.describe('dopasowanie do wymagań ogłoszenia'),
+    structure: Score.describe('struktura'),
+    correctness: Score.describe('poprawność merytoryczna'),
+    length: Score.describe('długość'),
+  }),
+  good: z.array(z.string()),
+  missing: z.array(z.string()),
+  stronger: z.string().describe('mocniejsza wersja odpowiedzi, tylko z faktów; braki w nawiasach kwadratowych'),
+  factualErrors: z.array(z.object({ claim: z.string(), correction: z.string(), whereToCheck: z.string() })),
+  companyChecks: z.array(z.string()),
+  newFacts: z.array(z.object({ topic: z.string(), answer: z.string() })),
+  followUp: z.string().describe('jedno dopytanie albo pusty'),
+});
+
+/** Odpowiedź modelu: podsumowanie rozmowy. */
+export const MockSummaryAiSchema = z.object({
+  strengths: z.array(z.string()),
+  improvements: z.array(z.string()),
+  topicsToReview: z.array(z.object({ topic: z.string(), why: z.string() })),
+  candidateQuestions: z.string().describe('ocena pytań kandydata do firmy'),
+});
+
+export const MockTurnSchema = z.object({
+  id: z.string(),
+  role: z.enum(['interviewer', 'candidate']),
+  /** closing: "Czy są pytania do nas?" i odpowiedź kandydata na nie (bez oceny). */
+  kind: z.enum(['question', 'followup', 'answer', 'skip', 'closing']),
+  /** id pytania z planu albo "closing" */
+  questionId: z.string(),
+  content: z.string(),
+  at: z.string(),
+});
+
+export const MockSavedGradeSchema = MockGradeSchema.omit({ followUp: true, newFacts: true }).extend({
+  questionId: z.string(),
+  /** id odpowiedzi kandydata, którą ocenia */
+  answerId: z.string(),
+  /** średnia kryteriów zaokrąglona do całości (liczy program) */
+  score: z.number(),
+  placeholders: z.array(z.string()),
+  /** nowe fakty z odpowiedzi; do profilu trafiają dopiero po kliknięciu kandydata */
+  facts: z.array(z.object({ topic: z.string(), answer: z.string(), added: z.boolean() })),
+});
+
+export const MockSummarySchema = MockSummaryAiSchema.extend({
+  at: z.string(),
+  interviewId: z.string(),
+  /** średni wynik ocenionych odpowiedzi (null, gdy żadnej) */
+  average: z.number().nullable(),
+  answered: z.number(),
+  skipped: z.number(),
+  placeholders: z.array(z.object({ question: z.string(), items: z.array(z.string()) })),
+  costUsd: z.number(),
+});
+
+export const MockInterviewSchema = z.object({
+  id: z.string(),
+  startedAt: z.string(),
+  status: z.enum(['active', 'finished']),
+  language: z.enum(['pl', 'en']),
+  /** tekst wysłanej wersji CV z chwili startu: źródło faktów dla ocen (bez ponownego renderowania przy każdej odpowiedzi) */
+  cvText: z.string(),
+  probes: z.array(MockProbeSchema),
+  plan: z.object({
+    questions: z.array(MockPlanSchema.shape.questions.element.extend({ id: z.string() })),
+    companyChecks: z.array(z.string()),
+  }),
+  turns: z.array(MockTurnSchema),
+  grades: z.array(MockSavedGradeSchema),
+  summary: MockSummarySchema.nullable(),
+});
+
+/** Plik próbnej rozmowy przy aplikacji: bieżąca rozmowa i podsumowania wszystkich zakończonych podejść. */
+export const MockInterviewFileSchema = z.object({
+  current: MockInterviewSchema.nullable(),
+  history: z.array(MockSummarySchema),
+});
+
 export const CourseCosts = ['bezpłatny', 'płatny', 'częściowo płatny'] as const;
 
 export const CourseAdviceSchema = z.object({
@@ -428,6 +523,13 @@ export type AtsReport = z.infer<typeof AtsReportSchema>;
 export type InterviewPrep = z.infer<typeof InterviewPrepSchema>;
 export type MockQuestionKind = (typeof MockQuestionKinds)[number];
 export type MockProbe = z.infer<typeof MockProbeSchema>;
+export type MockTurn = z.infer<typeof MockTurnSchema>;
+export type MockSavedGrade = z.infer<typeof MockSavedGradeSchema>;
+export type MockSummary = z.infer<typeof MockSummarySchema>;
+export type MockInterview = z.infer<typeof MockInterviewSchema>;
+export type MockInterviewFile = z.infer<typeof MockInterviewFileSchema>;
+/** Rozmowa z bieżącym kosztem (liczonym z zapisu zużycia przy odczycie). */
+export type MockInterviewView = MockInterviewFile & { costUsd: number };
 export type CoverLetter = z.infer<typeof CoverLetterSchema>;
 export type CourseAdvice = z.infer<typeof CourseAdviceSchema>;
 export type Application = z.infer<typeof ApplicationSchema>;

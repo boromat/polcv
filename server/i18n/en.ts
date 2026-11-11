@@ -124,6 +124,14 @@ export const EN: Record<string, string> = {
   'Liczba spoza profilu ({numbers}) - potwierdź albo odrzuć.': 'A number that is not in your profile ({numbers}). Confirm or reject it.',
   'Tytuł z ogłoszenia, a profil nie potwierdza: {names}. Zostaw go tylko, jeśli to prawda.': 'The title comes from the posting, and your profile does not confirm: {names}. Keep it only if it is true.',
 
+  // mockInterview.ts: próbna rozmowa
+  'Nie ma trwającej próbnej rozmowy. Zacznij nową.': 'There is no mock interview in progress. Start a new one.',
+  'Poprzednia odpowiedź czeka jeszcze na ocenę. Spróbuj ponownie.': 'Your previous answer is still waiting for feedback. Try again.',
+  'Odpowiedź jest pusta.': 'The answer is empty.',
+  'Nie ma takiego faktu w tej rozmowie.': 'There is no such fact in this interview.',
+  'Próbna rozmowa': 'Mock interview',
+  'Niepoprawne dane faktu': 'Invalid fact data',
+
   // llm/prompts/mockChecks.ts: o co rekruter dopyta na próbnej rozmowie
   'Umiejętność „{skill}” jest w CV, ale nie pokazuje jej żaden punkt doświadczenia ani projekt: rekruter zapyta, gdzie jej użyto i z jakim efektem.':
     'The skill "{skill}" is in your CV, but no experience point or project shows it: the recruiter will ask where you used it and with what result.',

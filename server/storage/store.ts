@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { nanoid } from 'nanoid';
-import type { Application, CvVersion, Profile, Settings, UsageEntry, AtsReport, InterviewPrep, CoverLetter, CourseAdvice, Career } from '../../shared/schemas';
+import type { Application, CvVersion, Profile, Settings, UsageEntry, AtsReport, InterviewPrep, CoverLetter, CourseAdvice, Career, MockInterviewFile } from '../../shared/schemas';
 import { tr } from '../i18n';
 import { errorMessage } from '../../shared/errors';
 
@@ -350,6 +350,12 @@ export const getReport = (pid: string, aid: string, v: number) => readJson<AtsRe
 export const saveReport = (pid: string, aid: string, r: AtsReport) => writeJson(reportFile(pid, aid, r.version), r);
 
 export const getInterviewPrep = (pid: string, aid: string) => readJson<InterviewPrep>(path.join(appDir(pid, aid), 'interview.json'));
+
+const mockFile = (pid: string, aid: string) => path.join(appDir(pid, aid), 'mock-interview.json');
+export async function getMockInterview(pid: string, aid: string): Promise<MockInterviewFile> {
+  return (await readJson<MockInterviewFile>(mockFile(pid, aid))) ?? { current: null, history: [] };
+}
+export const updateMockInterview = (pid: string, aid: string, fn: Updater<MockInterviewFile>) => updateJson(mockFile(pid, aid), () => getMockInterview(pid, aid), fn);
 export const saveInterviewPrep = (pid: string, aid: string, d: InterviewPrep) => writeJson(path.join(appDir(pid, aid), 'interview.json'), d);
 export const getCoverLetter = (pid: string, aid: string) => readJson<CoverLetter>(path.join(appDir(pid, aid), 'letter.json'));
 export const saveCoverLetter = (pid: string, aid: string, d: CoverLetter) => writeJson(path.join(appDir(pid, aid), 'letter.json'), d);
