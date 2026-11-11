@@ -125,6 +125,15 @@ describe('próbna rozmowa: przebieg', () => {
     expect(v.current!.turns.slice(-2).map((t) => [t.kind, t.questionId])).toEqual([['skip', 'q2'], ['question', 'q3']]);
   });
 
+  it('dopytanie tylko po ogólnikowej odpowiedzi: przy konkrecie 3-5 program je pomija i zadaje następne pytanie', async () => {
+    const { pid, aid } = await setup();
+    replies = { mock_interview_plan: [plan()], mock_interview_grade: [grade({ criteria: { concrete: 4, fit: 4, structure: 4, correctness: 4 }, followUp: 'A jaki był efekt?' })] };
+    await mock.startMock(pid, aid);
+    const v = await mock.answerMock(pid, aid, 'Przygotowywałam 12 raportów miesięcznie w Google Analytics 4 dla zespołu.');
+    expect(lastTurn(v)).toMatchObject({ role: 'interviewer', kind: 'question', questionId: 'q2' });
+    expect(v.current!.turns.some((t) => t.kind === 'followup')).toBe(false);
+  });
+
   it('mocniejsza wersja z liczbą spoza źródeł wraca do modelu; z miejscem w nawiasach przechodzi', async () => {
     const { pid, aid } = await setup();
     replies = {

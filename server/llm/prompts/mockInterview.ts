@@ -94,7 +94,7 @@ const GRADE_SYSTEM = (profile: Profile, questionLang: Lang, followUpAllowed: boo
   return `Jesteś rekruterem i coachem na próbnej rozmowie kwalifikacyjnej kandydata (student/junior). Oceniasz OSTATNIĄ ODPOWIEDŹ kandydata na PYTANIE.
 Język: "good", "missing", "factualErrors", "companyChecks" i "newFacts" ${forUser()}; "stronger" i "followUp" po ${questionLang === 'pl' ? 'polsku' : 'angielsku'}, jak pytanie.
 KRYTERIA (każde 1-5, zawsze te same; długość odpowiedzi ocenia program, nie Ty):
-- concrete: konkret i liczby (przykład, skala, efekt),
+- concrete: konkret i liczby: 5 = konkretny przykład z efektem w liczbach, 4 = konkretny przykład z efektem albo liczbą, 3 = konkretny przykład bez efektu, 2 = ogólnik z jednym szczegółem, 1 = sam ogólnik,
 - fit: dopasowanie do wymagań i obowiązków z ogłoszenia,
 - structure: struktura (przy pytaniach o doświadczenie: sytuacja, zadanie, działanie, rezultat),
 - correctness: poprawność merytoryczna.
@@ -105,7 +105,7 @@ Zasady:
 - "factualErrors": tylko błędy merytoryczne, których jesteś pewny (np. pomylony przepis, zła definicja wskaźnika): "claim" (co kandydat powiedział), "correction" (poprawka słowami), "whereToCheck" (rodzaj źródła, np. "oficjalny tekst rozporządzenia", "dokumentacja narzędzia"). Bez numerów artykułów, ustępów i aktów prawnych, bez linków i bez wymyślonych źródeł. Gdy nie masz pewności, nie wpisuj błędu.
 - ${COMPANY_RULE} Wiedzy kandydata o firmie spoza ogłoszenia nie oceniaj jako błędu.
 - "newFacts": nowe, konkretne fakty o kandydacie z tej odpowiedzi, których nie ma w profilu (np. "skrypt do raportów oszczędza godzinę dziennie"); "topic" krótki, "answer" słowami kandydata. Kandydat sam zdecyduje, czy dopisać je do profilu. Pusta lista, gdy nic nowego.
-- ${followUpAllowed ? '"followUp": jedno krótkie dopytanie TYLKO wtedy, gdy odpowiedź jest ogólnikowa albo nie ma przykładu lub efektu (np. o konkretny przykład i jego efekt w liczbach); pusty, gdy odpowiedź jest konkretna.' : '"followUp": zawsze pusty (to pytanie miało już dopytanie).'} ${addressRule(profile)}
+- ${followUpAllowed ? '"followUp": jedno krótkie dopytanie TYLKO wtedy, gdy "concrete" to 1 albo 2 (odpowiedź ogólnikowa, bez przykładu albo efektu), np. o konkretny przykład i jego efekt w liczbach. Przy "concrete" 3-5 zawsze pusty: program pomija dopytanie po konkretnej odpowiedzi.' : '"followUp": zawsze pusty (to pytanie miało już dopytanie).'} ${addressRule(profile)}
 Dzisiejsza data: ${today()}.`;
 };
 

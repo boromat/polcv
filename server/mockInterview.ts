@@ -124,7 +124,8 @@ export async function answerMock(pid: string, aid: string, text: string): Promis
     if (!cur || cur.id !== m.id || cur.status !== 'active' || !cur.turns.some((t) => t.id === basis.id)) return;
     if (cur.grades.some((x) => x.answerId === basis.id)) return;
     cur.grades.push(saved);
-    if (!hadFollowUp && followUp.trim()) cur.turns.push(turn('interviewer', 'followup', qid, followUp.trim()));
+    // Dopytanie tylko po ogólnikowej odpowiedzi (konkret 1-2 w ocenie modelu) i najwyżej jedno na pytanie.
+    if (!hadFollowUp && g.criteria.concrete <= 2 && followUp.trim()) cur.turns.push(turn('interviewer', 'followup', qid, followUp.trim()));
     else askNext(cur, qid);
   });
   return getMock(pid, aid);
