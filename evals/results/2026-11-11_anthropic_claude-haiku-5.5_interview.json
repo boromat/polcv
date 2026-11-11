@@ -1,0 +1,537 @@
+{
+  "kind": "interview",
+  "date": "2026-11-11",
+  "model": "anthropic/claude-haiku-5.5",
+  "label": "",
+  "mock": false,
+  "summary": {
+    "cases": 6,
+    "completed": 5,
+    "vagueFollowUp": {
+      "asked": 5,
+      "total": 5
+    },
+    "goodFollowUp": {
+      "asked": 20,
+      "total": 21
+    },
+    "factualFlagged": {
+      "flagged": 5,
+      "total": 5
+    },
+    "goodAboveVague": {
+      "yes": 5,
+      "total": 5
+    },
+    "fabricated": 2,
+    "scoreByType": {
+      "good": 2.3,
+      "vague": 1.8,
+      "factual-error": 1.2,
+      "brag": 1,
+      "too-long": 2.6
+    },
+    "rejected": 14,
+    "costPerInterview": 0.027540280000000007,
+    "secondsPerInterview": 104.53620000000001
+  },
+  "cases": [
+    {
+      "id": "01-marketing",
+      "title": "Studentka marketingu po stażu w social media; przechwałka o Google Ads, błąd o konwersji w GA4",
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "questions": 8,
+      "answers": [
+        {
+          "questionId": "q1",
+          "kind": "intro",
+          "type": "good",
+          "score": 3,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q2",
+          "kind": "experience",
+          "type": "vague",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q3",
+          "kind": "situational",
+          "type": "too-long",
+          "score": 2,
+          "lengthScore": 4,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q4",
+          "kind": "knowledge",
+          "type": "factual-error",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 1,
+          "fabricated": []
+        },
+        {
+          "questionId": "q5",
+          "kind": "tools",
+          "type": "brag",
+          "score": 1,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q6",
+          "kind": "gap",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q7",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q8",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        }
+      ],
+      "average": 1.9,
+      "costUsd": 0.031361200000000006,
+      "seconds": 116.704,
+      "rejected": 4
+    },
+    {
+      "id": "03-analityczka",
+      "title": "Asystentka sprzedaży przechodząca do analizy danych; błąd o AI Act, przechwałka o SQL",
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "questions": 8,
+      "answers": [
+        {
+          "questionId": "q1",
+          "kind": "intro",
+          "type": "good",
+          "score": 3,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q2",
+          "kind": "experience",
+          "type": "too-long",
+          "score": 3,
+          "lengthScore": 4,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q3",
+          "kind": "situational",
+          "type": "vague",
+          "score": 1,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q4",
+          "kind": "knowledge",
+          "type": "factual-error",
+          "score": 1,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 1,
+          "fabricated": []
+        },
+        {
+          "questionId": "q5",
+          "kind": "tools",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q6",
+          "kind": "gap",
+          "type": "brag",
+          "score": 1,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q7",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q8",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        }
+      ],
+      "average": 2,
+      "costUsd": 0.029552600000000005,
+      "seconds": 108.151,
+      "rejected": 3
+    },
+    {
+      "id": "05-mechanik",
+      "title": "Mechanik samochodowy; ogólnikowe przedstawienie się, błąd o płynie hamulcowym, przechwałka o uprawnieniach",
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "questions": 8,
+      "answers": [
+        {
+          "questionId": "q1",
+          "kind": "intro",
+          "type": "vague",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q2",
+          "kind": "experience",
+          "type": "good",
+          "score": 3,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q3",
+          "kind": "situational",
+          "type": "too-long",
+          "score": 3,
+          "lengthScore": 3,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q4",
+          "kind": "knowledge",
+          "type": "factual-error",
+          "score": 1,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 1,
+          "fabricated": []
+        },
+        {
+          "questionId": "q5",
+          "kind": "tools",
+          "type": "brag",
+          "score": 1,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 1,
+          "fabricated": []
+        },
+        {
+          "questionId": "q6",
+          "kind": "gap",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q7",
+          "kind": "probe",
+          "type": "good",
+          "score": 3,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q8",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        }
+      ],
+      "average": 2.1,
+      "costUsd": 0.0253219,
+      "seconds": 95.297,
+      "rejected": 1
+    },
+    {
+      "id": "07-ksiegowosc",
+      "title": "Studentka rachunkowości po praktykach; błąd o stawce VAT i KPiR, przechwałka o sprawozdaniach",
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "questions": 8,
+      "answers": [
+        {
+          "questionId": "q1",
+          "kind": "intro",
+          "type": "good",
+          "score": 3,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q2",
+          "kind": "experience",
+          "type": "vague",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q3",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q4",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q5",
+          "kind": "situational",
+          "type": "too-long",
+          "score": 2,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q6",
+          "kind": "knowledge",
+          "type": "factual-error",
+          "score": 1,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 2,
+          "fabricated": []
+        },
+        {
+          "questionId": "q7",
+          "kind": "tools",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q8",
+          "kind": "gap",
+          "type": "brag",
+          "score": 1,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        }
+      ],
+      "average": 2.1,
+      "costUsd": 0.0239907,
+      "seconds": 94.785,
+      "rejected": 0
+    },
+    {
+      "id": "09-frontend-en",
+      "title": "Computer science student, frontend; interview in English, error about TypeScript, brag about React",
+      "language": "en",
+      "ok": false,
+      "error": "Model anthropic/claude-haiku-5.5 zwrócił dane w złym formacie (mock_interview_grade) w 3 próbach. Spróbuj ponownie albo wybierz inny model w Ustawieniach.",
+      "questions": 8,
+      "answers": [
+        {
+          "questionId": "q1",
+          "kind": "intro",
+          "type": "good",
+          "score": null,
+          "lengthScore": null,
+          "followUp": false,
+          "factualErrors": 0,
+          "fabricated": []
+        }
+      ],
+      "average": null,
+      "costUsd": 0.0043493,
+      "seconds": 19.598,
+      "rejected": 3
+    },
+    {
+      "id": "12-handlowiec",
+      "title": "Student zarządzania, sprzedawca w elektromarkecie; przechwałka o wynikach, błąd o marży i narzucie",
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "questions": 8,
+      "answers": [
+        {
+          "questionId": "q1",
+          "kind": "intro",
+          "type": "good",
+          "score": 3,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q2",
+          "kind": "experience",
+          "type": "brag",
+          "score": 1,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q3",
+          "kind": "situational",
+          "type": "vague",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q4",
+          "kind": "knowledge",
+          "type": "factual-error",
+          "score": 1,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 1,
+          "fabricated": []
+        },
+        {
+          "questionId": "q5",
+          "kind": "tools",
+          "type": "too-long",
+          "score": 3,
+          "lengthScore": 4,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q6",
+          "kind": "gap",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [
+            "B2B",
+            "B2B"
+          ]
+        },
+        {
+          "questionId": "q7",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        },
+        {
+          "questionId": "q8",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": []
+        }
+      ],
+      "average": 2,
+      "costUsd": 0.027475,
+      "seconds": 107.744,
+      "rejected": 3
+    }
+  ]
+}

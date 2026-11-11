@@ -53,6 +53,8 @@ describe('npm run eval -- --interview na atrapie modelu', () => {
       cases: 2,
       completed: 2,
       vagueFollowUp: { asked: 2, total: 2 },
+      // Atrapa dopytuje też po krótkiej dobrej odpowiedzi bez liczb (domyślna odpowiedź w 09): miara to pokazuje.
+      goodFollowUp: { asked: 1, total: 6 },
       factualFlagged: { flagged: 2, total: 2 },
       goodAboveVague: { yes: 2, total: 2 },
       fabricated: 0,

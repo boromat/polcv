@@ -249,5 +249,40 @@ przechwałkę bez pokrycia w profilu i zbyt długą. CV to wierna kopia profilu 
 | Odrzucone odpowiedzi modelu | ile razy kontrole (plan, mocniejsza wersja, dopytanie) kazały modelowi poprawić odpowiedź |
 | Koszt i czas jednej rozmowy | koszt z zapisu zużycia (zadanie „próbna rozmowa”), czas od planu do podsumowania |
 
-Wyników na prawdziwym modelu jeszcze nie ma: przebieg wymaga zgody na koszt (szacunkowo ok. $0,02 na rozmowę na
-`anthropic/claude-haiku-5.5`).
+### Przebieg 1: 11.11.2026, `anthropic/claude-haiku-5.5`
+
+Kod z commita `565765b`, [szczegóły](results/2026-11-11_anthropic_claude-haiku-5.5_interview.md). Miarę „dobra
+odpowiedź dostała dopytanie” dopisałem po przebiegu i policzyłem z zapisanych danych, bez nowych wywołań.
+
+| Miara | Wynik |
+|---|---|
+| Rozmowy zakończone | 5 z 6 |
+| Ogólnikowa odpowiedź dostała dopytanie | 5 z 5 |
+| Dobra odpowiedź dostała dopytanie (powinno być 0) | 20 z 21 |
+| Błąd merytoryczny wskazany | 5 z 5 |
+| Dobra odpowiedź oceniona wyżej niż ogólnikowa | 5 z 5 rozmów |
+| Średni wynik: dobra / ogólnikowa / z błędem / przechwałka / zbyt długa | 2,2 / 1,8 / 1,2 / 1,0 / 2,6 |
+| Kryterium długości: dobra / zbyt długa | 1,2 / 3,4 |
+| Wymyślone fakty w mocniejszych wersjach | 2 („B2B” w odpowiedzi na pytanie o brak, para 12) |
+| Odpowiedzi modelu odrzucone przez kontrole | 14 |
+| Koszt / czas jednej rozmowy | $0,028 / 105 s (razem $0,14) |
+
+Co działa: każdy błąd merytoryczny (AI Act, stawka VAT, płyn hamulcowy, marża i narzut, konwersja w GA4) został
+wskazany, przechwałki dostały najniższy wynik, a kontrola zatrzymała w mocniejszych wersjach m.in. „Google Ads”,
+„Next.js” i „hurtownię danych”, których kandydaci nie mieli. Plan trzy razy wrócił do modelu (brak pytania po
+angielsku, 9 pytań, brak pytania o narzędzia) i za każdym razem został poprawiony.
+
+Co nie działa (poprawki opisane niżej):
+
+- **Dopytanie prawie zawsze.** Haiku dopytywał po 20 z 21 dobrych odpowiedzi, więc „ogólnikowa dostała dopytanie” nic
+  nie znaczy. Specyfikacja mówi o dopytaniu tylko przy odpowiedzi ogólnikowej.
+- **Kryterium długości odwrócone.** Zwięzłe dobre odpowiedzi (40-70 słów) dostały za długość średnio 1,2, a zbyt długie
+  (ok. 250 słów) 3,4. Przez to zbyt długie miały wyższy średni wynik niż dobre.
+- **Rozmowa 09 (po angielsku) się przerwała.** Mocniejsza wersja pierwszej odpowiedzi trzy razy wymieniała React,
+  TypeScript i Next.js z ogłoszenia (kandydat ich nie ma), kontrola trzy razy ją odrzuciła i ocena się nie udała.
+- **Fałszywy alarm.** „GA4” zostało odrzucone, choć profil ma „Google Analytics 4” (ogłoszenie podaje je jako
+  synonim); kontrola nazw nie brała synonimów z ogłoszenia. Odrzucała też pojęcia z dziedziny w odpowiedziach
+  sytuacyjnych („CTR”, „CPC”).
+- „B2B” liczę jako wymyślony fakt według listy przypadku, ale padło w pytaniu o brak, gdzie nazwy z dziedziny są
+  dozwolone; zapis nie miał jeszcze treści mocniejszych wersji, więc nie da się sprawdzić, czy to deklaracja, czy
+  przypisanie doświadczenia (od teraz wynik zapisuje te teksty).

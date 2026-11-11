@@ -83,6 +83,8 @@ export interface AnswerResult {
   factualErrors: number;
   /** wymyślone fakty w mocniejszych wersjach tego pytania: zakazane nazwy i liczby spoza profilu, CV i odpowiedzi */
   fabricated: string[];
+  /** mocniejsze wersje tego pytania (do wglądu; starsze wyniki ich nie mają) */
+  stronger?: string[];
 }
 
 export interface InterviewCaseResult {
@@ -104,6 +106,8 @@ export interface InterviewSummary {
   cases: number;
   completed: number;
   vagueFollowUp: { asked: number; total: number };
+  /** dopytania po dobrej odpowiedzi: rekruter dopytuje tylko o ogólnikowe, więc powinno ich nie być */
+  goodFollowUp: { asked: number; total: number };
   factualFlagged: { flagged: number; total: number };
   goodAboveVague: { yes: number; total: number };
   fabricated: number;
@@ -195,6 +199,7 @@ async function runCase(c: InterviewCase, observed: { schemaName: string; accepte
       followUp: m.turns.some((x) => x.kind === 'followup' && x.questionId === q.id),
       factualErrors: grade?.factualErrors.length ?? 0,
       fabricated: m.grades.filter((g) => g.questionId === q.id).flatMap((g) => fabricated(g.stronger, c, m, profile)),
+      stronger: m.grades.filter((g) => g.questionId === q.id).map((g) => g.stronger),
     });
   }
   return {
@@ -224,6 +229,7 @@ export function summarizeInterviews(cases: InterviewCaseResult[]): InterviewSumm
     cases: cases.length,
     completed: done.length,
     vagueFollowUp: { asked: of('vague').filter((a) => a.followUp).length, total: of('vague').length },
+    goodFollowUp: { asked: of('good').filter((a) => a.followUp).length, total: of('good').length },
     factualFlagged: { flagged: of('factual-error').filter((a) => a.factualErrors > 0).length, total: of('factual-error').length },
     goodAboveVague: { yes: pairs.filter((p) => p.good! > p.vague!).length, total: pairs.length },
     fabricated: all.reduce((s, a) => s + a.fabricated.length, 0),
@@ -249,6 +255,7 @@ export function interviewMarkdown(r: InterviewEvalResult): string {
     '| Miara | Wynik |',
     '|---|---|',
     `| Ogólnikowa odpowiedź dostała dopytanie | ${frac(s.vagueFollowUp.asked, s.vagueFollowUp.total)} |`,
+    `| Dobra odpowiedź dostała dopytanie (powinno być 0) | ${frac(s.goodFollowUp.asked, s.goodFollowUp.total)} |`,
     `| Błąd merytoryczny wskazany | ${frac(s.factualFlagged.flagged, s.factualFlagged.total)} |`,
     `| Dobra odpowiedź oceniona wyżej niż ogólnikowa | ${frac(s.goodAboveVague.yes, s.goodAboveVague.total)} rozmów |`,
     `| Wymyślone fakty w mocniejszych wersjach | ${s.fabricated} |`,
