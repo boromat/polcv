@@ -50,9 +50,26 @@ What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish applicat
 5. **Exports a one-page PDF** with selectable text from three ATS-safe templates, keeps a history
    of applications with statuses, and on request prepares you for the interview, drafts a cover
    letter or suggests the courses and certificates that would help most for that posting.
-6. **Career advisor (optional):** a chat that learns what you are looking for, proposes roles you
+6. **Mock interview (in the *Rozmowa* tab):** an AI recruiter asks 6-8 questions for the posting
+   one at a time (introduction, experience, a situational task, knowledge from the requirements,
+   tools, a question about a gap; one in English when the posting requires English) and probes what
+   the program found in your CV itself: a skill no experience shows, a point without a number,
+   project dates that differ from your profile. After a vague answer it asks at most one follow-up;
+   you can skip a question, finish at any time and resume later. Every answer gets a 1-5 score
+   (specifics and numbers, fit with the posting, structure, correctness, length), comments and a
+   stronger version that uses facts only from your profile, your CV and your answers: missing
+   details stay as placeholders in brackets, such as "[how many documents a week]", and the program
+   rejects a number or a name from anywhere else. New facts from your answers reach your profile
+   only when you click *Add to profile*. The summary has your average, strengths, what to improve,
+   the placeholders to prepare, topics to review, feedback on your questions for the company and the
+   cost; summaries of every attempt are kept so you can see progress. Limits: about the company the
+   recruiter knows only what the posting says (the rest becomes "check before the interview", which
+   the program cannot verify in code); it points out factual errors only when the model is sure, so
+   it can miss some; the interview is written, not spoken. One interview costs about $0.40 on the
+   default Claude Sonnet 5.5 and about $0.02 on Claude Haiku 5.5.
+7. **Career advisor (optional):** a chat that learns what you are looking for, proposes roles you
    have a real chance at, and gives you ready-made search links for job portals.
-7. **Projects from GitHub (optional):** enter your GitHub username on the profile page and the AI
+8. **Projects from GitHub (optional):** enter your GitHub username on the profile page and the AI
    adds your public repositories as projects, using only facts from their descriptions and READMEs.
 
 ## Quick start

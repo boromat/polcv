@@ -249,6 +249,11 @@ table.table { width: 100%; border-collapse: collapse; }
 .new-item { box-shadow: 0 0 0 2px #9fdcb5; }
 details > summary { cursor: pointer; font-weight: 600; }
 .qa { border-left: 3px solid var(--accent); padding: 6px 0 6px 12px; display: flex; flex-direction: column; gap: 6px; }
+/* Próbna rozmowa: pytania rekrutera i odpowiedzi kandydata jak w rozmowie. */
+.mock-turn { padding: 8px 12px; border-radius: 8px; max-width: 760px; }
+.mock-turn.interviewer { border-left: 3px solid var(--accent); }
+.mock-turn.candidate { align-self: flex-end; background: var(--panel, rgba(127, 127, 127, 0.08)); }
+.mock-grade mark { background: #ffe58f; color: inherit; padding: 0 2px; }
 .pre { white-space: pre-wrap; }
 .steps { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--faint); }
 .steps .on { color: var(--accent); font-weight: 600; }

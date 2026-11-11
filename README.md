@@ -27,7 +27,7 @@ Jak to działa:
 3. dopytuje o rzeczy, których brakuje w Twoim profilu (odpowiedzi zapamiętuje),
 4. pisze CV pod to ogłoszenie - bez zmyślania; odważniejsze sformułowania zaznacza na żółto do Twojej decyzji, także tytuł z ogłoszenia, gdy wymienia coś, czego profil nie potwierdza (np. „Junior Java Developer” bez Javy),
 5. ocenia CV jak system ATS i AI-rekruter (wynik 0-100) i umie je automatycznie poprawić,
-6. zapisuje PDF i historię aplikacji ze statusami; na życzenie przygotowuje do rozmowy i pisze list motywacyjny,
+6. zapisuje PDF i historię aplikacji ze statusami; na życzenie przygotowuje do rozmowy, prowadzi próbną rozmowę z oceną każdej odpowiedzi i pisze list motywacyjny,
 7. na życzenie dopisuje do profilu Twoje projekty z GitHuba - tylko publiczne repozytoria i tylko to, co wynika z ich opisów i plików README.
 
 Wszystkie dane zostają na Twoim komputerze, w folderze `data`. Do AI (przez OpenRouter) wysyłana jest tylko treść profilu i ogłoszenia (oraz opisy Twoich publicznych repozytoriów, gdy dodajesz projekty z GitHuba) - a jeśli chcesz, z danymi osobowymi zamienionymi na tokeny (zob. [Ochrona danych osobowych](#ochrona-danych-osobowych-polanon--opcjonalnie)).
@@ -66,7 +66,14 @@ Przy domyślnych modelach (Claude Sonnet do pisania i oceny, Claude Haiku do ana
    - popraw tekst, jeśli chcesz - podgląd odświeża się na bieżąco (czerwona linia = koniec strony); poprawione fakty (stanowiska, daty, punkty, nowe umiejętności) zapisują się też w profilu,
    - zakładka **Raport** pokazuje wynik i konkretne poprawki; brakujące słowo kluczowe, które znasz, kliknij i napisz, gdzie tego używasz, a przy poprawkach „wymaga Twoich danych” kliknij **Uzupełnij**; odpowiedzi trafiają do profilu, a **Popraw automatycznie** tworzy nową wersję i ocenia ją ponownie.
 6. **Pobierz PDF** - plik zapisuje się też w historii. Status zmieniaj w **Historii** (Wysłane → Rozmowa → Oferta…).
-7. Gdy dostaniesz zaproszenie: otwórz aplikację → zakładka **Rozmowa** → **Przygotuj mnie do rozmowy**.
+7. Gdy dostaniesz zaproszenie: otwórz aplikację → zakładka **Rozmowa** → **Przygotuj mnie do rozmowy**. Tam też jest **Próbna rozmowa**:
+   - AI-rekruter zadaje 6-8 pytań pod to ogłoszenie po jednym (przedstawienie się, doświadczenie, zadanie sytuacyjne, wiedza z wymagań, narzędzia, pytanie o brak; jedno po angielsku, gdy ogłoszenie wymaga angielskiego). Dopytuje o to, co program sam znalazł w CV: umiejętność bez dowodu w doświadczeniu, punkt bez liczby, daty projektu inne niż w profilu,
+   - po ogólnikowej odpowiedzi dopytuje najwyżej raz; pytanie możesz pominąć, a rozmowę zakończyć w każdej chwili i wznowić później,
+   - każda odpowiedź dostaje wynik 1-5 (konkret i liczby, dopasowanie do ogłoszenia, struktura, poprawność, długość), uwagi i mocniejszą wersję. Mocniejsza wersja bierze fakty tylko z profilu, CV i Twoich odpowiedzi; brakujące dane zostawia w nawiasach do uzupełnienia, np. „[ile dokumentów tygodniowo]”, a program odrzuca liczbę albo nazwę spoza tych źródeł,
+   - nowe fakty z odpowiedzi (np. „skrypt oszczędza godzinę dziennie”) trafiają do profilu dopiero po kliknięciu **Dopisz do profilu**: na próbnej rozmowie się improwizuje, a profil zasila każde kolejne CV,
+   - na końcu: średni wynik, mocne strony, rzeczy do poprawy, lista miejsc w nawiasach do przygotowania, tematy do powtórki, ocena Twoich pytań do firmy i koszt rozmowy. Podsumowania kolejnych podejść zostają, więc widać postęp.
+
+   Ograniczenia: o firmie rekruter wie tylko to, co jest w ogłoszeniu (resztę wpisuje jako „sprawdź przed rozmową”, ale tego program nie umie sprawdzić w kodzie); błędy merytoryczne wskazuje tylko, gdy model jest pewny, więc może któryś przeoczyć; rozmowa jest pisana, nie głosowa. Koszt jednej rozmowy to ok. 0,40 $ na domyślnym Claude Sonnet 5.5 i ok. 0,02 $ na Claude Haiku 5.5.
 8. Chcesz uzupełnić braki? Zakładka **Kursy i certyfikaty** (gdy CV jest gotowe) podpowiada, które kursy i certyfikaty najbardziej pomogą w tej rekrutacji, z czasem nauki, kosztem i linkiem do wyszukania.
 
 ## Szukaj pracy (doradca kariery)
@@ -111,7 +118,7 @@ Folder `data` obok programu:
 - `geocache.json` - zapamiętane współrzędne miast (do filtra promienia),
 - `profiles/<id>/profile.json` - profil, `files/` - wgrane CV, zdjęcie,
 - `profiles/<id>/career.json` - rozmowa z doradcą, preferencje, propozycje i znalezione oferty,
-- `profiles/<id>/applications/<id>/` - ogłoszenie, wersje CV, raporty, zapisany PDF,
+- `profiles/<id>/applications/<id>/` - ogłoszenie, wersje CV, raporty, zapisany PDF, próbna rozmowa (`mock-interview.json`),
 - `usage.jsonl` - historia kosztów AI.
 
 Kopia zapasowa = skopiowanie folderu `data`.

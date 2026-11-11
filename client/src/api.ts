@@ -11,6 +11,7 @@ import type {
   ImproveOptions,
   ImproveResult,
   InterviewPrep,
+  MockInterviewView,
   CourseAdvice,
   Profile,
   Pronoun,
@@ -186,6 +187,14 @@ export const api = {
 
   interview: (pid: string, aid: string) => req<InterviewPrep | null>('GET', `${A(pid, aid)}/interview`),
   makeInterview: (pid: string, aid: string) => req<InterviewPrep>('POST', `${A(pid, aid)}/interview`),
+  mock: (pid: string, aid: string) => req<MockInterviewView>('GET', `${A(pid, aid)}/mock`),
+  startMock: (pid: string, aid: string, restart = false) => req<MockInterviewView>('POST', `${A(pid, aid)}/mock/start`, { restart }),
+  // Pusta odpowiedź ponawia ocenę ostatniej odpowiedzi, gdy wcześniej się nie udała.
+  answerMock: (pid: string, aid: string, text: string) => req<MockInterviewView>('POST', `${A(pid, aid)}/mock/answer`, { text }),
+  skipMock: (pid: string, aid: string) => req<MockInterviewView>('POST', `${A(pid, aid)}/mock/skip`),
+  finishMock: (pid: string, aid: string) => req<MockInterviewView>('POST', `${A(pid, aid)}/mock/finish`),
+  addMockFact: (pid: string, aid: string, answerId: string, index: number) => req<MockInterviewView>('POST', `${A(pid, aid)}/mock/facts`, { answerId, index }),
+  clearMock: (pid: string, aid: string) => req<MockInterviewView>('DELETE', `${A(pid, aid)}/mock`),
   courses: (pid: string, aid: string) => req<CourseAdvice | null>('GET', `${A(pid, aid)}/courses`),
   makeCourses: (pid: string, aid: string) => req<CourseAdvice>('POST', `${A(pid, aid)}/courses`),
   letter: (pid: string, aid: string) => req<CoverLetter | null>('GET', `${A(pid, aid)}/letter`),

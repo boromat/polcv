@@ -3,6 +3,7 @@ import type { Application, CourseAdvice, CoverLetter, InterviewPrep } from '../.
 import { api } from '../../api';
 import { ErrorBox, LazyText } from '../../components/ui';
 import { useT } from '../../i18n';
+import { MockInterviewCard } from './MockInterview';
 
 /** Wczytuje zapisany wynik AI. Błąd wczytania nie może wyglądać jak brak wyniku (pusty stan zachęca do płatnego nadpisania). */
 function useSaved<T>(has: boolean, load: () => Promise<T | null>) {
@@ -140,9 +141,13 @@ export function InterviewView({ pid, app, run }: { pid: string; app: Application
     trudne: t('trudne'),
   };
 
+  // Próbna rozmowa jest w tej samej zakładce, nad przygotowaniem (korzysta z niego, gdy istnieje).
+  const mock = <MockInterviewCard pid={pid} app={app} run={run} />;
   if (!prep && (saved.loading || saved.error)) return <LoadState title={t('Przygotowanie do rozmowy')} loading={saved.loading} error={saved.error} retry={saved.retry} />;
   if (!prep) {
     return (
+      <div className="stack lg">
+      {mock}
       <div className="card empty">
         <h2>{t('Przygotowanie do rozmowy')}</h2>
         <p style={{ maxWidth: 520 }}>
@@ -152,12 +157,14 @@ export function InterviewView({ pid, app, run }: { pid: string; app: Application
           {t('Przygotuj mnie do rozmowy')}
         </button>
       </div>
+      </div>
     );
   }
 
   const groups = [...new Set(prep.questions.map((q) => q.category))];
   return (
     <div className="stack lg">
+      {mock}
       <div className="card stack">
         <div className="row between">
           <h2>{t('Przygotowanie do rozmowy')}</h2>

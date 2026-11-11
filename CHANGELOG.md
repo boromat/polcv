@@ -6,6 +6,25 @@ All notable changes to PolCV are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Mock interview.** In the *Rozmowa* tab an AI recruiter asks 6-8 questions for the posting one
+  at a time: introduction and motivation, the experience closest to the role, a situational task
+  from the duties, knowledge from the required skills, tools, a question about a gap, and one
+  question in English when the posting requires English. It also probes what the program finds in
+  your CV itself: a skill no experience point or project shows, a point without a number, project
+  dates that differ from your profile (for example from GitHub). After a vague answer it asks at
+  most one follow-up; you can skip a question, finish at any time, resume later or start again.
+  Every answer gets a 1-5 score on five fixed criteria, what was good, what was missing, factual
+  errors (only when the model is sure, without invented article numbers or links) and a stronger
+  version that may use only facts from your profile, your CV and your own answers: missing details
+  stay as placeholders in brackets, and a number or a name from anywhere else goes back to the
+  model. New facts from your answers reach your profile only when you click *Add to profile*. The
+  summary adds your average, strengths, what to improve, the placeholders to prepare, topics to
+  review, feedback on your questions for the company and the cost of the interview, and summaries
+  of every attempt are kept. About the company the recruiter knows only what the posting says. The
+  whole conversation goes through polanon masking when it is on.
+
 ### Fixed
 
 - **The CV title no longer claims what your profile does not confirm.** The title is still copied
