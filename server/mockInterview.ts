@@ -5,7 +5,7 @@ import { applyDecisions } from './llm/prompts/common';
 import { withoutPending } from './cv/render';
 import { versionPdf } from './services';
 import { normalize } from './ats/keywords';
-import { interviewLang, interviewProbes, placeholders } from './llm/prompts/mockChecks';
+import { interviewLang, interviewProbes, lengthScore, placeholders } from './llm/prompts/mockChecks';
 import { MOCK_TASK, mockGrade, mockPlan, mockSummary } from './llm/prompts/mockInterview';
 import { tr } from './i18n';
 
@@ -107,9 +107,11 @@ export async function answerMock(pid: string, aid: string, text: string): Promis
   const hadFollowUp = m.turns.some((t) => t.kind === 'followup' && t.questionId === qid);
   const g = await mockGrade({ profile, posting, cvText: m.cvText, interview: m, questionId: qid, answers, followUpAllowed: !hadFollowUp, ctx: ctxOf(pid, aid) });
   const { followUp, newFacts, ...rest } = g;
-  const c = g.criteria;
+  // Długość liczy program z całej odpowiedzi na pytanie (po dopytaniu: z obu części).
+  const c = { ...g.criteria, length: lengthScore(answers.join(' ')) };
   const saved: MockSavedGrade = {
     ...rest,
+    criteria: c,
     questionId: qid,
     answerId: basis.id,
     score: Math.round((c.concrete + c.fit + c.structure + c.correctness + c.length) / 5),

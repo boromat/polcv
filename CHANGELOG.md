@@ -15,7 +15,8 @@ All notable changes to PolCV are recorded here. The format follows
   your CV itself: a skill no experience point or project shows, a point without a number, project
   dates that differ from your profile (for example from GitHub). After a vague answer it asks at
   most one follow-up; you can skip a question, finish at any time, resume later or start again.
-  Every answer gets a 1-5 score on five fixed criteria, what was good, what was missing, factual
+  Every answer gets a 1-5 score on five fixed criteria (the length one counted by the program from
+  the number of words, 45-180 being best), what was good, what was missing, factual
   errors (only when the model is sure, without invented article numbers or links) and a stronger
   version that may use only facts from your profile, your CV and your own answers: missing details
   stay as placeholders in brackets, and a number or a name from anywhere else goes back to the

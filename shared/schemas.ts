@@ -348,14 +348,13 @@ export const MockPlanSchema = z.object({
 
 const Score = z.number().int().min(1).max(5);
 
-/** Odpowiedź modelu: ocena jednej odpowiedzi kandydata. */
+/** Odpowiedź modelu: ocena jednej odpowiedzi kandydata (długość liczy program, zob. MockSavedGradeSchema). */
 export const MockGradeSchema = z.object({
   criteria: z.object({
     concrete: Score.describe('konkret i liczby'),
     fit: Score.describe('dopasowanie do wymagań ogłoszenia'),
     structure: Score.describe('struktura'),
     correctness: Score.describe('poprawność merytoryczna'),
-    length: Score.describe('długość'),
   }),
   good: z.array(z.string()),
   missing: z.array(z.string()),
@@ -386,6 +385,8 @@ export const MockTurnSchema = z.object({
 });
 
 export const MockSavedGradeSchema = MockGradeSchema.omit({ followUp: true, newFacts: true }).extend({
+  /** kryteria modelu i długość liczona przez program z liczby słów */
+  criteria: MockGradeSchema.shape.criteria.extend({ length: Score.describe('długość') }),
   questionId: z.string(),
   /** id odpowiedzi kandydata, którą ocenia */
   answerId: z.string(),

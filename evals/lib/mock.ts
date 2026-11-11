@@ -114,7 +114,7 @@ function mockInterviewGrade(system: string, user: string) {
   const vague = !numbers && words < 25;
   const error = FACTUAL_ERROR.test(answer);
   return {
-    criteria: { concrete: numbers ? 4 : vague ? 1 : 3, fit: vague ? 2 : 4, structure: vague ? 2 : 3, correctness: error ? 1 : 4, length: words > 180 || vague ? 2 : 4 },
+    criteria: { concrete: numbers ? 4 : vague ? 1 : 3, fit: vague ? 2 : 4, structure: vague ? 2 : 3, correctness: error ? 1 : 4 },
     good: [en ? 'Clear answer.' : 'Jasna odpowiedź.'],
     missing: [en ? 'More specifics.' : 'Więcej konkretów.'],
     stronger: en ? 'My task was [describe the task], and the result was [what changed].' : 'Moim zadaniem było [opisz zadanie], a efekt to [jaki był efekt].',

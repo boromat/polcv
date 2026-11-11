@@ -60,7 +60,7 @@ const plan = (n = 7) =>
 const SAFE = 'Moim zadaniem było prowadzenie profilu firmy na Instagramie i przygotowywanie raportów w Google Analytics 4 [ile raportów miesięcznie].';
 const grade = (over: Record<string, unknown> = {}) =>
   JSON.stringify({
-    criteria: { concrete: 2, fit: 3, structure: 3, correctness: 4, length: 3 },
+    criteria: { concrete: 2, fit: 3, structure: 3, correctness: 4 },
     good: ['Dobry przykład'],
     missing: ['Brak liczb'],
     stronger: SAFE,
@@ -172,16 +172,18 @@ describe('próbna rozmowa: przebieg', () => {
     const { pid, aid } = await setup();
     replies = {
       mock_interview_plan: [plan(), plan()],
-      mock_interview_grade: [grade({ criteria: { concrete: 5, fit: 5, structure: 4, correctness: 5, length: 4 } }), grade()],
+      mock_interview_grade: [grade({ criteria: { concrete: 5, fit: 5, structure: 4, correctness: 5 } }), grade()],
       mock_interview_summary: [summary(), summary()],
     };
     await mock.startMock(pid, aid);
-    await mock.answerMock(pid, aid, 'Pierwsza odpowiedź.');
+    // Pierwsza odpowiedź ma 50 słów (długość 5), druga 2 słowa (długość 1): długość liczy program, nie model.
+    await mock.answerMock(pid, aid, Array.from({ length: 50 }, (_, i) => `słowo${i}`).join(' '));
     await mock.answerMock(pid, aid, 'Druga odpowiedź.');
     await mock.skipMock(pid, aid);
     const v = await mock.finishMock(pid, aid);
     const s = v.current!.summary!;
     expect(v.current!.status).toBe('finished');
+    expect(v.current!.grades.map((g) => [g.criteria.length, g.score])).toEqual([[5, 5], [1, 3]]);
     expect(s).toMatchObject({ average: 4, answered: 2, skipped: 1, strengths: ['a', 'b', 'c'] });
     expect(s.placeholders).toEqual([
       { question: 'Pytanie 1: proszę opowiedzieć o tym.', items: ['[ile raportów miesięcznie]'] },

@@ -4,6 +4,7 @@ import {
   addressIssues,
   factualErrorIssues,
   interviewProbes,
+  lengthScore,
   needsEnglishQuestion,
   placeholders,
   planIssues,
@@ -72,6 +73,13 @@ describe('próbna rozmowa: plan', () => {
     expect(addressIssues('Czy może Pani opowiedzieć?', 'on')).toEqual(['Pani']);
     expect(addressIssues('Jak wyglądała praca z Excelem?', undefined)).toEqual([]);
     expect(planIssues([q('intro', 'pl', 'Dlaczego aplikowałeś?'), ...full.slice(1)], posting, undefined).join('\n')).toContain('nie podał, jak się określa');
+  });
+});
+
+describe('próbna rozmowa: długość odpowiedzi liczy program', () => {
+  const words = (n: number) => Array.from({ length: n }, () => 'słowo').join(' ');
+  it('45-180 słów to pełny wynik; za krótka i rozwlekła tracą', () => {
+    expect([10, 20, 40, 60, 180, 200, 300, 400].map((n) => lengthScore(words(n)))).toEqual([1, 2, 4, 5, 5, 3, 2, 1]);
   });
 });
 

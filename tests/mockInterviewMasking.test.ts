@@ -56,7 +56,7 @@ beforeAll(async () => {
     const content =
       name === 'mock_interview_plan'
         ? JSON.stringify({ questions: ['intro', 'experience', 'situational', 'knowledge', 'tools', 'gap'].map((kind) => ({ kind, text: 'Proszę opowiedzieć o tym.', lang: 'pl', why: '' })), companyChecks: [] })
-        : JSON.stringify({ criteria: { concrete: 3, fit: 3, structure: 3, correctness: 3, length: 3 }, good: [], missing: [], stronger: SAFE, factualErrors: [], companyChecks: [], newFacts: [], followUp: '' });
+        : JSON.stringify({ criteria: { concrete: 3, fit: 3, structure: 3, correctness: 3 }, good: [], missing: [], stronger: SAFE, factualErrors: [], companyChecks: [], newFacts: [], followUp: '' });
     return new Response(JSON.stringify({ model: 'test/model', choices: [{ message: { content }, finish_reason: 'stop' }], usage: { cost: 0, prompt_tokens: 1, completion_tokens: 1 } }));
   });
 });

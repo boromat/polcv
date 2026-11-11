@@ -182,6 +182,23 @@ export function addressIssue(text: string, pronouns: Profile['pronouns']): strin
   return bad.length ? `Dopytanie „${text}” ma formy, które nie pasują do kandydata (${bad.join(', ')}). ${genderNote(pronouns)}` : null;
 }
 
+// ---------- Długość odpowiedzi ----------
+
+/**
+ * Kryterium długości liczone w kodzie, nie przez model (Haiku 5.5 dawał zwięzłym odpowiedziom 1, a rozwlekłym 3-4):
+ * odpowiedź na rozmowie to ok. 20 s - 1,5 min mówienia, czyli 45-180 słów.
+ */
+export function lengthScore(answer: string): number {
+  const words = answer.split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
+  if (words < 15) return 1;
+  if (words < 30) return 2;
+  if (words < 45) return 4;
+  if (words <= 180) return 5;
+  if (words <= 240) return 3;
+  if (words <= 320) return 2;
+  return 1;
+}
+
 // ---------- Mocniejsza wersja odpowiedzi ----------
 
 /** Miejsce do uzupełnienia w mocniejszej wersji: "[ile dokumentów tygodniowo]". */
