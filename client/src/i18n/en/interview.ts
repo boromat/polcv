@@ -10,6 +10,8 @@ export const interview: Record<string, string> = {
   'Dobre:': 'Good:',
   'Zabrakło:': 'Missing:',
   'Mocniejsza wersja:': 'Stronger version:',
+  'Mocniejszej wersji nie udało się przygotować tylko z Twoich faktów. Dopisz sam konkretny przykład i jego efekt.':
+    'A stronger version could not be written from your facts alone. Add a specific example and its result yourself.',
   'Fragmenty w nawiasach uzupełnij własnymi danymi: AI ich nie zgaduje.': 'Fill in the parts in brackets with your own details: the AI does not guess them.',
   'Błąd merytoryczny:': 'Factual error:',
   'Gdzie to sprawdzić: {where}': 'Where to check: {where}',

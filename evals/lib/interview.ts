@@ -85,6 +85,8 @@ export interface AnswerResult {
   fabricated: string[];
   /** mocniejsze wersje tego pytania (do wglądu; starsze wyniki ich nie mają) */
   stronger?: string[];
+  /** oceny tego pytania bez mocniejszej wersji (kontrola faktów odrzuciła ją 3 razy) */
+  strongerFailed?: number;
 }
 
 export interface InterviewCaseResult {
@@ -111,6 +113,8 @@ export interface InterviewSummary {
   factualFlagged: { flagged: number; total: number };
   goodAboveVague: { yes: number; total: number };
   fabricated: number;
+  /** oceny bez mocniejszej wersji (kontrola faktów odrzuciła ją 3 razy); brak w starszych wynikach */
+  strongerFailed?: number;
   scoreByType: Partial<Record<AnswerType, number>>;
   rejected: number;
   costPerInterview: number | null;
@@ -200,6 +204,7 @@ async function runCase(c: InterviewCase, observed: { schemaName: string; accepte
       factualErrors: grade?.factualErrors.length ?? 0,
       fabricated: m.grades.filter((g) => g.questionId === q.id).flatMap((g) => fabricated(g.stronger, c, m, profile)),
       stronger: m.grades.filter((g) => g.questionId === q.id).map((g) => g.stronger),
+      strongerFailed: m.grades.filter((g) => g.questionId === q.id && g.strongerFailed).length,
     });
   }
   return {
@@ -233,6 +238,7 @@ export function summarizeInterviews(cases: InterviewCaseResult[]): InterviewSumm
     factualFlagged: { flagged: of('factual-error').filter((a) => a.factualErrors > 0).length, total: of('factual-error').length },
     goodAboveVague: { yes: pairs.filter((p) => p.good! > p.vague!).length, total: pairs.length },
     fabricated: all.reduce((s, a) => s + a.fabricated.length, 0),
+    strongerFailed: all.reduce((s, a) => s + (a.strongerFailed ?? 0), 0),
     scoreByType,
     rejected: cases.reduce((s, c) => s + c.rejected, 0),
     costPerInterview: mean(done.map((c) => c.costUsd)),
@@ -259,6 +265,7 @@ export function interviewMarkdown(r: InterviewEvalResult): string {
     `| Błąd merytoryczny wskazany | ${frac(s.factualFlagged.flagged, s.factualFlagged.total)} |`,
     `| Dobra odpowiedź oceniona wyżej niż ogólnikowa | ${frac(s.goodAboveVague.yes, s.goodAboveVague.total)} rozmów |`,
     `| Wymyślone fakty w mocniejszych wersjach | ${s.fabricated} |`,
+    `| Oceny bez mocniejszej wersji (kontrola faktów odrzuciła ją 3 razy) | ${s.strongerFailed ?? '-'} |`,
     `| Średni wynik według rodzaju odpowiedzi | ${AnswerTypes.filter((t) => s.scoreByType[t] !== undefined).map((t) => `${TYPE_LABEL[t]} ${s.scoreByType[t]}`).join(', ')} |`,
     `| Odpowiedzi modelu odrzucone przez kontrole | ${s.rejected} |`,
     `| Koszt jednej rozmowy | ${usd(s.costPerInterview)} |`,

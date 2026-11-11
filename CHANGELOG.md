@@ -20,7 +20,8 @@ All notable changes to PolCV are recorded here. The format follows
   errors (only when the model is sure, without invented article numbers or links) and a stronger
   version that may use only facts from your profile, your CV and your own answers: missing details
   stay as placeholders in brackets, and a number or a name from anywhere else goes back to the
-  model. New facts from your answers reach your profile only when you click *Add to profile*. The
+  model; if it keeps adding one, the answer gets feedback without a stronger version instead of
+  stopping the interview. New facts from your answers reach your profile only when you click *Add to profile*. The
   summary adds your average, strengths, what to improve, the placeholders to prepare, topics to
   review, feedback on your questions for the company and the cost of the interview, and summaries
   of every attempt are kept. About the company the recruiter knows only what the posting says. The

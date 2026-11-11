@@ -392,6 +392,8 @@ export const MockSavedGradeSchema = MockGradeSchema.omit({ followUp: true, newFa
   answerId: z.string(),
   /** średnia kryteriów zaokrąglona do całości (liczy program) */
   score: z.number(),
+  /** kontrola faktów trzy razy odrzuciła mocniejszą wersję: ocena jest bez niej ("stronger" pusty) */
+  strongerFailed: z.boolean().optional(),
   placeholders: z.array(z.string()),
   /** nowe fakty z odpowiedzi; do profilu trafiają dopiero po kliknięciu kandydata */
   facts: z.array(z.object({ topic: z.string(), answer: z.string(), added: z.boolean() })),
@@ -525,6 +527,7 @@ export type InterviewPrep = z.infer<typeof InterviewPrepSchema>;
 export type MockQuestionKind = (typeof MockQuestionKinds)[number];
 export type MockProbe = z.infer<typeof MockProbeSchema>;
 export type MockTurn = z.infer<typeof MockTurnSchema>;
+export type MockGrade = z.infer<typeof MockGradeSchema>;
 export type MockSavedGrade = z.infer<typeof MockSavedGradeSchema>;
 export type MockSummary = z.infer<typeof MockSummarySchema>;
 export type MockInterview = z.infer<typeof MockInterviewSchema>;

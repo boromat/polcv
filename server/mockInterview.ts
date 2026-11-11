@@ -105,7 +105,7 @@ export async function answerMock(pid: string, aid: string, text: string): Promis
   const qid = basis.questionId;
   const answers = m.turns.filter((t) => t.role === 'candidate' && t.kind === 'answer' && t.questionId === qid).map((t) => t.content);
   const hadFollowUp = m.turns.some((t) => t.kind === 'followup' && t.questionId === qid);
-  const g = await mockGrade({ profile, posting, cvText: m.cvText, interview: m, questionId: qid, answers, followUpAllowed: !hadFollowUp, ctx: ctxOf(pid, aid) });
+  const { grade: g, strongerFailed } = await mockGrade({ profile, posting, cvText: m.cvText, interview: m, questionId: qid, answers, followUpAllowed: !hadFollowUp, ctx: ctxOf(pid, aid) });
   const { followUp, newFacts, ...rest } = g;
   // Długość liczy program z całej odpowiedzi na pytanie (po dopytaniu: z obu części).
   const c = { ...g.criteria, length: lengthScore(answers.join(' ')) };
@@ -115,6 +115,7 @@ export async function answerMock(pid: string, aid: string, text: string): Promis
     questionId: qid,
     answerId: basis.id,
     score: Math.round((c.concrete + c.fit + c.structure + c.correctness + c.length) / 5),
+    ...(strongerFailed ? { strongerFailed: true } : {}),
     placeholders: placeholders(g.stronger),
     facts: newFacts.filter((f) => f.topic.trim() && f.answer.trim()).map((f) => ({ topic: f.topic.trim(), answer: f.answer.trim(), added: false })),
   };

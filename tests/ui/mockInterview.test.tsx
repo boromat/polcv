@@ -96,6 +96,16 @@ describe('Próbna rozmowa w zakładce Rozmowa', () => {
     await waitFor(() => expect(api.addMockFact).toHaveBeenCalledWith('p1', 'a1', 'a1', 0));
   });
 
+  it('ocena bez mocniejszej wersji mówi, czego brakuje', async () => {
+    const graded = interview({
+      turns: [question('q1', 'Proszę opowiedzieć o raportach.'), { id: 'a1', role: 'candidate', kind: 'answer', questionId: 'q1', content: 'Odpowiedź', at }, question('q2', 'Pytanie 2')],
+      grades: [{ questionId: 'q1', answerId: 'a1', score: 2, criteria: { concrete: 2, fit: 2, structure: 2, correctness: 3, length: 1 }, good: [], missing: [], stronger: '', strongerFailed: true, placeholders: [], factualErrors: [], companyChecks: [], facts: [] }],
+    });
+    api.mock.mockResolvedValue(view(graded));
+    render(<MockInterviewCard pid="p1" app={app} run={run} />);
+    expect(await screen.findByText(/Mocniejszej wersji nie udało się przygotować/)).toBeTruthy();
+  });
+
   it('pominięcie pytania i ponowienie oceny, gdy wcześniej się nie udała', async () => {
     api.mock.mockResolvedValue(view(interview()));
     api.skipMock.mockResolvedValue(view(interview()));

@@ -41,9 +41,13 @@ function GradeCard({ g, onAddFact }: { g: MockSavedGrade; onAddFact: (index: num
           <b>{t('Zabrakło:')}</b> {g.missing.join(' ')}
         </div>
       )}
-      <div className="callout info small pre">
-        <b>{t('Mocniejsza wersja:')}</b> <WithGaps text={g.stronger} />
-      </div>
+      {g.stronger ? (
+        <div className="callout info small pre">
+          <b>{t('Mocniejsza wersja:')}</b> <WithGaps text={g.stronger} />
+        </div>
+      ) : (
+        <div className="callout warn small">{t('Mocniejszej wersji nie udało się przygotować tylko z Twoich faktów. Dopisz sam konkretny przykład i jego efekt.')}</div>
+      )}
       {g.placeholders.length > 0 && <p className="faint small">{t('Fragmenty w nawiasach uzupełnij własnymi danymi: AI ich nie zgaduje.')}</p>}
       {g.factualErrors.map((e, i) => (
         <div key={i} className="callout warn small">

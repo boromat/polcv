@@ -7,9 +7,11 @@ import {
   type MockInterview,
   type MockProbe,
   type MockQuestionKind,
+  type MockGrade,
   type Profile,
 } from '../../../shared/schemas';
 import { callJson, type LlmContext } from '../openrouter';
+import { HttpError } from '../../storage/store';
 import { forUser, genderForms, json, postingForPrompt, profileForPrompt, today } from './common';
 import { profileTexts } from './cvChecks';
 import { addressIssue, factualErrorIssues, interviewLang, lackingPostingNames, needsEnglishQuestion, planIssues, requiredKinds, strongerIssues } from './mockChecks';
@@ -126,27 +128,38 @@ export const candidateAnswers = (m: MockInterview) => m.turns.filter((t) => t.ro
 
 const transcript = (m: MockInterview) => m.turns.map((t) => ({ who: t.role === 'interviewer' ? 'rekruter' : 'kandydat', kind: t.kind, text: t.content }));
 
-export async function mockGrade({ profile, posting, cvText, interview, questionId, answers, followUpAllowed, ctx }: GradeInput) {
+/**
+ * Ocena odpowiedzi. Gdy kontrola faktów trzy razy odrzuci mocniejszą wersję, rozmowa się nie przerywa: jedno
+ * zapytanie bez mocniejszej wersji, a ocena wraca z `strongerFailed` (kandydat widzi, że wersji nie ma i dlaczego).
+ */
+export async function mockGrade({ profile, posting, cvText, interview, questionId, answers, followUpAllowed, ctx }: GradeInput): Promise<{ grade: MockGrade; strongerFailed: boolean }> {
   const question = interview.plan.questions.find((q) => q.id === questionId)!;
   const sources = { texts: [...profileTexts(profile), cvText, ...candidateAnswers(interview)], posting };
   const answer = answers.join('\n');
   // Nazwy z ogłoszenia, których kandydat nie ma: lista dla modelu, żeby nie wpisywał ich do mocniejszej wersji.
   const lacking = lackingPostingNames(sources);
-  return callJson({
-    schema: MockGradeSchema.superRefine((g, c) => {
-      for (const message of strongerIssues(g.stronger, question.kind, sources, profile.pronouns, question.lang)) c.addIssue({ code: 'custom', path: ['stronger'], message });
-      for (const message of factualErrorIssues(g.factualErrors, answer)) c.addIssue({ code: 'custom', path: ['factualErrors'], message });
-      const address = followUpAllowed && g.followUp.trim() && question.lang === 'pl' ? addressIssue(g.followUp, profile.pronouns) : null;
-      if (address) c.addIssue({ code: 'custom', path: ['followUp'], message: address });
-    }),
-    schemaName: 'mock_interview_grade',
-    tier: 'main',
-    temperature: 0.3,
-    maxTokens: 4000,
-    system: GRADE_SYSTEM(profile, question.lang, followUpAllowed),
-    user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nWYSŁANE CV:\n"""\n${cvText}\n"""\n\nDO DOPYTANIA:\n${json(interview.probes.map((p) => p.detail))}\n\nNAZWY Z OGŁOSZENIA, KTÓRYCH KANDYDAT NIE MA (w "stronger" ich nie wymieniaj, poza pytaniem o brak albo o wiedzę):\n${json(lacking)}\n\nROZMOWA:\n${json(transcript(interview))}\n\nPYTANIE:\n${json({ kind: question.kind, text: question.text, why: question.why })}\n\nOSTATNIA ODPOWIEDŹ${answers.length > 1 ? ' (po dopytaniu: oceń całą odpowiedź na pytanie, razem z pierwszą częścią)' : ''}:\n"""\n${answer}\n"""\n\nOceń odpowiedź.`,
-    ctx,
-  });
+  const call = (withStronger: boolean) =>
+    callJson({
+      schema: MockGradeSchema.superRefine((g, c) => {
+        if (withStronger) for (const message of strongerIssues(g.stronger, question.kind, sources, profile.pronouns, question.lang)) c.addIssue({ code: 'custom', path: ['stronger'], message });
+        for (const message of factualErrorIssues(g.factualErrors, answer)) c.addIssue({ code: 'custom', path: ['factualErrors'], message });
+        const address = followUpAllowed && g.followUp.trim() && question.lang === 'pl' ? addressIssue(g.followUp, profile.pronouns) : null;
+        if (address) c.addIssue({ code: 'custom', path: ['followUp'], message: address });
+      }),
+      schemaName: 'mock_interview_grade',
+      tier: 'main',
+      temperature: 0.3,
+      maxTokens: 4000,
+      system: GRADE_SYSTEM(profile, question.lang, followUpAllowed) + (withStronger ? '' : '\nTym razem "stronger" zostaw pusty: poprzednie próby nie przeszły kontroli faktów.'),
+      user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nWYSŁANE CV:\n"""\n${cvText}\n"""\n\nDO DOPYTANIA:\n${json(interview.probes.map((p) => p.detail))}\n\nNAZWY Z OGŁOSZENIA, KTÓRYCH KANDYDAT NIE MA (w "stronger" ich nie wymieniaj, poza pytaniem o brak albo o wiedzę):\n${json(lacking)}\n\nROZMOWA:\n${json(transcript(interview))}\n\nPYTANIE:\n${json({ kind: question.kind, text: question.text, why: question.why })}\n\nOSTATNIA ODPOWIEDŹ${answers.length > 1 ? ' (po dopytaniu: oceń całą odpowiedź na pytanie, razem z pierwszą częścią)' : ''}:\n"""\n${answer}\n"""\n\nOceń odpowiedź.`,
+      ctx,
+    });
+  try {
+    return { grade: await call(true), strongerFailed: false };
+  } catch (e) {
+    if (!(e instanceof HttpError) || e.status !== 502) throw e;
+    return { grade: { ...(await call(false)), stronger: '' }, strongerFailed: true };
+  }
 }
 
 // ---------- Podsumowanie ----------

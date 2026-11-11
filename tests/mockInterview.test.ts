@@ -146,6 +146,20 @@ describe('próbna rozmowa: przebieg', () => {
     expect(v.current!.grades[0]).toMatchObject({ stronger: SAFE, placeholders: ['[ile raportów miesięcznie]'] });
   });
 
+  it('trzy odrzucone mocniejsze wersje nie przerywają rozmowy: ocena wraca bez mocniejszej wersji', async () => {
+    const { pid, aid } = await setup();
+    const bad = grade({ stronger: 'Moim zadaniem było prowadzenie profilu firmy na Instagramie, co dało 250 nowych obserwujących.' });
+    replies = { mock_interview_plan: [plan()], mock_interview_grade: [bad, bad, bad, bad] };
+    await mock.startMock(pid, aid);
+    sent.length = 0;
+    const v = await mock.answerMock(pid, aid, 'Prowadziłam Instagram firmy.');
+    expect(sent).toHaveLength(4);
+    expect(sent[3].messages[0].content).toContain('"stronger" zostaw pusty');
+    expect(v.current!.grades[0]).toMatchObject({ stronger: '', strongerFailed: true, placeholders: [] });
+    // Rozmowa idzie dalej (ocena konkretu 2 dopuszcza dopytanie, ale atrapa go nie proponuje).
+    expect(lastTurn(v)).toMatchObject({ role: 'interviewer', kind: 'question', questionId: 'q2' });
+  });
+
   it('nowy fakt z odpowiedzi trafia do profilu dopiero po kliknięciu kandydata', async () => {
     const { pid, aid } = await setup();
     replies = { mock_interview_plan: [plan()], mock_interview_grade: [grade({ newFacts: [{ topic: 'Skrypt do raportów', answer: 'Oszczędza godzinę dziennie' }] })] };
