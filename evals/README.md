@@ -297,3 +297,35 @@ Poprawki po przebiegu 1 (jeszcze bez pomiaru na prawdziwym modelu):
   dostaje listę nazw z ogłoszenia, których kandydat nie ma (`29c6a3d`),
 - po trzech odrzuconych mocniejszych wersjach ocena wraca bez niej, zamiast przerywać rozmowę; ewaluacja liczy takie
   oceny (`52bd2c3`).
+
+### Przebieg 2: 11.11.2026, `anthropic/claude-haiku-5.5`, po poprawkach
+
+Kod z commita `f7e22f8`, [szczegóły](results/2026-11-11_anthropic_claude-haiku-5.5_interview_po-poprawkach.md).
+
+| Miara | Przebieg 1 | Przebieg 2 |
+|---|---|---|
+| Rozmowy zakończone | 5 z 6 | 6 z 6 |
+| Ogólnikowa odpowiedź dostała dopytanie | 5 z 5 | 6 z 6 |
+| Dobra odpowiedź dostała dopytanie (powinno być 0) | 20 z 21 | 15 z 23 |
+| w tym odpowiedzi przygotowane pod rodzaj pytania (bez „probe”) | - | 6 z 12 |
+| Błąd merytoryczny wskazany | 5 z 5 | 6 z 6 |
+| Dobra odpowiedź oceniona wyżej niż ogólnikowa | 5 z 5 rozmów | 6 z 6 rozmów |
+| Średni wynik: dobra / ogólnikowa / z błędem / przechwałka / zbyt długa | 2,2 / 1,8 / 1,2 / 1,0 / 2,6 | 2,7 / 1,7 / 1,0 / 1,3 / 2,7 |
+| Wymyślone fakty w mocniejszych wersjach | 2 | 2 (oba to uczciwe „z B2B nie pracowałem”) |
+| Oceny bez mocniejszej wersji | - | 0 |
+| Odpowiedzi modelu odrzucone przez kontrole | 14 | 11 |
+| Koszt / czas jednej rozmowy | $0,028 / 105 s | $0,024 / 91 s (razem $0,14) |
+
+- **Rozmowa po angielsku przeszła do końca**, a żadna ocena nie musiała wrócić bez mocniejszej wersji: lista nazw,
+  których kandydat nie ma, wystarczyła, żeby model ich nie wpisywał.
+- **Zbyt długa odpowiedź nie wygrywa już z dobrą** (2,7 i 2,7 zamiast 2,6 i 2,2), a różnica między dobrą i ogólnikową
+  wzrosła (2,7 wobec 1,7). Za długość dobre przygotowane odpowiedzi dostają 5, zbyt długie 2-3; model ocenia jednak
+  rozwlekłe odpowiedzi wyżej w pozostałych kryteriach.
+- **Dopytań po dobrych odpowiedziach jest mniej, ale wciąż za dużo.** Na 11 z 15 przypadków to pytania „probe”, na które
+  kandydat z tego zbioru odpowiada ogólną odpowiedzią „default”, nietrafiającą w to, o co rekruter dopytuje, więc
+  dopytanie jest tam zasadne, a etykieta „dobra” myląca. Z odpowiedzi przygotowanych pod rodzaj pytania dopytanie
+  dostała połowa (6 z 12), m.in. uczciwe odpowiedzi o brak bez liczb: to wciąż więcej, niż zakłada specyfikacja.
+- **Wymyślone fakty: 0 w praktyce.** Miara znalazła „B2B” w dwóch mocniejszych wersjach pytania o brak, ale oba
+  zdania mówią, że kandydat z B2B nie pracował (od tego przebiegu wynik zapisuje treść mocniejszych wersji, więc
+  widać to wprost). Dopasowanie słów nie odróżnia deklaracji od twierdzenia, jak w ewaluacji CV.
+- Wszystkie 6 błędów merytorycznych zostało wskazanych, przechwałki dostały 1-2.

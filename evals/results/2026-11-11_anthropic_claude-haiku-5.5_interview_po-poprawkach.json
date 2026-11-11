@@ -1,0 +1,824 @@
+{
+  "kind": "interview",
+  "date": "2026-11-11",
+  "model": "anthropic/claude-haiku-5.5",
+  "label": "po-poprawkach",
+  "mock": false,
+  "summary": {
+    "cases": 6,
+    "completed": 6,
+    "vagueFollowUp": {
+      "asked": 6,
+      "total": 6
+    },
+    "goodFollowUp": {
+      "asked": 15,
+      "total": 23
+    },
+    "factualFlagged": {
+      "flagged": 6,
+      "total": 6
+    },
+    "goodAboveVague": {
+      "yes": 6,
+      "total": 6
+    },
+    "fabricated": 2,
+    "strongerFailed": 0,
+    "scoreByType": {
+      "good": 2.7,
+      "vague": 1.7,
+      "factual-error": 1,
+      "brag": 1.3,
+      "too-long": 2.7
+    },
+    "rejected": 11,
+    "costPerInterview": 0.023705383333333333,
+    "secondsPerInterview": 90.62966666666667
+  },
+  "cases": [
+    {
+      "id": "01-marketing",
+      "title": "Studentka marketingu po stażu w social media; przechwałka o Google Ads, błąd o konwersji w GA4",
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "questions": 8,
+      "answers": [
+        {
+          "questionId": "q1",
+          "kind": "intro",
+          "type": "good",
+          "score": 4,
+          "lengthScore": 5,
+          "followUp": false,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Studiuję marketing internetowy i na stażu w Kawiarni Pod Lipą prowadziłam profile na Instagramie i Facebooku: publikowałam 3 posty tygodniowo, przygotowywałam grafiki w Canvie i co miesiąc raport zasięgów z Meta Business Suite dla właścicielki. Dzięki temu [co zmieniło się w zasięgach lub zaangażowaniu]. Chcę rozwijać się w marketingu online, a rola w Ogrodnik24 łączy to, co robię najchętniej: social media, grafikę i analizę wyników w GA4 oraz Excelu. Szczególnie zależy mi na [co konkretnie chcesz sprawdzić w kampaniach lub raportach w Ogrodnik24]."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q2",
+          "kind": "experience",
+          "type": "vague",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Podczas stażu w Kawiarni Pod Lipą prowadziłam profile marki na Instagramie i Facebooku. Publikowałam 3 posty tygodniowo, a grafiki do postów i relacji przygotowywałam w Canvie. Co miesiąc przygotowywałam raport zasięgów z Meta Business Suite dla właścicielki. Dzięki temu [co zmieniło się w zasięgach lub zaangażowaniu, np. wzrost o X%]. Najbardziej podobało mi się łączenie kreatywnej pracy z analizą wyników, dlatego chcę rozwijać to w marketingu online.",
+            "Na stażu w Kawiarni Pod Lipą prowadziłam profile lokalu na Instagramie i Facebooku. Zadaniem było regularne publikowanie treści, więc przygotowywałam 3 posty tygodniowo oraz grafiki do postów i relacji w Canvie. Co miesiąc robiłam raport zasięgów z Meta Business Suite dla właścicielki i na jego podstawie dobierałam, co publikować dalej. Efektem było [o ile wzrosły zasięgi lub interakcje, jeśli masz dane]. Zaplanowałam też [co jeszcze zmieniłaś lub jaki był kolejny krok]."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q3",
+          "kind": "situational",
+          "type": "too-long",
+          "score": 2,
+          "lengthScore": 3,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Najpierw sprawdziłabym, na którym etapie spada wynik. Zaczęłabym od wskaźników: liczba kliknięć, koszt konwersji i liczba konwersji w ostatnim tygodniu porównana z poprzednim. Jeśli kliknięcia spadły, sprawdziłabym, czy coś zmieniło się w reklamach lub w zapytaniach, na które się wyświetlają. Jeśli kliknięcia są, a konwersji nie ma, sprawdziłabym w Google Analytics 4, czy śledzenie konwersji działa poprawnie i czy strona docelowa się nie zmieniła. Ukończyłam kurs Podstawy Google Analytics 4, więc wiem, gdzie szukać tych danych. Następnie porozmawiałabym z zespołem obsługi klienta, czy klienci zgłaszają problemy z zamówieniami lub stroną. Wprowadziłabym jedną zmianę naraz i obserwowała wyniki przez [ile dni] przed kolejnym krokiem. Podobnie planowałam działania na stażu w Kawiarni Pod Lipą, gdzie [jaki był efekt zmian w zasięgach].",
+            "Najpierw sprawdziłabym, który wskaźnik przestał działać. Porównałabym liczbę kliknięć, zapytań i kosztu zapytania w tym samym przedziale co wcześniej, żeby zobaczyć, czy spadek dotyczy ruchu, czy zamiany ruchu na zapytania. Następnie w Google Analytics 4 sprawdziłabym, czy zdarzenie zapytania nadal się rejestruje i czy ruch trafia na właściwą stronę, bo zmiana w śledzeniu albo na stronie często daje taki sam objaw jak słabsza kampania. Podobnie robiłam przy raportach zasięgów w Meta Business Suite dla [nazwa kawiarni], gdzie porównywałam tygodnie przed i po zmianie: [co konkretnie porównywałaś i jaki był efekt]. Zmiany wprowadzałabym jedna po drugiej, żeby wiedzieć, co zadziałało."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q4",
+          "kind": "knowledge",
+          "type": "factual-error",
+          "score": 1,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 1,
+          "fabricated": [],
+          "stronger": [
+            "W GA4 wszystko, co użytkownik robi na stronie, to zdarzenie, na przykład wyświetlenie strony, kliknięcie czy przewinięcie. Konwersją oznaczam tylko te zdarzenia, które mają wartość biznesową, na przykład wysłanie formularza albo zakup. Rozróżnienie ma znaczenie w raportach, bo konwersje są podstawą do oceny kampanii i do optymalizacji, a ich liczba nie zależy od liczby sesji. Sesja to jedynie okres aktywności użytkownika i sama w sobie nie jest konwersją. W praktyce oznaczyłabym [które zdarzenie jest kluczowe dla firmy, np. zakup] jako konwersję, a następnie sprawdziła, czy [wskaźnik konwersji w raporcie] jest zgodny z danymi sprzedażowymi.",
+            "W Google Analytics 4 wszystko, co użytkownik robi na stronie, jest zdarzeniem: wejście na stronę, kliknięcie, przewinięcie. Konwersja to wybrane zdarzenie, które oznaczamy jako kluczowe, bo ma wartość biznesową, np. zakup w sklepie albo wysłanie formularza. Rozróżnienie ma znaczenie w raportach, bo konwersje pokazują, czy kampania realnie przynosi wyniki, a nie tylko ruch. Gdybym miała to sprawdzić w pracy, przeszłabym do raportu konwersji i porównała liczbę zakupów z liczbą sesji z kampanii [nazwa kampanii], żeby zobaczyć, który kanał działa. Gdy czegoś nie wiem, mówię o tym wprost i sprawdzam w dokumentacji GA4."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q5",
+          "kind": "tools",
+          "type": "brag",
+          "score": 1,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 1,
+          "fabricated": [],
+          "stronger": [
+            "Which tools do I use for social media graphics and short videos? I create graphics for posts and stories in Canva, which I used during my internship at Kawiarnia Pod Lipą, where I published 3 posts a week on Instagram and Facebook. For short videos I use [name of video tool, if any]. I work in English at B2 level, so I can read tool documentation and communicate with an international team about [example of work in English, e.g. a campaign report or tool tutorial]. [Result of a specific graphic or video, e.g. how many posts were prepared per week or how engagement changed].",
+            "I create social media graphics mainly in Canva, which I used during my internship at Kawiarnia Pod Lipą to prepare posts and stories in line with the cafe's colours. For short videos I use [tool you used for video, if any]. I work in English at a B2 level, so I can read tool documentation and communicate with colleagues, but I have not yet worked on English-language graphics or video projects, so I would describe that as [your real example, if you have one]. In a new role I would start with [specific task] and build on what I already know from Canva."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q6",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Na stażu w Kawiarni Pod Lipą przygotowywałam grafiki do postów i relacji w Canvie, średnio [ile grafik tygodniowo] do [ile] postów i relacji. Robiłam je w spójnej kolorystyce lokalu, co ułatwiało odbiorcom rozpoznanie marki. W efekcie [jaki efekt: np. zmiana zasięgów lub interakcji, jeśli znasz dane]. Równolegle co miesiąc przygotowywałam raport zasięgów z Meta Business Suite dla właścicielki, na jego podstawie [co zmieniłam lub zaproponowałam]. Potrafię [jeśli dotyczy: wskaż inne narzędzie, którego użyłaś].",
+            "Na stażu w Kawiarni Pod Lipą odpowiadałam za grafiki do postów i relacji na Instagramie i Facebooku. Tygodniowo przygotowywałam [ile grafik i relacji tygodniowo] w Canvie, zachowując spójne kolory lokalu. Publikowałam 3 posty tygodniowo, a co miesiąc sprawdzałam wyniki w raporcie zasięgów z Meta Business Suite dla właścicielki. Po wprowadzeniu [jaka zmiana w grafikach] zasięgi [jak się zmieniły, np. o ile procent lub ile osób więcej]. Ten wynik pokazał mi, że [wniosek z danych]. Chciałabym przenieść to podejście do Waszych kampanii i grafik w Ogrodnik24."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q7",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Na stażu w Kawiarni Pod Lipą używałam Excela i Google Analytics 4 w dwóch miejscach. Co miesiąc zestawiałam w Excelu dane o zasięgach z Meta Business Suite i przygotowywałam z nich raport dla właścicielki, a w GA4 sprawdzałam, skąd przychodzą odwiedziny na stronę kawiarni [źródło ruchu, np. z Instagrama]. Dzięki temu wiedziałam, które posty przyciągały najwięcej osób, i ustaliłam z właścicielką, że [jaka decyzja została podjęta, np. w które godziny publikować]. Efektem było [wynik, np. wzrost zasięgów o X% w ciągu Y miesięcy]. Znam też GA4 z kursu Podstawy Google Analytics 4 z marca 2025, ale na stażu używałam go praktycznie, do śledzenia ruchu z mediów społecznościowych.",
+            "Na stażu w Kawiarni Pod Lipą przygotowywałam co miesiąc raport zasięgów w Meta Business Suite dla właścicielki. Zestawiałam w Excelu dane z postów, żeby zobaczyć, które publikacje działały najlepiej. Dodatkowo, w ramach kursu Podstawy Google Analytics 4, sprawdzałam w praktyce, jak raportować zdarzenia i konwersje. Efektem było [co się zmieniło w zasięgach lub interakcjach po wprowadzeniu wniosków z raportu]. W kole naukowym miałam ten sam schemat pracy z danymi przy kampanii konferencji: [jaki był efekt tej analizy]. Wiem, że w tej roli najważniejsze jest pokazanie, co z danych wynika, dlatego mogę oprzeć się na tym samym sposobie raportowania."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q8",
+          "kind": "gap",
+          "type": "good",
+          "score": 3,
+          "lengthScore": 4,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Google Ads nie prowadziłam jeszcze samodzielnie, więc zaczęłabym od podstaw: [kurs lub certyfikat Google Ads, jeśli go zrobisz, albo planowany termin nauki]. Mam jednak doświadczenie w raportowaniu, bo na stażu co miesiąc przygotowywałam raport zasięgów z Meta Business Suite, a na kursie Podstawy Google Analytics 4 nauczyłam się czytać dane o ruchu. W pierwszych tygodniach chciałabym [konkretny sposób nauki, np. pierwsze kampanie testowe z niewielkim budżetem] i porównywać wyniki kampanii z danymi w GA4, żeby szybko zobaczyć, co działa. Rozumiem, po co są konwersje i jak sprawdzać wynik, a obsługę panelu Google Ads chcę opanować szybko, zanim zacznę samodzielnie optymalizować kampanie.",
+            "Google Ads nie prowadziłam jeszcze samodzielnie, więc zaczęłabym od podstaw: [nazwa kursu lub certyfikatu Google Ads, jeśli zrobiłaś]. Na stażu w Kawiarni Pod Lipą czytałam raporty z Meta Business Suite i GA4 i wiem, które wskaźniki pokazują, czy reklama działa, na przykład zasięgi i interakcje. Te same zasady przeniosłabym na kampanie Google Ads: najpierw sprawdziłabym, czy kampania klika się i prowadzi do działań na stronie, a potem [konkretny wskaźnik, np. kliknięcia lub konwersje w GA4]. Zaplanowałam naukę w ten sposób: [konkretny plan, np. tydzień na podstawy kampanii i kurs, potem próbna kampania z małym budżetem], a efekt chcę pokazać w [termin, np. pierwszym miesiącu pracy]."
+          ],
+          "strongerFailed": 0
+        }
+      ],
+      "average": 2.5,
+      "costUsd": 0.026531100000000002,
+      "seconds": 100.834,
+      "rejected": 2
+    },
+    {
+      "id": "03-analityczka",
+      "title": "Asystentka sprzedaży przechodząca do analizy danych; błąd o AI Act, przechwałka o SQL",
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "questions": 8,
+      "answers": [
+        {
+          "questionId": "q1",
+          "kind": "intro",
+          "type": "good",
+          "score": 4,
+          "lengthScore": 5,
+          "followUp": false,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Nazywam się Natalia Pawłowska i pracuję jako asystentka ds. sprzedaży w Hurtowni Bałtyk w Gdańsku. Co tydzień przygotowuję raporty sprzedaży dla 12 przedstawicieli handlowych w Excelu, korzystając z tabel przestawnych i funkcji WYSZUKAJ.PIONOWO. Przy uporządkowaniu bazy 3 000 klientów usunęłam duplikaty, co [jaki efekt dla raportowania]. Ukończyłam kursy SQL od podstaw oraz Power BI dla początkujących, a w pracy łączę analizę liczb z przygotowywaniem zestawień dla zarządu. Chcę przejść do analizy danych na pełen etat, bo to raporty dają mi najwięcej satysfakcji. Widzę w Sklepiku Domowym okazję, by rozwijać raportowanie sprzedaży i marży oraz analizę promocji w [dodaj, co z ogłoszenia chcesz wnieść najpierw]."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q2",
+          "kind": "experience",
+          "type": "too-long",
+          "score": 3,
+          "lengthScore": 3,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Przygotowuję cotygodniowe raporty sprzedaży w Excelu dla 12 przedstawicieli handlowych w Hurtowni Bałtyk. Zbudowałam je na tabelach przestawnych i funkcji WYSZUKAJ.PIONOWO, które łączą dane sprzedażowe z kartoteką klientów. Raport pokazuje sprzedaż i wynik każdego przedstawiciela w porównaniu z poprzednim tygodniem, a formatowanie warunkowe od razu podkreśla odchylenia od celu. Przedstawiciele korzystają z niego przed cotygodniowym spotkaniem, a ja przygotowuję zestawienia do kwartalnych spotkań zarządu. Zanim wysyłam raport, sprawdzam sumy kontrolne, bo w poprzedniej pracy błąd w kwocie potrafił zepsuć całe zestawienie. Dzięki temu [jaki był efekt, np. liczba wyjaśnianych rozbieżności w miesiącu]. Chciałabym zrobić to samo, ale na większej skali i z użyciem SQL oraz Power BI, których uczę się na kursach.",
+            "Przygotowuję cotygodniowe raporty sprzedaży w Excelu dla 12 przedstawicieli handlowych w Hurtowni Bałtyk. Raport zawiera [zakres danych, np. sprzedaż według produktów i regionów] i buduję go na tabelach przestawnych oraz funkcji WYSZUKAJ.PIONOWO, które łączą dane z kilku zestawień. Odbiorcy chcą szybko zobaczyć, co idzie dobrze, a co źle, więc formatuję wyniki warunkowo i dbam o czytelność. Cały cykl, od pobrania danych do wysłania raportu, zajmuje mi [ile godzin w tygodniu]. Raporty przygotowuję od [od kiedy] i [jaki efekt miały, np. skrócenie czasu przygotowania albo mniej pomyłek]. Przy okazji przygotowuję zestawienia na kwartalne spotkania zarządu w PowerPoincie, co uczy mnie sprawdzania liczb kilka razy przed wysłaniem."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q3",
+          "kind": "situational",
+          "type": "vague",
+          "score": 1,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Najpierw sprawdziłabym, czy spadek nie wynika z błędu w danych. Porównałabym wynik z poprzednimi tygodniami i sprawdziła, czy w regionie nie zmieniły się filtry, zakres dat lub liczba rekordów. Zweryfikowałabym też, czy nie ma zduplikowanych pozycji, tak jak przy porządkowaniu bazy [ile klientów/rekordów] w Hurtowni Bałtyk. Dopiero gdy liczby się zgadzają, przekazałabym wynik dalej, opisując, co sprawdziłam i [jaki był wynik weryfikacji].",
+            "Zanim przekażę wynik dalej, sprawdziłabym, czy spadek marży wynika z danych, czy z rzeczywistej zmiany. Najpierw porównałabym rekordy dla tego regionu z danymi źródłowymi funkcją WYSZUKAJ.PIONOWO i sprawdziła, czy nie ma duplikatów, tak jak przy porządkowaniu bazy [ilu klientów lub rekordów]. Potem przeliczyłabym sumy w tabeli przestawnej i porównała je z poprzednim okresem. Sprawdziłabym też, czy w tym czasie nie zmieniły się ceny, koszty zakupu albo promocje w tym regionie. Dopiero gdy wynik by się potwierdził, przekazałabym go [komu, np. kierownikowi analiz sprzedaży] razem z opisem tego, co sprawdziłam, i wstępną przyczyną, jeśli ją znam."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q4",
+          "kind": "knowledge",
+          "type": "factual-error",
+          "score": 1,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 1,
+          "fabricated": [],
+          "stronger": [
+            "Przy łączeniu sprzedaży z tabelą produktów zaczynam od sprawdzenia kluczy: sprzedaż i produkty muszą mieć wspólny identyfikator, np. [nazwa klucza, np. id_produktu]. Następnie piszę zapytanie z INNER JOIN, bo interesują mnie tylko sprzedaże z przypisanym produktem, i agreguję wynik według [kategorii lub produktu]. Po napisaniu sprawdzam, czy suma sprzedaży po złączeniu zgadza się z sumą z tabeli źródłowej, żeby wykluczyć duplikaty wynikające z błędnego klucza. Kurs SQL od podstaw ukończyłam w lutym 2025 roku i [tu wpisz, czy i gdzie użyłaś JOIN w praktyce, np. w raportach w Hurtowni Bałtyk].",
+            "Przy łączeniu sprzedaży z tabelą produktów zaczynam od sprawdzenia, jaki klucz wspólny mają obie tabele, najczęściej identyfikator produktu [nazwa klucza]. Następnie piszę zapytanie z INNER JOIN, żeby zachować tylko sprzedaże z przypisanym produktem, i sprawdzam wynik porównując sumę sprzedaży przed i po złączeniu [jaki wynik sprawdzenia]. Na koniec weryfikuję, czy liczba wierszy się nie zmieniła nieoczekiwanie, bo duplikaty klucza zawyżyłyby wartości. Zanim zaczęłam pracować z danymi w SQL, przeszłam 40-godzinny kurs SQL od podstaw, a w Hurtowni Bałtyk na co dzień sprawdzam sumy w tabelach przestawnych [dodaj przykład z pracy]."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q5",
+          "kind": "tools",
+          "type": "good",
+          "score": 3,
+          "lengthScore": 4,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Power BI używałam w kursie Power BI dla początkujących (05.2025), gdzie budowałam prosty dashboard na danych [jakich danych, np. sprzedażowych]. Pokazywałam na nim [jakie wskaźniki, np. sprzedaż i marżę w podziale na miesiące], a filtrowanie pozwalało [co dawało]. Na co dzień nie pracowałam jeszcze w Power BI: moje raporty dla 12 przedstawicieli handlowych przygotowuję w Excelu, używając tabel przestawnych i WYSZUKAJ.PIONOWO. Dlatego widzę tu wyraźną różnicę: w Excelu raport jest statyczny i trzeba go odświeżać ręcznie, a w Power BI mogłabym [jaki efekt, np. udostępnić dashboard zespołowi, który odświeża się automatycznie]. Chcę to sprawdzić w praktyce, zaczynając od przeniesienia jednego z moich cotygodniowych raportów na dashboard.",
+            "Power BI poznałam na kursie \"Power BI dla początkujących\" (2025-05), gdzie zbudowałam dashboard [co pokazywał: np. sprzedaż i marżę w podziale na produkty]. Wskaźniki to [np. udział marży, sprzedaż w czasie], a filtr [np. regionu] pozwalał [np. przedstawicielom szybko sprawdzić wynik swojego obszaru]. W pracy w Hurtowni Bałtyk na co dzień przygotowuję cotygodniowe raporty sprzedaży dla 12 przedstawicieli handlowych w Excelu, z tabelami przestawnymi i WYSZUKAJ.PIONOWO, więc zależy mi, żeby te same dane pokazywać w dashboardzie zamiast statycznych tabel. Przy takim dashboardzie [jaki był efekt, np. ile czasu zaoszczędziłabym tygodniowo na raportach]."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q6",
+          "kind": "gap",
+          "type": "brag",
+          "score": 2,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Power BI znam z kursu Power BI dla początkujących, który ukończyłam w maju 2025, i na nim ćwiczyłam budowę pierwszych raportów. Od zera zaczęłabym od ustalenia z działem handlowym, na jakie pytania dashboard ma odpowiadać, np. sprzedaż i marża według regionów i promocji. Potem połączyłabym się ze źródłem danych, sprawdziła poprawność kluczy i sum względem Excela, na którym przygotowuję obecne raporty, i zbudowała model danych z tabelą dat oraz tabelami sprzedaży i produktów. Następnie dodałabym miary w DAX dla marży i udziału w sprzedaży, filtry dla regionu i okresu oraz 2-3 wykresy, które czytelnie pokazują odchylenia. Na końcu pokazałabym wersję próbną osobie z działu handlowego, zebrała uwagi i ustaliła częstotliwość odświeżania. W pracy z SQL, który znam dobrze, pisałam procedury składowane i optymalizowałam zapytania na bazie [liczba rekordów lub tabel], co ułatwi przygotowanie danych pod model. Dashboardu w Power BI jeszcze nie zbudowałam w pracy, [czy i kiedy] zrobiłam taki projekt poza kursem.",
+            "Power BI znam z kursu, ale w pracy dotąd korzystałam głównie z Excela, więc zaczęłabym od [jakie źródło danych] z hurtowni. W pierwszym tygodniu uporządkowałabym dane w Power Query: połączyłabym [tabela sprzedaży] z [tabela produktów] i sprawdziła, czy sumy zgadzają się z raportem z Excela. W drugim tygodniu zbudowałabym pierwszy model i miary dla sprzedaży i marży, a następnie prosty dashboard z filtrami po [region] i [okres]. Każdy wskaźnik porównałabym z raportem tygodniowym, żeby mieć pewność poprawności. W trzecim tygodniu przekazałabym wersję próbną wybranemu przedstawicielowi i zebrała uwagi, które wprowadziłabym w kolejnej iteracji. Efekt mierzyłabym tym, że [ile godzin tygodniowo zaoszczędzone na ręcznym raportowaniu]."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q7",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Przygotowuję cotygodniowe raporty sprzedaży dla 12 przedstawicieli handlowych w Excelu, czyli w sumie około [liczba raportów] miesięcznie. Używam tabel przestawnych i WYSZUKAJ.PIONOWO, żeby połączyć dane sprzedażowe z listą klientów i produktów. Przy porządkowaniu bazy 3 000 klientów usunęłam duplikaty i sprawdziłam sumy w tabeli przestawnej, co [jaki był efekt, np. ile czasu zajmuje teraz cykl raportowy]. Co kwartał przygotowuję zestawienia na spotkania zarządu, a [co zmieniło się w decyzjach lub w czasie przygotowania]. Chcę te umiejętności rozwinąć w analizie marży i promocji w Power BI.",
+            "Pracuję w Hurtowni Bałtyk jako asystentka ds. sprzedaży i co tydzień przygotowuję raporty sprzedaży dla 12 przedstawicieli handlowych w Excelu. Ogólnie robię [ile raportów miesięcznie] i jeden cykl zajmuje mi [ile godzin], od pobrania danych do wysłania. Do zestawień używam tabel przestawnych i WYSZUKAJ.PIONOWO, które łączą sprzedaż z danymi klientów. Dzięki temu [co konkretnie się zmieniło, np. czas przygotowania albo liczba poprawek]. Przy okazji zestawień na kwartalne spotkania zarządu [jaki był zakres i efekt]. Chcę to robić na większą skalę w analizie danych."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q8",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "In my current role as a sales assistant at Hurtownia Bałtyk, I prepare weekly sales reports in Excel for 12 sales representatives. Once, [describe the specific finding, e.g. a discount pattern in one region] came up in the data, and I needed to explain it to [colleague's role], who doesn't work with spreadsheets. I wrote a short summary in English [or Polish, if the colleague needed it] using [the chart or pivot table you used], focusing on [the one number that mattered] and what it meant for [the decision]. As a result, [the outcome, e.g. the colleague changed the promotion plan or asked for a follow-up report]. This is how I approach English communication: clear, short, and built around the numbers.",
+            "In my current role as a sales assistant at Hurtownia Bałtyk, I prepare weekly sales reports in Excel for 12 sales representatives. Once, I noticed [what changed in the data] and explained it to [colleague's role] in simple terms, focusing on [the decision it supported]. I used pivot tables to show [the key figure], and avoided technical terms by [how you simplified it]. As a result, [the outcome, e.g. the team changed the approach to X or the meeting took Y less time]. I also prepare summaries for quarterly management meetings, where I need to present numbers clearly to people outside the sales team."
+          ],
+          "strongerFailed": 0
+        }
+      ],
+      "average": 2.5,
+      "costUsd": 0.0281094,
+      "seconds": 105.86,
+      "rejected": 3
+    },
+    {
+      "id": "05-mechanik",
+      "title": "Mechanik samochodowy; ogólnikowe przedstawienie się, błąd o płynie hamulcowym, przechwałka o uprawnieniach",
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "questions": 8,
+      "answers": [
+        {
+          "questionId": "q1",
+          "kind": "intro",
+          "type": "vague",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Jestem mechanikiem samochodowym z ponad trzyletnim doświadczeniem. Od marca 2022 pracuję w Auto Naprawa Lipiec w Radomiu, gdzie wymieniam rozrządy, sprzęgła i układy hamulcowe w samochodach osobowych i dostawczych. Diagnozuję usterki testerem OBD i serwisuję klimatyzację, a od 2023 roku mam certyfikat F-gazowy. Aplikuję do Waszej stacji, bo chcę pracować w autoryzowanym serwisie i rozwijać się w diagnostyce komputerowej. Przy [ile aut miesięcznie obsługuję] zawsze dbam o dokładność i porządek na stanowisku. Chciałbym w Waszym zespole [co chciałbyś rozwijać].",
+            "Jestem mechanikiem samochodowym z [liczba] latami doświadczenia, od marca 2022 pracuję w Auto Naprawie Lipiec w Radomiu. Zajmuję się przeglądami i naprawami samochodów osobowych i dostawczych: wymieniam rozrządy, sprzęgła i układy hamulcowe, diagnozuję usterki testerem komputerowym OBD i serwisuję klimatyzację. W 2023 roku zdobyłem certyfikat F-gazowy dla personelu. Na co dzień [jaki był efekt, np. skrócenie czasu diagnozy]. Chcę pracować w Waszej autoryzowanej stacji, bo [powód związany z marką lub zakresem serwisu]. Lubię precyzyjną pracę i dbam o porządek na stanowisku, a w tej roli chciałbym [cel rozwojowy]."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q2",
+          "kind": "experience",
+          "type": "good",
+          "score": 3,
+          "lengthScore": 4,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Pracuję jako mechanik w Auto Naprawie Lipiec w Radomiu od marca 2022. Najczęściej wymieniam rozrządy, sprzęgła i układy hamulcowe w samochodach osobowych i dostawczych, a diagnozę usterek prowadzę testerem komputerowym OBD. Serwisuję też klimatyzację samochodową, a posiadany certyfikat F-gazowy pozwala mi wykonywać te prace zgodnie z wymogami. Najtrudniejsza była dla mnie naprawa [konkretny model i usterka], gdzie diagnoza wymagała [jakie kroki diagnostyczne] i trwała [ile godzin]. Efekt: [co zostało naprawione i jak potwierdziłem poprawność, np. jazda testowa, kontrola po naprawie]. Przyjmuję też auta od klientów i tłumaczę im zakres naprawy, co pozwala uniknąć nieporozumień przy odbiorze.",
+            "Pracuję jako mechanik w Auto Naprawie Lipiec w Radomiu od marca 2022. Codziennie przyjmuję od [ilu] klientów [jakie] samochody osobowe i dostawcze, diagnozuję usterki testerem OBD i wymieniam rozrządy, sprzęgła oraz układy hamulcowe. Najczęściej wykonuję [jaki rodzaj napraw] i serwisuję klimatyzację samochodową. Za najtrudniejszą uważam [konkretna naprawa], bo [dlaczego była trudna]. Przykładowo, przy [marka i model] wykryłem usterkę [usterka] za pomocą testera OBD, wymiana [część] zajęła [ile czasu], a skuteczność potwierdziłem [jak: jazda próbna, ponowny odczyt błędów, pomiar]. Klientom tłumaczę zakres naprawy i jej przyczynę, żeby wiedzieli, za co płacą."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q3",
+          "kind": "situational",
+          "type": "too-long",
+          "score": 2,
+          "lengthScore": 3,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Najpierw wypytałbym klienta, kiedy objaw się pojawia: tylko przy hamowaniu czy także przy jeździe, na mokrej i suchej nawierzchni, i czy ktoś ostatnio robił coś przy hamulcach lub zawieszeniu. Potem sprawdziłbym ciśnienie i stan opon, bo różnica w ogumieniu potrafi ciągnąć auto w bok. Następnie podjechałbym na podnośnik i obejrzałem zaciski, tarcze i klocki po obu stronach: czy któryś zacisk nie chodzi, czy tarcza nie jest zużyta lub spaczona, czy przewód hamulcowy nie jest zapieczony. Dopiero potem sprawdziłbym zawieszenie, czyli tuleje wahaczy, łożyska i końcówki drążków, bo luz w tych elementach zmienia geometrię. Na koniec podpiąłbym tester OBD, żeby sprawdzić błędy w ABS i ESP, i wykonałbym próbę jazdy, żeby potwierdzić objaw. Klientowi wyjaśniłbym, co znalazłem, ile to kosztuje i ile zajmie [czas naprawy według cennika].",
+            "Najpierw zapytałbym klienta, czy ciągnięcie pojawia się od razu przy każdym hamowaniu, czy tylko przy mocnym, i czy coś było ostatnio robione przy hamulcach lub zawieszeniu. Potem sprawdziłbym na podnośniku stan zacisków i tarcz po obu stronach, grubość klocków i szczelność przewodów, bo różnica w zacisku lewym i prawym to najczęstsza przyczyna ciągnięcia. Następnie zrobiłbym jazdę próbną i podłączyłbym tester OBD, żeby sprawdzić błędy i ewentualnie ABS. Jeśli w ten sposób wskazałbym przyczynę, wyjaśniłbym klientowi zakres naprawy, koszt i czas, w sposób zrozumiały dla niego, i po naprawie sprawdziłbym skuteczność kolejną jazdą próbną. [przykład z pracy w Auto Naprawa Lipiec: jaka usterka, ile czasu zajęła]"
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q4",
+          "kind": "knowledge",
+          "type": "factual-error",
+          "score": 1,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 1,
+          "fabricated": [],
+          "stronger": [
+            "Diagnozę zaczynam od rozmowy z klientem: pytam, kiedy pojawił się objaw i czy był ostatnio robiony serwis. Następnie podłączam tester OBD i odczytuję kody błędów z pamięci sterownika. Nie kończę na kodach: sprawdzam parametry na żywo, na przykład obroty, czujniki i wartości mieszanki, bo sam kod nie zawsze wskazuje przyczynę. Dopiero gdy dane wskazują konkretny element, sprawdzam go fizycznie na stanowisku, na przykład [jaki element i jak go sprawdzałem]. Przyczynę uznaję za potwierdzoną, gdy po naprawie [jak to sprawdziłem, np. kasowanie błędów i ponowny odczyt, jaka jazda kontrolna] usterka nie wraca.",
+            "Podłączam tester OBD i odczytuję zapisane kody błędów. Następnie sprawdzam parametry na żywo, na przykład [które parametry sprawdzam]. Zanim wymienię podzespół, potwierdzam przyczynę, na przykład [jak potwierdzam przyczynę]. W Auto Naprawa Lipiec zastosowałem to przy [jakim samochodzie i usterce], a efektem było [jaki był efekt]."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q5",
+          "kind": "tools",
+          "type": "brag",
+          "score": 1,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "W Auto Naprawa Lipiec diagnozuję usterki testerem komputerowym OBD. Podłączam tester do sterownika, odczytuję kody błędów, a następnie sprawdzam parametry na żywo, żeby potwierdzić przyczynę, zanim wymienię jakąkolwiek część. Przy kodach producenta korzystam z [nazwa używanego oprogramowania diagnostycznego, jeśli je znasz] i [jak weryfikujesz kod, np. z dokumentacją serwisową]. Ostatnio tak zdiagnozowałem [jaka usterka, jaki samochód] i [jaki był efekt naprawy].",
+            "W Auto Naprawie Lipiec diagnozowałem usterki testerem OBD, pracując na [nazwa testera i oprogramowania, jeśli znasz]. Kody błędów producenta sprawdzałem [jak: w jakim źródle, np. w dokumentacji naprawczej] i zawsze potwierdzałem przyczynę przed wymianą części, np. odczytem parametrów na żywo. Przykład: [jaki samochód, jaka usterka, ile czasu zajęła diagnoza, jaki był efekt]. Posiadam też uprawnienia SEP oraz [doświadczenie w stacji kontroli pojazdów, jeśli dotyczy i zostanie potwierdzone]."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q6",
+          "kind": "gap",
+          "type": "good",
+          "score": 3,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Z pojazdami elektrycznymi nie pracowałem, więc ta część wymagań w mojej dotychczasowej pracy nie była [liczba napraw EV, jeśli były]. Od marca 2022 roku w Auto Naprawa Lipiec wymieniałem rozrządy, sprzęgła i układy hamulcowe w samochodach osobowych i dostawczych oraz diagnozowałem usterki testerem OBD, [ile napraw tygodniowo wykonywałem samodzielnie]. Serwisowałem też klimatykę, a od 2023 roku mam certyfikat F-gazowy. Uważam, że przy tym zakresie samodzielnie prowadzę typowe naprawy, a elektroniki samochodowej uczyłem się w praktyce przez diagnostykę. Chętnie przejdę szkolenie z napraw aut elektrycznych, [jakie szkolenie lub kurs byłby najlepszy dla stacji].",
+            "Od marca 2022 pracuję jako mechanik samochodowy w Auto Naprawa Lipiec w Radomiu. Samodzielnie wykonuję przeglądy, wymieniam rozrządy, sprzęgła i układy hamulcowe oraz serwisuję klimatyzację. Diagnozuję usterki testerem OBD, a w tygodniu samodzielnie obsługuję [ile samochodów tygodniowo]. Jako przykład podam naprawę [marka i model auta], w której usterka [opis usterki] zajęła [ile godzin], a skuteczność potwierdziłem [sposób sprawdzenia]. Z pojazdami elektrycznymi nie pracowałem, ale na co dzień zajmuję się elektroniką samochodową, więc szybko przyswajam nowe zagadnienia. Dlatego do samodzielnej pracy w serwisie autoryzowanym jestem przygotowany, a szkolenie z napraw aut elektrycznych przyjąłbym z chęcią."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q7",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Przy klimatyzacji serwisowałem [ile systemów klimatyzacji w miesiącu] samochodów osobowych i dostawczych. Uzupełnianie czynnika chłodniczego wykonywałem [ile razy w miesiącu / na jakiej podstawie], a posiadany certyfikat F-gazowy pozwala mi pracować z czynnikami zgodnie z przepisami. Przy każdej naprawie diagnozowałem usterki testerem OBD i wymieniałem rozrządy, sprzęgła oraz układy hamulcowe w [ile aut miesięcznie]. Efektem było [jaki efekt, np. liczba napraw bez powrotu klienta].",
+            "Pracuję jako mechanik w Auto Naprawa Lipiec w Radomiu od marca 2022. Przy klimatyzacji obsługuję [ile systemów miesięcznie] samochodów osobowych i dostawczych. Najczęściej wykonuję [diagnostykę szczelności / uzupełnianie czynnika chłodniczego, jeśli to robię; ile kilogramów lub gramów czynnika miesięcznie]. Uprawnienia F-gazowe, które mam, pozwalają mi na pracę z czynnikami chłodniczymi zgodnie z przepisami. Przy każdej naprawie sprawdzam wydajność nawiewu i zgłaszam klientowi [jaki efekt, np. ile minut oszczędności albo jak potwierdzam skuteczność]. Chętnie podniosę tę skalę w serwisie autoryzowanym."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q8",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "W Auto Naprawie Lipiec wymieniałem rozrządy, sprzęgła i układy hamulcowe w osobówkach i dostawczakach, średnio [ile napraw miesięcznie] w miesiącu. Najczęściej były to [konkretny typ naprawy]. Efekt dla klientów: [np. liczba aut wróconych bez ponownej usterki / skrócony czas naprawy / inny mierzalny wynik]. Skuteczność potwierdzałem [sposób, np. próbą drogową i ponownym odczytem OBD]. Wymiana rozrządu w [model] trwała około [czas], a po naprawie [co się zmieniło u klienta].",
+            "W Auto Naprawie Lipiec wymieniałem rozrządy, sprzęgła i układy hamulcowe w samochodach osobowych i dostawczych. Średnio w miesiącu wykonywałem [ile napraw rozrządów, sprzęgieł i hamulców] i diagnozowałem usterki testerem OBD przy [ile zleceń diagnostycznych]. Najczęściej trafiały się [jaki typ usterki]. Po każdej naprawie [jak potwierdzałem skuteczność, np. jazda próbna, ponowny odczyt OBD] i efekt dla klientów to [jaki efekt, np. mniej powrotów na warsztat, krótszy czas naprawy]."
+          ],
+          "strongerFailed": 0
+        }
+      ],
+      "average": 2.3,
+      "costUsd": 0.024034800000000002,
+      "seconds": 92.953,
+      "rejected": 0
+    },
+    {
+      "id": "07-ksiegowosc",
+      "title": "Studentka rachunkowości po praktykach; błąd o stawce VAT i KPiR, przechwałka o sprawozdaniach",
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "questions": 8,
+      "answers": [
+        {
+          "questionId": "q1",
+          "kind": "intro",
+          "type": "good",
+          "score": 4,
+          "lengthScore": 4,
+          "followUp": false,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Studiuję finanse i rachunkowość na Krakowskiej Szkole Ekonomii i Finansów, gdzie mam w programie rachunkowość finansową i prawo podatkowe. Podczas praktyk w Biurze Rachunkowym Bilans w lipcu i sierpniu 2025 roku księgowałam faktury zakupu i sprzedaży w KPiR dla [liczba] jednoosobowych firm, wprowadzałam dokumenty do Comarch ERP Optima, w tym [ile dokumentów miesięcznie], a także przygotowywałam dokumenty do archiwizacji. [Jaki efekt miała ta praca, np. czas zamknięcia miesiąca albo liczba poprawek]. Chcę pracować w biurze rachunkowym, bo to praktyczne przedłużenie moich studiów i miejsce, gdzie mogę rozwijać księgowość od strony codziennej pracy z dokumentami i klientami."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q2",
+          "kind": "experience",
+          "type": "vague",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Podczas praktyki w Biurze Rachunkowym Bilans odpowiadałam za księgowanie faktur zakupu i sprzedaży w KPiR dla jednoosobowych firm. Codziennie wprowadzałam dokumenty do Comarch ERP Optima, a następnie sprawdzałam ich zgodność z dokumentami źródłowymi. Typowy dzień zaczynałam od weryfikacji nowych dokumentów od klientów, potem księgowałam je według rodzaju i stawki VAT. Na koniec przygotowywałam dokumenty do archiwizacji. Pracowałam [ile dokumentów tygodniowo] i [jaki był efekt, np. ile czasu zaoszczędzono lub ile błędów wyłapano].",
+            "Podczas praktyki w Biurze Rachunkowym Bilans, od [miesiąc] do [miesiąc], zajmowałam się księgowaniem faktur zakupu i sprzedaży dla jednoosobowych firm w KPiR. Typowo księgowałam około [liczba] dokumentów tygodniowo, wprowadzając je do programu Comarch ERP Optima. Na koniec tygodnia przygotowywałam dokumenty do archiwizacji, tak aby były kompletne i uporządkowane. Moim zadaniem było [co dokładnie sprawdzałam przed zaksięgowaniem]. Efektem było [np. zamknięte rozliczenia w terminie / brak poprawek po kontroli]. Dzięki temu nauczyłam się [co konkretnie], co chcę rozwijać w pracy u was."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q3",
+          "kind": "situational",
+          "type": "too-long",
+          "score": 3,
+          "lengthScore": 3,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Najpierw sprawdziłabym, ile czasu zostało do złożenia ewidencji VAT, bo to decyduje o kolejności działań. Zadzwoniłabym do klienta, wskazałam konkretnie, których dokumentów brakuje lub są nieczytelne, i zapytałabym, kiedy może je przesłać. Równolegle zapytałabym przełożoną, czy biuro ma procedurę na takie sytuacje, żeby nie działać na własną rękę. Gdy dokumenty dotrą, zaksięgowałabym je w Comarch ERP Optima, dwukrotnie sprawdzając kwoty i daty, bo błąd w deklaracji oznacza korektę. Na koniec zaproponowałabym klientowi przesyłanie dokumentów co tydzień i przypomnienie kilka dni przed terminem. Podobnie pilnowałam się w pracy w kinie [ile zmian tygodniowo], gdzie kasa musiała się zgadzać co do grosza. Efekt tego podejścia w praktyce: [jaki był efekt, np. ile deklaracji złożyłam w terminie].",
+            "Najpierw sprawdziłabym, ile dni zostało do terminu złożenia ewidencji VAT, żeby wiedzieć, jak pilna jest sprawa. Równolegle zadzwoniłabym do klienta, poprosiła o ponowne przesłanie nieczytelnych dokumentów i zapytała, kiedy może je dostarczyć. Następnie skonsultowałabym z przełożoną, jak biuro postępuje w takich przypadkach. Dokumenty, które już mam, zaksięgowałabym w KPiR i Comarch ERP Optima, a kwoty i daty sprawdziłabym dwukrotnie, żeby uniknąć korekt. Na koniec zaproponowałabym klientowi przesyłanie dokumentów na bieżąco, na przykład co tydzień, oraz przypomnienie kilka dni przed terminem. Podobną dokładność stosowałam na praktyce w Biurze Rachunkowym Bilans, gdzie księgowałam faktury zakupu i sprzedaży w KPiR dla jednoosobowych firm [ile dokumentów miesięcznie i jaki był efekt]."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q4",
+          "kind": "knowledge",
+          "type": "factual-error",
+          "score": 1,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 1,
+          "fabricated": [],
+          "stronger": [
+            "Ewidencję ryczałtu prowadzi przedsiębiorca rozliczający się w ryczałcie od przychodów ewidencjonowanych, a KPiR prowadzi przedsiębiorca na zasadach ogólnych albo w podatku liniowym. Z ewidencji ryczałtu korzysta się wtedy, gdy przedsiębiorca wybrał ryczałt, a jego ewidencja zapisuje przychody bez pełnego księgowania kosztów. KPiR natomiast służy do rozliczenia dochodu, czyli przychodów pomniejszonych o koszty. Podczas praktyki w Biurze Rachunkowym Bilans księgowałam faktury w KPiR dla jednoosobowych firm, więc znam tę różnicę od strony dokumentów: [jak wyglądały przychody i koszty w ewidencji ryczałtu, jeśli miałam z nią styczność].",
+            "Ewidencja ryczałtu służy do rozliczania podatku dochodowego od przychodów bez odejmowania kosztów, a podatek liczy się od przychodu według stawki zależnej od rodzaju działalności. KPiR jest księgą, w której zapisuje się przychody i koszty, więc dochód ustala się po odjęciu kosztów. Przedsiębiorca może wybrać ryczałt, jeśli spełnia warunki dotyczące wysokości przychodu i rodzaju działalności, a KPiR jest wtedy, gdy chce rozliczać rzeczywiste koszty. Podczas praktyki w Biurze Rachunkowym Bilans księgowałam faktury w KPiR dla jednoosobowych firm, dlatego znam tę księgę od strony praktycznej. Warunki wyboru sprawdziłabym w aktualnych przepisach, zanim udzieliłabym klientowi porady."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q5",
+          "kind": "tools",
+          "type": "good",
+          "score": 3,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Na praktyce w Biurze Rachunkowym Bilans wprowadzałam dokumenty zakupu i sprzedaży do Comarch ERP Optima, pracując na [liczba dokumentów tygodniowo] dla [liczba klientów]. Excel wykorzystywałam do zestawień [np. zestawienie dokumentów do ewidencji VAT], a przy każdym zestawieniu sprawdzałam sumy i daty [jaki był efekt, np. liczba wyłapanych błędów]. Pilnowanie zgodności kwot znam też z pracy w Kinie Kometa, gdzie rozliczałam kasę na koniec zmiany tak, aby wszystko zgadzało się co do grosza. Taką samą dokładność chcę wnieść do ewidencji KPiR i VAT w Państwa biurze.",
+            "Na praktyce w Biurze Rachunkowym Bilans wprowadzałam dokumenty zakupu i sprzedaży do Comarch ERP Optima, w tym [ile dokumentów miesięcznie]. Odpowiadałam za [konkretna czynność w Optimie, np. kontrola zgodności kwot]. Excela używam do [konkretne zestawienie, np. zestawienia kwot z dokumentów], co pozwoliło [jaki był efekt]. W pracy w kinie rozliczałam kasę na koniec zmiany, więc przyzwyczaiłam się do tego, że kwoty muszą się zgadzać co do grosza, i tę dokładność przenoszę na księgowanie."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q6",
+          "kind": "gap",
+          "type": "brag",
+          "score": 1,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Na praktyce w Biurze Rachunkowym Bilans przygotowywałam ewidencje VAT dla [liczba klientów] jednoosobowych firm. Dokumenty zakupu i sprzedaży wprowadzałam do Comarch ERP Optima, a w przypadku brakujących faktur kontaktowałam się z klientami i pilnowałam terminów składania ewidencji. Najczęściej pracowałam z [stawki VAT, z którymi pracowałam] i [inne stawki, jeśli je stosowałam], a błędy w kwotach wyłapywałam przez porównanie dokumentów z zapisami w KPiR. Efektem była [efekt: np. liczba ewidencji złożonych w terminie albo liczba wyłapanych błędów]. Podstawy VAT poznawałam na studiach, ale dopiero na praktyce nauczyłam się stosować je do konkretnych dokumentów.",
+            "Na praktyce w Biurze Rachunkowym Bilans zajmowałam się ewidencją VAT tylko w zakresie [jakie dokumenty VAT przygotowywałam]. Mój udział w przygotowaniu ewidencji VAT polegał na [co dokładnie robiłam samodzielnie]. Dla [liczba] klientów [jednoosobowych firm] pilnowałam [jaki element VAT], a efektem było [jaki wynik lub wskaźnik]. Podstawy VAT poznawałam na studiach z przedmiotu prawo podatkowe, a w praktyce stosowałam je przy księgowaniu faktur sprzedaży i zakupu w KPiR. Jeśli brakuje mi doświadczenia w jakimś obszarze VAT, otwarcie to przyznaję i chcę się go uczyć pod okiem doświadczonych księgowych."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q7",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Na praktyce w Biurze Rachunkowym Bilans księgowałam [liczba] faktur zakupu i sprzedaży miesięcznie w KPiR dla [liczba] jednoosobowych firm. Wprowadzałam dokumenty do Comarch ERP Optima, a [co dokładnie sprawdzałam pod kątem VAT, np. poprawność stawek i kwot]. Do zestawień używałam MS Excel, [np. do sumowania kwot na koniec miesiąca]. Dzięki temu [jaki był efekt, np. dokumenty były gotowe do ewidencji VAT przed terminem]. Terminowość pokazywałam, [np. dotrzymując ustalonych terminów wprowadzania dokumentów].",
+            "Podczas praktyki w Biurze Rachunkowym Bilans księgowałam faktury zakupu i sprzedaży w KPiR dla [liczba] jednoosobowych firm, miesięcznie około [liczba] dokumentów. Wprowadzałam je do Comarch ERP Optima i sprawdzałam poprawność kwot oraz dat przed zamknięciem miesiąca. Przy ewidencjach VAT korzystałam z podstaw VAT, a zestawienia przygotowywałam w MS Excel. Dzięki temu [jaki był efekt, np. czy zestawienia zgadzały się z ewidencją bez korekt]. Terminowość pilnowałam, planując pracę tak, by [jaki termin dotrzymałam]. Chciałabym wykorzystać te doświadczenia w Państwa zespole księgowych."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q8",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Na praktyce w Biurze Rachunkowym Bilans księgowałam faktury zakupu i sprzedaży w KPiR dla [liczba] jednoosobowych firm, około [liczba dokumentów] tygodniowo. Każdy dokument wprowadzałam do Comarch ERP Optima i sprawdzałam kwoty oraz daty przed zapisaniem. Po zaksięgowaniu przygotowywałam dokumenty do archiwizacji: [jak je segregowałam i opisywałam]. Efektem było [co się zmieniło, np. mniej poprawek przy zamknięciu miesiąca] albo [ile dokumentów przeszło przez mój etap bez błędów].",
+            "Na praktyce w Biurze Rachunkowym Bilans księgowałam faktury zakupu i sprzedaży w KPiR dla [liczba] jednoosobowych firm, miesięcznie około [liczba dokumentów]. Każdy dokument wprowadzałam do Comarch ERP Optima i sprawdzałam zgodność kwot i dat przed zaksięgowaniem. Po zakończeniu miesiąca przygotowywałam dokumenty do archiwizacji według [opis zasad archiwizacji w biurze], co pozwalało [jaki był efekt, np. szybciej odnaleźć dokument podczas kontroli]. Dzięki temu mogłam [jaki efekt dla biura lub klienta]."
+          ],
+          "strongerFailed": 0
+        }
+      ],
+      "average": 2.6,
+      "costUsd": 0.023767700000000003,
+      "seconds": 88.148,
+      "rejected": 1
+    },
+    {
+      "id": "09-frontend-en",
+      "title": "Computer science student, frontend; interview in English, error about TypeScript, brag about React",
+      "language": "en",
+      "ok": true,
+      "error": "",
+      "questions": 7,
+      "answers": [
+        {
+          "questionId": "q1",
+          "kind": "intro",
+          "type": "good",
+          "score": 3,
+          "lengthScore": 5,
+          "followUp": false,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "I am a computer science student at the Academy of Applied Computer Science in Łódź, and I focus on frontend development. In Pogodynka, a weather app I built in Vue.js, I wrote the components, handled connection errors from the public API, and made the layout responsive for mobile, [what result or measure did this give]. For a local hair salon I built a booking-form website on WordPress, which taught me how a real user flow works, [how many bookings or users it handled]. I work with HTML, CSS, JavaScript and Git, I use Figma for design, and I work in English at B2 level. I am drawn to this role because it means building interfaces for clinics in an international team, [what experience you have in building production interfaces, if any, and what you would want to learn in this role]."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q2",
+          "kind": "experience",
+          "type": "vague",
+          "score": 1,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "I built Pogodynka, a weather app, as a personal project in 2025. I wrote its components in Vue.js and fetched the forecast from a public API. When the connection failed, I handled the error and showed the user a message [what the user saw instead of a blank screen]. I also made the layout responsive for phones with CSS, so the forecast displays correctly on a small screen [how many users or requests it served, if known]. The project taught me how to split a page into components and how to deal with unreliable network data, and I would bring that same approach to the team's work [what concrete task from the role you would start with].",
+            "In Pogodynka, a weather app I built in February and March 2025, I wrote the components in Vue.js that show the forecast from a public API. When the connection failed, I handled the error so the user saw [what message or fallback view appeared] instead of a blank screen. I also made the layout responsive with CSS, so the view worked on phones, and I checked it on [which devices or screen widths]. The result was [what changed for the user, e.g. number of users or test results]. I used JavaScript and Git for the project, and [how you would apply this experience to interface work in a new framework]."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q3",
+          "kind": "situational",
+          "type": "good",
+          "score": 4,
+          "lengthScore": 4,
+          "followUp": false,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "If a layout broke on small mobile screens, I would first compare it with the Figma frame and check which breakpoints and spacing values the design specifies. Then I would reproduce the problem in the browser dev tools at the same screen width, find the CSS rule causing the overflow and fix it with responsive units or a media query for that breakpoint. In Pogodynka I used the same approach to make the view work on phones, so I would test the fix on [which devices or screen sizes] and check [what changed for the user, e.g. number of layout issues fixed]. Before sending the change for code review, I would add or update the test for that component and describe the fix in the pull request so the reviewer knows which breakpoint was affected."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q4",
+          "kind": "knowledge",
+          "type": "factual-error",
+          "score": 1,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 1,
+          "fabricated": [],
+          "stronger": [
+            "TypeScript checks types at compile time, not in the browser at runtime, so a type error is caught before the code is deployed. An interface and a type alias both describe the shape of an object, and in most cases they work the same way. I would use an interface for component props, for example [props for the component], because it can be extended later. I would use a type alias for unions or more complex types, for example [a union of states]. In Pogodynka I already worked with Vue.js components, and in React I would apply the same approach: define the types of the props and the data returned from the API, so errors show up while I write the code, not after the page loads.",
+            "Interface and type alias both describe the shape of an object, but an interface can be extended and merged, while a type alias can also describe unions, primitives and tuples. In a React component I would type props with an interface or a type alias, for example [your props type], and type state with useState so the compiler checks every usage. TypeScript checks the code at build time, before the browser runs it, so a mismatched prop is caught in the editor instead of breaking the page. I have not used TypeScript in a project yet, so I would learn it on [a project or course you completed] and then apply it to [specific component]."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q5",
+          "kind": "tools",
+          "type": "brag",
+          "score": 1,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "I did not use Git on a commercial project yet, but I used it on my own projects, Pogodynka and my portfolio. In Pogodynka I worked on a feature branch for the Vue.js components, and I merged it into the main branch after testing the responsive layout on a phone. Once I had a merge conflict in the CSS files, which I resolved by comparing both versions and keeping the breakpoint changes from both sides. I also used Figma to check layouts before coding them, for example [what design I checked in Figma]. I am now building my React skills and I want to apply them in a team that uses Git for code review, [what you would like to learn at Brightway Labs].",
+            "In Pogodynka I used Git to keep my work on the project organized. I created a separate branch for each feature, such as the API error handling, and merged it into the main branch once the code worked. [If you had a merge conflict, describe which file it was in and how you resolved it]. [Describe the result, for example how many commits the project had or how the history helped you track a change]. Git was also how I kept my portfolio at example.com/igor in sync with the code on my machine."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q6",
+          "kind": "gap",
+          "type": "too-long",
+          "score": 3,
+          "lengthScore": 3,
+          "followUp": false,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "I have not used React in a commercial project yet, so I want to be direct about that. I know Vue.js well: I built components, handled API connection errors and made the layout responsive in Pogodynka. Many concepts carry over to React, like components, props, state and reactivity. To prepare, I went through the basics of hooks such as useState and useEffect and built [name of small React exercise or app] to practise them. My estimate is that I could work productively on simple components within [e.g. two to four weeks], while I would need more time for routing and state management in a larger codebase. I already work with Git branches and commits on my projects, and I would value learning from experienced developers on your team through code review."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q7",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "On the hairdresser website I built a WordPress site with a booking form for a local salon [how many bookings per week or month, or how many clients used the form]. I set up the page structure and the form fields, and I tested the form on a phone [what changed after launch, e.g. fewer phone calls about appointments, number of online bookings]. I also built Pogodynka with Vue.js components and API error handling, and I made its layout responsive with CSS, so I know how to adapt a design to small screens, which is what Brightway Labs needs for turning Figma designs into responsive pages.",
+            "I built a booking form for a local hair salon on WordPress, as my freelance project from March to June 2024. The salon needed clients to book appointments without calling. I designed the form fields and set it up on the site, then tested it with the owner on desktop and phone. In the first [period] it received [number] bookings through the form, and the owner stopped taking most appointments by phone. If you give me the exact number, I can say more precisely what changed for the salon."
+          ],
+          "strongerFailed": 0
+        }
+      ],
+      "average": 2.4,
+      "costUsd": 0.0178846,
+      "seconds": 68.176,
+      "rejected": 3
+    },
+    {
+      "id": "12-handlowiec",
+      "title": "Student zarządzania, sprzedawca w elektromarkecie; przechwałka o wynikach, błąd o marży i narzucie",
+      "language": "pl",
+      "ok": true,
+      "error": "",
+      "questions": 8,
+      "answers": [
+        {
+          "questionId": "q1",
+          "kind": "intro",
+          "type": "good",
+          "score": 3,
+          "lengthScore": 4,
+          "followUp": false,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Studiuję zarządzanie i od 2023 roku pracuję jako sprzedawca w ElektroPunkcie w Rzeszowie. Najbardziej lubię rozmowę z klientem, który wie, czego potrzebuje, i z tego wynika mój interes w sprzedaży terenowej. W 2024 roku zrealizowałem 110% planu sprzedaży usług dodatkowych: [jak to osiągnąłem, np. jaką metodą rozmów z klientami]. Chcę przenieść tę pracę z klientami indywidualnymi do regularnych wizyt u sklepów i restauracji, gdzie buduje się stałe zamówienia. Mam prawo jazdy kat. B, więc mogę samodzielnie planować trasę i obsługę klientów w regionie, co według mnie jest kluczowe w tej roli."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q2",
+          "kind": "experience",
+          "type": "brag",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Pracowałem jako sprzedawca w ElektroPunkt Sp. z o.o. w Rzeszowie. Najtrudniejsza sytuacja pojawiła się, gdy klient przychodził po laptop w budżecie, którego nie dało się spełnić bez kompromisu. Zamiast od razu proponować najdroższy model, zapytałem o sposób użytkowania, pokazałem dwa modele w różnych cenach i wyjaśniłem różnicę w konkretnych parametrach, które były dla niego ważne. Klient wybrał model, który wymagał od niego [ile dopłaty albo jaki kompromis]. W 2024 roku zrealizowałem 110% planu sprzedaży usług dodatkowych, głównie dzięki [jakie usługi dodatkowe i jak je proponowałem]. Wiem, że w sprzedaży w terenie kluczowe będzie planowanie wizyt i negocjowanie warunków, a tę umiejętność rozwijam już teraz w codziennej pracy z klientami.",
+            "Pracuję jako sprzedawca w ElektroPunkcie w Rzeszowie od czerwca 2023. Najtrudniejsza sytuacja była wtedy, gdy klient wahał się między dwoma laptopami w wyższej cenie. Zapytałem o jego potrzeby ([do czego będzie używał laptopa]), porównałem z nim konkretne parametry i pokazałem, co dokładnie dostaje za większą kwotę. Klient kupił model, który wybrałem, a ja obsłużyłem tę sprzedaż od początku do końca ([jaki był efekt w liczbach, np. wartość sprzedaży albo wynik planu]). W 2024 roku zrealizowałem 110% planu sprzedaży usług dodatkowych, dlatego chcę spróbować pracy w terenie, gdzie to samo podejście do klienta przełożę na regularne wizyty i nowych klientów."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q3",
+          "kind": "situational",
+          "type": "vague",
+          "score": 2,
+          "lengthScore": 1,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "Podczas wizyty najpierw zapytałbym właściciela, z jakim dostawcą pracuje i co mu w tej współpracy najbardziej odpowiada, żeby zrozumieć jego obawy. Potem przedstawiłbym konkretne argumenty: [np. dostępność asortymentu, czas dostawy, warunki płatności]. Zaproponowałbym niskie ryzyko startu, na przykład [próbną dostawę / degustację / rabat na pierwsze zamówienie w wysokości X]. Jeśli klient nadal nie chciałby zmieniać dostawcy, ustaliłbym konkretny termin kolejnego kontaktu i zapisałbym wynik wizyty, notując, co go powstrzymuje. Takie podejście wykorzystuje to, czego nauczyłem się w ElektroPunkcie, czyli doradzania i łagodzenia wątpliwości klienta, a efekt wizyty zapisałbym jako [np. ustalony termin, próbne zamówienie].",
+            "Najpierw zapytałbym właściciela, jakie napoje sprzedaje najczęściej, kto je zamawia i kiedy restauracja ma największy ruch. Następnie zaproponowałbym jedną konkretną zmianę, np. [konkretna propozycja asortymentu lub warunków dostawy], i pokazał, jak to wpłynie na jego koszty albo obrót. Gdyby klient nadal się wahał, ustaliłbym z nim termin kolejnej wizyty i zaproponowałbym [próbną dostawę lub zestaw degustacyjny na okres próbny], żeby mógł sprawdzić produkt bez ryzyka. Po wizycie zapisałbym notatki [w systemie, którego firma używa, np. nazwa narzędzia] i w ciągu [liczba dni] wróciłbym z dodatkową ofertą. Podobne podejście stosowałem w ElektroPunkcie, gdzie zrealizowałem 110% planu usług dodatkowych w 2024 roku, a [jaki był konkretny mechanizm, np. ile rozmów kończyło się dodatkową usługą]."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q4",
+          "kind": "knowledge",
+          "type": "factual-error",
+          "score": 1,
+          "lengthScore": 2,
+          "followUp": true,
+          "factualErrors": 1,
+          "fabricated": [],
+          "stronger": [
+            "Planowałbym tydzień z podziałem na stałych klientów i nowe kontakty. Na początku tygodnia ustaliłbym listę wizyt na podstawie tego, kto zamawia regularnie, a kto ostatnio zmniejszył zamówienia. Stałych klientów odwiedzałbym w ustalonej kolejności, zwykle [ile wizyt dziennie], a dwa dni tygodnia przeznaczył na pozyskiwanie nowych klientów, np. odwiedzając lokale w [wybranej okolicy Rzeszowa]. Po każdej wizycie uzupełniałbym notatki w systemie [nazwa systemu], żeby kolejna wizyta była przygotowana. W piątek sprawdziłbym wykonanie planu i przygotowałbym listę kontaktów na kolejny tydzień. Podobnie organizowałem pracę w ElektroPunkcie, gdzie [jak planowałem zmiany i sprzedaż dodatkową, z efektem: 110% planu usług dodatkowych w 2024 roku].",
+            "Planowałbym tydzień z wyprzedzeniem. Na początku tygodnia ustaliłbym listę klientów do odwiedzenia i podzieliłbym ją na dni według lokalizacji, żeby ograniczyć dojazdy. Stałym klientom poświęciłbym większość wizyt, sprawdzając stan zamówień, ekspozycję produktów i notatki z CRM [czy i jak prowadziłem notatki w CRM]. Dwa dni w tygodniu przeznaczyłbym na pozyskiwanie nowych klientów: restauracje i sklepy w sąsiedztwie tras, z konkretnym celem [ile wizyt i rozmów tygodniowo]. Po każdym dniu aktualizowałbym notatki i sprawdzał, co wymaga kontynuacji. Efekt chciałbym mierzyć liczbą zamówień i nowych klientów [jaki był wynik w praktyce]."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q5",
+          "kind": "tools",
+          "type": "too-long",
+          "score": 3,
+          "lengthScore": 3,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "W ElektroPunkcie pracowałem z systemem sprzedażowym POS, w którym sprawdzałem dostępność towaru, ceny, promocje i historię zamówień klientów. Opanowałem go w kilka dni i zacząłem pokazywać go nowym osobom na zmianie. Do zestawień sprzedaży usług dodatkowych używałem MS Excel: co [ile razy w miesiącu] przygotowywałem zestawienie dla kierownika i porównywałem wyniki z poprzednim miesiącem. Gdybym miał prowadzić notatki o klientach w systemie CRM, zapisywałbym przy każdym kontakcie, co zostało ustalone, kiedy wracam i jaki jest kolejny krok. Pozwoliłoby mi to planować wizyty u stałych klientów i nie tracić kontekstu rozmów z nowymi. Uważam, że w sprzedaży zaufanie klienta buduje się przez dobrą pamięć o tym, co już ustaliliśmy, [jaki był efekt wprowadzenia notatek, np. liczba ponownych zamówień].",
+            "Nie korzystałem wcześniej z systemu CRM, ale w ElektroPunkcie pracowałem w systemie sprzedażowym POS, gdzie sprawdzałem dostępność towaru, ceny, promocje i historię zamówień klientów. Gdy kierownik prosił o zestawienie sprzedaży usług dodatkowych, przygotowywałem je w Excelu i porównywałem wyniki z poprzednim miesiącem. Dzięki temu w 2024 roku zrealizowałem 110% planu usług dodatkowych. Przy obsłudze klientów zapisywałem ustalenia i kolejne kroki, co pozwalało mi wracać do rozmowy we właściwym momencie. [ile klientów miesięcznie obsługiwałeś] Do systemu CRM przeszedłbym szybko, bo zasada jest podobna: trzeba wiedzieć, gdzie są dane klienta, co ustaliliśmy i co zrobić dalej. Planuję notować każdą wizytę od razu po jej zakończeniu."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q6",
+          "kind": "gap",
+          "type": "good",
+          "score": 3,
+          "lengthScore": 4,
+          "followUp": true,
+          "factualErrors": 0,
+          "fabricated": [
+            "B2B",
+            "B2B"
+          ],
+          "stronger": [
+            "W ElektroPunkcie obsługiwałem klientów detalicznych, ale z B2B nie pracowałem, więc nie chcę udawać doświadczenia, którego nie mam. Mam jednak kilka rzeczy, które przenoszę do pracy z firmami. Przy sprzedaży usług dodatkowych zrealizowałem 110% planu w 2024 roku, a to wymagało pytania klienta o potrzeby i dopasowania oferty. Prawo jazdy kat. B pozwala mi jeździć do klientów w terenie, a samodzielnie przygotowuję ekspozycję promocji, więc planowanie pracy nie jest mi obce. Do sprzedaży B2B podchodzę tak samo jak do obsługi klienta: najpierw poznaję, czego firma potrzebuje, potem proponuję rozwiązanie. Chciałbym w nowej pracy nauczyć się procesu zakupowego firm, który jest dla mnie nowy, i szybko wypracować stałe relacje z klientami.",
+            "W sprzedaży detalicznej w ElektroPunkcie nie pracowałem bezpośrednio z firmami, więc doświadczenia B2B jeszcze nie mam. Przygotowanie widzę jednak w kilku obszarach. Zrealizowałem 110% planu sprzedaży usług dodatkowych w 2024 roku, a to wymagało przekonywania klientów do dodatkowej oferty, co jest zbliżone do negocjacji z właścicielem restauracji. Przygotowuję też ekspozycję promocji w strefie wejścia, więc wiem, jak zadbać o widoczność produktu. Mam prawo jazdy kat. B i samodzielnie planuję swoją pracę, na przykład [jak planowałem dzień lub tydzień pracy]. Na start w terenie widziałbym siebie przy [ile klientów dziennie / jaki zakres wizyt] i z planem poznania [liczby klientów lub segmentu, który chcę obsłużyć]."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q7",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 2,
+          "followUp": false,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "W ElektroPunkcie doradzałem klientom przy wyborze laptopów i telefonów. Pewnego razu klient chciał kupić sam sprzęt bez usług dodatkowych i miał wątpliwości co do ich wartości. Zapytałem go najpierw, do czego będzie używał urządzenia, a potem zaproponowałem usługę pasującą do tego zastosowania i wyjaśniłem, co konkretnie zyska. [Jak klient zareagował i czy kupił usługę]. W efekcie w 2024 roku zrealizowałem 110% planu sprzedaży usług dodatkowych. Wiem, że w terenie rozmowa z właścicielem firmy będzie trudniejsza, dlatego chcę tę samą metodę, czyli pytania o potrzeby i dopasowanie oferty, przenieść do wizyt u klientów hurtowni."
+          ],
+          "strongerFailed": 0
+        },
+        {
+          "questionId": "q8",
+          "kind": "probe",
+          "type": "good",
+          "score": 2,
+          "lengthScore": 2,
+          "followUp": false,
+          "factualErrors": 0,
+          "fabricated": [],
+          "stronger": [
+            "W ElektroPunkcie obsługiwałem średnio [ilu klientów dziennie] osób na zmianie. Przy doradztwie zawsze pytałem najpierw, do czego klient będzie używał laptopa lub telefonu, i proponowałem usługi dodatkowe pasujące do jego potrzeb. W 2024 roku zrealizowałem 110% planu sprzedaży usług dodatkowych, co przy [ile sprzedaży dodatkowej miesięcznie] dało [jaki wynik finansowy]. Przygotowywałem też ekspozycję promocji w strefie wejścia; efektem było [jak zmieniła się sprzedaż promowanych produktów lub ruch przy ekspozycji]. Ten sposób pracy, czyli rozpoznanie potrzeb klienta, dopasowanie oferty i konsekwentne domykanie sprzedaży, chciałbym przenieść na wizyty u klientów w terenie, gdzie będę samodzielnie planował tydzień i pozyskiwał nowych odbiorców."
+          ],
+          "strongerFailed": 0
+        }
+      ],
+      "average": 2.1,
+      "costUsd": 0.0219047,
+      "seconds": 87.807,
+      "rejected": 2
+    }
+  ]
+}
