@@ -47,8 +47,8 @@ ewaluacji (pierwsze wymagają odpowiedzi kandydata, druga to osobny model ocenia
 
 Model pisania CV i analizy ogłoszeń: `anthropic/claude-haiku-5.5`, czyli ten, którego autor używa na co dzień (w kodzie
 domyślnie do pisania jest ustawiony `anthropic/claude-sonnet-5.5`). Cztery przebiegi po 18 par tego samego dnia: 1. na
-kodzie z commita `3b0fb24`, 2. po poprawce kontroli podsumowania (`5f1f4a7`), 3. z nową kontrolą listy umiejętności
-(`97a148a`), 4. po poprawce tej kontroli (`7031f5b`); opisy niżej. Szczegóły dla każdej pary:
+kodzie z commita `8816d1d`, 2. po poprawce kontroli podsumowania (`cd48204`), 3. z nową kontrolą listy umiejętności
+(`5d64949`), 4. po poprawce tej kontroli (`843562d`); opisy niżej. Szczegóły dla każdej pary:
 [przebieg 1](results/2026-11-10_anthropic_claude-haiku-5.5.md),
 [przebieg 2](results/2026-11-10_anthropic_claude-haiku-5.5_po-poprawce.md),
 [przebieg 3](results/2026-11-10_anthropic_claude-haiku-5.5_kontrola-umiejetnosci.md),
@@ -112,7 +112,7 @@ zmieniło. W przebiegu 2:
 Po przebiegu 2 lista umiejętności jest sprawdzana przy pisaniu CV, przy „Popraw automatycznie” i przy wybranych
 zmianach z raportu. Konkretna pozycja, której profil nie potwierdza (nazwa techniczna jak „TypeScript” czy
 „Google Ads” albo umiejętność wymagana w ogłoszeniu jak „Java”), wraca do modelu, także z dopiskiem „(w nauce)”.
-Przy poprawie zostaje to, co CV już miało, np. umiejętność dopisana przez kandydata. W przebiegu 3 (`97a148a`):
+Przy poprawie zostaje to, co CV już miało, np. umiejętność dopisana przez kandydata. W przebiegu 3 (`5d64949`):
 
 - **Lista umiejętności jest czysta.** Żaden zakazany fakt nie trafił do umiejętności (w przebiegu 2 były 4). Trzy
   trafienia w treści to znowu dwa tytuły CV przepisane z ogłoszenia („Junior Java Developer”, „Kierowca zestawu ciągnik
@@ -125,7 +125,7 @@ Przy poprawie zostaje to, co CV już miało, np. umiejętność dopisana przez k
 - Odrzucenia za umiejętności były też w parach 05 i 17 (po jednym, CV przeszło w 2. podejściu); liczba 5 w tabeli to
   niepotwierdzone pozycje w odrzuconych podejściach, policzone jeszcze starszą funkcją.
 
-Poprawka po przebiegu 3 (`7031f5b`): pozycja wraca do modelu tylko wtedy, gdy ma nazwę, której profil nie ma (skrót,
+Poprawka po przebiegu 3 (`843562d`): pozycja wraca do modelu tylko wtedy, gdy ma nazwę, której profil nie ma (skrót,
 nazwa techniczna, w CV po polsku też słowo z wielkiej litery w środku, jak „Ads” w „Google Ads”), albo gdy jest
 narzędziem lub nazwą z ogłoszenia. „CMR documentation” i „Obsługa systemu TMS” przechodzą, gdy profil ma „CMR” i „TMS”;
 pozostałe niepotwierdzone pozycje pokazuje tylko ostrzeżenie w edytorze. Wynik zapisuje teraz nazwy odrzuconych
@@ -143,7 +143,7 @@ umiejętności (ostatnia kolumna tabeli dla każdej pary).
 - **Nowy problem, niezwiązany z kontrolą umiejętności:** długi profil (17) po skracaniu przez AI zajął 2 strony.
   Skracanie jest jedno i potem nikt nie sprawdza liczby stron; w przebiegach 1-3 to jedno podejście wystarczało.
   Kontrola umiejętności przy skracaniu nie odrzuca pozycji, które CV już miało, więc skracania nie blokuje.
-  Po przebiegu 4 AI skraca drugi raz, od skróconej wersji, gdy CV dalej wystaje (`58a0c06`); wynik zapisuje, ile
+  Po przebiegu 4 AI skraca drugi raz, od skróconej wersji, gdy CV dalej wystaje (`bff5955`); wynik zapisuje, ile
   razy skracało (w tabeli dla każdej pary „skrócone 2 razy”). Sprawdzenie samej pary 17 po tej zmianie
   ([wynik](results/2026-11-10_anthropic_claude-haiku-5.5_skracanie-17.md), $0,005): jedno skracanie wystarczyło i CV
   zmieściło się na stronie, więc drugie się nie uruchomiło. Na prawdziwym modelu drugie skracanie jest więc dalej
@@ -152,7 +152,7 @@ umiejętności (ostatnia kolumna tabeli dla każdej pary).
 ### Tytuł CV jako sugestia (pary 15 i 18)
 
 We wszystkich czterech przebiegach zakazane fakty w treści to głównie tytuły przepisane z ogłoszenia („Junior Java
-Developer” bez Javy, „Kierowca… kat. C+E” przy kat. B). Od commita `87cbeba` tytuł, który wymienia narzędzie,
+Developer” bez Javy, „Kierowca… kat. C+E” przy kat. B). Od commita `a415fae` tytuł, który wymienia narzędzie,
 certyfikat albo nazwaną umiejętność z ogłoszenia, której profil nie potwierdza, albo kategorię prawa jazdy, staje się
 żółtą sugestią, a w CV zostaje wersja bezpieczna (bez tej nazwy albo tytuł z profilu). Sprawdzenie na samych parach 15
 i 18 ([wynik](results/2026-11-10_anthropic_claude-haiku-5.5_tytul.md), $0,004; data w pliku to data UTC, przebieg był
@@ -174,7 +174,7 @@ i 18 ([wynik](results/2026-11-10_anthropic_claude-haiku-5.5_tytul.md), $0,004; d
 ## Porównanie modeli: 11.11.2026
 
 Pełne przebiegi 18 par na tych samych zamrożonych ogłoszeniach (data w plikach to data UTC, 2026-11-10), z kodem z
-commita `87cbeba`, czyli z kontrolą umiejętności, sugestią tytułu i drugim skracaniem. Modele:
+commita `a415fae`, czyli z kontrolą umiejętności, sugestią tytułu i drugim skracaniem. Modele:
 `anthropic/claude-sonnet-5.5` (domyślny model pisania w `server/storage/store.ts`) i `openai/gpt-6.1-sol` (inny dostawca
 w tej samej cenie za token: $2 / $10 za 1M tokenów wejścia / wyjścia na OpenRouter, sprawdzone 11.11.2026). Dla
 `anthropic/claude-haiku-5.5` ($0,10 / $0,50) tabela bierze przebieg 4 sprzed sugestii tytułu, więc jego 2 z 3 zakazanych
