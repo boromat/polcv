@@ -65,8 +65,11 @@ What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish applicat
    cost; summaries of every attempt are kept so you can see progress. Limits: about the company the
    recruiter knows only what the posting says (the rest becomes "check before the interview", which
    the program cannot verify in code); it points out factual errors only when the model is sure, so
-   it can miss some; the interview is written, not spoken. One interview costs about $0.40 on the
-   default Claude Sonnet 5.5 and about $0.02 on Claude Haiku 5.5.
+   it can miss some; it sometimes asks a follow-up after a specific answer too (after half of the
+   prepared good answers in the evaluation on Claude Haiku 5.5, see evals/README.md); the interview
+   is written, not spoken. One interview costs about $0.03 and about 1.5 minutes of waiting for the
+   AI on Claude Haiku 5.5 (measured on 6 interviews), and an estimated $0.50 on the default Claude
+   Sonnet 5.5.
 7. **Career advisor (optional):** a chat that learns what you are looking for, proposes roles you
    have a real chance at, and gives you ready-made search links for job portals.
 8. **Projects from GitHub (optional):** enter your GitHub username on the profile page and the AI
