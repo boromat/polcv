@@ -211,6 +211,30 @@ const withoutGaps = (s: string) => s.replace(PLACEHOLDER, ' ').replace(TOKEN, ' 
 
 /** Odpowiedź o wiedzy albo o braku: nazwy z dziedziny ("RODO", "JOIN") nie są tam twierdzeniem o kandydacie. */
 const DOMAIN_KINDS = new Set<MockQuestionKind>(['knowledge', 'gap']);
+/**
+ * Odpowiedź o tym, co kandydat robił: tu każdy skrót i nazwa techniczna ("SQL", "Power BI") muszą mieć pokrycie.
+ * W zadaniu sytuacyjnym, o narzędziach i w przedstawieniu się pojęcia z dziedziny ("CTR", "KPI") są naturalne,
+ * więc tam sprawdzamy tylko narzędzia i nazwy z ogłoszenia.
+ */
+const EXPERIENCE_KINDS = new Set<MockQuestionKind>(['experience', 'probe']);
+
+/** Narzędzie, certyfikat albo nazwana umiejętność z ogłoszenia (nie język i nie kompetencja miękka). */
+function namedKeyword(k: JobPosting['keywords'][number]): boolean {
+  if (!['narzędzie', 'certyfikat', 'umiejętność'].includes(k.category) || isSoftSkill(k)) return false;
+  return k.category !== 'umiejętność' || [k.term, ...k.synonyms].some((v) => /^\p{Lu}/u.test(v.trim()) || skillWords(v).some(isNameWord));
+}
+
+const sourceFinder = (src: FactSources) => {
+  const tokens = tokenize(src.texts.join(' \n '));
+  return (v: string) => countPhrase(tokens, v) > 0;
+};
+const variantsOf = (k: JobPosting['keywords'][number]) => [k.term, ...k.synonyms].filter((v) => v.trim());
+
+/** Narzędzia i nazwy z ogłoszenia, których kandydat nie ma (do promptu: tych nie wolno mu przypisać). */
+export function lackingPostingNames(src: FactSources): string[] {
+  const found = sourceFinder(src);
+  return src.posting.keywords.filter((k) => namedKeyword(k) && !variantsOf(k).flatMap(aliasVariants).some(found)).map((k) => k.term);
+}
 
 export interface FactSources {
   /** Teksty, z których mocniejsza wersja może brać fakty: profil, wysłane CV i odpowiedzi kandydata w tej rozmowie. */
@@ -219,22 +243,27 @@ export interface FactSources {
 }
 
 /**
- * Nazwy przypisane kandydatowi, których źródła nie mają: skrót albo nazwa techniczna ("SQL", "Power BI") i narzędzie
- * albo nazwana umiejętność z ogłoszenia ("Java"). Nazwa firmy i stanowiska z ogłoszenia jest dozwolona.
+ * Nazwy przypisane kandydatowi, których źródła nie mają: narzędzie albo nazwana umiejętność z ogłoszenia ("Java"),
+ * a w odpowiedzi o doświadczeniu także każdy skrót i nazwa techniczna ("SQL", "Power BI"). Synonim z ogłoszenia się
+ * liczy ("GA4" przy "Google Analytics 4" w profilu), nazwa firmy i stanowiska z ogłoszenia jest dozwolona.
  */
-function unconfirmedNames(text: string, src: FactSources): string[] {
-  const tokens = tokenize(src.texts.join(' \n '));
-  const found = (v: string) => countPhrase(tokens, v) > 0;
+function unconfirmedNames(text: string, src: FactSources, kind: MockQuestionKind): string[] {
+  if (DOMAIN_KINDS.has(kind)) return [];
+  const found = sourceFinder(src);
   const allowed = tokenize([src.posting.company, src.posting.title].join(' \n '));
-  const known = (w: string) => aliasVariants(w).some(found) || countPhrase(allowed, w) > 0;
-  const out = skillWords(text).filter((w) => /\p{L}/u.test(w) && isNameWord(w) && !known(w));
+  const synonymFound = (w: string) =>
+    src.posting.keywords.some((k) => {
+      const variants = variantsOf(k);
+      return variants.some((v) => countPhrase(tokenize(v), w) > 0 && countPhrase(tokenize(w), v) > 0) && variants.flatMap(aliasVariants).some(found);
+    });
+  const known = (w: string) => aliasVariants(w).some(found) || countPhrase(allowed, w) > 0 || synonymFound(w);
+  const out = EXPERIENCE_KINDS.has(kind) ? skillWords(text).filter((w) => /\p{L}/u.test(w) && isNameWord(w) && !known(w)) : [];
   const t = tokenize(text);
   for (const k of src.posting.keywords) {
-    if (!['narzędzie', 'certyfikat', 'umiejętność'].includes(k.category) || isSoftSkill(k)) continue;
-    const variants = [k.term, ...k.synonyms].filter((v) => v.trim());
-    const named = k.category !== 'umiejętność' || variants.some((v) => /^\p{Lu}/u.test(v.trim()) || skillWords(v).some(isNameWord));
+    if (!namedKeyword(k)) continue;
+    const variants = variantsOf(k);
     const hit = variants.find((v) => countPhrase(t, v) > 0);
-    if (named && hit && !variants.flatMap(aliasVariants).some(found)) out.push(hit);
+    if (hit && !variants.flatMap(aliasVariants).some(found)) out.push(hit);
   }
   const uniq = [...new Set(out)];
   return uniq.filter((n) => !uniq.some((o) => o !== n && normalize(o).includes(normalize(n))));
@@ -254,13 +283,11 @@ export function strongerIssues(text: string, kind: MockQuestionKind, src: FactSo
       `Mocniejsza wersja ma liczby, których nie ma w profilu, CV ani w odpowiedziach kandydata: ${numbers.join(', ')}. Nie wymyślaj liczb: w ich miejscu wstaw miejsce do uzupełnienia w nawiasach kwadratowych, np. "[ile dokumentów tygodniowo]".`,
     );
   }
-  if (!DOMAIN_KINDS.has(kind)) {
-    const names = unconfirmedNames(clean, src);
-    if (names.length) {
-      issues.push(
-        `Mocniejsza wersja przypisuje kandydatowi rzeczy, których nie ma w profilu, CV ani w jego odpowiedziach: ${names.join(', ')}. Opieraj się tylko na tym, co kandydat ma; czego brakuje, wpisz jako miejsce do uzupełnienia w nawiasach.`,
-      );
-    }
+  const names = unconfirmedNames(clean, src, kind);
+  if (names.length) {
+    issues.push(
+      `Mocniejsza wersja przypisuje kandydatowi rzeczy, których nie ma w profilu, CV ani w jego odpowiedziach: ${names.join(', ')}. Nie wymieniaj ich w tej odpowiedzi nawet jako czegoś do nauczenia; opieraj się tylko na tym, co kandydat ma, a czego brakuje, wpisz jako miejsce do uzupełnienia w nawiasach.`,
+    );
   }
   if (lang === 'pl') {
     const gendered = summaryPersonIssues(clean, pronouns).gendered;

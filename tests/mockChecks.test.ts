@@ -4,6 +4,7 @@ import {
   addressIssues,
   factualErrorIssues,
   interviewProbes,
+  lackingPostingNames,
   lengthScore,
   needsEnglishQuestion,
   placeholders,
@@ -103,6 +104,19 @@ describe('próbna rozmowa: mocniejsza wersja nie może niczego wymyślać', () =
     expect(strongerIssues('RODO wymaga podstawy prawnej przetwarzania danych.', 'knowledge', src(), 'ona', 'pl')).toEqual([]);
     // Nazwa firmy i stanowiska z ogłoszenia może paść.
     expect(strongerIssues('Chcę pracować w Przykład S.A. jako Młodszy Specjalista ds. Marketingu.', 'intro', src(), 'ona', 'pl')).toEqual([]);
+  });
+
+  it('synonim z ogłoszenia się liczy, a pojęcia z dziedziny w zadaniu sytuacyjnym nie są twierdzeniem', () => {
+    // Profil ma "Google Analytics 4", ogłoszenie podaje GA4 jako synonim.
+    expect(strongerIssues('Moim zadaniem były raporty w GA4.', 'experience', src(), undefined, 'pl')).toEqual([]);
+    expect(strongerIssues('Sprawdziłabym najpierw CTR i CPC kampanii.', 'situational', src(), 'ona', 'pl')).toEqual([]);
+    // Ten sam skrót w odpowiedzi o doświadczeniu to twierdzenie bez pokrycia.
+    expect(strongerIssues('Moim zadaniem była optymalizacja CTR.', 'experience', src(), undefined, 'pl').join('\n')).toContain('CTR');
+    // Narzędzie z ogłoszenia, którego kandydat nie ma, nie przechodzi też w przedstawieniu się.
+    expect(strongerIssues('Chcę rozwijać się w Google Ads.', 'intro', src(), undefined, 'pl').join('\n')).toContain('Google Ads');
+    // Źródła w tym teście nie mają też Excela (profil z fikstur ma go tylko na liście umiejętności).
+    expect(lackingPostingNames(src())).toEqual(['Excel', 'Google Ads']);
+    expect(lackingPostingNames({ ...src(), texts: [...src().texts, 'MS Excel'] })).toEqual(['Google Ads']);
   });
 
   it('formy z rodzajem: tylko formy kandydata, a bez zaimków żadnych', () => {

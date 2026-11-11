@@ -12,7 +12,7 @@ import {
 import { callJson, type LlmContext } from '../openrouter';
 import { forUser, genderForms, json, postingForPrompt, profileForPrompt, today } from './common';
 import { profileTexts } from './cvChecks';
-import { addressIssue, factualErrorIssues, interviewLang, needsEnglishQuestion, planIssues, requiredKinds, strongerIssues } from './mockChecks';
+import { addressIssue, factualErrorIssues, interviewLang, lackingPostingNames, needsEnglishQuestion, planIssues, requiredKinds, strongerIssues } from './mockChecks';
 
 // Próbna rozmowa kwalifikacyjna: plan pytań, ocena każdej odpowiedzi i podsumowanie. Cała historia rozmowy idzie
 // w polu "user", więc przy włączonym maskowaniu przechodzi przez polanon jak każde inne wywołanie.
@@ -130,6 +130,8 @@ export async function mockGrade({ profile, posting, cvText, interview, questionI
   const question = interview.plan.questions.find((q) => q.id === questionId)!;
   const sources = { texts: [...profileTexts(profile), cvText, ...candidateAnswers(interview)], posting };
   const answer = answers.join('\n');
+  // Nazwy z ogłoszenia, których kandydat nie ma: lista dla modelu, żeby nie wpisywał ich do mocniejszej wersji.
+  const lacking = lackingPostingNames(sources);
   return callJson({
     schema: MockGradeSchema.superRefine((g, c) => {
       for (const message of strongerIssues(g.stronger, question.kind, sources, profile.pronouns, question.lang)) c.addIssue({ code: 'custom', path: ['stronger'], message });
@@ -142,7 +144,7 @@ export async function mockGrade({ profile, posting, cvText, interview, questionI
     temperature: 0.3,
     maxTokens: 4000,
     system: GRADE_SYSTEM(profile, question.lang, followUpAllowed),
-    user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nWYSŁANE CV:\n"""\n${cvText}\n"""\n\nDO DOPYTANIA:\n${json(interview.probes.map((p) => p.detail))}\n\nROZMOWA:\n${json(transcript(interview))}\n\nPYTANIE:\n${json({ kind: question.kind, text: question.text, why: question.why })}\n\nOSTATNIA ODPOWIEDŹ${answers.length > 1 ? ' (po dopytaniu: oceń całą odpowiedź na pytanie, razem z pierwszą częścią)' : ''}:\n"""\n${answer}\n"""\n\nOceń odpowiedź.`,
+    user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nWYSŁANE CV:\n"""\n${cvText}\n"""\n\nDO DOPYTANIA:\n${json(interview.probes.map((p) => p.detail))}\n\nNAZWY Z OGŁOSZENIA, KTÓRYCH KANDYDAT NIE MA (w "stronger" ich nie wymieniaj, poza pytaniem o brak albo o wiedzę):\n${json(lacking)}\n\nROZMOWA:\n${json(transcript(interview))}\n\nPYTANIE:\n${json({ kind: question.kind, text: question.text, why: question.why })}\n\nOSTATNIA ODPOWIEDŹ${answers.length > 1 ? ' (po dopytaniu: oceń całą odpowiedź na pytanie, razem z pierwszą częścią)' : ''}:\n"""\n${answer}\n"""\n\nOceń odpowiedź.`,
     ctx,
   });
 }
