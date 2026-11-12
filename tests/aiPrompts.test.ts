@@ -126,7 +126,7 @@ describe('AI-rekruter', () => {
   });
 
   it('zna dzisiejszą datę, a poprawka zmieniająca w CV tylko datę odpada (daty są z profilu)', async () => {
-    const dateFix = { section: 'Projekty', find: 'PolAnon - Autor 09.2026 - obecnie', replace: 'PolAnon - Autor 09.2025 - obecnie', why: 'Popraw okres realizacji.', needsUserInput: true };
+    const dateFix = { section: 'Projekty', find: 'Planer Zadań - Autor 09.2026 - obecnie', replace: 'Planer Zadań - Autor 09.2025 - obecnie', why: 'Popraw okres realizacji.', needsUserInput: true };
     const realFix = { section: 'Doświadczenie', find: 'Raporty sprzedaży', replace: 'Cotygodniowe raporty sprzedaży dla 12 przedstawicieli', why: 'Skala.', needsUserInput: false };
     expect(dateOnlyFix(dateFix)).toBe(true);
     expect(dateOnlyFix({ ...dateFix, find: 'Raporty 2024', replace: 'Raporty sprzedaży 2024' })).toBe(false);
@@ -141,7 +141,7 @@ describe('AI-rekruter', () => {
 
   it('uwaga o datach w przyszłości, gdy żadna data w CV nie jest późniejsza niż dziś, wraca do modelu', async () => {
     const now = new Date('2026-11-12T12:00:00Z');
-    const cvText = 'PolAnon - Autor 09.2026 - obecnie\nPolSales 07.2026\nRODO 2016/679\n1000 testów';
+    const cvText = 'Planer Zadań - Autor 09.2026 - obecnie\nSklep Demo 07.2026\nRODO 2016/679\n1000 testów';
     expect(futureDatesInCv(cvText, now)).toEqual([]);
     expect(futureDatesInCv('Projekt 12.2026 - obecnie, studia 2027', now)).toEqual(['12.2026', '2027']);
     const claim = { ...review(full), weaknesses: ['Daty projektów (09.2026 - obecnie) są przyszłe względem dzisiejszej daty 2026-11-12'] };
@@ -157,7 +157,7 @@ describe('AI-rekruter', () => {
 
     const ok = { ...review(full), fixes: [{ section: 'Projekty', find: 'Raporty', replace: 'Raporty', why: 'Bez zmian.', needsUserInput: false }] };
     replies = [{ content: JSON.stringify({ ...ok, weaknesses: [`Daty projektów są przyszłe względem dzisiejszej daty`] }) }, { content: JSON.stringify(ok) }];
-    const r = await evaluateCv('PolAnon - Autor 09.2025 - obecnie', posting, ctx);
+    const r = await evaluateCv('Planer Zadań - Autor 09.2025 - obecnie', posting, ctx);
     expect(lastUserMessage(1)).toContain('żadna data w CV nie jest późniejsza niż dzisiejsza');
     // Poprawka, która niczego nie zmienia, odpada.
     expect(r.fixes).toEqual([]);

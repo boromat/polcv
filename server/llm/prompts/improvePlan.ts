@@ -60,7 +60,7 @@ export function profileSources(p: Profile): ProfileSource[] {
 
 /**
  * Temat odpowiedzi, który kandydat potwierdził: krótki ("komunikatywność" z "mam to", "Python"). Długi temat to pytanie
- * z wymaganiami ("…Make, n8n, Zapier lub Power Automate"), więc potwierdza tylko to, co jest w samej odpowiedzi.
+ * z wymaganiami ("…Selenium, Cypress lub Playwright"), więc potwierdza tylko to, co jest w samej odpowiedzi.
  */
 export const confirmedTopic = (f: { topic: string }) => (f.topic.trim().split(/\s+/).length <= 4 ? f.topic.trim() : '');
 

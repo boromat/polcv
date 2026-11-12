@@ -155,7 +155,7 @@ function phraseParts(phrase: string): string[][] {
   return parts.map((p) => (p.length > 1 ? p.filter((w) => !STOP.has(w)) : p)).filter((p) => p.length);
 }
 
-/** Przeczenia zmieniają sens ("wdrażanie bez AI"), więc nawet z `gap` ich nie przeskakujemy. */
+/** Przeczenia zmieniają sens ("wdrażanie bez ERP"), więc nawet z `gap` ich nie przeskakujemy. */
 const NEGATIONS = new Set(['nie', 'bez', 'brak', 'not', 'no', 'non', 'without']);
 
 function countWords(text: string[], words: string[], lang: MatchLang, gap: boolean): number {
@@ -166,7 +166,7 @@ function countWords(text: string[], words: string[], lang: MatchLang, gap: boole
     let ok = true;
     for (let w = 1; w < words.length && ok; w++) {
       // Następne słowo albo przerwa na jedno słowo pomocnicze ("praca w zespole"), a z `gap` na jedno dowolne
-      // ("wdrażanie rozwiązań AI"); granic i przeczeń nie przeskakujemy.
+      // ("wdrażanie systemów ERP"); granic i przeczeń nie przeskakujemy.
       const skip = text[pos + 1];
       const skippable = STOP.has(skip) || (gap && skip !== BREAK && !NEGATIONS.has(skip));
       if (pos + 1 < text.length && tokenMatches(skip, words[w], lang)) pos += 1;
@@ -183,7 +183,7 @@ function countWords(text: string[], words: string[], lang: MatchLang, gap: boole
 
 /**
  * Ile razy fraza występuje w tekście (słowa po kolei, bez przekraczania granic list i zdań).
- * `gap`: między słowami frazy może stać jedno dowolne słowo ("wdrażanie rozwiązań AI" to "wdrażanie AI"). Tylko do
+ * `gap`: między słowami frazy może stać jedno dowolne słowo ("wdrażanie systemów ERP" to "wdrażanie ERP"). Tylko do
  * wyniku CV, jak wyszukiwanie rekrutera; sprawdzanie profilu zostaje ścisłe ("zarządzanie dużymi projektami" to nie
  * potwierdzenie "zarządzania projektami").
  */

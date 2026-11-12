@@ -113,19 +113,19 @@ describe('punkty w 1. osobie', () => {
 
 describe('podsumowanie pisane przez kandydata', () => {
   it('wyłapuje 3. osobę i czas przeszły z rodzajem', () => {
-    expect(summaryPersonIssues('Zna Python, n8n i API, a w projektach tworzy prompty. Jest studentem.')).toEqual({ thirdPerson: ['Zna', 'tworzy', 'Jest'], gendered: [], nominal: [] });
+    expect(summaryPersonIssues('Zna Excel, SQL i Power BI, a w projektach tworzy raporty. Jest studentem.')).toEqual({ thirdPerson: ['Zna', 'tworzy', 'Jest'], gendered: [], nominal: [] });
     expect(summaryPersonIssues('Pracowałem w social media i zbudowałam sklep.')).toEqual({ thirdPerson: [], gendered: ['Pracowałem', 'zbudowałam'], nominal: [] });
   });
 
   it('równoważnik od nazwy roli i imiesłów po przecinku to opis kogoś z boku', () => {
-    expect(summaryPersonIssues('Student technologii kognitywnych, pracujący z narzędziami AI. Tworzę narzędzia.').nominal).toEqual(['Student', 'pracujący']);
+    expect(summaryPersonIssues('Student logistyki, pracujący z arkuszami kalkulacyjnymi. Tworzę raporty.').nominal).toEqual(['Student', 'pracujący']);
     expect(summaryPersonIssues('Technik informatyk z doświadczeniem w sieciach.').nominal).toEqual(['Technik']);
   });
 
   it('przepuszcza 1. osobę w czasie teraźniejszym i zdania bez czasownika', () => {
     for (const t of [
-      'Jestem studentem kierunku Technologie kognitywne. Znam Pythona i n8n, tworzę agentów AI i szukam pracy przy wdrożeniach.',
-      'Studiuję technologie kognitywne. Tworzę narzędzia wspierające analizę danych.',
+      'Jestem studentem kierunku Logistyka. Znam Excela i SAP, tworzę raporty magazynowe i szukam pracy w planowaniu dostaw.',
+      'Studiuję logistykę. Tworzę raporty wspierające planowanie dostaw.',
       'Jestem studentką marketingu. Mam doświadczenie w social media i współpracy z działem sprzedaży.',
       'Doświadczenie w analizie danych (Excel, Power BI), praca zespołem projektowym.',
     ]) {
@@ -470,10 +470,10 @@ describe('słowa kluczowe przy poprawie', () => {
   });
 
   it('fraza z jednym słowem w środku liczy się jak w raporcie: można ją przeredagować, ale nie zgubić', () => {
-    const ai: Keyword[] = [{ term: 'wdrażanie AI', synonyms: [], importance: 'must', category: 'umiejętność' }];
-    const before = cv({ summary: text('Zajmuję się wdrażaniem rozwiązań AI.') });
-    expect(lostKeywordIssues(cv({ summary: text('Zajmuję się wdrażaniem narzędzi AI.') }), before, ai)).toEqual([]);
-    expect(lostKeywordIssues(cv({ summary: text('Zajmuję się automatyzacją procesów.') }), before, ai)).toHaveLength(1);
+    const erp: Keyword[] = [{ term: 'wdrażanie ERP', synonyms: [], importance: 'must', category: 'umiejętność' }];
+    const before = cv({ summary: text('Zajmuję się wdrażaniem systemów ERP.') });
+    expect(lostKeywordIssues(cv({ summary: text('Zajmuję się wdrażaniem modułów ERP.') }), before, erp)).toEqual([]);
+    expect(lostKeywordIssues(cv({ summary: text('Zajmuję się planowaniem dostaw.') }), before, erp)).toHaveLength(1);
   });
 
   it('schemat poprawy zgłasza zgubione słowo jak inne błędy', () => {

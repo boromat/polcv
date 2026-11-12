@@ -9,7 +9,7 @@ All notable changes to PolCV are recorded here. The format follows
 ### Added
 
 - **Your studies count as a source of knowledge.** When the posting asks for knowledge your field
-  of study may have covered (for example AI for a cognitive technologies degree) and your profile
+  of study may have covered (for example warehouse management for a logistics degree) and your profile
   does not say so yet, the gap questions ask which courses you had, with typical course names as
   a hint and a reminder to list only the ones you really had. Your answer goes to your profile, and
   the CV can then say you know the topic both in practice (work, projects) and in theory (courses).
@@ -37,11 +37,11 @@ All notable changes to PolCV are recorded here. The format follows
   CV again.
 - The gap questions also know today's date, so experience marked *present* or from recent months
   counts up to today when compared with a requirement such as "2 years of experience".
-- **A keyword phrase with one word inserted counts in the CV score.** "wdrażaniem rozwiązań AI" in
-  the summary left "wdrażanie AI" on the list of missing keywords, because only a short word like
+- **A keyword phrase with one word inserted counts in the CV score.** "wdrażaniem systemów ERP" in
+  the summary left "wdrażanie ERP" on the list of missing keywords, because only a short word like
   "w" or "i" could stand between the words of a phrase. In the CV score any one word may now stand
   there, as in a recruiter's search for both words, but not a list or sentence break and not a
-  negation ("wdrażanie bez AI"). Checks against your profile stay strict: "zarządzanie dużymi
+  negation ("wdrażanie bez ERP"). Checks against your profile stay strict: "zarządzanie dużymi
   projektami" in the profile still does not confirm "zarządzanie projektami" for a new CV line.
 
 ## [1.3.0] - 2026-11-11
@@ -199,7 +199,7 @@ All notable changes to PolCV are recorded here. The format follows
 - *Improve automatically*, *Shorten to 1 page* and the instruction for the AI no longer make the AI
   rewrite text you wrote yourself: the style checks (first person in the summary, noun forms in
   points) apply only to what the AI writes anew, so your own wording passes as it is.
-- An answer to a long gap question that lists several tools ("Make, n8n, Zapier or Power Automate")
+- An answer to a long gap question that lists several tools ("Selenium, Cypress or Playwright")
   no longer confirms all of them: *Improve automatically* and the skill check count only what the
   answer itself says. A short topic, such as a keyword confirmed with *I have this*, still counts.
 

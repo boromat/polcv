@@ -87,7 +87,7 @@ const checkedReviewSchema = (cvText: string) =>
 const DATE = /(?<![\p{L}\p{N}])(?:\d{1,2}[./])?\d{4}(?![\p{L}\p{N}])/gu;
 
 /**
- * Poprawka, która zmienia w CV tylko daty ("PolAnon 09.2026 - obecnie" → "09.2025 - obecnie"). Daty są z profilu
+ * Poprawka, która zmienia w CV tylko daty ("Planer Zadań 09.2026 - obecnie" → "09.2025 - obecnie"). Daty są z profilu
  * kandydata, więc taka poprawka zrobiłaby z prawdziwej daty fałszywą (model potrafił uznać zeszły miesiąc za przyszłość).
  */
 export function dateOnlyFix(f: AiReview['fixes'][number]): boolean {

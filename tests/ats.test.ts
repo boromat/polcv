@@ -181,17 +181,17 @@ describe('frazy', () => {
 
   // [tekst, fraza, ile razy z `gap`]; bez `gap` każda z tych fraz to 0 albo tyle samo
   it.each<[string, string, number]>([
-    ['zajmuję się wdrażaniem rozwiązań AI oraz automatyzacją procesów', 'wdrażanie AI', 1],
+    ['zajmuję się wdrażaniem systemów ERP i szkoleniem użytkowników', 'wdrażanie ERP', 1],
     ['zarządzanie dużymi projektami', 'zarządzanie projektami', 1],
     ['Led the data quality analysis', 'data analysis', 1],
     // tylko jedno słowo przerwy
-    ['wdrażanie nowych rozwiązań AI', 'wdrażanie AI', 0],
+    ['wdrażanie nowych systemów ERP', 'wdrażanie ERP', 0],
     // granic list i zdań nie przeskakuje
-    ['wdrażanie, AI', 'wdrażanie AI', 0],
-    ['Wdrażanie procesów. AI w pracy', 'wdrażanie AI', 0],
+    ['wdrażanie, ERP', 'wdrażanie ERP', 0],
+    ['Wdrażanie procesów. ERP w pracy', 'wdrażanie ERP', 0],
     // przeczenia nie przeskakuje
-    ['wdrażanie bez AI', 'wdrażanie AI', 0],
-    ['wdrażanie nie AI', 'wdrażanie AI', 0],
+    ['wdrażanie bez ERP', 'wdrażanie ERP', 0],
+    ['wdrażanie nie ERP', 'wdrażanie ERP', 0],
     // słowo pomocnicze działa jak bez `gap`
     ['praca w zespole', 'praca zespołowa', 1],
   ])('z przerwą: %j ~ %j', (text, phrase, n) => {
@@ -199,8 +199,8 @@ describe('frazy', () => {
   });
 
   it('bez `gap` jedno słowo w środku frazy dalej ją przerywa (sprawdzanie profilu)', () => {
-    expect(countPhrase(tokenize('zajmuję się wdrażaniem rozwiązań AI'), 'wdrażanie AI')).toBe(0);
-    expect(countPhrase(tokenize('zajmuję się wdrażaniem AI'), 'wdrażanie AI')).toBe(1);
+    expect(countPhrase(tokenize('zajmuję się wdrażaniem systemów ERP'), 'wdrażanie ERP')).toBe(0);
+    expect(countPhrase(tokenize('zajmuję się wdrażaniem ERP'), 'wdrażanie ERP')).toBe(1);
   });
 });
 
@@ -240,12 +240,12 @@ describe('wynik słów kluczowych', () => {
   });
 
   it('fraza z jednym słowem w środku liczy się w CV, ale w profilu nadal nie', () => {
-    const text = 'Jestem studentem i zajmuję się wdrażaniem rozwiązań AI oraz automatyzacją procesów.';
-    const r = scoreKeywords(content({ summary: fact(text) }), [kw('wdrażanie AI', 'must', 'umiejętność', ['AI implementation'])]);
+    const text = 'Jestem studentem logistyki i zajmuję się wdrażaniem systemów ERP w hurtowni.';
+    const r = scoreKeywords(content({ summary: fact(text) }), [kw('wdrażanie ERP', 'must', 'umiejętność', ['ERP implementation'])]);
     expect(r.missing).toEqual([]);
-    expect(r.matched[0]).toMatchObject({ term: 'wdrażanie AI', where: ['summary'], credit: 1 });
+    expect(r.matched[0]).toMatchObject({ term: 'wdrażanie ERP', where: ['summary'], credit: 1 });
     const src = [{ where: 'summary' as const, credit: 1, bullet: false, text }];
-    expect(findKeyword(kw('wdrażanie AI'), src, 'pl')).toBeNull();
+    expect(findKeyword(kw('wdrażanie ERP'), src, 'pl')).toBeNull();
   });
 
   it('karze upychanie słów', () => {
