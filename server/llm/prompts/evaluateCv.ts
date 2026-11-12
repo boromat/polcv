@@ -36,9 +36,39 @@ export function reviewProblems(review: AiReview): string[] {
   return out;
 }
 
-const CheckedReviewSchema = AiReviewSchema.superRefine((r, ctx) => {
-  for (const message of reviewProblems(r)) ctx.addIssue({ code: 'custom', path: ['criteria'], message });
-});
+/** Data w tekście CV: "09.2026", "9/2026", "2026" (lata 1900-2099, miesiące 1-12). */
+const CV_DATE = /(?<![\p{L}\p{N}])(?:(0?[1-9]|1[0-2])[./])?((?:19|20)\d{2})(?![\p{L}\p{N}])/gu;
+
+/** Daty z CV późniejsze niż bieżący miesiąc. */
+export function futureDatesInCv(cvText: string, now = new Date()): string[] {
+  const current = now.getFullYear() * 12 + now.getMonth();
+  return [...cvText.matchAll(CV_DATE)].filter((m) => Number(m[2]) * 12 + (m[1] ? Number(m[1]) - 1 : 0) > current).map((m) => m[0]);
+}
+
+// Twierdzenie, że daty są w przyszłości: słowo o dacie i o przyszłości w tym samym zdaniu.
+const FUTURE_CLAIM =
+  /(?:dat\p{L}*|\d{1,2}[./]\d{4}|termin\p{L}*|dates?)[^.!?\n]{0,100}(?:przyszło\p{L}*|przyszł[aey]\b|późniejsz\p{L}*|future|later than)|(?:przyszło\p{L}*|przyszł[aey]\b|późniejsz\p{L}*|future|later than)[^.!?\n]{0,100}(?:dat\p{L}*|\d{1,2}[./]\d{4}|dates?)/iu;
+
+/**
+ * Ocena, która uznaje daty za przyszłe, choć żadna data w CV nie jest późniejsza niż dziś. Model potrafił tak napisać
+ * nawet z dzisiejszą datą w prompcie ("09.2026 jest przyszłe względem 2026-11-12"), więc sprawdzamy to w kodzie.
+ */
+export function futureClaimProblems(r: AiReview, cvText: string, now = new Date()): string[] {
+  if (futureDatesInCv(cvText, now).length) return [];
+  const texts = [...r.criteria.map((c) => c.comment), ...r.weaknesses, ...r.strengths, r.verdict, ...r.fixes.flatMap((f) => [f.why, f.replace])];
+  const claim = texts.find((t) => FUTURE_CLAIM.test(t));
+  if (!claim) return [];
+  const day = now.toISOString().slice(0, 10);
+  return [
+    `Piszesz o datach w przyszłości („${claim.slice(0, 140)}”), ale żadna data w CV nie jest późniejsza niż dzisiejsza (${day}): miesiąc i rok z CV, które są wcześniejsze albo równe dzisiejszym, są przeszłe. Usuń te uwagi i poprawki o datach i oceń "red_flags" bez nich.`,
+  ];
+}
+
+const checkedReviewSchema = (cvText: string) =>
+  AiReviewSchema.superRefine((r, ctx) => {
+    for (const message of reviewProblems(r)) ctx.addIssue({ code: 'custom', path: ['criteria'], message });
+    for (const message of futureClaimProblems(r, cvText)) ctx.addIssue({ code: 'custom', path: ['criteria'], message });
+  });
 
 /** Data w CV: "09.2026", "09/2026", "2026". */
 const DATE = /(?<![\p{L}\p{N}])(?:\d{1,2}[./])?\d{4}(?![\p{L}\p{N}])/gu;
@@ -55,7 +85,7 @@ export function dateOnlyFix(f: AiReview['fixes'][number]): boolean {
 
 export async function evaluateCv(cvText: string, posting: JobPosting, ctx: LlmContext): Promise<AiReview> {
   const review = await callJson({
-    schema: CheckedReviewSchema,
+    schema: checkedReviewSchema(cvText),
     schemaName: 'cv_review',
     tier: 'main',
     temperature: 0,
@@ -66,5 +96,6 @@ export async function evaluateCv(cvText: string, posting: JobPosting, ctx: LlmCo
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nTEKST CV (tak jak odczytał go system ATS):\n"""\n${cvText}\n"""`,
     ctx,
   });
-  return { ...review, fixes: review.fixes.filter((f) => !dateOnlyFix(f)) };
+  // Poprawka, która niczego nie zmienia ("find" = "replace"), tylko zaśmieca raport.
+  return { ...review, fixes: review.fixes.filter((f) => !dateOnlyFix(f) && !(f.find.trim() && f.find.trim() === f.replace.trim())) };
 }

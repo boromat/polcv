@@ -10,7 +10,7 @@ const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'polcv-ai-'));
 process.env.CV_DATA_DIR = dir;
 
 const { callJson } = await import('../server/llm/openrouter');
-const { dateOnlyFix, evaluateCv, reviewProblems } = await import('../server/llm/prompts/evaluateCv');
+const { dateOnlyFix, evaluateCv, futureClaimProblems, futureDatesInCv, reviewProblems } = await import('../server/llm/prompts/evaluateCv');
 const { generateCv, improveCv } = await import('../server/llm/prompts/generateCv');
 const { improvePlan } = await import('../server/llm/prompts/improvePlan');
 const { parsePosting, withoutLevel, withoutLevels } = await import('../server/llm/prompts/parsePosting');
@@ -126,7 +126,7 @@ describe('AI-rekruter', () => {
   });
 
   it('zna dzisiejszą datę, a poprawka zmieniająca w CV tylko datę odpada (daty są z profilu)', async () => {
-    const dateFix = { section: 'Projekty', find: 'PolAnon - Autor 09.2026 - obecnie', replace: 'PolAnon - Autor 09.2025 - obecnie', why: 'Data w przyszłości.', needsUserInput: true };
+    const dateFix = { section: 'Projekty', find: 'PolAnon - Autor 09.2026 - obecnie', replace: 'PolAnon - Autor 09.2025 - obecnie', why: 'Popraw okres realizacji.', needsUserInput: true };
     const realFix = { section: 'Doświadczenie', find: 'Raporty sprzedaży', replace: 'Cotygodniowe raporty sprzedaży dla 12 przedstawicieli', why: 'Skala.', needsUserInput: false };
     expect(dateOnlyFix(dateFix)).toBe(true);
     expect(dateOnlyFix({ ...dateFix, find: 'Raporty 2024', replace: 'Raporty sprzedaży 2024' })).toBe(false);
@@ -137,6 +137,25 @@ describe('AI-rekruter', () => {
     const system = sent[0].messages[0].content as string;
     expect(system).toContain(`dzisiejsza data to ${new Date().toISOString().slice(0, 10)}`);
     expect(system).toContain('nie proponuj w "fixes" ich zmiany');
+  });
+
+  it('uwaga o datach w przyszłości, gdy żadna data w CV nie jest późniejsza niż dziś, wraca do modelu', async () => {
+    const now = new Date('2026-11-12T12:00:00Z');
+    const cvText = 'PolAnon - Autor 09.2026 - obecnie\nPolSales 07.2026\nRODO 2016/679\n1000 testów';
+    expect(futureDatesInCv(cvText, now)).toEqual([]);
+    expect(futureDatesInCv('Projekt 12.2026 - obecnie, studia 2027', now)).toEqual(['12.2026', '2027']);
+    const claim = { ...review(full), weaknesses: ['Daty projektów (09.2026 - obecnie) są przyszłe względem dzisiejszej daty 2026-11-12'] };
+    expect(futureClaimProblems(claim, cvText, now).join('')).toContain('żadna data w CV nie jest późniejsza niż dzisiejsza (2026-11-12)');
+    // Data naprawdę w przyszłości: uwaga zostaje. "W przyszłości warto…" bez daty to nie uwaga o datach.
+    expect(futureClaimProblems(claim, 'Projekt 12.2026 - obecnie', now)).toEqual([]);
+    expect(futureClaimProblems({ ...review(full), weaknesses: ['W przyszłości warto dodać efekty w liczbach.'] }, cvText, now)).toEqual([]);
+
+    const ok = { ...review(full), fixes: [{ section: 'Projekty', find: 'Raporty', replace: 'Raporty', why: 'Bez zmian.', needsUserInput: false }] };
+    replies = [{ content: JSON.stringify({ ...ok, weaknesses: [`Daty projektów są przyszłe względem dzisiejszej daty`] }) }, { content: JSON.stringify(ok) }];
+    const r = await evaluateCv('PolAnon - Autor 09.2025 - obecnie', posting, ctx);
+    expect(lastUserMessage(1)).toContain('żadna data w CV nie jest późniejsza niż dzisiejsza');
+    // Poprawka, która niczego nie zmienia, odpada.
+    expect(r.fixes).toEqual([]);
   });
 
   it('nowa próba po zapętleniu ma temperaturę 0.2', async () => {

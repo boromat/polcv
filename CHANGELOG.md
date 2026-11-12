@@ -22,8 +22,11 @@ All notable changes to PolCV are recorded here. The format follows
   it is, so the model judged dates by its own training date: a project from two months ago was a
   red flag, and it suggested "fixing" a real date into a wrong one. The prompt now gives today's
   date, and a suggested fix that only changes dates is dropped, because the dates in the CV come
-  from your profile. A report made before this fix keeps its old comment until you score the CV
-  again.
+  from your profile. The date alone did not stop the model from calling September 2026 "the future"
+  in November 2026, so the program now checks it: a review that says dates are in the future while
+  no date in the CV is later than today goes back to the model. A suggested fix that changes
+  nothing is dropped too. A report made before this fix keeps its old comment until you score the
+  CV again.
 - The gap questions also know today's date, so experience marked *present* or from recent months
   counts up to today when compared with a requirement such as "2 years of experience".
 
