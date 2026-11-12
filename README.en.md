@@ -75,6 +75,8 @@ What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish applicat
    have a real chance at, and gives you ready-made search links for job portals.
 8. **Projects from GitHub (optional):** enter your GitHub username on the profile page and the AI
    adds your public repositories as projects, using only facts from their descriptions and READMEs.
+   In projects already in your profile it checks what changed in the repository and adds new points
+   and technologies; nothing is removed or rewritten.
 
 ## Quick start
 

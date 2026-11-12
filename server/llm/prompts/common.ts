@@ -19,7 +19,7 @@ export const genderForms = (p: Profile['pronouns']) =>
 
 /** Profil bez danych technicznych (klucz API, pliki) - tylko to, co AI ma wiedzieć. */
 export function profileForPrompt(p: Profile) {
-  const { apiKey, files, photo, id, displayName, createdAt, updatedAt, ...rest } = p;
+  const { apiKey, files, photo, id, displayName, createdAt, updatedAt, githubSync, ...rest } = p;
   return rest;
 }
 

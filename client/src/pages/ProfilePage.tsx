@@ -4,8 +4,9 @@ import { githubUserFromLinks } from '../../../shared/github';
 import { api } from '../api';
 import { useApp } from '../ctx';
 import { Busy, ErrorBox, Field, LazyText, PRONOUNS } from '../components/ui';
-import { plFew, useT } from '../i18n';
+import { useT } from '../i18n';
 import { errorMessage } from '../../../shared/errors';
+import { githubImportInfo } from './githubImport';
 
 const rid = () => Math.random().toString(36).slice(2, 12);
 
@@ -53,8 +54,8 @@ function ListSection<T extends { id: string }>({
   make: () => T;
   render: (item: T, set: (patch: Partial<T>) => void) => ReactNode;
   newIds: Set<string>;
-  /** plakietka przy nowych pozycjach, np. „nowe z CV” */
-  newLabel: string;
+  /** plakietka przy nowej pozycji o tym id, np. „nowe z CV” */
+  newLabel: (id: string) => string;
   addLabel: string;
 }) {
   const { t } = useT();
@@ -79,7 +80,7 @@ function ListSection<T extends { id: string }>({
         {items.length === 0 && <p className="faint">{t('Brak pozycji.')}</p>}
         {items.map((it, i) => (
           <div key={it.id} className={`entry-card ${newIds.has(it.id) ? 'new-item' : ''}`}>
-            {newIds.has(it.id) && <span className="badge good" style={{ alignSelf: 'flex-start' }}>{newLabel}</span>}
+            {newIds.has(it.id) && <span className="badge good" style={{ alignSelf: 'flex-start' }}>{newLabel(it.id)}</span>}
             {render(it, (patch) => onChange(items.map((x) => (x.id === it.id ? { ...x, ...patch } : x))))}
             <div className="row" style={{ justifyContent: 'flex-end' }}>
               <button className="icon-btn" disabled={i === 0} onClick={() => move(i, -1)} title={t('W górę')}>↑</button>
@@ -121,6 +122,8 @@ export function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
+  // Projekty z profilu, do których import z GitHuba dopisał nowości (są też w newIds).
+  const [updatedIds, setUpdatedIds] = useState<Set<string>>(new Set());
   // Skąd są nowe pozycje (plakietka przy nich).
   const [newFrom, setNewFrom] = useState<'cv' | 'github'>('cv');
   // Pole GitHuba; null = jeszcze nieruszone, podpowiadamy konto z linków w profilu.
@@ -246,6 +249,7 @@ export function ProfilePage() {
       set(proposal);
       flush();
       setNewIds(new Set(newIds));
+      setUpdatedIds(new Set());
       setNewFrom('cv');
       setInfo(
         mode === 'new'
@@ -271,7 +275,7 @@ export function ProfilePage() {
       // Serwer dopisuje projekty do zapisanego profilu, więc najpierw zapisujemy ręczne zmiany.
       await flush();
       if (rev.current !== savedRev.current) throw new Error(t('Nie udało się zapisać zmian w profilu, więc projekty z GitHuba nie zostały dodane. Spróbuj ponownie.'));
-      const { profile: saved, added, newIds: ids } = await api.importGithub(p.id, username);
+      const { profile: saved, added, updated, newIds: ids, updatedIds: upd } = await api.importGithub(p.id, username);
       const cur = latest.current;
       if (!cur || cur.id !== saved.id) return;
       if (rev.current === savedRev.current) {
@@ -281,26 +285,28 @@ export function ProfilePage() {
         setP(saved);
         setSaveState('saved');
       } else {
-        // Zmiany wpisane w trakcie importu zostają: dokładamy do nich nowe pozycje i zapisujemy całość.
+        // Zmiany wpisane w trakcie importu zostają: dokładamy do nich nowe pozycje i nowości w projektach i zapisujemy całość.
         const fresh = new Set(ids);
+        const changed = new Map(saved.projects.filter((x) => upd.includes(x.id)).map((x) => [x.id, x]));
+        const union = (a: string[], b: string[]) => [...a, ...b.filter((x) => !a.includes(x))];
         set({
-          projects: [...cur.projects, ...saved.projects.filter((x) => fresh.has(x.id))],
+          projects: [
+            ...cur.projects.map((x) => {
+              const s = changed.get(x.id);
+              return s ? { ...x, technologies: union(x.technologies, s.technologies), achievements: union(x.achievements, s.achievements) } : x;
+            }),
+            ...saved.projects.filter((x) => fresh.has(x.id) && !cur.projects.some((c) => c.id === x.id)),
+          ],
+          githubSync: saved.githubSync,
           skills: [...cur.skills, ...saved.skills.filter((x) => fresh.has(x.id))],
           contact: { ...cur.contact, links: [...cur.contact.links, ...saved.contact.links.filter((l) => !cur.contact.links.some((x) => x.url === l.url))] },
         });
       }
       reloadProfiles().catch(() => {});
       setNewIds(new Set(ids));
+      setUpdatedIds(new Set(upd));
       setNewFrom('github');
-      const n = added.projects.length;
-      const k = added.skills.length;
-      const projects = n === 1 ? t('1 projekt') : plFew(n) ? t('{n} projekty', { n }) : t('{n} projektów', { n });
-      const skills = k === 1 ? t('1 umiejętność') : t('{n} umiejętności', { n: k });
-      setInfo(
-        !n
-          ? t('Wszystkie projekty z GitHuba są już w profilu - nie ma nic nowego do dodania.')
-          : `${k ? t('Dodano {projects} i {skills} z GitHuba.', { projects, skills }) : t('Dodano {projects} z GitHuba.', { projects })} ${t('Nowe pozycje są oznaczone na zielono - sprawdź je.')}`,
-      );
+      setInfo(githubImportInfo({ added, updated }, t));
     } catch (e) {
       setError(errorMessage(e));
     } finally {
@@ -353,7 +359,7 @@ export function ProfilePage() {
     );
 
   const empty = !p.experience.length && !p.education.length && !p.skills.length;
-  const newLabel = newFrom === 'github' ? t('nowe z GitHuba') : t('nowe z CV');
+  const newLabel = (id: string) => (updatedIds.has(id) ? t('zaktualizowane z GitHuba') : newFrom === 'github' ? t('nowe z GitHuba') : t('nowe z CV'));
 
   return (
     <div className="container" style={{ maxWidth: 900 }}>
@@ -423,7 +429,7 @@ export function ProfilePage() {
         <div className="card">
           <h2>{t('Projekty z GitHuba')}</h2>
           <p className="muted small" style={{ marginTop: 4 }}>
-            {t('Wpisz nazwę użytkownika albo link do profilu. Program czyta tylko publiczne repozytoria (bez forków, do 10 ostatnio zmienianych), a do profilu trafiają wyłącznie fakty z ich opisów i plików README. Istniejących projektów nie zmieniamy.')}
+            {t('Wpisz nazwę użytkownika albo link do profilu. Program czyta tylko publiczne repozytoria (bez forków, do 10 ostatnio zmienianych), a do profilu trafiają wyłącznie fakty z ich opisów i plików README. W projektach, które już masz w profilu z linkiem do repozytorium, sprawdza zmiany od ostatniego razu i dopisuje nowe punkty i technologie, niczego nie usuwając.')}
           </p>
           <form
             className="row"
@@ -444,7 +450,7 @@ export function ProfilePage() {
               spellCheck={false}
             />
             <button type="submit" className="btn" disabled={!githubInput.trim() || !!busy}>
-              {t('Dodaj projekty z GitHuba')}
+              {t('Dodaj i odśwież projekty z GitHuba')}
             </button>
           </form>
         </div>

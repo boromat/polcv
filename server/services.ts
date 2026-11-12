@@ -23,8 +23,8 @@ import { htmlToPdf } from './cv/pdf';
 import { syncCvEdit } from './cv/profileSync';
 import { buildReport, honestReport, notWorse } from './ats/score';
 import { normalize } from './ats/keywords';
-import { fetchGithub, githubProject, knownRepo, mergeGithubProjects, parseGithubUser, type GithubMerge } from './cv/github';
-import { describeGithubRepos, profileLanguage } from './llm/prompts/githubProjects';
+import { applyGithubUpdates, fetchGithub, githubProject, mergeGithubProjects, parseGithubUser, repoState, type GithubMerge, type GithubUpdateMerge } from './cv/github';
+import { describeGithubRepos, describeGithubUpdates, profileLanguage } from './llm/prompts/githubProjects';
 import { tr, withLang } from './i18n';
 
 const ctxOf = (app: Application, task: string) => ({ profileId: app.profileId, applicationId: app.id, task });
@@ -500,25 +500,35 @@ export function pendingSuggestions(cv: CvVersion): number {
 // ---------- Projekty z GitHuba ----------
 
 /**
- * Publiczne repozytoria z GitHuba → projekty w profilu. Dopisuje tylko nowe projekty (istniejących nie zmienia),
- * brakujące technologie jako umiejętności i link do konta. Zapis od razu, na świeżo odczytanym profilu (bezpieczny przy autozapisie).
+ * Publiczne repozytoria z GitHuba → projekty w profilu. Dopisuje nowe projekty, brakujące technologie jako umiejętności
+ * i link do konta, a w projektach z linkiem do repozytorium, które zmieniło się od ostatniego razu, nowe punkty i technologie
+ * (niczego nie usuwa ani nie przepisuje). Zapis od razu, na świeżo odczytanym profilu (bezpieczny przy autozapisie).
  */
 export async function importGithub(profileId: string, input: string): Promise<GithubImportResult> {
   const login = parseGithubUser(input);
   if (!login) throw new HttpError(400, tr('Podaj nazwę użytkownika z GitHuba albo link do profilu, np. github.com/jan-kowalski.'));
   const profile = await store.getProfile(profileId);
-  // Repozytoria, które już są w profilu, nie idą do AI (mniej zapytań do GitHuba i taniej).
-  const data = await fetchGithub(login, knownRepo(profile));
+  // Repozytoria z profilu bez zmian od ostatniego razu nie idą do AI (mniej zapytań do GitHuba i taniej).
+  const data = await fetchGithub(login, repoState(profile));
   const lang = profileLanguage(profile);
-  const texts = await describeGithubRepos(data, lang, { profileId, task: 'projekty z GitHuba' });
+  const ctx = { profileId, task: 'projekty z GitHuba' };
+  const [texts, updates] = await Promise.all([describeGithubRepos(data, lang, ctx), describeGithubUpdates(data, profile, lang, ctx)]);
   const now = Date.now();
   const projects = data.repos.map((r, i) => githubProject(r, texts[i], lang, now));
   let merged!: GithubMerge;
+  let changed!: GithubUpdateMerge;
   const saved = await store.updateProfile(profileId, (cur) => {
     merged = mergeGithubProjects(cur, projects, data.login);
-    return merged.profile;
+    changed = applyGithubUpdates(merged.profile, updates);
+    return { ...changed.profile, githubSync: { ...cur.githubSync, ...data.seen } };
   });
-  return { profile: saved, added: merged.added, newIds: merged.newIds };
+  return {
+    profile: saved,
+    added: { projects: merged.added.projects, skills: [...merged.added.skills, ...changed.skills] },
+    updated: changed.updated,
+    newIds: [...merged.newIds, ...changed.updatedIds, ...changed.skillIds],
+    updatedIds: changed.updatedIds,
+  };
 }
 
 // ---------- Eksport ----------

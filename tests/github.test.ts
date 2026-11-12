@@ -14,7 +14,8 @@ process.env.CV_DATA_DIR = dir;
 
 const store = await import('../server/storage/store');
 const gh = await import('../server/cv/github');
-const { finishProjects, profileLanguage } = await import('../server/llm/prompts/githubProjects');
+const { finishProjects, finishUpdates, profileLanguage } = await import('../server/llm/prompts/githubProjects');
+const { profileForPrompt } = await import('../server/llm/prompts/common');
 const { importGithub } = await import('../server/services');
 const { profilesRouter } = await import('../server/routes/profiles');
 const { langMiddleware, withLang } = await import('../server/i18n');
@@ -28,6 +29,8 @@ type Route = () => Response;
 let github: Record<string, Route> = {};
 const ghCalls: { path: string; headers: Record<string, string> }[] = [];
 let aiReplies: string[] = [];
+// Odpowiedzi według nazwy schematu (dwa wywołania AI idą równolegle, więc kolejność nie jest pewna).
+let aiByName: Record<string, string[]> = {};
 const aiSent: any[] = [];
 const realFetch = globalThis.fetch;
 
@@ -49,8 +52,10 @@ beforeAll(async () => {
       return route ? route() : new Response(JSON.stringify({ message: 'Not Found' }), { status: 404 });
     }
     if (url.hostname === 'openrouter.ai') {
-      aiSent.push(JSON.parse(init.body));
-      const content = aiReplies.shift();
+      const body = JSON.parse(init.body);
+      aiSent.push(body);
+      const named = aiByName[body.response_format?.json_schema?.name];
+      const content = named?.length ? named.shift() : aiReplies.shift();
       if (content === undefined) throw new Error('brak odpowiedzi AI w teście');
       return new Response(JSON.stringify({ model: 'test/model', choices: [{ message: { content }, finish_reason: 'stop' }], usage: { cost: 0 } }));
     }
@@ -74,6 +79,7 @@ beforeEach(() => {
   github = {};
   ghCalls.length = 0;
   aiReplies = [];
+  aiByName = {};
   aiSent.length = 0;
 });
 
@@ -333,7 +339,7 @@ function serveAccount() {
     '/users/zofia-test/repos?per_page=100&sort=pushed': json([
       repo('weather-app', { description: 'Weather app', topics: ['react', 'openweather'], created_at: '2024-03-10T12:00:00Z', pushed_at: daysAgo(10) }),
       repo('todo-api', { description: 'REST API for todos', created_at: '2023-01-05T12:00:00Z', pushed_at: '2024-06-20T12:00:00Z' }),
-      repo('portfolio', { created_at: '2022-05-01T00:00:00Z', pushed_at: daysAgo(30) }),
+      repo('portfolio', { created_at: '2022-05-01T00:00:00Z', pushed_at: PORTFOLIO_PUSHED }),
       repo('forked-lib', { fork: true, pushed_at: daysAgo(1) }),
       repo('empty-repo', { size: 0, pushed_at: daysAgo(2) }),
       repo('zofia-test', { pushed_at: daysAgo(3) }),
@@ -370,10 +376,13 @@ const portfolio: Project = {
   technologies: ['HTML'], link: 'https://github.com/Zofia-Test/Portfolio/', achievements: ['Projekt graficzny strony'],
 };
 
-const newProfile = () =>
+// Portfolio sprawdzone przy ostatnim imporcie i bez zmian od tego czasu (pushed_at jak w serveAccount).
+const PORTFOLIO_PUSHED = daysAgo(30);
+const newProfile = (githubSync: Record<string, string> = { 'github.com/zofia-test/portfolio': PORTFOLIO_PUSHED }) =>
   store.saveProfile({
     ...structuredClone(fixtures.profile),
     id: store.newId(),
+    githubSync,
     projects: [structuredClone(portfolio)],
     skills: [...structuredClone(fixtures.profile.skills), { id: 's4', name: 'typescript', category: 'techniczne', level: '' }],
   });
@@ -485,5 +494,123 @@ describe('import projektów z GitHuba', () => {
     const missing = await post('nobody-here', 'en');
     expect(missing.status).toBe(404);
     expect(missing.body.error).toBe('There is no GitHub user "nobody-here". Check the username or the profile link.');
+  });
+});
+
+// ---------- Nowości w projektach, które już są w profilu ----------
+
+describe('nowości w projektach z profilu', () => {
+  const linked = (): Profile => ({
+    ...structuredClone(fixtures.profile),
+    projects: [
+      { ...project('Lista zadań', 'https://github.com/Zofia-Test/todo-api/', ['Python', 'Node.js']), description: 'API do zadań.', start: '2023-01', end: '2024-06', achievements: ['Udostępnianie REST API'] },
+      { ...project('Weather App', ''), description: 'Wpisane ręcznie' },
+    ],
+    skills: [{ id: 's1', name: 'Python', category: 'techniczne', level: '' }],
+  });
+
+  it('stan repozytorium: nowe, do sprawdzenia (zmienione albo jeszcze niesprawdzane) i bez zmian; sama nazwa bez linku = bez zmian', () => {
+    const todo = repo('todo-api', { pushed_at: '2026-10-01T10:00:00Z' });
+    const p = linked();
+    expect(gh.repoState(p)(repo('cv-maker'))).toBe('new');
+    expect(gh.repoState(p)(todo)).toBe('changed');
+    expect(gh.repoState({ ...p, githubSync: { 'github.com/zofia-test/todo-api': '2026-10-01T10:00:00Z' } })(todo)).toBe('same');
+    expect(gh.repoState({ ...p, githubSync: { 'github.com/zofia-test/todo-api': '2026-09-01T10:00:00Z' } })(todo)).toBe('changed');
+    expect(gh.repoState(p)(repo('weather-app'))).toBe('same');
+  });
+
+  it('dopisuje tylko nowe technologie i punkty; nazwa, opis, daty i istniejące punkty zostają', () => {
+    const before = linked();
+    let n = 0;
+    const res = gh.applyGithubUpdates(
+      before,
+      [{ url: 'https://github.com/zofia-test/todo-api', technologies: ['NodeJS', 'FastAPI', 'Docker'], achievements: ['Udostępnianie REST API.', 'Logowanie przez JWT'] }],
+      () => `id${++n}`,
+    );
+    const [todo, weather] = res.profile.projects;
+    expect(todo).toEqual({ ...before.projects[0], technologies: ['Python', 'Node.js', 'FastAPI', 'Docker'], achievements: ['Udostępnianie REST API', 'Logowanie przez JWT'] });
+    expect(weather).toEqual(before.projects[1]);
+    expect(res.updated).toEqual(['Lista zadań']);
+    expect(res.updatedIds).toEqual(['p-Lista zadań']);
+    // Umiejętności tylko z nowych technologii: Node.js był już w projekcie, choć nie wśród umiejętności, więc nie wraca.
+    expect(res.skills).toEqual(['FastAPI', 'Docker']);
+    expect(res.skillIds).toEqual(['id1', 'id2']);
+  });
+
+  it('nic nowego: profil bez zmian i pusta lista', () => {
+    const before = linked();
+    const res = gh.applyGithubUpdates(before, [{ url: 'https://github.com/zofia-test/todo-api', technologies: ['python'], achievements: ['udostępnianie REST API'] }]);
+    expect(res.profile).toEqual(before);
+    expect(res.updated).toEqual([]);
+  });
+
+  it('nowości od AI: liczba spoza README odpada, wersja dopisana do technologii też, repozytorium pominięte przez AI nic nie dostaje', () => {
+    const repos = [info('todo-api', { readme: 'REST API in FastAPI. Rate limit 100 requests.' }), info('other')];
+    const res = finishUpdates(repos, [
+      { repo: 'Todo-API', technologies: ['FastAPI 0.110', 'Docker'], achievements: ['Limit 100 zapytań', 'Obsługa 5000 użytkowników', ' '] },
+    ]);
+    expect(res).toEqual([
+      { url: 'https://github.com/zofia-test/todo-api', technologies: ['FastAPI', 'Docker'], achievements: ['Limit 100 zapytań'] },
+      { url: 'https://github.com/zofia-test/other', technologies: [], achievements: [] },
+    ]);
+  });
+
+  it('znacznik sprawdzenia nie idzie do AI razem z profilem', () => {
+    expect(profileForPrompt({ ...linked(), githubSync: { 'github.com/zofia-test/todo-api': '2026-10-01T10:00:00Z' } })).not.toHaveProperty('githubSync');
+  });
+
+  const updatesReply = JSON.stringify({
+    projects: [{ repo: 'portfolio', technologies: ['HTML', 'Astro'], achievements: ['Projekt graficzny strony', 'Galeria 12 prac', 'Formularz kontaktowy'] }],
+  });
+
+  it('import: projekt z profilu bez znacznika jest sprawdzany od razu, nowości trafiają do niego, a znaczniki do profilu', async () => {
+    const p = await newProfile({});
+    serveAccount();
+    github['/repos/zofia-test/portfolio/languages'] = json({ HTML: 5000, Astro: 3000 });
+    github['/repos/zofia-test/portfolio/readme'] = text('# Portfolio\nStrona w Astro z galerią prac i formularzem kontaktowym.');
+    aiByName = { github_projects: [aiReply], github_updates: [updatesReply] };
+    const res = await importGithub(p.id, 'zofia-test');
+
+    const saved = await store.getProfile(p.id);
+    expect(saved).toEqual(res.profile);
+    expect(saved.projects[0]).toEqual({ ...portfolio, technologies: ['HTML', 'Astro'], achievements: ['Projekt graficzny strony', 'Formularz kontaktowy'] });
+    expect(res.updated).toEqual(['Moje portfolio']);
+    expect(res.updatedIds).toEqual(['proj1']);
+    expect(res.newIds).toContain('proj1');
+    expect(res.added.projects).toEqual(['Weather App', 'Todo API']);
+    expect(res.added.skills).toContain('Astro');
+    expect(saved.githubSync).toEqual({
+      'github.com/zofia-test/weather-app': daysAgo(10),
+      'github.com/zofia-test/todo-api': '2024-06-20T12:00:00Z',
+      'github.com/zofia-test/portfolio': PORTFOLIO_PUSHED,
+    });
+
+    // AI: osobne wywołanie z tym, co profil już mówi o projekcie; README portfolio nie idzie do opisu nowych projektów.
+    const sent = aiSent.find((b) => b.response_format.json_schema.name === 'github_updates');
+    const user = sent.messages[1].content as string;
+    expect(user).toContain('"repo": "portfolio"');
+    expect(user).toContain('Projekt graficzny strony');
+    expect(user).toContain('Strona w Astro');
+    expect(user).not.toContain('weather-app');
+    expect(ghCalls.map((c) => c.path)).toContain('/repos/zofia-test/portfolio/readme');
+
+    // Ponowny import bez zmian w repozytoriach: bez AI i bez szczegółów repozytoriów.
+    ghCalls.length = 0;
+    aiSent.length = 0;
+    const again = await importGithub(p.id, 'zofia-test');
+    expect(again.updated).toEqual([]);
+    expect(again.newIds).toEqual([]);
+    expect(aiSent).toHaveLength(0);
+    expect(ghCalls).toHaveLength(2);
+
+    // Nowy push w portfolio: sprawdzamy je znowu; AI nie widzi nic nowego, więc projekt zostaje, a znacznik się zmienia.
+    const pushed = daysAgo(1);
+    github['/users/zofia-test/repos?per_page=100&sort=pushed'] = json([repo('portfolio', { created_at: '2022-05-01T00:00:00Z', pushed_at: pushed })]);
+    aiByName = { github_updates: [JSON.stringify({ projects: [{ repo: 'portfolio', technologies: [], achievements: [] }] })] };
+    const third = await importGithub(p.id, 'zofia-test');
+    expect(third.updated).toEqual([]);
+    expect(third.profile.projects[0]).toEqual(saved.projects[0]);
+    expect(third.profile.githubSync?.['github.com/zofia-test/portfolio']).toBe(pushed);
+    expect(third.profile.githubSync?.['github.com/zofia-test/todo-api']).toBe('2024-06-20T12:00:00Z');
   });
 });

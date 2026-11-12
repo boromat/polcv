@@ -15,6 +15,14 @@ All notable changes to PolCV are recorded here. The format follows
   the CV can then say you know the topic both in practice (work, projects) and in theory (courses).
   The name of the degree alone is not enough, because programmes with the same name differ: without
   your answer the AI may only offer this as a yellow suggestion.
+- **Importing from GitHub also checks the projects you already have.** The button, now *Add and
+  refresh projects from GitHub*, used to skip every repository already in your profile. Now a
+  project with a link to its repository is checked whenever the repository has changed since the
+  last import, and right away the first time: the AI compares the README with what your profile
+  says about the project, and new points and technologies are added to it, marked *updated from
+  GitHub*. Nothing is removed or rewritten: the name, description, dates and existing points stay,
+  and a number that is not in the repository is dropped, as for new projects. A project that only
+  has the same name, without a link, is left alone. Repositories without changes cost no AI call.
 
 ### Fixed
 

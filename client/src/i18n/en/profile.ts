@@ -38,11 +38,12 @@ export const profile: Record<string, string> = {
 
   // ProfilePage: projekty z GitHuba
   'nowe z GitHuba': 'new from GitHub',
+  'zaktualizowane z GitHuba': 'updated from GitHub',
   'Projekty z GitHuba': 'Projects from GitHub',
-  'Wpisz nazwę użytkownika albo link do profilu. Program czyta tylko publiczne repozytoria (bez forków, do 10 ostatnio zmienianych), a do profilu trafiają wyłącznie fakty z ich opisów i plików README. Istniejących projektów nie zmieniamy.':
-    'Enter your username or profile link. The app reads public repositories only (no forks, up to the 10 most recently updated), and only facts from their descriptions and README files go into your profile. Projects you already have stay unchanged.',
+  'Wpisz nazwę użytkownika albo link do profilu. Program czyta tylko publiczne repozytoria (bez forków, do 10 ostatnio zmienianych), a do profilu trafiają wyłącznie fakty z ich opisów i plików README. W projektach, które już masz w profilu z linkiem do repozytorium, sprawdza zmiany od ostatniego razu i dopisuje nowe punkty i technologie, niczego nie usuwając.':
+    'Enter your username or profile link. The app reads public repositories only (no forks, up to the 10 most recently updated), and only facts from their descriptions and README files go into your profile. In projects you already have with a link to the repository, it checks what changed since last time and adds new points and technologies without removing anything.',
   'Nazwa użytkownika albo link do profilu na GitHubie': 'GitHub username or profile link',
-  'Dodaj projekty z GitHuba': 'Add projects from GitHub',
+  'Dodaj i odśwież projekty z GitHuba': 'Add and refresh projects from GitHub',
   'Czytam projekty z GitHuba…': 'Reading your projects from GitHub…',
   'Nie udało się zapisać zmian w profilu, więc projekty z GitHuba nie zostały dodane. Spróbuj ponownie.':
     'Your profile changes could not be saved, so the GitHub projects were not added. Please try again.',
@@ -53,9 +54,11 @@ export const profile: Record<string, string> = {
   '{n} umiejętności': '{n} skills',
   'Dodano {projects} i {skills} z GitHuba.': 'Added {projects} and {skills} from GitHub.',
   'Dodano {projects} z GitHuba.': 'Added {projects} from GitHub.',
+  'Dodano {skills} z GitHuba.': 'Added {skills} from GitHub.',
+  'Zaktualizowano {updated}: nowe punkty albo technologie z repozytorium.': 'Updated {updated} with new points or technologies from the repository.',
   'Nowe pozycje są oznaczone na zielono - sprawdź je.': 'New entries are marked in green, so check them.',
-  'Wszystkie projekty z GitHuba są już w profilu - nie ma nic nowego do dodania.':
-    'All your GitHub projects are already in your profile, so there is nothing new to add.',
+  'Wszystkie projekty z GitHuba są już w profilu i nie ma w nich nic nowego.':
+    'All your GitHub projects are already in your profile and have nothing new.',
 
   // ProfilePage: dane kontaktowe, zdjęcie, o sobie
   'Dane kontaktowe': 'Contact details',

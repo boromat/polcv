@@ -59,8 +59,12 @@ export interface GithubData {
   about: string;
   /** repozytoria do opisania (bez tych, które są już w profilu) */
   repos: GithubRepo[];
-  /** nazwy repozytoriów pominiętych, bo są już w profilu */
+  /** repozytoria projektów z profilu, które zmieniły się od ostatniego sprawdzenia: szukamy w nich nowości */
+  updates: GithubRepo[];
+  /** nazwy repozytoriów pominiętych, bo są już w profilu i bez zmian */
   known: string[];
+  /** ostatnia zmiana każdego przejrzanego repozytorium (do `githubSync` w profilu) */
+  seen: Record<string, string>;
 }
 
 // ---------- Zapytania ----------
@@ -152,8 +156,17 @@ export function pickRepos(repos: GhRepo[], login: string): { projects: GhRepo[];
   return { projects, profileRepo: own.find(isProfile) ?? null };
 }
 
-/** Konto i repozytoria; `known` = repozytorium jest już w profilu (bez szczegółów i bez opisu przez AI). */
-export async function fetchGithub(username: string, known: (r: GhRepo) => boolean = () => false): Promise<GithubData> {
+/** Ostatnia zmiana repozytorium (bez wypchniętego kodu: utworzenie). */
+const lastChange = (r: Pick<GhRepo, 'pushed_at' | 'created_at'>) => r.pushed_at ?? r.created_at;
+
+/** 'new' = nie ma go w profilu, 'changed' = projekt z profilu do sprawdzenia, 'same' = bez zmian. */
+export type RepoState = 'new' | 'changed' | 'same';
+
+/**
+ * Konto i repozytoria; `state` mówi, które są w profilu: 'new' i 'changed' dostają szczegóły (języki, README),
+ * 'same' nie (bez opisu przez AI).
+ */
+export async function fetchGithub(username: string, state: (r: GhRepo) => RepoState = () => 'new'): Promise<GithubData> {
   const userRes = await gh(`/users/${encodeURIComponent(username)}`);
   if (userRes.status === 404) throw new HttpError(404, tr('Na GitHubie nie ma użytkownika „{user}”. Sprawdź nazwę albo link do profilu.', { user: username }));
   if (!userRes.ok) throw failed(userRes.status);
@@ -167,26 +180,28 @@ export async function fetchGithub(username: string, known: (r: GhRepo) => boolea
   const { projects, profileRepo } = pickRepos(Array.isArray(list) ? list : [], login);
   if (!projects.length) throw new HttpError(422, tr('Użytkownik {user} nie ma na GitHubie publicznych projektów (forki pomijamy).', { user: login }));
 
-  const fresh = projects.filter((r) => !known(r));
-  const [about, repos] = await Promise.all([
+  const states = new Map(projects.map((r) => [r, state(r)]));
+  const fresh = projects.filter((r) => states.get(r) === 'new');
+  const changed = projects.filter((r) => states.get(r) === 'changed');
+  const details = async (r: GhRepo): Promise<GithubRepo> => {
+    const [langs, text] = await Promise.all([optional(() => languages(r.full_name), []), optional(() => readme(r.full_name), '')]);
+    return {
+      name: r.name,
+      url: r.html_url,
+      description: (r.description ?? '').trim(),
+      topics: r.topics ?? [],
+      languages: langs,
+      homepage: (r.homepage ?? '').trim(),
+      readme: text,
+      createdAt: r.created_at,
+      pushedAt: lastChange(r),
+      archived: !!r.archived,
+    };
+  };
+  const [about, repos, updates] = await Promise.all([
     profileRepo && fresh.length ? optional(() => readme(profileRepo.full_name), '') : Promise.resolve(''),
-    Promise.all(
-      fresh.map(async (r): Promise<GithubRepo> => {
-        const [langs, text] = await Promise.all([optional(() => languages(r.full_name), []), optional(() => readme(r.full_name), '')]);
-        return {
-          name: r.name,
-          url: r.html_url,
-          description: (r.description ?? '').trim(),
-          topics: r.topics ?? [],
-          languages: langs,
-          homepage: (r.homepage ?? '').trim(),
-          readme: text,
-          createdAt: r.created_at,
-          pushedAt: r.pushed_at ?? r.created_at,
-          archived: !!r.archived,
-        };
-      }),
-    ),
+    Promise.all(fresh.map(details)),
+    Promise.all(changed.map(details)),
   ]);
   return {
     login,
@@ -195,7 +210,9 @@ export async function fetchGithub(username: string, known: (r: GhRepo) => boolea
     blog: String(user.blog ?? ''),
     about,
     repos,
-    known: projects.filter(known).map((r) => r.name),
+    updates,
+    known: projects.filter((r) => states.get(r) === 'same').map((r) => r.name),
+    seen: Object.fromEntries(projects.map((r) => [normalizeLink(r.html_url), lastChange(r)])),
   };
 }
 
@@ -236,7 +253,8 @@ const nameKey = (s: string) =>
   s.toLowerCase().replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '');
 
 /** Umiejętność do porównań: bez wielkości liter, spacji, kropek i myślników ("Node.js" = "NodeJS"), ale C++ ≠ C#. */
-const skillKey = (s: string) => s.toLowerCase().replace(/[\s._-]+/g, '');
+export const skillKey = (s: string) => s.toLowerCase().replace(/[\s._-]+/g, '');
+
 
 const TOOLS = new Set(
   [
@@ -253,10 +271,104 @@ export function knownRepo(profile: Profile): (r: Pick<GhRepo, 'name' | 'html_url
   return (r) => links.has(normalizeLink(r.html_url)) || names.has(nameKey(r.name));
 }
 
+/** Projekty profilu z linkiem do repozytorium. Tylko takie aktualizujemy: sama nazwa może oznaczać inny projekt. */
+export const linkedProjects = (profile: Profile, url: string): Project[] =>
+  profile.projects.filter((p) => p.link.trim() && normalizeLink(p.link) === normalizeLink(url));
+
+/**
+ * Stan repozytorium względem profilu. Projekt z linkiem do repozytorium jest do sprawdzenia, gdy repozytorium zmieniło się
+ * od ostatniego importu albo nie było jeszcze sprawdzane (`githubSync`); projekt tylko o tej samej nazwie zostaje bez zmian.
+ */
+export function repoState(profile: Profile): (r: GhRepo) => RepoState {
+  const known = knownRepo(profile);
+  const seen = profile.githubSync ?? {};
+  return (r) => {
+    if (!known(r)) return 'new';
+    if (!linkedProjects(profile, r.html_url).length) return 'same';
+    return seen[normalizeLink(r.html_url)] === lastChange(r) ? 'same' : 'changed';
+  };
+}
+
 export interface GithubMerge {
   profile: Profile;
   added: { projects: string[]; skills: string[] };
   newIds: string[];
+}
+
+/** Technologie, których nie ma wśród umiejętności profilu, jako nowe umiejętności (własne projekty pomijamy). */
+function missingSkills(profile: Profile, technologies: string[], projects: Project[], makeId: () => string): Skill[] {
+  const skillKeys = new Set(profile.skills.map((s) => skillKey(s.name)));
+  // Własny projekt użyty w innym projekcie (np. biblioteka autora) to projekt, a nie umiejętność.
+  for (const p of [...profile.projects, ...projects]) {
+    skillKeys.add(skillKey(p.name));
+    skillKeys.add(skillKey(normalizeLink(p.link).split('/').pop() ?? ''));
+  }
+  const skills: Skill[] = [];
+  for (const tech of technologies) {
+    const name = tech.trim();
+    const key = skillKey(name);
+    if (!key || skillKeys.has(key)) continue;
+    skillKeys.add(key);
+    skills.push({ id: makeId(), name, category: TOOLS.has(key) ? 'narzędzia' : 'techniczne', level: '' });
+  }
+  return skills;
+}
+
+/** Nowości z repozytorium projektu, który już jest w profilu (od AI, sprawdzone w kodzie). */
+export interface GithubUpdate {
+  url: string;
+  technologies: string[];
+  achievements: string[];
+}
+
+export interface GithubUpdateMerge {
+  profile: Profile;
+  /** nazwy projektów, do których coś doszło */
+  updated: string[];
+  updatedIds: string[];
+  /** nazwy i id nowych umiejętności z nowych technologii */
+  skills: string[];
+  skillIds: string[];
+}
+
+/**
+ * Dopisuje nowości do projektów z linkiem do repozytorium: technologie i punkty, których projekt jeszcze nie ma.
+ * Niczego nie usuwa ani nie przepisuje (nazwa, opis, daty i istniejące punkty zostają); nowe technologie trafiają też do umiejętności.
+ */
+export function applyGithubUpdates(profile: Profile, updates: GithubUpdate[], makeId: () => string = newId): GithubUpdateMerge {
+  const updated: Project[] = [];
+  const added: string[] = [];
+  const projects = profile.projects.map((p) => {
+    const mine = updates.filter((u) => p.link.trim() && normalizeLink(u.url) === normalizeLink(p.link));
+    if (!mine.length) return p;
+    const techKeys = new Set(p.technologies.map(skillKey));
+    const technologies = mine.flatMap((u) => u.technologies).filter((t) => {
+      const key = skillKey(t.trim());
+      if (!key || techKeys.has(key)) return false;
+      techKeys.add(key);
+      return true;
+    });
+    const texts = new Set([p.description, ...p.achievements].map(nameKey));
+    const achievements = mine.flatMap((u) => u.achievements).filter((a) => {
+      const key = nameKey(a);
+      if (!key || texts.has(key)) return false;
+      texts.add(key);
+      return true;
+    });
+    if (!technologies.length && !achievements.length) return p;
+    added.push(...technologies);
+    const next = { ...p, technologies: [...p.technologies, ...technologies.map((t) => t.trim())], achievements: [...p.achievements, ...achievements.map((a) => a.trim())] };
+    updated.push(next);
+    return next;
+  });
+  const skills = missingSkills(profile, added, [], makeId);
+  return {
+    profile: { ...profile, projects, skills: [...profile.skills, ...skills] },
+    updated: updated.map((p) => p.name),
+    updatedIds: updated.map((p) => p.id),
+    skills: skills.map((s) => s.name),
+    skillIds: skills.map((s) => s.id),
+  };
 }
 
 /**
@@ -275,20 +387,7 @@ export function mergeGithubProjects(profile: Profile, projects: Project[], login
     return true;
   });
 
-  const skillKeys = new Set(profile.skills.map((s) => skillKey(s.name)));
-  // Własny projekt użyty w innym projekcie (np. biblioteka autora) to projekt, a nie umiejętność.
-  for (const p of [...profile.projects, ...projects]) {
-    skillKeys.add(skillKey(p.name));
-    skillKeys.add(skillKey(normalizeLink(p.link).split('/').pop() ?? ''));
-  }
-  const skills: Skill[] = [];
-  for (const tech of fresh.flatMap((p) => p.technologies)) {
-    const name = tech.trim();
-    const key = skillKey(name);
-    if (!key || skillKeys.has(key)) continue;
-    skillKeys.add(key);
-    skills.push({ id: makeId(), name, category: TOOLS.has(key) ? 'narzędzia' : 'techniczne', level: '' });
-  }
+  const skills = missingSkills(profile, fresh.flatMap((p) => p.technologies), projects, makeId);
 
   const url = `https://github.com/${login}`;
   const hasLink = profile.contact.links.some((l) => normalizeLink(l.url) === normalizeLink(url));

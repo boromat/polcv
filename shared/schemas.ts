@@ -110,6 +110,8 @@ export const ProfileSchema = ProfileExtractSchema.extend({
   photo: z.string(),
   files: z.array(z.object({ name: z.string(), original: z.string(), uploadedAt: z.string() })),
   extraFacts: z.array(ExtraFactSchema),
+  /** Ostatnia zmiana każdego repozytorium (link bez protokołu → pushed_at) przy ostatnim imporcie z GitHuba; nie idzie do AI. */
+  githubSync: z.record(z.string(), z.string()).optional(),
 });
 
 // ---------- Ogłoszenie ----------
@@ -587,8 +589,12 @@ export interface GithubImportResult {
   profile: Profile;
   /** nazwy dopisanych projektów i umiejętności (puste = nic nowego) */
   added: { projects: string[]; skills: string[] };
+  /** nazwy projektów z profilu, do których doszły nowe punkty albo technologie z repozytorium */
+  updated: string[];
   /** id nowych pozycji, do wyróżnienia w formularzu */
   newIds: string[];
+  /** id zaktualizowanych projektów (też w `newIds`), z inną plakietką */
+  updatedIds: string[];
 }
 
 // ---------- Doradca kariery ----------

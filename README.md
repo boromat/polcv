@@ -28,7 +28,7 @@ Jak to działa:
 4. pisze CV pod to ogłoszenie - bez zmyślania; odważniejsze sformułowania zaznacza na żółto do Twojej decyzji, także tytuł z ogłoszenia, gdy wymienia coś, czego profil nie potwierdza (np. „Junior Java Developer” bez Javy),
 5. ocenia CV jak system ATS i AI-rekruter (wynik 0-100) i umie je automatycznie poprawić,
 6. zapisuje PDF i historię aplikacji ze statusami; na życzenie przygotowuje do rozmowy, prowadzi próbną rozmowę z oceną każdej odpowiedzi i pisze list motywacyjny,
-7. na życzenie dopisuje do profilu Twoje projekty z GitHuba - tylko publiczne repozytoria i tylko to, co wynika z ich opisów i plików README.
+7. na życzenie dopisuje do profilu Twoje projekty z GitHuba, a w projektach, które już tam są, sprawdza, co zmieniło się w repozytorium, i dopisuje nowe punkty i technologie (niczego nie usuwa ani nie przepisuje) - tylko publiczne repozytoria i tylko to, co wynika z ich opisów i plików README.
 
 Wszystkie dane zostają na Twoim komputerze, w folderze `data`. Do AI (przez OpenRouter) wysyłana jest tylko treść profilu i ogłoszenia (oraz opisy Twoich publicznych repozytoriów, gdy dodajesz projekty z GitHuba) - a jeśli chcesz, z danymi osobowymi zamienionymi na tokeny (zob. [Ochrona danych osobowych](#ochrona-danych-osobowych-polanon--opcjonalnie)).
 
