@@ -469,6 +469,13 @@ describe('słowa kluczowe przy poprawie', () => {
     expect(issues[0].message).toContain('Brakuje słowa kluczowego „Instagram”, które było w obecnym CV (sekcje: experience)');
   });
 
+  it('fraza z jednym słowem w środku liczy się jak w raporcie: można ją przeredagować, ale nie zgubić', () => {
+    const ai: Keyword[] = [{ term: 'wdrażanie AI', synonyms: [], importance: 'must', category: 'umiejętność' }];
+    const before = cv({ summary: text('Zajmuję się wdrażaniem rozwiązań AI.') });
+    expect(lostKeywordIssues(cv({ summary: text('Zajmuję się wdrażaniem narzędzi AI.') }), before, ai)).toEqual([]);
+    expect(lostKeywordIssues(cv({ summary: text('Zajmuję się automatyzacją procesów.') }), before, ai)).toHaveLength(1);
+  });
+
   it('schemat poprawy zgłasza zgubione słowo jak inne błędy', () => {
     const lost = withBullets(text('Prowadzenie profilu firmy'));
     const r = checkedImproveSchema(profile, 'pl', current, keywords).safeParse(lost);

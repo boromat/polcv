@@ -135,7 +135,7 @@ export function improvePlan(report: AtsReport, profile: Profile, posting: JobPos
   const keep: string[] = [];
 
   for (const kw of posting.keywords) {
-    const inCv = findKeyword(kw, cvSources, cv.language);
+    const inCv = findKeyword(kw, cvSources, cv.language, true);
     if (inCv) keep.push(inCv.foundAs);
     // Tytuł stanowiska to nie umiejętność: nie ma czego dopisywać do profilu ani przenosić do punktów.
     if (titleCore(kw.term) === titleCore(posting.title)) continue;

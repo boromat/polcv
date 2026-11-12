@@ -155,16 +155,22 @@ function phraseParts(phrase: string): string[][] {
   return parts.map((p) => (p.length > 1 ? p.filter((w) => !STOP.has(w)) : p)).filter((p) => p.length);
 }
 
-function countWords(text: string[], words: string[], lang: MatchLang): number {
+/** Przeczenia zmieniają sens ("wdrażanie bez AI"), więc nawet z `gap` ich nie przeskakujemy. */
+const NEGATIONS = new Set(['nie', 'bez', 'brak', 'not', 'no', 'non', 'without']);
+
+function countWords(text: string[], words: string[], lang: MatchLang, gap: boolean): number {
   let count = 0;
   for (let i = 0; i < text.length; i++) {
     if (!tokenMatches(text[i], words[0], lang)) continue;
     let pos = i;
     let ok = true;
     for (let w = 1; w < words.length && ok; w++) {
-      // Następne słowo albo przerwa na jedno słowo pomocnicze ("praca w zespole"); granic nie przeskakujemy.
-      if (pos + 1 < text.length && tokenMatches(text[pos + 1], words[w], lang)) pos += 1;
-      else if (pos + 2 < text.length && STOP.has(text[pos + 1]) && tokenMatches(text[pos + 2], words[w], lang)) pos += 2;
+      // Następne słowo albo przerwa na jedno słowo pomocnicze ("praca w zespole"), a z `gap` na jedno dowolne
+      // ("wdrażanie rozwiązań AI"); granic i przeczeń nie przeskakujemy.
+      const skip = text[pos + 1];
+      const skippable = STOP.has(skip) || (gap && skip !== BREAK && !NEGATIONS.has(skip));
+      if (pos + 1 < text.length && tokenMatches(skip, words[w], lang)) pos += 1;
+      else if (pos + 2 < text.length && skippable && tokenMatches(text[pos + 2], words[w], lang)) pos += 2;
       else ok = false;
     }
     if (ok) {
@@ -175,11 +181,16 @@ function countWords(text: string[], words: string[], lang: MatchLang): number {
   return count;
 }
 
-/** Ile razy fraza występuje w tekście (słowa po kolei, bez przekraczania granic list i zdań). */
-export function countPhrase(textTokens: string[], phrase: string, lang: MatchLang = 'pl'): number {
+/**
+ * Ile razy fraza występuje w tekście (słowa po kolei, bez przekraczania granic list i zdań).
+ * `gap`: między słowami frazy może stać jedno dowolne słowo ("wdrażanie rozwiązań AI" to "wdrażanie AI"). Tylko do
+ * wyniku CV, jak wyszukiwanie rekrutera; sprawdzanie profilu zostaje ścisłe ("zarządzanie dużymi projektami" to nie
+ * potwierdzenie "zarządzania projektami").
+ */
+export function countPhrase(textTokens: string[], phrase: string, lang: MatchLang = 'pl', gap = false): number {
   const parts = phraseParts(phrase);
   if (!parts.length) return 0;
-  return Math.min(...parts.map((words) => countWords(textTokens, words, lang)));
+  return Math.min(...parts.map((words) => countWords(textTokens, words, lang, gap)));
 }
 
 // ---------- Te same nazwy po polsku i po angielsku ----------
@@ -316,8 +327,8 @@ export interface KeywordMatch {
   credit: number;
 }
 
-/** Gdzie i jak mocno słowo kluczowe występuje w podanych fragmentach; null = nigdzie. */
-export function findKeyword(kw: Keyword, sources: KeywordSource[], lang: MatchLang): KeywordMatch | null {
+/** Gdzie i jak mocno słowo kluczowe występuje w podanych fragmentach; null = nigdzie. `gap` jak w countPhrase: tylko dla CV. */
+export function findKeyword(kw: Keyword, sources: KeywordSource[], lang: MatchLang, gap = false): KeywordMatch | null {
   const tokens = sources.map((s) => tokenize(s.text));
   const variants = [kw.term, ...kw.synonyms].filter((v) => v.trim()).map((v) => ({ v, educationOnly: false }));
   if (isHigherEducation(kw)) variants.push(...DEGREES.map((v) => ({ v, educationOnly: true })));
@@ -329,7 +340,7 @@ export function findKeyword(kw: Keyword, sources: KeywordSource[], lang: MatchLa
     let count = 0;
     sources.forEach((s, i) => {
       if (educationOnly && s.where !== 'education') return;
-      const c = countPhrase(tokens[i], v, lang);
+      const c = countPhrase(tokens[i], v, lang, gap);
       if (!c) return;
       count += c;
       where.add(s.where);
@@ -365,7 +376,7 @@ export function scoreKeywordSources(sources: KeywordSource[], keywords: Keyword[
   for (const kw of keywords) {
     const weight = keywordWeight(kw);
     total += weight;
-    const m = findKeyword(kw, sources, lang);
+    const m = findKeyword(kw, sources, lang, true);
     if (m) {
       got += weight * m.credit;
       matched.push(m);

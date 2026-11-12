@@ -407,8 +407,8 @@ export function lostKeywordIssues(next: CvContent, current: CvContent, keywords:
   const before = cvKeywordSources(current);
   const after = cvKeywordSources(next);
   return keywords.flatMap((kw) => {
-    const was = findKeyword(kw, before, current.language);
-    if (!was || findKeyword(kw, after, current.language)) return [];
+    const was = findKeyword(kw, before, current.language, true);
+    if (!was || findKeyword(kw, after, current.language, true)) return [];
     return [{
       path: [],
       message: `Brakuje słowa kluczowego „${was.foundAs}”, które było w obecnym CV (sekcje: ${was.where.join(', ')}). Przywróć je tam, gdzie jest prawdziwe: możesz je przenieść albo przeredagować zdanie, ale nie usuwaj go z CV.`,

@@ -29,6 +29,12 @@ All notable changes to PolCV are recorded here. The format follows
   CV again.
 - The gap questions also know today's date, so experience marked *present* or from recent months
   counts up to today when compared with a requirement such as "2 years of experience".
+- **A keyword phrase with one word inserted counts in the CV score.** "wdrażaniem rozwiązań AI" in
+  the summary left "wdrażanie AI" on the list of missing keywords, because only a short word like
+  "w" or "i" could stand between the words of a phrase. In the CV score any one word may now stand
+  there, as in a recruiter's search for both words, but not a list or sentence break and not a
+  negation ("wdrażanie bez AI"). Checks against your profile stay strict: "zarządzanie dużymi
+  projektami" in the profile still does not confirm "zarządzanie projektami" for a new CV line.
 
 ## [1.3.0] - 2026-11-11
 

@@ -120,6 +120,14 @@ describe('plan poprawy CV', () => {
     expect(plan.keep).toEqual(['Excel', 'Power BI', 'SQL']);
   });
 
+  it('słowo, które CV ma z jednym słowem w środku frazy, liczy się jak w raporcie: bez pytania do kandydata', () => {
+    const withPhrase = { ...posting, keywords: [kw('data analysis', 'must', 'umiejętność')] };
+    const cv = cvContent({ summary: fact('Finance student doing data quality analysis in Excel.', 's') });
+    const p = improvePlan(report(review({})), profile, withPhrase, cv);
+    expect(p.keep).toEqual(['data analysis']);
+    expect(p.needsInput).toEqual([]);
+  });
+
   it('tytuł stanowiska (także bez "Junior" i "(K/M)") nie trafia do pytań ani do planu', () => {
     const withTitle = { ...posting, title: 'Junior Sales Analyst (K/M)', keywords: [...posting.keywords, kw('Sales Analyst', 'must', 'inne')] };
     const p = improvePlan(report(review({})), profile, withTitle, cvContent());
