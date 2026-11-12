@@ -10,7 +10,7 @@ const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'polcv-ai-'));
 process.env.CV_DATA_DIR = dir;
 
 const { callJson } = await import('../server/llm/openrouter');
-const { evaluateCv, reviewProblems } = await import('../server/llm/prompts/evaluateCv');
+const { dateOnlyFix, evaluateCv, reviewProblems } = await import('../server/llm/prompts/evaluateCv');
 const { generateCv, improveCv } = await import('../server/llm/prompts/generateCv');
 const { improvePlan } = await import('../server/llm/prompts/improvePlan');
 const { parsePosting, withoutLevel, withoutLevels } = await import('../server/llm/prompts/parsePosting');
@@ -123,6 +123,20 @@ describe('AI-rekruter', () => {
     expect(system).toContain('8 = konkretne produkty pracy, skala lub narzędzia nawet bez liczb');
     expect(system).toContain('needsUserInput=true');
     expect(system).toContain('nigdy w 1. osobie');
+  });
+
+  it('zna dzisiejszą datę, a poprawka zmieniająca w CV tylko datę odpada (daty są z profilu)', async () => {
+    const dateFix = { section: 'Projekty', find: 'PolAnon - Autor 09.2026 - obecnie', replace: 'PolAnon - Autor 09.2025 - obecnie', why: 'Data w przyszłości.', needsUserInput: true };
+    const realFix = { section: 'Doświadczenie', find: 'Raporty sprzedaży', replace: 'Cotygodniowe raporty sprzedaży dla 12 przedstawicieli', why: 'Skala.', needsUserInput: false };
+    expect(dateOnlyFix(dateFix)).toBe(true);
+    expect(dateOnlyFix({ ...dateFix, find: 'Raporty 2024', replace: 'Raporty sprzedaży 2024' })).toBe(false);
+    expect(dateOnlyFix(realFix)).toBe(false);
+    replies = [{ content: JSON.stringify({ ...review(full), fixes: [dateFix, realFix] }) }];
+    const r = await evaluateCv('Tekst CV', posting, ctx);
+    expect(r.fixes).toEqual([realFix]);
+    const system = sent[0].messages[0].content as string;
+    expect(system).toContain(`dzisiejsza data to ${new Date().toISOString().slice(0, 10)}`);
+    expect(system).toContain('nie proponuj w "fixes" ich zmiany');
   });
 
   it('nowa próba po zapętleniu ma temperaturę 0.2', async () => {

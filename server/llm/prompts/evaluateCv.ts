@@ -1,6 +1,6 @@
 import { AiCriterionKeys, AiReviewSchema, type AiReview, type JobPosting } from '../../../shared/schemas';
 import { callJson, type LlmContext } from '../openrouter';
-import { forUser, json, postingForPrompt } from './common';
+import { forUser, json, postingForPrompt, today } from './common';
 
 const SYSTEM = () => `Jesteś rekruterem i jednocześnie systemem AI do wstępnej selekcji CV. Oceniasz CV wyłącznie na podstawie jego tekstu i ogłoszenia - tak, jak zrobiłby to automatyczny screening w firmie. Bądź rzetelny i surowy, ale sprawiedliwy: kandydat jest studentem/juniorem, oceniaj względem poziomu stanowiska.
 
@@ -12,6 +12,8 @@ Oceń 5 kryteriów w skali 0-10: każde kryterium dokładnie raz, ocena to liczb
 - summary_fit: czy nagłówek i podsumowanie od razu mówią, że to kandydat na TO stanowisko. 10 = nagłówek nazywa to stanowisko, a podsumowanie podaje kluczowe wymagania z ogłoszenia i dowód; 7 = trafne, ale bez dowodu albo bez nazwy stanowiska; 4 = ogólne, pasuje do wielu ofert; 1 = brak nagłówka i podsumowania albo inna branża.
 - clarity: czytelność, zwięzłość, logiczna kolejność, brak lania wody i powtórzeń. 10 = krótkie punkty od czynności, logiczna kolejność, bez powtórzeń; 7 = czytelne, ale pojedyncze punkty są za długie albo się powtarzają; 4 = długie bloki tekstu albo chaotyczna kolejność; 1 = trudne do przeczytania.
 - red_flags: 10 = brak czerwonych flag; 8 = jedna drobna (np. pojedynczy frazes); 5 = kilka drobnych albo jedna poważna; 2 = kilka poważnych. Odejmuj za: niespójne daty, luki bez wyjaśnienia, frazesy bez dowodów, upychanie słów kluczowych, literówki, nieprofesjonalny e-mail, sprzeczności. Nie odejmuj za brak liczb ani za krótką historię pracy typową dla studenta.
+
+DATY: dzisiejsza data to ${today()}. Każda data do dziś włącznie jest przeszła albo bieżąca, także z tego roku i z ostatnich miesięcy, więc nie jest czerwoną flagą. "W przyszłości" jest tylko data późniejsza niż dzisiejsza. Daty w CV program bierze z profilu kandydata: nie proponuj w "fixes" ich zmiany; gdy daty są ze sobą sprzeczne, napisz o tym w komentarzu.
 
 "comment" przy każdym kryterium: 1-2 zdania ${forUser()} z uzasadnieniem.
 "strengths"/"weaknesses": po 2-5 konkretnych punktów ${forUser()}.
@@ -38,8 +40,21 @@ const CheckedReviewSchema = AiReviewSchema.superRefine((r, ctx) => {
   for (const message of reviewProblems(r)) ctx.addIssue({ code: 'custom', path: ['criteria'], message });
 });
 
+/** Data w CV: "09.2026", "09/2026", "2026". */
+const DATE = /(?<![\p{L}\p{N}])(?:\d{1,2}[./])?\d{4}(?![\p{L}\p{N}])/gu;
+
+/**
+ * Poprawka, która zmienia w CV tylko daty ("PolAnon 09.2026 - obecnie" → "09.2025 - obecnie"). Daty są z profilu
+ * kandydata, więc taka poprawka zrobiłaby z prawdziwej daty fałszywą (model potrafił uznać zeszły miesiąc za przyszłość).
+ */
+export function dateOnlyFix(f: AiReview['fixes'][number]): boolean {
+  if (!f.find.trim() || !f.replace.trim() || f.find.trim() === f.replace.trim()) return false;
+  const shape = (s: string) => s.replace(DATE, '#').replace(/\s+/g, ' ').trim();
+  return shape(f.find) === shape(f.replace);
+}
+
 export async function evaluateCv(cvText: string, posting: JobPosting, ctx: LlmContext): Promise<AiReview> {
-  return callJson({
+  const review = await callJson({
     schema: CheckedReviewSchema,
     schemaName: 'cv_review',
     tier: 'main',
@@ -51,4 +66,5 @@ export async function evaluateCv(cvText: string, posting: JobPosting, ctx: LlmCo
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nTEKST CV (tak jak odczytał go system ATS):\n"""\n${cvText}\n"""`,
     ctx,
   });
+  return { ...review, fixes: review.fixes.filter((f) => !dateOnlyFix(f)) };
 }
