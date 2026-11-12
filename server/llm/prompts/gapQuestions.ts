@@ -1,7 +1,7 @@
 import { GapAnalysisSchema, type GapAnalysis, type JobPosting, type Profile } from '../../../shared/schemas';
 import { callJson, type LlmContext } from '../openrouter';
 import { HttpError } from '../../storage/store';
-import { forUser, genderForms, json, postingForPrompt, profileForPrompt } from './common';
+import { forUser, genderForms, json, postingForPrompt, profileForPrompt, today } from './common';
 
 const SYSTEM = (forms: ReturnType<typeof genderForms>) => `Jesteś doradcą kariery. Porównujesz wymagania z ogłoszenia z profilem kandydata (student/junior), żeby przed napisaniem CV dopytać o brakujące informacje.
 Zasady:
@@ -13,7 +13,8 @@ Zasady:
 - Nie pytaj o rzeczy, których nie da się uczciwie wpisać w CV, ani o oczywistości. Przy wymaganym wykształceniu/stażu, którego kandydat nie ma, możesz zapytać, czy jest w trakcie lub ma coś pokrewnego.
 - Maksymalnie 8 pytań: najpierw obowiązkowe, potem mile widziane. "hint" to krótka podpowiedź, co warto napisać (np. "Podaj nazwę kursu albo projektu i swoje zadania w nim").
 - ${forms ? `Kandydat określa się jako "${forms.label}": w pytaniach i podpowiedziach zwracaj się do niego formami ${forms.you}. Nie używaj innych form z rodzajem ani zapisów typu "miałeś(-aś)".` : "Formułuj pytania i podpowiedzi bez form zależnych od płci - także bez zapisów typu \"miałeś(-aś)\" czy \"robiłeś/aś\". Zamiast czasu przeszłego w 2. osobie pytaj w teraźniejszym albo bezosobowo: \"Czy masz doświadczenie z…?\", \"Gdzie i jak tego używasz?\", \"Jak wyglądał ten projekt i co z niego wynikło?\", \"Podaj, gdzie to było (staż, projekt, kurs)\". Zamiast \"Gdzie używałeś…?\" pisz \"Gdzie tego używasz?\", zamiast \"Czy budowałeś…?\" pisz \"Czy masz doświadczenie z budową…?\", zamiast \"Co zrobiłeś?\" pisz \"Co było Twoim zadaniem?\"."}
-- "id" pytań: q1, q2, …`;
+- "id" pytań: q1, q2, …
+- Staż liczy się do dzisiejszej daty (${today()}): pozycja "obecnie" trwa do dziś, a data do dziś włącznie, także z ostatnich miesięcy, jest przeszła, nie przyszła.`;
 
 // Słowa z rodzajem w 2. osobie ("robiłeś", "miałaś", "miałoś") i zapisy typu "miałeś(-aś)" - model czasem je wstawia mimo zasad,
 // więc taka odpowiedź nie przechodzi walidacji i wraca do poprawki. Formy zgodne z tym, jak kandydat się określa, są w porządku.

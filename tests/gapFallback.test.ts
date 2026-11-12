@@ -49,6 +49,8 @@ describe('pytania o braki: styl nie blokuje CV', () => {
     expect(res.questions[0].question).toBe('Gdzie używałeś testów A/B?');
     expect(sent).toHaveLength(1);
     expect(sent[0].messages[0].content).toContain('Kandydat określa się jako "on"');
+    // Staż z profilu ("obecnie", daty z ostatnich miesięcy) liczy się do dziś, nie do daty z treningu modelu.
+    expect(sent[0].messages[0].content).toContain(`Staż liczy się do dzisiejszej daty (${new Date().toISOString().slice(0, 10)})`);
   });
 
   it('kandydatka określa się jako "ona": forma męska wraca do poprawki', async () => {
