@@ -6,6 +6,16 @@ All notable changes to PolCV are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Your studies count as a source of knowledge.** When the posting asks for knowledge your field
+  of study may have covered (for example AI for a cognitive technologies degree) and your profile
+  does not say so yet, the gap questions ask which courses you had, with typical course names as
+  a hint and a reminder to list only the ones you really had. Your answer goes to your profile, and
+  the CV can then say you know the topic both in practice (work, projects) and in theory (courses).
+  The name of the degree alone is not enough, because programmes with the same name differ: without
+  your answer the AI may only offer this as a yellow suggestion.
+
 ### Fixed
 
 - **The AI recruiter no longer treats recent dates as the future.** Its prompt did not say what day

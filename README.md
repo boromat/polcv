@@ -24,7 +24,7 @@ Jak to działa:
 
 1. wklejasz link do ogłoszenia (pracuj.pl, justjoin.it, nofluffjobs i inne),
 2. AI wyciąga z niego wymagania i słowa kluczowe, których szukają systemy ATS,
-3. dopytuje o rzeczy, których brakuje w Twoim profilu (odpowiedzi zapamiętuje),
+3. dopytuje o rzeczy, których brakuje w Twoim profilu, także o przedmioty ze studiów, gdy kierunek mógł uczyć tego, czego wymaga ogłoszenie (odpowiedzi zapamiętuje),
 4. pisze CV pod to ogłoszenie - bez zmyślania; odważniejsze sformułowania zaznacza na żółto do Twojej decyzji, także tytuł z ogłoszenia, gdy wymienia coś, czego profil nie potwierdza (np. „Junior Java Developer” bez Javy),
 5. ocenia CV jak system ATS i AI-rekruter (wynik 0-100) i umie je automatycznie poprawić,
 6. zapisuje PDF i historię aplikacji ze statusami; na życzenie przygotowuje do rozmowy, prowadzi próbną rozmowę z oceną każdej odpowiedzi i pisze list motywacyjny,

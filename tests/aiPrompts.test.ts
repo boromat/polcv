@@ -163,6 +163,9 @@ describe('pisanie i poprawa CV', () => {
     expect(cv.experience[0].bullets.map((b) => b.status)).toEqual(['fact', 'suggested']);
     expect(cv.experience[0].bullets[1]).toMatchObject({ reason: 'Liczba spoza profilu (40) - potwierdź albo odrzuć.', fallbackText: 'Obsługa zgłoszeń dziennie' });
     expect(sent[0].messages[0].content).toContain('ZAWSZE formą rzeczownikową');
+    // Wiedza ze studiów: z potwierdzenia w profilu jako fakt, z samej nazwy kierunku najwyżej jako żółta sugestia.
+    expect(sent[0].messages[0].content).toContain('Sama nazwa kierunku tego nie potwierdza');
+    expect(sent[0].messages[0].content).toContain('najwyżej zaproponować jako "suggested"');
   });
 
   it('pozycja spoza profilu dostaje opis błędu przy poprawce', async () => {

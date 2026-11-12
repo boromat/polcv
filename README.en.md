@@ -36,8 +36,9 @@ What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish applicat
 1. **Reads the posting** from a link (pracuj.pl, justjoin.it, nofluffjobs and most other sites, via
    schema.org `JobPosting` data or the page text) or from pasted text, and turns it into
    requirements, keywords with synonyms and weights, the GDPR clause and photo expectations.
-2. **Asks about the gaps** between the posting and your profile, and remembers your answers for
-   the next CV.
+2. **Asks about the gaps** between the posting and your profile, including the courses from your
+   studies when your field may have covered what the posting asks for, and remembers your answers
+   for the next CV.
 3. **Writes the CV without inventing anything.** Every line points at a fact in your profile;
    bolder wording is marked yellow and needs your approval before the PDF can be exported. So does a
    title copied from the posting that names something your profile does not confirm ("Junior Java
