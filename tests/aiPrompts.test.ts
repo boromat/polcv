@@ -10,7 +10,7 @@ const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'polcv-ai-'));
 process.env.CV_DATA_DIR = dir;
 
 const { callJson } = await import('../server/llm/openrouter');
-const { dateOnlyFix, evaluateCv, futureClaimProblems, futureDatesInCv, reviewProblems } = await import('../server/llm/prompts/evaluateCv');
+const { cvDatesNote, dateOnlyFix, evaluateCv, futureClaimProblems, futureDatesInCv, reviewProblems } = await import('../server/llm/prompts/evaluateCv');
 const { generateCv, improveCv } = await import('../server/llm/prompts/generateCv');
 const { improvePlan } = await import('../server/llm/prompts/improvePlan');
 const { parsePosting, withoutLevel, withoutLevels } = await import('../server/llm/prompts/parsePosting');
@@ -149,6 +149,11 @@ describe('AI-rekruter', () => {
     // Data naprawdę w przyszłości: uwaga zostaje. "W przyszłości warto…" bez daty to nie uwaga o datach.
     expect(futureClaimProblems(claim, 'Projekt 12.2026 - obecnie', now)).toEqual([]);
     expect(futureClaimProblems({ ...review(full), weaknesses: ['W przyszłości warto dodać efekty w liczbach.'] }, cvText, now)).toEqual([]);
+    // To samo innymi słowami: "sprzeczne daty wobec bieżącej daty w CV".
+    expect(futureClaimProblems({ ...review(full), weaknesses: ['Sprzeczne daty projektów z 09.2026 wobec bieżącej daty w CV'] }, cvText, now)).toHaveLength(1);
+    // Program podaje modelowi wynik porównania dat z dzisiejszą.
+    expect(cvDatesNote(cvText, now)).toContain('żadna nie jest w przyszłości');
+    expect(cvDatesNote('Projekt 12.2026', now)).toContain('późniejsze niż dzisiaj (sprawdził program): 12.2026');
 
     const ok = { ...review(full), fixes: [{ section: 'Projekty', find: 'Raporty', replace: 'Raporty', why: 'Bez zmian.', needsUserInput: false }] };
     replies = [{ content: JSON.stringify({ ...ok, weaknesses: [`Daty projektów są przyszłe względem dzisiejszej daty`] }) }, { content: JSON.stringify(ok) }];

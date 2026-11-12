@@ -13,7 +13,7 @@ Oceń 5 kryteriów w skali 0-10: każde kryterium dokładnie raz, ocena to liczb
 - clarity: czytelność, zwięzłość, logiczna kolejność, brak lania wody i powtórzeń. 10 = krótkie punkty od czynności, logiczna kolejność, bez powtórzeń; 7 = czytelne, ale pojedyncze punkty są za długie albo się powtarzają; 4 = długie bloki tekstu albo chaotyczna kolejność; 1 = trudne do przeczytania.
 - red_flags: 10 = brak czerwonych flag; 8 = jedna drobna (np. pojedynczy frazes); 5 = kilka drobnych albo jedna poważna; 2 = kilka poważnych. Odejmuj za: niespójne daty, luki bez wyjaśnienia, frazesy bez dowodów, upychanie słów kluczowych, literówki, nieprofesjonalny e-mail, sprzeczności. Nie odejmuj za brak liczb ani za krótką historię pracy typową dla studenta.
 
-DATY: dzisiejsza data to ${today()}. Każda data do dziś włącznie jest przeszła albo bieżąca, także z tego roku i z ostatnich miesięcy, więc nie jest czerwoną flagą. "W przyszłości" jest tylko data późniejsza niż dzisiejsza. Daty w CV program bierze z profilu kandydata: nie proponuj w "fixes" ich zmiany; gdy daty są ze sobą sprzeczne, napisz o tym w komentarzu.
+DATY: dzisiejsza data to ${today()}. Każda data do dziś włącznie jest przeszła albo bieżąca, także z tego roku i z ostatnich miesięcy, więc nie jest czerwoną flagą. "W przyszłości" jest tylko data późniejsza niż dzisiejsza; wynik porównania dat z dzisiejszą podaje program w sekcji DATY W CV i tego się trzymaj. Kolejność pozycji od najnowszej do najstarszej to standard CV, nie chaos. Daty w CV program bierze z profilu kandydata: nie proponuj w "fixes" ich zmiany; gdy daty są ze sobą sprzeczne (np. koniec przed początkiem), napisz o tym w komentarzu.
 
 "comment" przy każdym kryterium: 1-2 zdania ${forUser()} z uzasadnieniem.
 "strengths"/"weaknesses": po 2-5 konkretnych punktów ${forUser()}.
@@ -45,9 +45,22 @@ export function futureDatesInCv(cvText: string, now = new Date()): string[] {
   return [...cvText.matchAll(CV_DATE)].filter((m) => Number(m[2]) * 12 + (m[1] ? Number(m[1]) - 1 : 0) > current).map((m) => m[0]);
 }
 
-// Twierdzenie, że daty są w przyszłości: słowo o dacie i o przyszłości w tym samym zdaniu.
-const FUTURE_CLAIM =
-  /(?:dat\p{L}*|\d{1,2}[./]\d{4}|termin\p{L}*|dates?)[^.!?\n]{0,100}(?:przyszło\p{L}*|przyszł[aey]\b|późniejsz\p{L}*|future|later than)|(?:przyszło\p{L}*|przyszł[aey]\b|późniejsz\p{L}*|future|later than)[^.!?\n]{0,100}(?:dat\p{L}*|\d{1,2}[./]\d{4}|dates?)/iu;
+// Twierdzenie, że daty są w przyszłości albo sprzeczne z dzisiejszą datą: słowo o dacie i o przyszłości (albo o
+// "bieżącej", "dzisiejszej" dacie) w tym samym zdaniu.
+const FUTURE_WORD = String.raw`(?:przyszło\p{L}*|przyszł[aey]\b|późniejsz\p{L}*|bieżąc\p{L}*|dzisiejsz\p{L}*|aktualn\p{L}* dat\p{L}*|future|later than|current date|today)`;
+const DATE_WORD = String.raw`(?:dat\p{L}*|\d{1,2}[./]\d{4}|termin\p{L}*|dates?)`;
+const FUTURE_CLAIM = new RegExp(`${DATE_WORD}[^.!?\\n]{0,100}${FUTURE_WORD}|${FUTURE_WORD}[^.!?\\n]{0,100}${DATE_WORD}`, 'iu');
+
+/** Daty z CV porównane z dzisiejszą przez program (do promptu: model sam porównuje je źle). */
+export function cvDatesNote(cvText: string, now = new Date()): string {
+  const all = [...new Set([...cvText.matchAll(CV_DATE)].map((m) => m[0]))];
+  const future = futureDatesInCv(cvText, now);
+  const day = now.toISOString().slice(0, 10);
+  if (!all.length) return `Dzisiaj: ${day}. W CV nie ma dat.`;
+  return future.length
+    ? `Dzisiaj: ${day}. Daty w CV późniejsze niż dzisiaj (sprawdził program): ${[...new Set(future)].join(', ')}. Pozostałe daty są przeszłe albo bieżące.`
+    : `Dzisiaj: ${day}. Program sprawdził wszystkie daty w CV (${all.join(', ')}): każda jest wcześniejsza niż dzisiaj albo z bieżącego miesiąca, żadna nie jest w przyszłości. Nie traktuj ich jako błędu ani sprzeczności z dzisiejszą datą.`;
+}
 
 /**
  * Ocena, która uznaje daty za przyszłe, choć żadna data w CV nie jest późniejsza niż dziś. Model potrafił tak napisać
@@ -93,7 +106,7 @@ export async function evaluateCv(cvText: string, posting: JobPosting, ctx: LlmCo
     retryTemperature: 0.2,
     maxTokens: 6000,
     system: SYSTEM(),
-    user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nTEKST CV (tak jak odczytał go system ATS):\n"""\n${cvText}\n"""`,
+    user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nTEKST CV (tak jak odczytał go system ATS):\n"""\n${cvText}\n"""\n\nDATY W CV:\n${cvDatesNote(cvText)}`,
     ctx,
   });
   // Poprawka, która niczego nie zmienia ("find" = "replace"), tylko zaśmieca raport.
