@@ -65,8 +65,8 @@ export const career: Record<string, string> = {
   'Utwórz profil': 'Create profile',
 
   // CareerPage: strona i zakładki
-  'Porozmawiaj z doradcą AI o tym, czego szukasz - potem dostaniesz propozycje stanowisk z gotowymi linkami do wyszukiwania na pracuj.pl, justjoin.it i nofluffjobs.':
-    'Tell the AI advisor what you are looking for, then get role suggestions with ready-made search links for pracuj.pl, justjoin.it and nofluffjobs.',
+  'Porozmawiaj z doradcą AI o tym, czego szukasz - potem dostaniesz propozycje stanowisk z gotowymi linkami do wyszukiwania na pracuj.pl, justjoin.it, nofluffjobs i Smart Jobs.':
+    'Tell the AI advisor what you are looking for, then get role suggestions with ready-made search links for pracuj.pl, justjoin.it, nofluffjobs and Smart Jobs.',
   'Zaproponuj stanowiska od nowa': 'Suggest roles again',
   'Pokaż propozycje pracy': 'Show role suggestions',
   'Doradca ma już wystarczająco informacji.': 'The advisor has enough information now.',
@@ -78,8 +78,8 @@ export const career: Record<string, string> = {
   'Szukaj ofert dla wszystkich': 'Find job offers for all roles',
   'Przy każdym stanowisku są linki do wyszukiwarek portali. Znalezioną ofertę wklej w':
     "Each role has links to the portals' search pages. Paste an offer you find into",
-  'Automatyczne wyszukiwanie i ocenę ofert na nofluffjobs możesz włączyć w':
-    'You can turn on automatic search and scoring of nofluffjobs offers in',
+  'Automatyczne wyszukiwanie i ocenę ofert ({portals}) możesz włączyć w':
+    'You can turn on automatic search and scoring of offers ({portals}) in',
   Ustawieniach: 'Settings',
   'Dobieram stanowiska do Twojego profilu…': 'Matching roles to your profile…',
   'Zacząć rozmowę od nowa? Preferencje i zapisane w profilu informacje zostaną.':
@@ -172,7 +172,7 @@ export const career: Record<string, string> = {
   'Szukaj ofert': 'Find job offers',
   'Czego brakuje:': 'What is missing:',
   'Otwórz wyszukiwanie:': 'Open a search:',
-  'Szukam ofert na nofluffjobs i oceniam dopasowanie… (ok. 10-30 s)': 'Searching nofluffjobs for offers and rating the match… (about 10-30 s)',
+  'Szukam ofert ({portals}) i oceniam dopasowanie… (ok. 10-30 s)': 'Searching for offers ({portals}) and rating the match… (about 10-30 s)',
   'Sprawdzono {n} ofert, pasuje do Twoich preferencji: {m}': 'Checked {n} offers, matching your preferences: {m}',
   '(w tym {n} słabo dopasowanych - ukryte)': '(weak matches hidden: {n})',
   'Wyszukano {date}.': 'Searched on {date}.',

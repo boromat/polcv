@@ -13,7 +13,7 @@
 
 Czym różni się od zagranicznych narzędzi (Jobscan, Teal, Rezi):
 
-- **polskie portale** - czyta ogłoszenia z pracuj.pl, justjoin.it i nofluffjobs,
+- **polskie portale** - czyta ogłoszenia z pracuj.pl, justjoin.it, nofluffjobs i Smart Jobs,
 - **klauzula RODO** dodawana automatycznie (albo dosłownie ta z ogłoszenia), **zdjęcie** według polskich zwyczajów i wymagań oferty,
 - **słowa kluczowe z polską odmianą** - przy liczeniu wyniku „marketingu”, „marketingiem” i „marketing” to dla programu to samo słowo; nie każdy system ATS rozpoznaje odmianę, więc AI wpisuje w CV słowa w brzmieniu z ogłoszenia, tam gdzie to zgodne z prawdą,
 - **CV po polsku albo po angielsku** - w języku ogłoszenia; sam program ma interfejs po polsku i po angielsku (przełącznik PL | EN), więc pomoże też osobom, które dopiero uczą się polskiego,
@@ -22,7 +22,7 @@ Czym różni się od zagranicznych narzędzi (Jobscan, Teal, Rezi):
 
 Jak to działa:
 
-1. wklejasz link do ogłoszenia (pracuj.pl, justjoin.it, nofluffjobs i inne),
+1. wklejasz link do ogłoszenia (pracuj.pl, justjoin.it, nofluffjobs, Smart Jobs i inne),
 2. AI wyciąga z niego wymagania i słowa kluczowe, których szukają systemy ATS,
 3. dopytuje o rzeczy, których brakuje w Twoim profilu, także o przedmioty ze studiów, gdy kierunek mógł uczyć tego, czego wymaga ogłoszenie (odpowiedzi zapamiętuje),
 4. pisze CV pod to ogłoszenie - bez zmyślania; odważniejsze sformułowania zaznacza na żółto do Twojej decyzji, także tytuł z ogłoszenia, gdy wymienia coś, czego profil nie potwierdza (np. „Junior Java Developer” bez Javy),
@@ -85,15 +85,17 @@ Zakładka **Szukaj pracy**:
    - praca **stacjonarna/hybrydowa** w promieniu (10-100 km) od wybranego miasta,
    - praca **zdalna** z całej Polski,
    - minimalne wynagrodzenie, forma umowy, wymiar etatu, poziom (staż/junior/mid).
-3. **Propozycje i oferty** - AI proponuje 5-8 stanowisk z uzasadnieniem i tym, czego brakuje. Przy każdym są linki **Otwórz wyszukiwanie: pracuj.pl · justjoin.it · nofluffjobs** z frazą, miastem, promieniem i poziomem - otwierasz je sam w przeglądarce, a ciekawą ofertę wklejasz w **Nowe CV**.
+3. **Propozycje i oferty** - AI proponuje 5-8 stanowisk z uzasadnieniem i tym, czego brakuje. Przy każdym są linki **Otwórz wyszukiwanie: pracuj.pl · justjoin.it · nofluffjobs · Smart Jobs** z frazą, miastem, promieniem i poziomem (Smart Jobs: z frazą i trybem pracy) - otwierasz je sam w przeglądarce, a ciekawą ofertę wklejasz w **Nowe CV**.
 
 Pod nazwą firmy (przy ofertach, w Historii i w aplikacji) jest link **opinie na GoWork**, który otwiera wyszukiwanie opinii o pracodawcy na GoWork.pl. Program niczego z GoWork nie pobiera.
 
 ### Automatyczne wyszukiwanie ofert (domyślnie wyłączone)
 
-W **Ustawieniach** możesz włączyć wyszukiwanie, w którym program sam przeszukuje nofluffjobs (jedyny z tych portali, którego plik `robots.txt` na to pozwala), odrzuca oferty niepasujące do preferencji (seniorzy, zła umowa, za niska stawka), ocenia dopasowanie pozostałych przez AI, a **Zrób CV pod to** od razu zaczyna CV pod wybraną ofertę.
+W **Ustawieniach** możesz włączyć wyszukiwanie, w którym program sam przeszukuje nofluffjobs i Smart Jobs (te z tych portali, których plik `robots.txt` na to pozwala), odrzuca oferty niepasujące do preferencji (seniorzy, zła umowa, za niska stawka), ocenia dopasowanie pozostałych przez AI, a **Zrób CV pod to** od razu zaczyna CV pod wybraną ofertę.
 
-Włączając je, bierzesz na siebie korzystanie zgodne z regulaminem portalu: tylko na własny użytek i z umiarem. Program przedstawia się jako `PolCV/<wersja>` z linkiem do tego repozytorium i wysyła kilka zapytań na stanowisko. Współrzędne miast do filtra promienia pochodzą z OpenStreetMap Nominatim (© autorzy OpenStreetMap) i są zapamiętywane lokalnie. Oferty bez podanego wynagrodzenia nie są odrzucane przez filtr kwoty.
+Włączając je, bierzesz na siebie korzystanie zgodne z regulaminami portali: tylko na własny użytek i z umiarem. Program przedstawia się jako `PolCV/<wersja>` z linkiem do tego repozytorium i wysyła kilka zapytań na stanowisko. Współrzędne miast do filtra promienia pochodzą z OpenStreetMap Nominatim (© autorzy OpenStreetMap) i są zapamiętywane lokalnie. Oferty bez podanego wynagrodzenia nie są odrzucane przez filtr kwoty.
+
+Smart Jobs podaje w samej stronie tylko pierwsze 20 wyników na zapytanie (dalsze doczytuje przez `/api/`, którego `robots.txt` zabrania), więc program bierze te 20. Portal nie ma filtra promienia, tylko filtr miasta: przy pracy na miejscu program szuka ofert z Twojego miasta (numer miasta w OpenStreetMap też pochodzi z Nominatim), a odległość liczy sam. Poziom (np. „Starszy”) Smart Jobs podaje w nazwie roli, a nie w tytule, i program bierze go z niej.
 
 ## Ochrona danych osobowych (polanon) - opcjonalnie
 
@@ -153,7 +155,7 @@ Na 18 fikcyjnych parach profil + ogłoszenie z [`evals/`](evals/README.md) (11.1
 
 ## Zastrzeżenia
 
-- PolCV nie jest powiązany z pracuj.pl, justjoin.it, nofluffjobs, GoWork, OpenRouter ani dostawcami modeli AI - ich nazwy służą tylko do opisu, z czym program współpracuje.
+- PolCV nie jest powiązany z pracuj.pl, justjoin.it, nofluffjobs, Smart Jobs, GoWork, OpenRouter ani dostawcami modeli AI - ich nazwy służą tylko do opisu, z czym program współpracuje.
 - Za treść CV wysyłanego pracodawcy odpowiadasz Ty. Program oznacza sugestie AI, ale decyzja należy do Ciebie. Wynik 0-100 to symulacja typowych reguł ATS i opinia AI, nie gwarancja.
 - Cudze CV importuj tylko za zgodą tej osoby.
 - Program jest udostępniany „tak jak jest”, bez gwarancji (licencja MIT).

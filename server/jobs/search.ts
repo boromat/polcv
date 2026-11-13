@@ -2,7 +2,7 @@ import * as cheerio from 'cheerio';
 import { createHash } from 'node:crypto';
 import type { CareerPrefs, JobLead, RoleProposal } from '../../shared/schemas';
 import { normalize } from '../ats/keywords';
-import { distanceKm, geocodeCity, type Point } from './geocode';
+import { distanceKm, geocodeCity, geocodePlace, type Point } from './geocode';
 import { APP_UA } from './http';
 import { tr } from '../i18n';
 
@@ -129,6 +129,151 @@ async function searchNofluff(q: SearchQuery): Promise<JobLead[]> {
   return leads;
 }
 
+// ---------- Smart Jobs ----------
+
+const SJ_MODES: Record<string, string> = { onSite: 'stacjonarna', hybrid: 'hybrydowa', remote: 'zdalna' };
+// "other" (na portalu "Pozostałe") może znaczyć zlecenie, dzieło albo staż - nie zgadujemy, więc nie trafia do listy umów.
+const SJ_CONTRACT: Record<string, string> = { b2b: 'B2B', employmentContract: 'umowa o pracę' };
+const SJ_PERIOD: Record<string, { unit: string; label: string }> = {
+  hourly: { unit: 'hour', label: 'godz.' },
+  daily: { unit: 'day', label: 'dzień' },
+  monthly: { unit: 'month', label: 'mies.' },
+  yearly: { unit: 'year', label: 'rok' },
+};
+const SJ_ORIGIN = 'https://thesmartjobs.com';
+
+/** Pola oferty z wyników Smart Jobs, z których korzystamy (portal podaje ich więcej). */
+interface SjJob {
+  title?: string;
+  slugUrl?: string;
+  company?: { name?: string };
+  role?: { name?: string };
+  locations?: { city?: string; coordinates?: { lat: number; lon: number } }[];
+  salaries?: { min?: number; max?: number; currency?: string; period?: string; contractType?: string }[];
+  workModes?: string[];
+  attributes?: { groupName?: string; attributeName?: string }[];
+  timestamps?: { publishedAt?: string };
+}
+
+/** Treść, którą Next.js wstrzykuje w stronę kawałkami (self.__next_f.push), złożona w jeden tekst. */
+function nextFlight(html: string): string {
+  let out = '';
+  for (const m of html.matchAll(/self\.__next_f\.push\(\[1,("(?:[^"\\]|\\.)*")\]\)/g)) out += JSON.parse(m[1]);
+  return out;
+}
+
+/** Obiekt JSON zaczynający się w `start` (dopasowanie nawiasów z pominięciem tekstu w cudzysłowach). */
+function jsonAt(text: string, start: number): unknown {
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === '\\') escaped = true;
+      else if (ch === '"') inString = false;
+    } else if (ch === '"') inString = true;
+    else if (ch === '{' || ch === '[') depth++;
+    else if ((ch === '}' || ch === ']') && --depth === 0) return JSON.parse(text.slice(start, i + 1));
+  }
+  return null;
+}
+
+/**
+ * Oferty z wyników wyszukiwania Smart Jobs. Strona podaje je w stanie wstrzykniętym przez Next.js
+ * (pierwsza strona wyników, do 20 ofert). Z `near` zostają tylko oferty z miejscem pracy w promieniu `km`.
+ */
+export function parseSmartjobs(html: string, near?: { point: Point; km: number }): JobLead[] {
+  const flight = nextFlight(html);
+  const start = flight.indexOf('{"pages":[{"data":[');
+  if (start < 0) return [];
+  let found: { pages?: { data?: SjJob[] }[] } | null;
+  try {
+    found = jsonAt(flight, start) as typeof found;
+  } catch {
+    return [];
+  }
+  const jobs = found?.pages?.[0]?.data ?? [];
+  return jobs.flatMap((j): JobLead[] => {
+    if (!j?.slugUrl || !j.title) return [];
+    const url = `${SJ_ORIGIN}/pl/${j.slugUrl}`;
+    const places = j.locations ?? [];
+    const workModes = [...new Set((j.workModes ?? []).map((m) => SJ_MODES[m] ?? m))];
+    const cities = [...new Set(places.map((p) => p.city ?? '').filter(Boolean))];
+    let location = cities.slice(0, 3).join(', ') || (workModes.includes('zdalna') ? 'zdalnie' : '');
+    if (near) {
+      const nearest = places
+        .flatMap((p) => (p.coordinates ? [{ city: p.city ?? '', km: distanceKm(near.point, p.coordinates) }] : []))
+        .sort((a, b) => a.km - b.km)[0];
+      if (!nearest || nearest.km > near.km) return [];
+      location = `${nearest.city} (~${Math.round(nearest.km)} km)`;
+    }
+    const salaries = j.salaries ?? [];
+    const salaryText = salaries.slice(0, 2).map((s) => {
+      const period = SJ_PERIOD[s.period ?? ''] ?? { unit: s.period ?? '', label: s.period ?? '' };
+      const amount = s.min && s.max && s.min !== s.max ? `${s.min}-${s.max}` : `${s.max ?? s.min}`;
+      const contract = SJ_CONTRACT[s.contractType ?? ''];
+      return `${amount} ${s.currency} / ${period.label}${contract ? ` (${contract})` : ''}`;
+    });
+    const monthly = salaries.flatMap((s) => {
+      const top = s.max ?? s.min;
+      return s.currency === 'PLN' && top ? [toMonthly(top, SJ_PERIOD[s.period ?? '']?.unit ?? s.period ?? '')] : [];
+    });
+    const attrs = (group: string): string[] => (j.attributes ?? []).flatMap((a) => (a.groupName === group && a.attributeName ? [a.attributeName] : []));
+    // Poziom nie ma osobnego pola: "Starszy" bywa tylko w nazwie roli ("Starszy Analityk" przy tytule "Analityk"),
+    // a wymagane lata doświadczenia są wśród atrybutów. Oba trafiają do pola poziomu, które czytają filtr i ocena AI.
+    const seniority = [j.role?.name && j.role.name !== j.title ? j.role.name : '', ...attrs('Doświadczenie').filter((a) => /\d/.test(a))]
+      .filter(Boolean)
+      .join(' / ');
+    return [{
+      id: leadId(url),
+      portal: 'smartjobs',
+      title: j.title,
+      company: j.company?.name ?? '',
+      location,
+      workModes,
+      workTime: '',
+      salary: salaryText.join('; '),
+      salaryMonthly: monthly.length ? Math.max(...monthly) : null,
+      contracts: [...new Set(salaries.map((s) => SJ_CONTRACT[s.contractType ?? ''] ?? '').filter(Boolean))],
+      seniority,
+      skills: [...attrs('Umiejętności'), ...attrs('Narzędzia')].slice(0, 8),
+      url,
+      publishedAt: j.timestamps?.publishedAt ?? '',
+      match: null,
+      matchReason: '',
+      excludedBy: '',
+    }];
+  });
+}
+
+/**
+ * Adres wyszukiwania Smart Jobs. Bez `sort`, bo robots.txt portalu go zabrania; dalszych stron wyników
+ * strona nie podaje w adresie (doczytuje je przez /api/, którego robots.txt też zabrania).
+ */
+export function smartjobsUrl(phrase: string, workModes: string[], osmId = ''): string {
+  const params = new URLSearchParams({ query: phrase });
+  if (workModes.length) params.set('workModes', workModes.join(','));
+  if (osmId) params.set('osmId', osmId);
+  return `${SJ_ORIGIN}/pl/praca?${params}`;
+}
+
+async function smartjobsPage(url: string): Promise<string> {
+  const res = await fetch(url, { headers: { 'User-Agent': APP_UA, 'Accept-Language': 'pl-PL' }, signal: AbortSignal.timeout(20_000) });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.text();
+}
+
+async function searchSmartjobs(q: SearchQuery): Promise<JobLead[]> {
+  if (q.scope === 'remote') return parseSmartjobs(await smartjobsPage(smartjobsUrl(q.phrase, ['remote'])));
+  const modes = [q.prefs.onsite && 'onSite', q.prefs.hybrid && 'hybrid'].filter(Boolean) as string[];
+  // Portal ma filtr miasta (relacja OSM), ale nie promienia: bierzemy oferty z miasta kandydata, a odległość liczymy sami.
+  const home = await geocodePlace(q.prefs.city);
+  const osmId = home && 'osm' in home ? home.osm : '';
+  return parseSmartjobs(await smartjobsPage(smartjobsUrl(q.phrase, modes, osmId)), home ? { point: home, km: q.prefs.radiusKm } : undefined);
+}
+
 // ---------- Filtry ----------
 
 const TOO_SENIOR = /senior|starszy|starsza|ekspert|expert|lead|kierownik|dyrektor|manager|head|principal|c_level|architekt|architect/i;
@@ -187,10 +332,13 @@ export function cleanPhrase(p: string): string {
 export type Searcher = (q: SearchQuery) => Promise<JobLead[]>;
 type Searchers = Record<string, { name: string; run: Searcher }>;
 
-// Program sam przeszukuje tylko portale, których robots.txt na to pozwala: dziś jest to nofluffjobs.
+// Program sam przeszukuje tylko portale, których robots.txt na to pozwala: nofluffjobs i Smart Jobs.
 // pracuj.pl blokuje automaty, a justjoin.it zabrania /api/, więc dla nich są tylko linki, które kandydat
 // otwiera sam w przeglądarce. Innych źródeł ofert program nie wczytuje.
-const SEARCHERS: Searchers = { nofluff: { name: 'nofluffjobs', run: searchNofluff } };
+const SEARCHERS: Searchers = {
+  nofluff: { name: 'nofluffjobs', run: searchNofluff },
+  smartjobs: { name: 'Smart Jobs', run: searchSmartjobs },
+};
 
 export function activeSearchers(): Searchers {
   return SEARCHERS;

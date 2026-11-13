@@ -654,7 +654,7 @@ export const RoleProposalSchema = z.object({
 
 export const CareerProposalsSchema = z.object({ intro: z.string(), roles: z.array(RoleProposalSchema) });
 
-export const Portals = ['pracuj', 'justjoin', 'nofluff'] as const;
+export const Portals = ['pracuj', 'justjoin', 'nofluff', 'smartjobs'] as const;
 
 export const JobLeadSchema = z.object({
   id: z.string(),

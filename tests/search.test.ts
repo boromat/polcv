@@ -133,9 +133,9 @@ describe('filtry ofert z preferencji', () => {
     expect(Math.round(distanceKm(pruszkow, { lat: 50.0647, lon: 19.945 }))).toBeGreaterThan(200);
   });
 
-  it('program sam przeszukuje tylko nofluffjobs: żadnych dodatkowych modułów z innymi portalami', () => {
+  it('program sam przeszukuje tylko nofluffjobs i Smart Jobs: żadnych dodatkowych modułów z innymi portalami', () => {
     // Inne portale nie pozwalają na automatyczne pobieranie ofert (blokada albo robots.txt), więc program ich nie wczytuje.
-    expect(Object.values(activeSearchers()).map((s) => s.name)).toEqual(['nofluffjobs']);
+    expect(Object.values(activeSearchers()).map((s) => s.name)).toEqual(['nofluffjobs', 'Smart Jobs']);
   });
 
   it('wymiar etatu', () => {

@@ -16,7 +16,7 @@ Everything runs on your computer; only the text the AI needs goes out, through
 
 What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish application:
 
-- **Polish job boards** - reads postings from pracuj.pl, justjoin.it and nofluffjobs.
+- **Polish job boards** - reads postings from pracuj.pl, justjoin.it, nofluffjobs and Smart Jobs.
 - **The GDPR (RODO) consent clause** Polish employers expect, added automatically or copied word
   for word from the posting; the **photo** follows Polish custom and the posting's wishes.
 - **Keywords matched across Polish inflection** - when PolCV scores a CV, "marketingu",
@@ -33,8 +33,8 @@ What general-purpose tools (Jobscan, Teal, Rezi) do not do for a Polish applicat
 
 ## What it does
 
-1. **Reads the posting** from a link (pracuj.pl, justjoin.it, nofluffjobs and most other sites, via
-   schema.org `JobPosting` data or the page text) or from pasted text, and turns it into
+1. **Reads the posting** from a link (pracuj.pl, justjoin.it, nofluffjobs, Smart Jobs and most
+   other sites, via schema.org `JobPosting` data or the page text) or from pasted text, and turns it into
    requirements, keywords with synonyms and weights, the GDPR clause and photo expectations.
 2. **Asks about the gaps** between the posting and your profile, including the courses from your
    studies when your field may have covered what the posting asks for, and remembers your answers
@@ -159,22 +159,29 @@ these runs, so it is not yet tested on a real model. It is a small set prepared 
 
 ## Job portals
 
-The career advisor gives every proposed role search links for pracuj.pl, justjoin.it and
-nofluffjobs: you open them in your own browser, and the app fetches nothing. The same goes for the
-**reviews on GoWork** link under every company name (offers, History and the application page): it
-opens a search for employer reviews on GoWork.pl.
+The career advisor gives every proposed role search links for pracuj.pl, justjoin.it,
+nofluffjobs and Smart Jobs (the Smart Jobs one with the phrase and work mode only): you open them
+in your own browser, and the app fetches nothing. The same goes for the **reviews on GoWork** link
+under every company name (offers, History and the application page): it opens a search for
+employer reviews on GoWork.pl.
 
-An **automated search** that fetches, filters and AI-ranks offers is available for nofluffjobs -
-the one portal whose `robots.txt` allows it. It is **off by default**; switching it on in Settings
-means you accept responsibility for using it in line with the portal's terms, for personal use and
-at a modest pace. The app identifies itself as `PolCV/<version>` with a link to this repository
+An **automated search** that fetches, filters and AI-ranks offers is available for nofluffjobs
+and Smart Jobs, the portals whose `robots.txt` allows it. It is **off by default**; switching it
+on in Settings means you accept responsibility for using it in line with the portals' terms, for
+personal use and at a modest pace. The app identifies itself as `PolCV/<version>` with a link to this repository
 and makes only a handful of requests per role. City coordinates for the radius filter come from
 [OpenStreetMap Nominatim](https://nominatim.org) (© OpenStreetMap contributors, cached locally).
 
+Smart Jobs puts only the first 20 results of a search in the page itself (it loads the rest
+through `/api/`, which its `robots.txt` disallows), so the app takes those 20. The portal has a city
+filter but no radius: for on-site work the app asks for offers in your city (the city's
+OpenStreetMap number also comes from Nominatim) and measures the distance itself. Smart Jobs gives
+the level (for example "Senior") in the role name rather than the title, and the app reads it there.
+
 ## Disclaimer
 
-- PolCV is not affiliated with pracuj.pl, justjoin.it, nofluffjobs, GoWork, OpenRouter or any model
-  provider; their names are used only to say what the app works with.
+- PolCV is not affiliated with pracuj.pl, justjoin.it, nofluffjobs, Smart Jobs, GoWork, OpenRouter
+  or any model provider; their names are used only to say what the app works with.
 - You are responsible for what you send to employers: the app marks AI suggestions, but it is your
   CV. The score is a simulation of typical ATS rules and an AI opinion, not a promise.
 - Only import other people's CVs with their consent.

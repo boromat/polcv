@@ -7,7 +7,7 @@ import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'polcv-geo-'));
 process.env.CV_DATA_DIR = dir;
 
-const { geocodeCity } = await import('../server/jobs/geocode');
+const { geocodeCity, geocodePlace } = await import('../server/jobs/geocode');
 
 const cached = () => {
   try {
@@ -35,10 +35,16 @@ describe('geokodowanie miasta (Nominatim)', () => {
     for (let i = 0; i < 3; i++) expect(await geocodeCity('Kraków')).toBeNull();
     expect(Object.keys(cached())).toEqual([]);
     // Następna próba pyta ponownie i zapamiętuje wynik.
-    expect(await geocodeCity('Kraków')).toEqual({ lat: 50.06, lon: 19.94 });
-    expect(Object.values(cached())).toEqual([{ lat: 50.06, lon: 19.94 }]);
-    expect(await geocodeCity('Kraków')).toEqual({ lat: 50.06, lon: 19.94 });
+    expect(await geocodeCity('Kraków')).toEqual({ lat: 50.06, lon: 19.94, osm: '' });
+    expect(Object.values(cached())).toEqual([{ lat: 50.06, lon: 19.94, osm: '' }]);
+    expect(await geocodeCity('Kraków')).toEqual({ lat: 50.06, lon: 19.94, osm: '' });
     expect(fetchMock).toHaveBeenCalledTimes(4);
+  });
+
+  it('zapamiętuje relację OSM miasta (filtr miasta w Smart Jobs), a punkt bez granicy zostawia ją pustą', async () => {
+    nominatim({ status: 200, body: [{ lat: '52.53', lon: '17.6', osm_type: 'relation', osm_id: 2905441 }] }, { status: 200, body: [{ lat: '52.1', lon: '20.6', osm_type: 'node', osm_id: 77 }] });
+    expect(await geocodePlace('Gniezno')).toEqual({ lat: 52.53, lon: 17.6, osm: 'R2905441' });
+    expect(await geocodePlace('Mała Wieś')).toEqual({ lat: 52.1, lon: 20.6, osm: '' });
   });
 
   it('prawdziwy brak wyniku zostaje w pamięci (bez kolejnych zapytań)', async () => {
@@ -47,5 +53,29 @@ describe('geokodowanie miasta (Nominatim)', () => {
     expect(await geocodeCity('Nieistniejące Miasto')).toBeNull();
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(Object.values(cached())).toContain(null);
+  });
+});
+
+describe('pamięć geokodowania sprzed relacji OSM', () => {
+  it('stary wpis (same współrzędne) wystarcza do promienia, a dla filtra miasta jest pobierany raz ponownie', async () => {
+    const oldDir = fs.mkdtempSync(path.join(os.tmpdir(), 'polcv-geo-old-'));
+    const { normalize } = await import('../server/ats/keywords');
+    fs.writeFileSync(path.join(oldDir, 'geocache.json'), JSON.stringify({ [normalize('Konin')]: { lat: 52.22, lon: 18.25 } }));
+    process.env.CV_DATA_DIR = oldDir;
+    vi.resetModules();
+    const geo = await import('../server/jobs/geocode');
+    try {
+      const fetchMock = nominatim({ status: 429 }, { status: 200, body: [{ lat: '52.22', lon: '18.25', osm_type: 'relation', osm_id: 2700 }] });
+      expect(await geo.geocodeCity('Konin')).toEqual({ lat: 52.22, lon: 18.25 });
+      expect(fetchMock).toHaveBeenCalledTimes(0);
+      // Chwilowa odmowa: zostają znane współrzędne, bez relacji.
+      expect(await geo.geocodePlace('Konin')).toEqual({ lat: 52.22, lon: 18.25 });
+      expect(await geo.geocodePlace('Konin')).toEqual({ lat: 52.22, lon: 18.25, osm: 'R2700' });
+      expect(await geo.geocodePlace('Konin')).toEqual({ lat: 52.22, lon: 18.25, osm: 'R2700' });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    } finally {
+      process.env.CV_DATA_DIR = dir;
+      fs.rmSync(oldDir, { recursive: true, force: true });
+    }
   });
 });

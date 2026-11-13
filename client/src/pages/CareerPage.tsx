@@ -6,10 +6,10 @@ import { useApp } from '../ctx';
 import { Busy, ErrorBox, Field, fmtDate, GoworkLink, scoreTone } from '../components/ui';
 import { useT } from '../i18n';
 import { errorMessage } from '../../../shared/errors';
+import { PORTAL_NAMES, portalLinks } from './portalLinks';
 
 const CONTRACTS = ['umowa o pracę', 'umowa zlecenie', 'B2B', 'staż / praktyki'] as const;
 const RADII = [10, 20, 30, 50, 75, 100];
-const PORTAL_NAMES: Record<JobLead['portal'], string> = { pracuj: 'pracuj.pl', justjoin: 'justjoin.it', nofluff: 'nofluffjobs' };
 const FIT_TONE: Record<RoleProposal['fit'], string> = { wysokie: 'good', średnie: 'accent', ambitne: 'warn' };
 const WEAK_MATCH = 30;
 const MAX_MESSAGE = 15_000; // tak samo jak na serwerze
@@ -20,35 +20,6 @@ type T = ReturnType<typeof useT>['t'];
 function reasonLabel(reason: string, t: T) {
   const contract = /^umowa: (.*)$/.exec(reason);
   return contract ? t('umowa: {list}', { list: contract[1].split(', ').map((c) => t(c)).join(', ') }) : t(reason);
-}
-
-// pracuj.pl: 1 praktykant, 3 asystent, 17 junior, 4 mid. Kod 2 ("pracownik fizyczny") jest przy każdym poziomie,
-// bo tak portal oznacza oferty dla mechaników, spawaczy czy magazynierów, bez podziału na junior i mid.
-const LEVELS: Record<RoleProposal['seniority'], { pracuj: string; justjoin: string; nofluff: string }> = {
-  staż: { pracuj: '1,2,3', justjoin: 'junior', nofluff: 'trainee,junior' },
-  junior: { pracuj: '1,2,3,17', justjoin: 'junior', nofluff: 'trainee,junior' },
-  mid: { pracuj: '2,17,4', justjoin: 'mid', nofluff: 'junior,mid' },
-};
-
-/** Linki do wyszukiwarek portali z frazą, miastem i poziomem - otwiera je kandydat, program niczego nie pobiera. */
-function portalLinks(role: RoleProposal, prefs: CareerPrefs) {
-  const phrase = role.keywords[0] || role.title;
-  const q = encodeURIComponent(phrase);
-  const city = prefs.city.trim();
-  const local = !!city && (prefs.onsite || prefs.hybrid);
-  const remoteOnly = !local && prefs.remote;
-  const citySlug = city.toLowerCase().replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, '-');
-  const lv = LEVELS[role.seniority];
-
-  const pracuj = new URLSearchParams({ et: lv.pracuj });
-  if (remoteOnly) pracuj.set('wm', 'home-office');
-  if (local) pracuj.set('rd', String(prefs.radiusKm));
-  const nofluff = [`keyword=${phrase}`, `seniority=${lv.nofluff}`, remoteOnly ? 'city=remote' : local ? `city=${citySlug}` : ''].filter(Boolean).join(' ');
-  return [
-    { name: 'pracuj.pl', url: `https://www.pracuj.pl/praca/${q};kw${local ? `/${encodeURIComponent(city.toLowerCase())};wp` : ''}?${pracuj}` },
-    { name: 'justjoin.it', url: `https://justjoin.it/job-offers/${remoteOnly ? 'remote' : local ? citySlug : 'all-locations'}?keyword=${q}&experience-level=${lv.justjoin}` },
-    { name: 'nofluffjobs', url: `https://nofluffjobs.com/pl/?criteria=${encodeURIComponent(nofluff)}` },
-  ];
 }
 
 function ChatPanel({
@@ -334,6 +305,7 @@ function RoleCard({
   cvApps: Map<string, string>;
 }) {
   const { t, lang } = useT();
+  const { settings } = useApp();
   const [showAll, setShowAll] = useState(false);
   const [showWeak, setShowWeak] = useState(false);
   const [showExcluded, setShowExcluded] = useState(false);
@@ -379,7 +351,7 @@ function RoleCard({
           </span>
         ))}
       </div>
-      {searching && <div className="callout info small">{t('Szukam ofert na nofluffjobs i oceniam dopasowanie… (ok. 10-30 s)')}</div>}
+      {searching && <div className="callout info small">{t('Szukam ofert ({portals}) i oceniam dopasowanie… (ok. 10-30 s)', { portals: settings?.searchPortals.join(', ') ?? '' })}</div>}
       {offers && !searching && (
         <div className="stack" style={{ gap: 8 }}>
           <div className="faint">
@@ -596,7 +568,7 @@ export function CareerPage() {
       <div className="page-head">
         <div>
           <h1>{t('Szukaj pracy')}</h1>
-          <p className="sub">{t('Porozmawiaj z doradcą AI o tym, czego szukasz - potem dostaniesz propozycje stanowisk z gotowymi linkami do wyszukiwania na pracuj.pl, justjoin.it i nofluffjobs.')}</p>
+          <p className="sub">{t('Porozmawiaj z doradcą AI o tym, czego szukasz - potem dostaniesz propozycje stanowisk z gotowymi linkami do wyszukiwania na pracuj.pl, justjoin.it, nofluffjobs i Smart Jobs.')}</p>
         </div>
         <button className="btn primary" onClick={proposals} disabled={sending}>
           {career.proposals ? t('Zaproponuj stanowiska od nowa') : t('Pokaż propozycje pracy')}
@@ -671,7 +643,7 @@ export function CareerPage() {
               {!canSearch && (
                 <div className="callout info small">
                   {t('Przy każdym stanowisku są linki do wyszukiwarek portali. Znalezioną ofertę wklej w')} <Link to="/new">{t('Nowe CV')}</Link>.{' '}
-                  {t('Automatyczne wyszukiwanie i ocenę ofert na nofluffjobs możesz włączyć w')} <Link to="/settings">{t('Ustawieniach')}</Link>.
+                  {t('Automatyczne wyszukiwanie i ocenę ofert ({portals}) możesz włączyć w', { portals: settings?.searchPortals.join(', ') ?? '' })} <Link to="/settings">{t('Ustawieniach')}</Link>.
                 </div>
               )}
               {roles.map((r) => (

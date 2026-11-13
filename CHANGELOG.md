@@ -6,6 +6,22 @@ All notable changes to PolCV are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Smart Jobs as a second job search portal.** The automated search, when switched on in
+  Settings, now also searches Smart Jobs (thesmartjobs.com), whose `robots.txt` allows it, next to
+  nofluffjobs, and every proposed role gets a Smart Jobs search link. The portal puts only the
+  first 20 results of a search in the page, so the app takes those 20; it has a city filter but no
+  radius, so for on-site work the app asks for offers in your city and measures the distance
+  itself. The city's OpenStreetMap number comes from Nominatim with the coordinates PolCV already
+  looks up; a city looked up before this version is looked up once more. The level, given in the
+  role name ("Senior Accountant" for an offer titled "Accountant"), and the required years of
+  experience count for the junior filter and the AI ranking. Pay in a day or hour rate counts as
+  monthly pay, and a contract the portal only calls "other" is not used to drop an offer. A posting
+  link from Smart Jobs already worked through its `JobPosting` data.
+- The messages about the automated search name the portals it searches instead of only
+  nofluffjobs.
+
 ## [1.3.1] - 2026-11-13
 
 ### Added

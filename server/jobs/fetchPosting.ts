@@ -67,7 +67,7 @@ function findJobPostings(node: unknown, out: Record<string, unknown>[] = []): Re
   return out;
 }
 
-/** Dane JobPosting ze schema.org - pracuj.pl, justjoin.it i nofluffjobs je publikują. */
+/** Dane JobPosting ze schema.org - pracuj.pl, justjoin.it, nofluffjobs i Smart Jobs je publikują. */
 export function jsonLdToText(html: string): string {
   const $ = cheerio.load(html);
   const postings: Record<string, unknown>[] = [];
