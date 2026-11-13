@@ -6,6 +6,8 @@ All notable changes to PolCV are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-11-13
+
 ### Added
 
 - **Your studies count as a source of knowledge.** When the posting asks for knowledge your field
@@ -323,7 +325,8 @@ All notable changes to PolCV are recorded here. The format follows
 First public release: a CV tailored to one job posting, scored the way an ATS and an AI recruiter
 would, with a career advisor, interview prep, cover letters and optional masking with polanon.
 
-[Unreleased]: https://github.com/boromat/polcv/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/boromat/polcv/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/boromat/polcv/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/boromat/polcv/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/boromat/polcv/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/boromat/polcv/compare/v1.0.1...v1.1.0
