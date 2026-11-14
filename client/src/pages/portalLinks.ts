@@ -4,10 +4,10 @@ export const PORTAL_NAMES: Record<JobLead['portal'], string> = { pracuj: 'pracuj
 
 // pracuj.pl: 1 praktykant, 3 asystent, 17 junior, 4 mid. Kod 2 ("pracownik fizyczny") jest przy każdym poziomie,
 // bo tak portal oznacza oferty dla mechaników, spawaczy czy magazynierów, bez podziału na junior i mid.
-const LEVELS: Record<RoleProposal['seniority'], { pracuj: string; justjoin: string; nofluff: string }> = {
-  staż: { pracuj: '1,2,3', justjoin: 'junior', nofluff: 'trainee,junior' },
-  junior: { pracuj: '1,2,3,17', justjoin: 'junior', nofluff: 'trainee,junior' },
-  mid: { pracuj: '2,17,4', justjoin: 'mid', nofluff: 'junior,mid' },
+const LEVELS: Record<RoleProposal['seniority'], { pracuj: string; justjoin: string; nofluff: string; theprotocol: string }> = {
+  staż: { pracuj: '1,2,3', justjoin: 'junior', nofluff: 'trainee,junior', theprotocol: 'trainee,assistant,junior' },
+  junior: { pracuj: '1,2,3,17', justjoin: 'junior', nofluff: 'trainee,junior', theprotocol: 'trainee,assistant,junior' },
+  mid: { pracuj: '2,17,4', justjoin: 'mid', nofluff: 'junior,mid', theprotocol: 'junior,mid' },
 };
 
 /**
@@ -31,10 +31,14 @@ export function portalLinks(role: RoleProposal, prefs: CareerPrefs) {
   const smart = new URLSearchParams({ query: phrase });
   const modes = remoteOnly ? ['remote'] : local ? [prefs.onsite && 'onSite', prefs.hybrid && 'hybrid'].filter(Boolean) : [];
   if (modes.length) smart.set('workModes', modes.join(','));
+  // theprotocol.it: filtry w ścieżce (poziom, tryb pracy, miasto), bez promienia.
+  const tpModes = remoteOnly ? ['zdalna'] : local ? [prefs.onsite && 'stacjonarna', prefs.hybrid && 'hybrydowa'].filter(Boolean) : [];
+  const tp = [`${lv.theprotocol};p`, tpModes.length ? `${tpModes.join(',')};rw` : '', local ? `${citySlug};wp` : ''].filter(Boolean).join('/');
   return [
     { name: 'pracuj.pl', url: `https://www.pracuj.pl/praca/${q};kw${local ? `/${encodeURIComponent(city.toLowerCase())};wp` : ''}?${pracuj}` },
     { name: 'justjoin.it', url: `https://justjoin.it/job-offers/${remoteOnly ? 'remote' : local ? citySlug : 'all-locations'}?keyword=${q}&experience-level=${lv.justjoin}` },
     { name: 'nofluffjobs', url: `https://nofluffjobs.com/pl/?criteria=${encodeURIComponent(nofluff)}` },
     { name: 'Smart Jobs', url: `https://thesmartjobs.com/pl/praca?${smart}` },
+    { name: 'theprotocol.it', url: `https://theprotocol.it/filtry/${tp}?${new URLSearchParams({ kw: phrase })}` },
   ];
 }

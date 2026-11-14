@@ -568,7 +568,7 @@ export function CareerPage() {
       <div className="page-head">
         <div>
           <h1>{t('Szukaj pracy')}</h1>
-          <p className="sub">{t('Porozmawiaj z doradcą AI o tym, czego szukasz - potem dostaniesz propozycje stanowisk z gotowymi linkami do wyszukiwania na pracuj.pl, justjoin.it, nofluffjobs i Smart Jobs.')}</p>
+          <p className="sub">{t('Porozmawiaj z doradcą AI o tym, czego szukasz - potem dostaniesz propozycje stanowisk z gotowymi linkami do wyszukiwania na pracuj.pl, justjoin.it, nofluffjobs, Smart Jobs i theprotocol.it.')}</p>
         </div>
         <button className="btn primary" onClick={proposals} disabled={sending}>
           {career.proposals ? t('Zaproponuj stanowiska od nowa') : t('Pokaż propozycje pracy')}

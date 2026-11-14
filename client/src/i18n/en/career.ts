@@ -65,8 +65,8 @@ export const career: Record<string, string> = {
   'Utwórz profil': 'Create profile',
 
   // CareerPage: strona i zakładki
-  'Porozmawiaj z doradcą AI o tym, czego szukasz - potem dostaniesz propozycje stanowisk z gotowymi linkami do wyszukiwania na pracuj.pl, justjoin.it, nofluffjobs i Smart Jobs.':
-    'Tell the AI advisor what you are looking for, then get role suggestions with ready-made search links for pracuj.pl, justjoin.it, nofluffjobs and Smart Jobs.',
+  'Porozmawiaj z doradcą AI o tym, czego szukasz - potem dostaniesz propozycje stanowisk z gotowymi linkami do wyszukiwania na pracuj.pl, justjoin.it, nofluffjobs, Smart Jobs i theprotocol.it.':
+    'Tell the AI advisor what you are looking for, then get role suggestions with ready-made search links for pracuj.pl, justjoin.it, nofluffjobs, Smart Jobs and theprotocol.it.',
   'Zaproponuj stanowiska od nowa': 'Suggest roles again',
   'Pokaż propozycje pracy': 'Show role suggestions',
   'Doradca ma już wystarczająco informacji.': 'The advisor has enough information now.',

@@ -85,7 +85,7 @@ Zakładka **Szukaj pracy**:
    - praca **stacjonarna/hybrydowa** w promieniu (10-100 km) od wybranego miasta,
    - praca **zdalna** z całej Polski,
    - minimalne wynagrodzenie, forma umowy, wymiar etatu, poziom (staż/junior/mid).
-3. **Propozycje i oferty** - AI proponuje 5-8 stanowisk z uzasadnieniem i tym, czego brakuje. Przy każdym są linki **Otwórz wyszukiwanie: pracuj.pl · justjoin.it · nofluffjobs · Smart Jobs** z frazą, miastem, promieniem i poziomem (Smart Jobs: z frazą i trybem pracy) - otwierasz je sam w przeglądarce, a ciekawą ofertę wklejasz w **Nowe CV**.
+3. **Propozycje i oferty** - AI proponuje 5-8 stanowisk z uzasadnieniem i tym, czego brakuje. Przy każdym są linki **Otwórz wyszukiwanie: pracuj.pl · justjoin.it · nofluffjobs · Smart Jobs · theprotocol.it** z frazą, miastem, promieniem i poziomem (Smart Jobs: z frazą i trybem pracy, theprotocol.it: bez promienia, bo portal go nie ma) - otwierasz je sam w przeglądarce, a ciekawą ofertę wklejasz w **Nowe CV**.
 
 Pod nazwą firmy (przy ofertach, w Historii i w aplikacji) jest link **opinie na GoWork**, który otwiera wyszukiwanie opinii o pracodawcy na GoWork.pl. Program niczego z GoWork nie pobiera.
 
@@ -155,7 +155,7 @@ Na 18 fikcyjnych parach profil + ogłoszenie z [`evals/`](evals/README.md) (11.1
 
 ## Zastrzeżenia
 
-- PolCV nie jest powiązany z pracuj.pl, justjoin.it, nofluffjobs, Smart Jobs, GoWork, OpenRouter ani dostawcami modeli AI - ich nazwy służą tylko do opisu, z czym program współpracuje.
+- PolCV nie jest powiązany z pracuj.pl, justjoin.it, nofluffjobs, Smart Jobs, theprotocol.it, GoWork, OpenRouter ani dostawcami modeli AI - ich nazwy służą tylko do opisu, z czym program współpracuje.
 - Za treść CV wysyłanego pracodawcy odpowiadasz Ty. Program oznacza sugestie AI, ale decyzja należy do Ciebie. Wynik 0-100 to symulacja typowych reguł ATS i opinia AI, nie gwarancja.
 - Cudze CV importuj tylko za zgodą tej osoby.
 - Program jest udostępniany „tak jak jest”, bez gwarancji (licencja MIT).

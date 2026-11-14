@@ -21,6 +21,9 @@ All notable changes to PolCV are recorded here. The format follows
   link from Smart Jobs already worked through its `JobPosting` data.
 - The messages about the automated search name the portals it searches instead of only
   nofluffjobs.
+- **A theprotocol.it search link** for every proposed role, with the phrase, level, work mode and
+  city (the portal has no radius filter). You open it in your browser: the portal shows automated
+  clients a bot check, so the app does not search it itself.
 
 ## [1.3.1] - 2026-11-13
 

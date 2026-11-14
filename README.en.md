@@ -160,9 +160,10 @@ these runs, so it is not yet tested on a real model. It is a small set prepared 
 ## Job portals
 
 The career advisor gives every proposed role search links for pracuj.pl, justjoin.it,
-nofluffjobs and Smart Jobs (the Smart Jobs one with the phrase and work mode only): you open them
-in your own browser, and the app fetches nothing. The same goes for the **reviews on GoWork** link
-under every company name (offers, History and the application page): it opens a search for
+nofluffjobs, Smart Jobs and theprotocol.it (the Smart Jobs one with the phrase and work mode only,
+the theprotocol.it one without a radius, which the portal does not have): you open them in your
+own browser, and the app fetches nothing. The same goes for the **reviews on GoWork** link under
+every company name (offers, History and the application page): it opens a search for
 employer reviews on GoWork.pl.
 
 An **automated search** that fetches, filters and AI-ranks offers is available for nofluffjobs
@@ -180,8 +181,8 @@ the level (for example "Senior") in the role name rather than the title, and the
 
 ## Disclaimer
 
-- PolCV is not affiliated with pracuj.pl, justjoin.it, nofluffjobs, Smart Jobs, GoWork, OpenRouter
-  or any model provider; their names are used only to say what the app works with.
+- PolCV is not affiliated with pracuj.pl, justjoin.it, nofluffjobs, Smart Jobs, theprotocol.it, GoWork,
+  OpenRouter or any model provider; their names are used only to say what the app works with.
 - You are responsible for what you send to employers: the app marks AI suggestions, but it is your
   CV. The score is a simulation of typical ATS rules and an AI opinion, not a promise.
 - Only import other people's CVs with their consent.

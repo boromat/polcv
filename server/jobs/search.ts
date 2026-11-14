@@ -333,8 +333,8 @@ export type Searcher = (q: SearchQuery) => Promise<JobLead[]>;
 type Searchers = Record<string, { name: string; run: Searcher }>;
 
 // Program sam przeszukuje tylko portale, których robots.txt na to pozwala: nofluffjobs i Smart Jobs.
-// pracuj.pl blokuje automaty, a justjoin.it zabrania /api/, więc dla nich są tylko linki, które kandydat
-// otwiera sam w przeglądarce. Innych źródeł ofert program nie wczytuje.
+// pracuj.pl i theprotocol.it blokują automaty, a justjoin.it zabrania /api/, więc dla nich są tylko linki,
+// które kandydat otwiera sam w przeglądarce. Innych źródeł ofert program nie wczytuje.
 const SEARCHERS: Searchers = {
   nofluff: { name: 'nofluffjobs', run: searchNofluff },
   smartjobs: { name: 'Smart Jobs', run: searchSmartjobs },
