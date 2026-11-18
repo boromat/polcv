@@ -6,6 +6,8 @@ All notable changes to PolCV are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-11-18
+
 ### Added
 
 - **Smart Jobs as a second job search portal.** The automated search, when switched on in
@@ -352,7 +354,8 @@ All notable changes to PolCV are recorded here. The format follows
 First public release: a CV tailored to one job posting, scored the way an ATS and an AI recruiter
 would, with a career advisor, interview prep, cover letters and optional masking with polanon.
 
-[Unreleased]: https://github.com/boromat/polcv/compare/v1.3.1...HEAD
+[Unreleased]: https://github.com/boromat/polcv/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/boromat/polcv/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/boromat/polcv/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/boromat/polcv/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/boromat/polcv/compare/v1.1.0...v1.2.0
