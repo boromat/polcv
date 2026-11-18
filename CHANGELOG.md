@@ -25,6 +25,14 @@ All notable changes to PolCV are recorded here. The format follows
   city (the portal has no radius filter). You open it in your browser: the portal shows automated
   clients a bot check, so the app does not search it itself.
 
+### Security
+
+- **ESLint no longer pulls in a minimatch with a known flaw.** ESLint 10.14 and typescript-eslint
+  8.72 brought minimatch 10.2.6, open to a denial of service through crafted glob patterns, an
+  advisory of medium severity. It was a development tool only, never part of the app, but GitHub
+  flagged it. ESLint 10.15 and typescript-eslint 8.73, within the ranges `package.json` allows,
+  use minimatch 11.0.9, and `npm audit` finds nothing.
+
 ## [1.3.1] - 2026-11-13
 
 ### Added
