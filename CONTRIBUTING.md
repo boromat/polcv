@@ -65,3 +65,12 @@ Masking of personal data before an AI call is done by
 polanon: report it there, with invented text of the same shape. A way for another page or another
 machine to read the profile or run a command, or for personal data to reach the model while masking
 is on, is a security report: see `SECURITY.md`, never a public issue.
+
+## Releases
+
+The version lives in `package.json` (and `package-lock.json`, which `npm install` keeps in step),
+and the Settings page compares it with the latest GitHub release to offer an update. To release,
+set the version, rename `## [Unreleased]` in `CHANGELOG.md` to `## [X.Y.Z] - YYYY-MM-DD` in a commit
+of its own (`Release X.Y.Z`), then push the tag `vX.Y.Z`. `.github/workflows/release.yml` checks
+that the tag, both files and a dated changelog section agree, and creates the release *PolCV X.Y.Z*
+with that section as its notes.

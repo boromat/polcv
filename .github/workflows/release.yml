@@ -1,0 +1,81 @@
+name: Release
+
+# Tag w rodzaju v1.3.2 tworzy wydanie na GitHubie z opisem z sekcji tej wersji w CHANGELOG.md.
+# PolCV instaluje się z repozytorium (git clone i start.bat), więc nic poza wydaniem nie jest
+# publikowane, a aktualizacja w Ustawieniach pokazuje numer nowego wydania.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Tag, wersja i CHANGELOG się zgadzają
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Wydanie z numerem, którego program nie ma w package.json, pokazałoby w Ustawieniach inną
+      # wersję niż na GitHubie, a wydanie bez datowanej sekcji wyszłoby bez opisu.
+      - name: Porównaj
+        run: |
+          python3 - "${GITHUB_REF_NAME#v}" <<'PY'
+          import json
+          import re
+          import sys
+
+          tag = sys.argv[1]
+          version = json.load(open("package.json", encoding="utf-8"))["version"]
+          lock = json.load(open("package-lock.json", encoding="utf-8"))
+          if version != tag:
+              sys.exit(f"tag v{tag} nie zgadza się z wersją {version} w package.json")
+          if lock["version"] != tag or lock["packages"][""]["version"] != tag:
+              sys.exit(f"package-lock.json ma inną wersję niż {tag}: uruchom npm install")
+          changelog = open("CHANGELOG.md", encoding="utf-8").read()
+          if not re.search(rf"^## \[{re.escape(tag)}\]", changelog, re.MULTILINE):
+              sys.exit(f"CHANGELOG.md nie ma sekcji '## [{tag}]'")
+          dated = rf"^## \[{re.escape(tag)}\] - \d{{4}}-\d{{2}}-\d{{2}}\s*$"
+          if not re.search(dated, changelog, re.MULTILINE):
+              sys.exit(f"CHANGELOG.md nie ma daty wydania {tag}: wpisz '## [{tag}] - RRRR-MM-DD'")
+          PY
+
+  github:
+    name: Wydanie na GitHubie
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      # Cała historia z tagami, żeby znaleźć poprzednie wydanie do linku z porównaniem.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      # Sekcja wersji z CHANGELOG.md, bez nagłówka, aż do następnej wersji, a pod nią link do zmian
+      # od poprzedniego wydania, jak w dotychczasowych wydaniach.
+      - name: Opis z CHANGELOG.md
+        run: |
+          python3 - "${GITHUB_REF_NAME#v}" > notes.md <<'PY'
+          import re
+          import sys
+
+          tag = sys.argv[1]
+          changelog = open("CHANGELOG.md", encoding="utf-8").read()
+          section = re.search(
+              rf"^## \[{re.escape(tag)}\][^\n]*\n(.*?)(?=^## \[|\Z)", changelog, re.MULTILINE | re.DOTALL
+          )
+          print(section.group(1).strip())
+          PY
+          previous=$(git describe --tags --abbrev=0 --match 'v*' "$GITHUB_REF_NAME^" 2>/dev/null || true)
+          if [ -n "$previous" ]; then
+            printf '\n**Full changelog**: %s/%s/compare/%s...%s\n' \
+              "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$previous" "$GITHUB_REF_NAME" >> notes.md
+          fi
+
+      # Tytuł jak w dotychczasowych wydaniach: "PolCV 1.3.1".
+      - name: Publikacja
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --title "PolCV ${GITHUB_REF_NAME#v}" --notes-file notes.md --verify-tag
