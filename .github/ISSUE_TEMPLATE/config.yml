@@ -1,0 +1,10 @@
+blank_issues_enabled: true
+contact_links:
+  - name: The profile, a key or a command is reachable where it should not be
+    url: https://github.com/boromat/polcv/security/advisories/new
+    about: Report privately. A public issue would publish the way in along with the bug.
+  - name: A personal value was not masked before it reached the model
+    url: https://github.com/boromat/polanon/issues
+    about: >-
+      Detection belongs to polanon, the library that does the masking. Report it there, with
+      invented data only.
