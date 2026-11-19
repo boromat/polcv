@@ -203,8 +203,8 @@ export function lengthScore(answer: string): number {
 
 /** Miejsce do uzupełnienia w mocniejszej wersji: "[ile dokumentów tygodniowo]". */
 const PLACEHOLDER = /\[[^\]\n]{1,100}\]/g;
-/** Token polanonu: dana osobowa z wejścia, nie nowy fakt. */
-const TOKEN = /<[A-Z_]+_\d+>/g;
+/** Token polanonu: dana osobowa z wejścia, nie nowy fakt; także z przypadkiem, `<OSOBA_1:narzędnik>` (polanon 0.4). */
+const TOKEN = /<[A-Z_]+_\d+(?::\p{L}+)?>/gu;
 
 export const placeholders = (s: string) => [...new Set([...s.matchAll(PLACEHOLDER)].map((m) => m[0]))];
 const withoutGaps = (s: string) => s.replace(PLACEHOLDER, ' ').replace(TOKEN, ' ');
