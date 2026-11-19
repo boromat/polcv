@@ -1,6 +1,6 @@
 {
   "name": "polcv",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "private": true,
   "description": "Local, ATS-friendly CV generator tailored to a job posting, with ATS and AI scoring",
   "license": "MIT",
