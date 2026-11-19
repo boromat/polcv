@@ -94,6 +94,13 @@ describe('próbna rozmowa: mocniejsza wersja nie może niczego wymyślać', () =
     expect(placeholders('Raporty [ile tygodniowo] dla [kogo] i znów [ile tygodniowo]')).toEqual(['[ile tygodniowo]', '[kogo]']);
   });
 
+  it('token polanonu, także z przypadkiem, to dana z wejścia, a nie nowa nazwa ani liczba', () => {
+    // polanon 0.4 maskuje osobę wymienioną ponownie w innym przypadku jako <OSOBA_1:narzędnik>,
+    // a sprawdzenie działa na tekście zamaskowanym, zanim program wstawi prawdziwe wartości.
+    expect(strongerIssues('Razem z <OSOBA_1> prowadziłam profil firmy na Instagramie.', 'experience', src(), 'ona', 'pl')).toEqual([]);
+    expect(strongerIssues('Razem z <OSOBA_1:narzędnik> prowadziłam profil firmy na Instagramie.', 'experience', src(), 'ona', 'pl')).toEqual([]);
+  });
+
   it('liczba, którą kandydat podał w tej rozmowie, jest faktem', () => {
     const answers = ['Robiłam 12 raportów miesięcznie.'];
     expect(strongerIssues('Przygotowywałam 12 raportów miesięcznie w Google Analytics 4.', 'experience', src(answers), 'ona', 'pl')).toEqual([]);

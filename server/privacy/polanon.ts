@@ -19,7 +19,8 @@ import { commandLine, requireConfirmed, runCommand } from '../commands';
 const BRIDGE = fileURLToPath(new URL('./polanon_bridge.py', import.meta.url));
 const ENV = { ...process.env, PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1' };
 const MIN_PYTHON = [3, 11];
-const TOKEN = /<[A-Z_]+_\d+>/g;
+/** Token polanonu, także z przypadkiem po dwukropku, `<OSOBA_1:celownik>` (polanon 0.4, jego CASED_TOKEN_PATTERN). */
+const TOKEN = /<[A-Z_]+_\d+(?::\p{L}+)?>/gu;
 
 /** Dokładne komendy, które Ustawienia pokazują przed instalacją i które serwer uruchamia po potwierdzeniu. */
 export interface InstallCommands {

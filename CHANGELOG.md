@@ -6,6 +6,15 @@ All notable changes to PolCV are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- **A person named again in another case no longer fails the mock interview's stronger answer.**
+  polanon 0.4 masks such a mention as `<OSOBA_1:narzędnik>`, and the check that the stronger
+  answer invents nothing reads the masked text. It removed only tokens without a case, so
+  "Razem z <OSOBA_1:narzędnik> prowadziłam…" was sent back to the model for naming something
+  outside the profile. Tokens with a case are now taken for data from the input, and the warning
+  about tokens left after restoring counts them too.
+
 ## [1.4.0] - 2026-11-18
 
 ### Added
