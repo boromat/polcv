@@ -15,6 +15,11 @@ All notable changes to PolCV are recorded here. The format follows
   ranges (169.254.169.254 included) and their IPv6 counterparts, follows redirects itself and
   checks each one, and drops a page the browser fallback ended on outside the internet. Found
   by CodeQL (js/request-forgery).
+- **A saved PDF is served and replaced only under a name the app gives it.** The download and the
+  replacing of an older PDF joined the file name kept in `application.json` to the folder as it
+  was, so a name such as `../../profile.json` written into that file would have served or deleted
+  a file outside the application. Only a name of letters, digits and underscores ending in `.pdf`
+  is used now. Found by CodeQL (js/path-injection).
 
 ## [1.4.1] - 2026-11-19
 

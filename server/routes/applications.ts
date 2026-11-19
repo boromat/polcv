@@ -1,4 +1,3 @@
-import path from 'node:path';
 import { Router, type Response } from 'express';
 import { z } from 'zod';
 import { ApplicationStatuses, CoverLetterSchema, CvVersionSchema, GapAnswerSchema, TemplateIds, type ApplicationSummary } from '../../shared/schemas';
@@ -186,8 +185,9 @@ applicationsRouter.post(`${base}/:aid/export`, async (req, res) => {
 applicationsRouter.get(`${base}/:aid/download`, async (req, res) => {
   const { pid, aid } = req.params;
   const app = await store.getApplication(pid, aid);
-  if (!app.pdfFile) throw new HttpError(404, tr('Ten PDF nie został jeszcze zapisany.'));
-  res.download(path.join(store.appDir(pid, aid), app.pdfFile), app.pdfFile);
+  const file = app.pdfFile ? store.pdfPath(pid, aid, app.pdfFile) : null;
+  if (!file) throw new HttpError(404, tr('Ten PDF nie został jeszcze zapisany.'));
+  res.download(file, app.pdfFile);
 });
 
 applicationsRouter.get(`${base}/:aid/interview`, async (req, res) => {
