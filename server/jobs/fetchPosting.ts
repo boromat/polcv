@@ -1,3 +1,5 @@
+import { lookup } from 'node:dns/promises';
+import { BlockList, isIP } from 'node:net';
 import * as cheerio from 'cheerio';
 import { parseHTML } from 'linkedom';
 import { Readability } from '@mozilla/readability';
@@ -138,6 +140,77 @@ function combine(html: string): string {
   return parts.join('\n\n').slice(0, MAX_CHARS);
 }
 
+/**
+ * Adresy, spod których PolCV nie pobiera ogłoszeń: ten komputer, sieci lokalne, adresy współdzielone u operatora,
+ * adresy usług w chmurze (169.254.169.254) i zarezerwowane. Adres IPv4 zapisany jako IPv6 (::ffff:127.0.0.1)
+ * BlockList sprawdza regułami IPv4.
+ */
+const NOT_PUBLIC = new BlockList();
+for (const [address, prefix] of [
+  ['0.0.0.0', 8],
+  ['10.0.0.0', 8],
+  ['100.64.0.0', 10],
+  ['127.0.0.0', 8],
+  ['169.254.0.0', 16],
+  ['172.16.0.0', 12],
+  ['192.0.0.0', 24],
+  ['192.168.0.0', 16],
+  ['198.18.0.0', 15],
+  ['224.0.0.0', 3],
+] as const) {
+  NOT_PUBLIC.addSubnet(address, prefix, 'ipv4');
+}
+for (const [address, prefix] of [
+  ['::', 127],
+  ['fc00::', 7],
+  ['fe80::', 10],
+  ['ff00::', 8],
+] as const) {
+  NOT_PUBLIC.addSubnet(address, prefix, 'ipv6');
+}
+/** Ile przekierowań program przejdzie sam, sprawdzając adres przed każdym. */
+const MAX_REDIRECTS = 5;
+
+const notPublic = () =>
+  new HttpError(
+    400,
+    tr('PolCV pobiera ogłoszenia tylko z adresów w internecie, nie z tego komputera ani z sieci lokalnej. Skopiuj tekst ogłoszenia i wklej go w pole poniżej.'),
+  );
+
+/**
+ * Rzuca 400, gdy link prowadzi pod adres, który nie jest publiczny. Nazwa jest sprawdzana w DNS, każdy jej adres;
+ * parser URL zamienia już zapisy w rodzaju 0x7f000001 albo 127.1 na 127.0.0.1. Nazwa, której DNS nie zna, przechodzi:
+ * pobranie i tak się nie uda i program poprosi o wklejenie treści.
+ */
+async function assertPublic(url: URL): Promise<void> {
+  const host = url.hostname.replace(/^\[(.*)\]$/, '$1');
+  let addresses: string[] = [];
+  if (isIP(host)) addresses = [host];
+  else {
+    try {
+      addresses = (await lookup(host, { all: true, verbatim: true })).map((a) => a.address);
+    } catch {
+      /* nieznana nazwa */
+    }
+  }
+  if (addresses.some((a) => NOT_PUBLIC.check(a, isIP(a) === 6 ? 'ipv6' : 'ipv4'))) throw notPublic();
+}
+
+/** fetch, który za przekierowaniem idzie sam (do MAX_REDIRECTS) i przed każdym krokiem sprawdza adres. */
+async function fetchPublic(url: URL, init: RequestInit): Promise<Response> {
+  let current = url;
+  for (let hop = 0; ; hop++) {
+    await assertPublic(current);
+    const res = await fetch(current, { ...init, redirect: 'manual' });
+    const location = res.status >= 300 && res.status < 400 ? res.headers.get('location') : null;
+    if (!location || hop === MAX_REDIRECTS) return res;
+    const next = new URL(location, current);
+    if (!/^https?:$/.test(next.protocol)) return res;
+    await res.body?.cancel();
+    current = next;
+  }
+}
+
 export async function fetchPosting(rawUrl: string): Promise<FetchedPosting> {
   let url: URL;
   try {
@@ -146,6 +219,7 @@ export async function fetchPosting(rawUrl: string): Promise<FetchedPosting> {
     throw new HttpError(400, tr('To nie wygląda na poprawny link (powinien zaczynać się od https://).'));
   }
   if (!/^https?:$/.test(url.protocol)) throw new HttpError(400, tr('Obsługiwane są tylko linki http(s).'));
+  await assertPublic(url);
 
   const pasteText = () =>
     new HttpError(
@@ -157,9 +231,8 @@ export async function fetchPosting(rawUrl: string): Promise<FetchedPosting> {
   let fileText: string | null = null; // link prowadzi do pliku, nie do strony
   let blocked = false;
   try {
-    const res = await fetch(url, {
+    const res = await fetchPublic(url, {
       headers: { 'User-Agent': APP_UA, 'Accept-Language': 'pl-PL,pl;q=0.9,en;q=0.8', Accept: 'text/html,application/xhtml+xml' },
-      redirect: 'follow',
       signal: AbortSignal.timeout(20_000),
     });
     const buf = new Uint8Array(await res.arrayBuffer());
@@ -175,8 +248,9 @@ export async function fetchPosting(rawUrl: string): Promise<FetchedPosting> {
         if (text.length >= MIN_USEFUL) return { text, method: jsonLdToText(html) ? 'json-ld' : 'html' };
       }
     }
-  } catch {
-    /* np. przekroczony czas: spróbujemy przeglądarką */
+  } catch (e) {
+    // Przekierowanie poza internet kończy pobieranie; inne błędy (np. przekroczony czas): spróbujemy przeglądarką.
+    if (e instanceof HttpError) throw e;
   }
   // Strona nie chce automatów: nie obchodzimy blokady, tylko prosimy o wklejenie treści.
   if (blocked) throw pasteText();
@@ -191,13 +265,16 @@ export async function fetchPosting(rawUrl: string): Promise<FetchedPosting> {
     const html = await withPage(async (page) => {
       await page.setExtraHTTPHeaders({ 'Accept-Language': 'pl-PL,pl;q=0.9' });
       const resp = await page.goto(url.toString(), { waitUntil: 'domcontentloaded', timeout: 30_000 });
+      // Przeglądarka sama idzie za przekierowaniami: strona, która skończyła poza internetem, nie jest używana.
+      await assertPublic(new URL(page.url()));
       await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {});
       const content = await page.content();
       return looksBlocked(resp?.status() ?? 200, content) ? '' : content;
     });
     const text = html ? combine(html) : '';
     if (text.length >= MIN_USEFUL) return { text, method: 'browser' };
-  } catch {
+  } catch (e) {
+    if (e instanceof HttpError) throw e;
     /* koniec możliwości */
   }
 

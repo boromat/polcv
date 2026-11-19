@@ -109,6 +109,7 @@ $0.05-0.15. The Settings page lists the models and shows what you have spent.
   repositories when you import projects from them).
 - A posting link is fetched as `PolCV/<version>`, not as a disguised browser. When a site blocks
   automated requests, the app does not try to get around it and asks you to paste the posting text.
+  Links, and redirects, to this computer or the local network are not fetched.
 - **Optional: [polanon](https://github.com/boromat/polanon).** If Python 3.11+ and
   `pip install polanon` are available, *Ustawienia → Ochrona danych osobowych* can mask your name,
   e-mail, phone, address, company names and profile links as tokens such as `<OSOBA_1>` before

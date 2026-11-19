@@ -6,6 +6,16 @@ All notable changes to PolCV are recorded here. The format follows
 
 ## [Unreleased]
 
+### Security
+
+- **A posting is fetched only from an address on the internet.** A link to this computer or the
+  local network, or a redirect from a posting page to one, was fetched like any other, and with
+  `CV_HOST` set another machine on the network could use it to read a service listening only on
+  this computer. The app now looks the name up and refuses 127.0.0.0/8, private and link-local
+  ranges (169.254.169.254 included) and their IPv6 counterparts, follows redirects itself and
+  checks each one, and drops a page the browser fallback ended on outside the internet. Found
+  by CodeQL (js/request-forgery).
+
 ## [1.4.1] - 2026-11-19
 
 ### Fixed

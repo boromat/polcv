@@ -129,7 +129,7 @@ Kopia zapasowa = skopiowanie folderu `data`.
 
 - **„Brak klucza OpenRouter”** - wklej klucz w Ustawieniach.
 - **„Brak środków na koncie OpenRouter”** - doładuj konto na openrouter.ai.
-- **Link z ogłoszeniem się nie pobiera** - kliknij „Link nie działa? Wklej treść ogłoszenia”, zaznacz całą stronę ogłoszenia (Ctrl+A), skopiuj i wklej. Program pobiera ogłoszenie jako `PolCV/<wersja>` (nie udaje przeglądarki), a gdy strona blokuje takie pobieranie, nie próbuje tego obejść, tylko prosi o wklejenie treści.
+- **Link z ogłoszeniem się nie pobiera** - kliknij „Link nie działa? Wklej treść ogłoszenia”, zaznacz całą stronę ogłoszenia (Ctrl+A), skopiuj i wklej. Program pobiera ogłoszenie jako `PolCV/<wersja>` (nie udaje przeglądarki), a gdy strona blokuje takie pobieranie, nie próbuje tego obejść, tylko prosi o wklejenie treści. Linków i przekierowań do tego komputera albo sieci lokalnej nie pobiera.
 - **„Z tego pliku nie da się odczytać tekstu”** - Twoje CV jest skanem/obrazkiem. Zapisz je ponownie jako PDF z Worda albo Google Docs.
 - **Okno `start.bat` zamyka się od razu** - uruchom je ponownie i przeczytaj komunikat; zwykle brakuje Node.js.
 - **Port 3000 zajęty** - zamknij inne okno PolCV albo ustaw inny port: w `start.bat` przed `call npm start` dopisz `set PORT=3001`.
