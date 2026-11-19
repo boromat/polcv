@@ -153,9 +153,10 @@ these runs, so it is not yet tested on a real model. It is a small set prepared 
   `npm run build` to update PolCV, and `pip install` for polanon and its spaCy model. The app shows
   the exact commands first and waits for your confirmation, and the server runs only the commands
   that were confirmed.
-- To use PolCV from your home network, set `CV_HOST=0.0.0.0` (everyone on that network can then
-  see your data); the API then also answers this computer's IP addresses and name. If you open
-  PolCV under another name, add it to `CV_ALLOWED_HOSTS`, comma-separated, e.g.
+- To use PolCV from your home network, set `CV_HOST=0.0.0.0`. The app has no login, so everyone on
+  that network can then use it as you do: see and change your data, spend your OpenRouter credit and
+  run the update and install commands. The API then also answers this computer's IP addresses and
+  name. If you open PolCV under another name, add it to `CV_ALLOWED_HOSTS`, comma-separated, e.g.
   `CV_ALLOWED_HOSTS=polcv.lan`.
 
 ## Job portals
