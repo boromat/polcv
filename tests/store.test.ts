@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import os from 'node:os';
+import type { AddressInfo } from 'node:net';
 import path from 'node:path';
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import type { Application, CareerTurn, CvContent, JobLead, RoleProposal } from '../shared/schemas';
@@ -269,5 +270,31 @@ describe('długie wywołania AI nie cofają równoległych zmian', () => {
     gate.resolve(turn());
     const c = await running;
     expect(c.chat).toEqual([]);
+  });
+});
+
+describe('pobieranie zapisanego PDF-u (CodeQL js/path-injection)', () => {
+  it('nazwa pliku z application.json nie wyprowadza poza folder zgłoszenia', async () => {
+    const express = (await import('express')).default;
+    const { applicationsRouter } = await import('../server/routes/applications');
+    const app = express();
+    app.use('/api', applicationsRouter);
+    const server = app.listen(0, '127.0.0.1');
+    await new Promise((r) => server.once('listening', r));
+    const port = (server.address() as AddressInfo).port;
+    try {
+      const p = await newProfile();
+      const a = await newApp(p.id, { pdfFile: '../../profile.json' });
+      const res = await fetch(`http://127.0.0.1:${port}/api/profiles/${p.id}/applications/${a.id}/download`);
+      expect(res.status).toBe(404);
+      expect(await res.text()).not.toContain(fixtures.profile.contact.fullName);
+    } finally {
+      await new Promise((r) => server.close(r));
+    }
+  });
+
+  it('ścieżka PDF-u tylko dla nazwy, jaką nadaje program', () => {
+    expect(store.pdfPath('p1', 'a1', 'Zofia_Zolkiewska_CV_Firma.pdf')).toBe(path.join(store.appDir('p1', 'a1'), 'Zofia_Zolkiewska_CV_Firma.pdf'));
+    for (const bad of ['../../profile.json', String.raw`..\x.pdf`, 'a/b.pdf', String.raw`C:\x.pdf`, 'CV.pdf.exe', '']) expect(store.pdfPath('p1', 'a1', bad)).toBeNull();
   });
 });

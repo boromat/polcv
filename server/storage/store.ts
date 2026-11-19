@@ -275,6 +275,14 @@ export const profileFilesDir = (id: string) => path.join(profileDir(id), 'files'
 // ---------- Aplikacje ----------
 
 export const appDir = (profileId: string, appId: string) => path.join(profileDir(profileId), 'applications', safeId(appId));
+
+/**
+ * Ścieżka zapisanego PDF-u zgłoszenia albo null, gdy nazwa z application.json nie jest nazwą, jaką nadaje program
+ * (litery, cyfry i podkreślenia, potem .pdf): nazwa pliku nie może wyprowadzić poza folder zgłoszenia.
+ */
+export function pdfPath(profileId: string, appId: string, file: string): string | null {
+  return /^\w+\.pdf$/.test(file) ? path.join(appDir(profileId, appId), file) : null;
+}
 const appFile = (profileId: string, appId: string) => path.join(appDir(profileId, appId), 'application.json');
 
 export async function listApplications(profileId: string): Promise<Application[]> {

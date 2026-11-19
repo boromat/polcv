@@ -559,7 +559,8 @@ export async function exportPdf(profileId: string, appId: string): Promise<Appli
   const name = [profile.contact.fullName || profile.displayName, 'CV', shortCompany(app.posting?.company ?? ''), app.posting?.title].filter(Boolean).map((x) => fileSafe(String(x))).filter(Boolean).join('_');
   const file = `${name || 'CV'}.pdf`;
   return store.updateApplication(profileId, appId, async (a) => {
-    if (a.pdfFile && a.pdfFile !== file) await fs.rm(path.join(store.appDir(profileId, appId), a.pdfFile), { force: true });
+    const old = a.pdfFile && a.pdfFile !== file ? store.pdfPath(profileId, appId, a.pdfFile) : null;
+    if (old) await fs.rm(old, { force: true });
     await fs.writeFile(path.join(store.appDir(profileId, appId), file), pdf);
     a.pdfFile = file;
     if (a.status === 'szkic' || a.status === 'przygotowane') a.status = 'wysłane';
