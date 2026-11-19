@@ -136,7 +136,12 @@ describe.skipIf(!withPolanon)('maskowanie przez polanon', () => {
     expect(masked.text).not.toMatch(/olena|shevchenko/i);
     expect(masked.text).toContain('<LINK_1>');
     expect(masked.text).toContain('junior QA');
-    expect(await masked.restore({ t: masked.text })).toEqual({ t: text });
+    // polanon 0.4.1 daje obu zapisom tego samego linku jeden token, więc oba wracają w pierwszym zapisie;
+    // 0.4.0 dawał dwa tokeny i każdy zapis wracał osobno.
+    const first = 'https://www.linkedin.com/in/olena-shevchenko-example/';
+    const restored = (await masked.restore({ t: masked.text })).t;
+    expect(restored).not.toMatch(/<[A-Z_]+_\d+/);
+    expect([text, `Olena Shevchenko, ${first} - junior QA, ${first}`]).toContain(restored);
   });
 
   it('login z GitHuba bez linku, nazwisko małymi literami i ulica bez "ul." też', async () => {
