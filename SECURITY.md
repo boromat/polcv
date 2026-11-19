@@ -16,9 +16,11 @@ supported.
   `localhost`, `127.0.0.1` or `[::1]`, and refuses a request that changes data from another
   origin (`server/security.ts`), so a page open in the same browser cannot read the profile or
   run anything, also after DNS rebinding.
-- `CV_HOST=0.0.0.0` opens the app to the local network on purpose: everyone on it can then see
-  the data. That is a documented choice, not a vulnerability; a request answered under a name
-  that is neither local, nor this computer's, nor in `CV_ALLOWED_HOSTS` is one.
+- `CV_HOST=0.0.0.0` opens the app to the local network on purpose, and the app has no login:
+  everyone on that network can then use all of it as the user does, read and change the data,
+  spend the OpenRouter credit and run the update and install commands. That is a documented
+  choice, not a vulnerability; a request answered under a name that is neither local, nor this
+  computer's, nor in `CV_ALLOWED_HOSTS` is one.
 - The OpenRouter key sits in plain text in `data/settings.json`, which only the user's account
   should be able to read; `OPENROUTER_API_KEY` takes precedence and is never written to disk. The
   browser only ever gets keys masked.
