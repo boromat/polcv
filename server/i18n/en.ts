@@ -70,6 +70,8 @@ export const EN: Record<string, string> = {
   'koniec strony {n}': 'end of page {n}',
   'To nie wygląda na poprawny link (powinien zaczynać się od https://).': 'This does not look like a valid link (it should start with https://).',
   'Obsługiwane są tylko linki http(s).': 'Only http(s) links are supported.',
+  'PolCV pobiera ogłoszenia tylko z adresów w internecie, nie z tego komputera ani z sieci lokalnej. Skopiuj tekst ogłoszenia i wklej go w pole poniżej.':
+    'PolCV only fetches postings from addresses on the internet, not from this computer or the local network. Copy the text of the posting and paste it in the field below.',
   'Nie udało się pobrać treści ogłoszenia z tego linku (strona mogła zablokować pobieranie). Skopiuj tekst ogłoszenia i wklej go w pole poniżej.':
     'Could not fetch the job posting from this link (the site may have blocked it). Copy the posting text and paste it into the field below.',
 

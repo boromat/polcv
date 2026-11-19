@@ -25,7 +25,9 @@ supported.
 - The server runs a program (`git pull --ff-only`, `npm install`, `npm run build`, `pip install`)
   only when the request carries exactly the commands the user was shown and confirmed.
 - A posting link is fetched as `PolCV/<version>`, and the app does not try to get past a site that
-  blocks automated requests.
+  blocks automated requests. A link, or a redirect from it, to this computer or the local network
+  (127.0.0.0/8, 10/8, 172.16/12, 192.168/16, link-local addresses such as 169.254.169.254, and
+  their IPv6 counterparts) is not fetched.
 
 ## Masking (polanon)
 
