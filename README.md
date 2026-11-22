@@ -102,8 +102,10 @@ Smart Jobs podaje w samej stronie tylko pierwsze 20 wyników na zapytanie (dalsz
 [polanon](https://github.com/boromat/polanon) to osobny, darmowy pakiet Pythona. Gdy jest zainstalowany, w **Ustawieniach → Ochrona danych osobowych** możesz włączyć maskowanie: zanim tekst trafi do AI, imię i nazwisko, e-mail, telefon, adres, nazwy firm i linki z profilu zamieniane są na tokeny (np. `<OSOBA_1>`), a w odpowiedzi AI program wstawia prawdziwe wartości z powrotem. Model widzi tylko tokeny.
 
 - Potrzebny jest Python 3.11+ (<https://www.python.org/downloads/>, zaznacz „Add python.exe to PATH”). Sam polanon zainstalujesz przyciskiem w Ustawieniach albo poleceniem `py -m pip install polanon`. Gdy na PyPI wyjdzie nowsza wersja, Ustawienia to pokażą i zaktualizują go jednym przyciskiem. Tam też jednym przyciskiem zainstalujesz model spaCy, a gdy wyjdzie nowe wydanie PolCV, zaktualizujesz sam program (przy kopii z `git clone`).
+- PolCV maskuje z polanonem 0.4.3 lub nowszym. Ze starszym maskowanie odmawia, a Ustawienia proszą o aktualizację tym samym przyciskiem.
+- W tekście po polsku model dopisuje do tokenu osoby przypadek (`<OSOBA_1:dopełniacz>`), więc w liście imię i nazwisko wraca odmienione: „dla Jana Kowalskiego”, a nie „dla Jan Kowalski”.
 - Bez Pythona i polanonu PolCV działa normalnie - to tylko dodatkowa ochrona.
-- Gdy maskowanie jest włączone, a polanon przestanie działać, program **nic nie wyśle** do AI i pokaże błąd.
+- Gdy maskowanie jest włączone, a polanon przestanie działać, program **nic nie wyśle** do AI i pokaże błąd. Tak samo, gdy ostatnia kontrola polanonu przed wysłaniem znajdzie w zamaskowanym tekście daną, która miała być ukryta. Komunikat podaje wtedy same tokeny (np. `<OSOBA_1>`), a przy błędzie polanonu samą nazwę błędu, nigdy fragmentu CV.
 - To pseudonimizacja, nie pełna anonimizacja: nie każdy szczegół da się wykryć (np. nazwa uczelni). Dokładniej działa z modelem spaCy: `py -m pip install "polanon[ner]"` i `py -m spacy download pl_core_news_md`.
 
 ## Udostępnianie koledze

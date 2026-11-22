@@ -36,7 +36,10 @@ supported.
 Masking is pseudonymisation, not anonymisation. With it switched on, what
 [polanon](https://github.com/boromat/polanon) detects (name, e-mail, phone, address, company
 names, profile links) is replaced with tokens before any text reaches the model, and when masking
-is on but polanon is not working, nothing is sent at all. A value polanon does not recognise is a
-detection gap rather than a bypass: report it in the polanon repository, with invented text of
-the same shape. A way past the masking that does not depend on PolCV goes privately to polanon, as
+is on but polanon is not working, nothing is sent at all. Before the text leaves, polanon's last
+check (`leaked_tokens`, polanon 0.4.3 or newer) looks for every masked value in it once more; if
+one is still there, nothing is sent either, and the error names only the tokens. Error messages
+from the masking name polanon's error by its type, never quoting the text. A value polanon does
+not recognise is a detection gap rather than a bypass: report it in the polanon repository, with
+invented text of the same shape. A way past the masking that does not depend on PolCV goes privately to polanon, as
 its [security policy](https://github.com/boromat/polanon/blob/main/SECURITY.md) describes.

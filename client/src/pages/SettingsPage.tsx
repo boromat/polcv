@@ -80,7 +80,11 @@ function PrivacyCard({ settings, onSave }: { settings: SettingsView; onSave: (p:
   const install = async () => {
     const commands = status?.installCommands?.polanon;
     if (!commands) return;
-    const question = status?.polanon && status.latest ? t('Zaktualizować polanon do wersji {version}?', { version: status.latest }) : t('Zainstalować polanon z PyPI?');
+    const question = !status?.polanon
+      ? t('Zainstalować polanon z PyPI?')
+      : status.latest
+        ? t('Zaktualizować polanon do wersji {version}?', { version: status.latest })
+        : t('Zaktualizować polanon z PyPI?');
     if (!confirm(question + '\n\n' + t('Program uruchomi: {command}', { command: commands.join('\n') }))) return;
     setInstalling(true);
     setInstallLog(null);
@@ -120,6 +124,8 @@ function PrivacyCard({ settings, onSave }: { settings: SettingsView; onSave: (p:
 
   const cmd = status?.command ?? 'python';
   const broken = settings.maskPii && status && !status.polanon;
+  // Starszy polanon niż ten, z którym PolCV maskuje: maskowanie odmawia, dopóki go nie zaktualizujesz.
+  const tooOld = !!status?.polanon && !!status.updateRequired;
   return (
     <div className="card stack">
       <div className="row between">
@@ -158,17 +164,24 @@ function PrivacyCard({ settings, onSave }: { settings: SettingsView; onSave: (p:
         </div>
       ) : (
         <div className="stack" style={{ gap: 8 }}>
+          {tooOld && (
+            <div className={`callout small ${settings.maskPii ? 'error' : 'warn'}`}>
+              {t('PolCV maskuje z polanonem {version} lub nowszym. Zaktualizuj go przyciskiem poniżej - do tego czasu przy włączonym maskowaniu nic nie zostanie wysłane do AI.', { version: status.required ?? '' })}
+            </div>
+          )}
           <div className="row" style={{ gap: 6 }}>
-            <span className="badge good">polanon {status.polanon}</span>
-            {status.updateAvailable ? (
+            <span className={`badge ${tooOld ? 'bad' : 'good'}`}>polanon {status.polanon}</span>
+            {tooOld ? (
+              <span className="badge bad">{t('wymagana {version}', { version: status.required ?? '' })}</span>
+            ) : status.updateAvailable ? (
               <span className="badge warn">{t('dostępna {version}', { version: status.latest ?? '' })}</span>
             ) : (
               status.latest && <span className="badge">{t('aktualna')}</span>
             )}
             <span className="badge">Python {status.python}</span>
-            {status.updateAvailable && (
-              <button className="btn sm" onClick={install} disabled={installing}>
-                {installing ? t('Aktualizuję… (do minuty)') : t('Zaktualizuj do {version}', { version: status.latest ?? '' })}
+            {(status.updateAvailable || tooOld) && (
+              <button className={`btn sm${tooOld ? ' primary' : ''}`} onClick={install} disabled={installing}>
+                {installing ? t('Aktualizuję… (do minuty)') : status.latest ? t('Zaktualizuj do {version}', { version: status.latest }) : t('Zaktualizuj polanon')}
               </button>
             )}
           </div>

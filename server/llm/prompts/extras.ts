@@ -58,6 +58,8 @@ export async function coverLetter(profile: Profile, posting: JobPosting, lang: '
     system: LETTER_SYSTEM(lang, genderForms(profile.pronouns)),
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}`,
     ctx,
+    // List po polsku: model pisze "dla <OSOBA_1:dopełniacz>" i imię wraca odmienione; po angielsku token bez zmian.
+    language: lang,
   });
 }
 

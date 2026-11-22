@@ -88,6 +88,22 @@ describe('Ustawienia: potwierdzenie komend', () => {
     expect(api.installPolanon).not.toHaveBeenCalled();
   });
 
+  it('za stary polanon: Ustawienia proszą o aktualizację także bez sieci, a serwer dostaje komendę pip', async () => {
+    api.polanonStatus.mockResolvedValue(polanon({ polanon: '0.4.2', required: '0.4.3', updateRequired: true, latest: null, updateAvailable: false }));
+    api.installPolanon.mockResolvedValue({ ok: true, output: '', status: polanon({ polanon: '0.4.3', required: '0.4.3', updateRequired: false }) });
+    confirmSpy.mockReturnValue(true);
+    render(<SettingsPage />);
+    expect(await screen.findByText('wymagana 0.4.3')).toBeTruthy();
+    expect(screen.getByText(/PolCV maskuje z polanonem 0\.4\.3 lub nowszym/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Zaktualizuj polanon' }));
+    const message = String(confirmSpy.mock.calls[0][0]);
+    expect(message).toContain('Zaktualizować polanon z PyPI?');
+    expect(message).toContain(`Program uruchomi: ${PIP[0]}`);
+    await waitFor(() => expect(api.installPolanon).toHaveBeenCalledWith(PIP));
+    expect(await screen.findByText('Gotowe: polanon 0.4.3.')).toBeTruthy();
+    expect(screen.queryByText('wymagana 0.4.3')).toBeNull();
+  });
+
   it('model spaCy: okno pokazuje obie komendy po kolei, a serwer dostaje dokładnie te dwie', async () => {
     api.polanonStatus.mockResolvedValue(polanon({ polanon: '0.2.0' }));
     api.installNer.mockResolvedValue({ ok: true, output: '', status: polanon({ polanon: '0.2.0', spacy: true, model: true }) });

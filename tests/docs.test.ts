@@ -47,6 +47,14 @@ describe('wersja Node.js', () => {
   });
 });
 
+describe('wymagany polanon', () => {
+  it('oba README i SECURITY.md podają tę samą najstarszą wersję polanonu, z którą program maskuje', () => {
+    const min = /export const MIN_POLANON = '([\d.]+)'/.exec(read('server/privacy/polanon.ts'))?.[1];
+    expect(min).toBeTruthy();
+    for (const doc of [...readmes, read('SECURITY.md')]) expect(doc).toMatch(new RegExp(`polanon\\p{L}* ${min!.replaceAll('.', '\\.')} (lub nowszym|or newer)`, 'u'));
+  });
+});
+
 describe('jak program przedstawia się stronom', () => {
   it('README nie podaje starej, stałej wersji', () => {
     for (const r of readmes) {

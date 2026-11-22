@@ -7,7 +7,7 @@ import type { Profile, Settings } from '../../shared/schemas';
 import { HttpError } from '../storage/store';
 import { collectStrings, replaceStrings } from '../llm/strings';
 import { latestVersionFrom } from '../jobs/http';
-import { tr } from '../i18n';
+import { tr, type Lang } from '../i18n';
 import { commandLine, requireConfirmed, runCommand } from '../commands';
 
 /**
@@ -21,6 +21,15 @@ const ENV = { ...process.env, PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1' };
 const MIN_PYTHON = [3, 11];
 /** Token polanonu, także z przypadkiem po dwukropku, `<OSOBA_1:celownik>` (polanon 0.4, jego CASED_TOKEN_PATTERN). */
 const TOKEN = /<[A-Z_]+_\d+(?::\p{L}+)?>/gu;
+/**
+ * Najstarszy polanon, z którym PolCV maskuje: notka o tokenach z przypadkiem (token_instructions, od 0.4.0), ostatnia
+ * kontrola przed wysłaniem (leaked_tokens, od 0.4.2) i jej dwie poprawki z 0.4.3 (słowo po dwukropku tokenu, wartość
+ * w nawiasach ostrych). Ze starszym maskowanie odmawia, a Ustawienia proszą o aktualizację.
+ */
+export const MIN_POLANON = '0.4.3';
+
+/** Czy zainstalowany polanon jest starszy niż MIN_POLANON (bez polanonu albo przy nieczytelnym numerze false). */
+export const polanonTooOld = (installed: string | null) => !!installed && isNewer(MIN_POLANON, installed);
 
 /** Dokładne komendy, które Ustawienia pokazują przed instalacją i które serwer uruchamia po potwierdzeniu. */
 export interface InstallCommands {
@@ -37,11 +46,15 @@ export interface PolanonStatus {
   spacy: boolean;
   model: boolean;
   error: string;
+  /** Najstarsza wersja polanonu, z którą PolCV maskuje (MIN_POLANON). */
+  required: string;
+  /** Zainstalowany polanon jest starszy niż `required`: maskowanie odmawia do aktualizacji. */
+  updateRequired: boolean;
   /** null, gdy nie ma Pythona, którym dałoby się instalować */
   installCommands: InstallCommands | null;
 }
 
-type Found = Omit<PolanonStatus, 'installCommands'> & { cmd: string[] };
+type Found = Omit<PolanonStatus, 'installCommands' | 'required' | 'updateRequired'> & { cmd: string[] };
 
 const POLANON_STEP = ['-m', 'pip', 'install', '--upgrade', 'polanon'];
 const NER_STEPS = [
@@ -131,7 +144,12 @@ async function findPython(pythonPath: string): Promise<Found> {
         old ||= tr('{command} to Python {version}', { command: cmd.join(' '), version: info.python });
         continue;
       }
-      return { ...info, cmd, command: cmd.join(' '), error: info.polanon ? '' : tr('Pakiet polanon nie jest zainstalowany.') };
+      const error = !info.polanon
+        ? tr('Pakiet polanon nie jest zainstalowany.')
+        : polanonTooOld(info.polanon)
+          ? tr('polanon {version} jest za stary: PolCV potrzebuje wersji {required} lub nowszej. Zaktualizuj go w Ustawieniach.', { version: info.polanon, required: MIN_POLANON })
+          : '';
+      return { ...info, cmd, command: cmd.join(' '), error };
     } catch {
       /* to nie nasz skrypt odpowiedział - próbujemy dalej */
     }
@@ -142,7 +160,7 @@ async function findPython(pythonPath: string): Promise<Found> {
 
 export async function polanonStatus(settings: Settings): Promise<PolanonStatus> {
   const { cmd, ...status } = await findPython(settings.pythonPath);
-  return { ...status, installCommands: status.python ? installCommands(cmd) : null };
+  return { ...status, required: MIN_POLANON, updateRequired: polanonTooOld(status.polanon), installCommands: status.python ? installCommands(cmd) : null };
 }
 
 /** Najnowsza wersja polanonu na PyPI. */
@@ -208,9 +226,20 @@ export async function installPolanon(settings: Settings, confirmed: unknown): Pr
 
 type Pending = { resolve: (v: any) => void; reject: (e: Error) => void; timer: NodeJS.Timeout };
 
+/**
+ * Sama nazwa wyjątku z ostatniej linii stderr ("KeyError: 'Kowalski'" -> "KeyError"), bez jego treści: ta potrafi
+ * zacytować kawałek CV, a komunikat trafia do interfejsu i do logu. Linia, która nie jest wyjątkiem, daje "".
+ */
+export function errorType(stderr: string): string {
+  const last = stderr.trim().split('\n').at(-1)?.trim() ?? '';
+  return /^([A-Za-z_][\w.]*(?:Error|Exception|Interrupt|Exit))(?::|$)/.exec(last)?.[1] ?? '';
+}
+
 class Bridge {
   readonly key: string;
   dead = false;
+  /** Notka polanonu o tokenach (token_instructions) do promptu systemowego, z wiadomości "ready". */
+  notes: Record<Lang, string> = { pl: '', en: '' };
   private child: ChildProcessWithoutNullStreams;
   private pending = new Map<number, Pending>();
   private nextId = 1;
@@ -242,13 +271,15 @@ class Bridge {
         if ('ready' in msg) {
           clearTimeout(startTimer);
           if (!msg.ready) this.dead = true;
+          else this.notes = msg.notes;
           return msg.ready ? resolve() : reject(new Error(msg.error));
         }
         const p = this.pending.get(msg.id);
         if (!p) return;
         this.pending.delete(msg.id);
         clearTimeout(p.timer);
-        if (msg.error) p.reject(new Error(msg.error));
+        // Mostek podaje samą nazwę wyjątku, bez treści, która mogłaby zacytować CV.
+        if (msg.error) p.reject(new Error(tr('polanon zgłosił błąd {error}', { error: String(msg.error) })));
         else p.resolve(msg);
       });
       const die = (e: Error) => {
@@ -262,9 +293,11 @@ class Bridge {
         this.pending.clear();
       };
       this.child.on('error', die);
-      this.child.on('exit', (code) =>
-        die(new Error(`${tr('proces polanon zakończył się (kod {code})', { code: String(code) })}${stderr.trim() ? `: ${stderr.trim().split('\n').at(-1)}` : ''}`)),
-      );
+      // 'close', a nie 'exit': dopiero wtedy stderr jest przeczytany do końca, z nazwą wyjątku w ostatniej linii.
+      this.child.on('close', (code) => {
+        const type = errorType(stderr);
+        die(new Error(`${tr('proces polanon zakończył się (kod {code})', { code: String(code) })}${type ? `: ${type}` : ''}`));
+      });
     });
     this.ready.catch(() => {}); // błąd startu zgłasza call(), a nie "unhandled rejection"
   }
@@ -305,7 +338,8 @@ function getBridge(settings: Settings): Promise<Bridge> {
   starting ??= (async () => {
     stopBridge();
     const found = await findPython(settings.pythonPath);
-    if (!found.polanon) throw new Error(found.error);
+    // Bez polanonu albo ze starszym niż MIN_POLANON: błąd z findPython mówi, co zrobić.
+    if (!found.polanon || found.error) throw new Error(found.error);
     return (bridge = new Bridge(found.cmd, settings.maskPiiNer, key));
   })().finally(() => (starting = null));
   return starting;
@@ -313,12 +347,13 @@ function getBridge(settings: Settings): Promise<Bridge> {
 
 // ---------- Maskowanie zapytań do AI ----------
 
-export const TOKENS_NOTE = `
-
-Dane osobowe w treści są zastąpione tokenami w nawiasach ostrych, np. <OSOBA_1>, <EMAIL_1>, <TELEFON_1>, <LINK_1>, <FIRMA_1>. Traktuj token jak prawdziwą, podaną wartość (np. imię i nazwisko są w CV). Gdy jej potrzebujesz, przepisz token dokładnie tak, jak jest zapisany - bez odmiany, bez zmian liter i bez spacji w środku. Nie twórz nowych tokenów.`;
-
 export interface Masked {
   text: string;
+  /**
+   * Notka polanonu o tokenach (token_instructions) do promptu systemowego, w języku tekstu, który pisze model.
+   * Po polsku prosi o przypadek po dwukropku (`dla <OSOBA_1:dopełniacz>`), a restore wstawia imię i nazwisko odmienione.
+   */
+  notes: Record<Lang, string>;
   /** Wstawia oryginalne wartości z powrotem do wszystkich tekstów w odpowiedzi AI. */
   restore<T>(value: T): Promise<T>;
 }
@@ -383,16 +418,20 @@ export function profileTerms(profile: Profile | null): ProfileTerm[] {
 
 export async function maskForAi(text: string, settings: Settings, terms: ProfileTerm[] = []): Promise<Masked> {
   let b: Bridge;
-  let res: { text: string; mapping: Record<string, string> };
+  let res: { text: string; mapping: Record<string, string>; leaked?: string[] };
   try {
     b = await getBridge(settings);
     res = await b.call({ op: 'mask', text, terms });
   } catch (e) {
     throw unavailable(e);
   }
+  // Ostatnia kontrola polanonu (leaked_tokens) znalazła w zamaskowanym tekście wartość z mapowania: nic nie wychodzi,
+  // a komunikat podaje same tokeny, nigdy wartości.
+  if (res.leaked?.length) throw unavailable(new Error(tr('ostatnia kontrola przed wysłaniem znalazła w tekście niezamaskowane wartości tokenów {tokens}', { tokens: res.leaked.join(', ') })));
   const mapping = res.mapping;
   return {
     text: res.text,
+    notes: b.notes,
     async restore<T>(value: T): Promise<T> {
       if (!Object.keys(mapping).length) return value;
       const texts: string[] = [];

@@ -13,9 +13,10 @@ const { profile } = await import('./fixtures');
 const { collectStrings, replaceStrings } = await import('../server/llm/strings');
 const store = await import('../server/storage/store');
 
-// polanon jest opcjonalny: testy z prawdziwym pakietem idą tylko tam, gdzie jest zainstalowany.
+// polanon jest opcjonalny: testy z prawdziwym pakietem idą tylko tam, gdzie jest zainstalowany w wersji, z którą PolCV
+// maskuje. Ze starszym maskowanie odmawia tak samo jak bez polanonu.
 const status = await polanonStatus(store.DEFAULT_SETTINGS);
-const withPolanon = !!status.polanon;
+const withPolanon = !!status.polanon && !status.updateRequired;
 
 afterAll(() => {
   vi.unstubAllGlobals();
@@ -79,7 +80,7 @@ describe('dane z profilu, które polanon maskuje zawsze', () => {
   });
 });
 
-describe.skipIf(withPolanon)('maskowanie włączone, ale bez polanonu', () => {
+describe.skipIf(withPolanon)('maskowanie włączone, ale bez polanonu albo ze starszym niż wymagany', () => {
   it('nic nie wychodzi do AI, tylko jasny błąd', async () => {
     await store.saveSettings({ apiKey: 'sk-test-key', maskPii: true });
     const fetchSpy = vi.fn();

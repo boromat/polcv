@@ -162,6 +162,8 @@ export const EN: Record<string, string> = {
   // privacy/polanon.ts (stan i błędy pokazywane w Ustawieniach)
   '{command} to Python {version}': '{command} is Python {version}',
   'Pakiet polanon nie jest zainstalowany.': 'The polanon package is not installed.',
+  'polanon {version} jest za stary: PolCV potrzebuje wersji {required} lub nowszej. Zaktualizuj go w Ustawieniach.':
+    'polanon {version} is too old: PolCV needs version {required} or newer. Update it in Settings.',
   'polanon wymaga Pythona 3.11 lub nowszego ({found}).': 'polanon needs Python 3.11 or newer ({found}).',
   'Nie znaleziono Pythona 3.11+.': 'Python 3.11+ was not found.',
   'polanon nie wystartował w ciągu {seconds} s': 'polanon did not start within {seconds} s',
@@ -173,6 +175,9 @@ export const EN: Record<string, string> = {
   'proces polanon zakończył się (kod {code})': 'the polanon process exited (code {code})',
   'proces polanon nie działa': 'the polanon process is not running',
   'polanon nie odpowiedział w ciągu 120 s': 'polanon did not respond within 120 s',
+  'polanon zgłosił błąd {error}': 'polanon reported the error {error}',
+  'ostatnia kontrola przed wysłaniem znalazła w tekście niezamaskowane wartości tokenów {tokens}':
+    'the last check before sending found the values of the tokens {tokens} unmasked in the text',
   'Maskowanie danych osobowych (polanon) jest włączone, ale nie działa: {error}. Nic nie zostało wysłane do AI. Napraw to w Ustawieniach albo wyłącz maskowanie.':
     'Personal data masking (polanon) is turned on but is not working: {error}. Nothing was sent to the AI. Fix it in Settings or turn masking off.',
 

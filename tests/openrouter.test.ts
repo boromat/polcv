@@ -131,3 +131,68 @@ describe('klient OpenRouter', () => {
     expect(sent[1].messages[0].content).not.toContain('półpauzy');
   });
 });
+
+// Maskowanie z prawdziwym polanonem: jest opcjonalny, więc te testy idą tam, gdzie jest zainstalowany w wersji, z którą
+// PolCV maskuje (w CI osobne zadanie "Maskowanie danych z polanon"). Dane FIKCYJNE: ta osoba nie istnieje.
+const polanon = await (await import('../server/privacy/polanon')).polanonStatus((await import('../server/storage/store')).DEFAULT_SETTINGS);
+const withPolanon = !!polanon.polanon && !polanon.updateRequired;
+
+describe.skipIf(!withPolanon)('maskowanie przez polanon: notka o tokenach i tokeny z przypadkiem', () => {
+  const user = 'Kandydatka: Zofia Żółkiewska, e-mail zofia.zolkiewska@example.com. Umiejętności: SQL, Power BI.';
+  const callMasked = async (language?: 'pl' | 'en') => {
+    const { callJson } = await import('../server/llm/openrouter');
+    return callJson({ schema: Schema, schemaName: 'test', system: 's', user, tier: 'fast', ctx: { profileId: '', task: 'test' }, language });
+  };
+  /** Notki polanonu (token_instructions) z mostka, po polsku i po angielsku. */
+  const polanonNotes = async () => {
+    const { maskForAi } = await import('../server/privacy/polanon');
+    const store = await import('../server/storage/store');
+    return (await maskForAi('Kandydatka: Zofia Żółkiewska', { ...store.DEFAULT_SETTINGS, maskPii: true })).notes;
+  };
+
+  beforeAll(async () => {
+    const store = await import('../server/storage/store');
+    await store.saveSettings({ maskPii: true });
+  });
+  afterAll(async () => {
+    const store = await import('../server/storage/store');
+    await store.saveSettings({ maskPii: false });
+  });
+
+  it('list po polsku: notka polanonu prosi o przypadek, a imię i nazwisko wraca odmienione', async () => {
+    const { withLang } = await import('../server/i18n');
+    replies = [ok(JSON.stringify({ name: 'List od <OSOBA_1:dopełniacz>. Szanowna Pani <OSOBA_1:wołacz>, dziękuję.', score: 1 }))];
+    const out = await withLang('pl', () => callMasked());
+    expect(out.name).toBe('List od Zofii Żółkiewskiej. Szanowna Pani Zofio Żółkiewska, dziękuję.');
+
+    const notes = await polanonNotes();
+    expect(notes.pl).toMatch(/<OSOBA_1:\p{L}+>/u); // po polsku polanon prosi o przypadek po dwukropku
+    expect(sent[0].messages[0].content).toContain(notes.pl);
+    expect(sent[0].messages[1].content).toContain('<OSOBA_1>');
+    expect(JSON.stringify(sent[0].messages)).not.toMatch(/Żółkiewska|zofia\.zolkiewska@example\.com/);
+  });
+
+  it('angielski interfejs: notka po angielsku, bez prośby o przypadek; list po polsku dostaje polską', async () => {
+    const { withLang } = await import('../server/i18n');
+    replies = [ok('{"name":"<OSOBA_1>","score":1}'), ok('{"name":"<OSOBA_1>","score":1}'), ok('{"name":"<OSOBA_1>","score":1}')];
+    expect(await withLang('en', () => callMasked())).toEqual({ name: 'Zofia Żółkiewska', score: 1 });
+    await withLang('en', () => callMasked('pl'));
+    await withLang('pl', () => callMasked('en'));
+
+    const notes = await polanonNotes();
+    expect(notes.en).not.toMatch(/<OSOBA_1:\p{L}+>/u);
+    const systems = sent.map((body) => body.messages[0].content as string);
+    expect(systems.map((s) => (s.includes(notes.pl) ? 'pl' : s.includes(notes.en) ? 'en' : '?'))).toEqual(['en', 'pl', 'en']);
+  });
+
+  it('token z przypadkiem, którego nie ma w mapowaniu, liczy się do ostrzeżenia o nieznanych tokenach', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    replies = [ok(JSON.stringify({ name: 'Od <OSOBA_1:dopełniacz> i <OSOBA_7:dopełniacz>', score: 1 }))];
+    try {
+      expect((await callMasked('pl')).name).toBe('Od Zofii Żółkiewskiej i <OSOBA_7:dopełniacz>');
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('zostało 1 tokenów'));
+    } finally {
+      warn.mockRestore();
+    }
+  });
+});
