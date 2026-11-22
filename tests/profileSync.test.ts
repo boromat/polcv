@@ -17,6 +17,16 @@ describe('daty z CV w formacie profilu', () => {
   it.each(['lato 2024', '07.2025', '13.2024 - 01.2025', ''])('"%s" to nie zakres dat', (text) => {
     expect(parseCvDates(text)).toBeNull();
   });
+
+  it.each([' 07.2025   \u2013   09.2025 ', '07.2025-09.2025', '07.2025 -  - 09.2025'])('odstępy wokół myślnika nie zmieniają dat: "%s"', (text) => {
+    expect(parseCvDates(text)).toEqual({ start: '2025-07', end: '2025-09', current: false });
+  });
+
+  it('długi ciąg spacji przechodzi w czasie liniowym (CodeQL js/polynomial-redos)', () => {
+    const start = performance.now();
+    expect(parseCvDates('03.2024' + ' '.repeat(50_000) + 'x')).toBeNull();
+    expect(performance.now() - start).toBeLessThan(200);
+  });
 });
 
 describe('poprawki w CV trafiają do profilu', () => {

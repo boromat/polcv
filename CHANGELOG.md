@@ -13,6 +13,10 @@ All notable changes to PolCV are recorded here. The format follows
   it, started again at every dot and took quadratic time: 50,000 dots took 3.5 seconds, and the
   text of a posting comes from the internet. The edges are now trimmed with a loop, with the same
   result. Found by CodeQL (js/polynomial-redos).
+- **A CV date with a long run of spaces no longer stalls the app.** `parseCvDates` split a date
+  range on a dash with `\s*` on both sides, which on a long run of spaces with no dash after it
+  took quadratic time: 50,000 spaces took 1.4 seconds. The range is now split on the dash alone and
+  each part trimmed, with the same result. Found by CodeQL (js/polynomial-redos).
 
 ## [1.4.2] - 2026-11-20
 

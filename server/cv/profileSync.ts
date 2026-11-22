@@ -17,7 +17,9 @@ function profileDate(s: string): string | null {
 
 /** "03.2024 - 06.2025", "09/2023 - present" → daty profilu; null, gdy to nie jest czytelny zakres. */
 export function parseCvDates(s: string): { start: string; end: string; current: boolean } | null {
-  const parts = s.split(/\s*[-\u2013\u2014]\s*/).filter(Boolean);
+  // Podzia\u0142 po samym my\u015blniku i trim cz\u0119\u015bci: \s* po obu stronach my\u015blnika w wyra\u017ceniu sprawdza\u0142o d\u0142ugi
+  // ci\u0105g spacji od ka\u017cdej spacji od nowa, czyli w czasie kwadratowym.
+  const parts = s.split(/[-\u2013\u2014]/).map((part) => part.trim()).filter(Boolean);
   if (parts.length !== 2) return null;
   const start = profileDate(parts[0]);
   if (!start) return null;
