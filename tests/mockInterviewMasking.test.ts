@@ -32,7 +32,8 @@ vi.mock('../server/privacy/polanon', async (importOriginal) => {
         });
       const swap = (s: string) => Object.entries(mapping).reduce((acc, [k, v]) => acc.split(k).join(v), s);
       const restore = <T,>(v: T): T => JSON.parse(swap(JSON.stringify(v)));
-      return { text: out, restore: async <T,>(v: T) => restore(v) };
+      const notes = { pl: 'Dane osobowe są zastąpione tokenami, np. <OSOBA_1>.', en: 'Personal data is replaced by tokens such as <OSOBA_1>.' };
+      return { text: out, notes, restore: async <T,>(v: T) => restore(v) };
     },
   };
 });

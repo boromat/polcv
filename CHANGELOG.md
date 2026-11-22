@@ -6,8 +6,36 @@ All notable changes to PolCV are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- **Masking needs polanon 0.4.3 or newer.** PolCV now takes the note about tokens and the last
+  check before sending from polanon itself (`token_instructions`, `leaked_tokens`), and 0.4.3 is
+  the first release whose last check reads a word after a token's colon and a value written in
+  angle brackets. With an older polanon masking refuses, as it does without polanon, and Settings
+  marks the version as too old and offers the update, the same `pip install --upgrade polanon`,
+  also when PyPI cannot be reached.
+
+### Fixed
+
+- **A name in a Polish cover letter comes back in the right case.** The note about tokens asked
+  the model to copy `<OSOBA_1>` without inflecting it, so "dla <OSOBA_1>" was restored as "dla Jan
+  Kowalski". The system prompt now carries polanon's own note, which asks for the case after a
+  colon, "dla <OSOBA_1:dopełniacz>", and polanon's restore declines the name: "dla Jana
+  Kowalskiego". The note follows the language the model writes in: a cover letter and a CV their
+  own, everything else the language of the interface. In English the model copies the token
+  unchanged.
+
 ### Security
 
+- **Nothing leaves when polanon's last check finds a hidden value in the masked text.** After
+  masking, the bridge runs `polanon.leaked_tokens` on the text about to be sent. If a value of the
+  mapping is still in it, the call is refused like a masking failure (503, nothing sent to the AI),
+  and the message names only the tokens, never the values.
+- **A masking error no longer quotes the CV.** The bridge replied with the exception and its
+  message, such as `KeyError: 'Kowalski'`, which reached the 503 message in the interface and the
+  log, and a bridge that stopped added the last line of its error output. Both now name only the
+  exception's type, as polanon's own `MaskedTurn` does. A missing package or model is still named
+  when the bridge starts.
 - **A posting with a long run of dots no longer stalls the app.** `normalize` trimmed dots and
   slashes at the edges of words with a lookahead that, on a long run of dots with no space after
   it, started again at every dot and took quadratic time: 50,000 dots took 3.5 seconds, and the

@@ -294,6 +294,11 @@ export const profile: Record<string, string> = {
   'Aktualizuję… (do minuty)': 'Updating… (up to a minute)',
   'Zaktualizuj do {version}': 'Update to {version}',
   'Gotowe: polanon {version}.': 'Done: polanon {version}.',
+  'Zaktualizować polanon z PyPI?': 'Update polanon from PyPI?',
+  'Zaktualizuj polanon': 'Update polanon',
+  'wymagana {version}': '{version} required',
+  'PolCV maskuje z polanonem {version} lub nowszym. Zaktualizuj go przyciskiem poniżej - do tego czasu przy włączonym maskowaniu nic nie zostanie wysłane do AI.':
+    'PolCV masks with polanon {version} or newer. Update it with the button below: until then, nothing is sent to the AI while masking is on.',
   'Jak się określasz?': 'How do you refer to yourself?',
   'on': 'he (on)',
   'ona': 'she (ona)',

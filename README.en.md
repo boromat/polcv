@@ -116,9 +116,14 @@ $0.05-0.15. The Settings page lists the models and shows what you have spent.
   any text reaches the model, and put the originals back into its answer. The Settings page can
   install it for you, shows when a newer version is on PyPI so you can update it with one
   click, and installs the spaCy model with another. It also offers to update PolCV itself when a
-  newer release is out (for copies made with `git clone`). PolCV works the same without it; when masking is on but polanon is not
-  working, nothing is sent at all. Masking is pseudonymisation, not anonymisation - see polanon's
-  threat model.
+  newer release is out (for copies made with `git clone`). PolCV masks with polanon 0.4.3 or newer;
+  with an older one masking refuses and Settings asks you to update it with the same button. In
+  Polish text the model adds a case to a person's token (`<OSOBA_1:dopełniacz>`), so a cover letter
+  gets the name declined ("dla Jana Kowalskiego", not "dla Jan Kowalski"). PolCV works the same
+  without it; when masking is on but polanon is not working, or polanon's last check before
+  sending finds a hidden value left in the masked text, nothing is sent at all, and the message
+  names only the tokens, or only the type of polanon's error, never a piece of the CV. Masking is
+  pseudonymisation, not anonymisation - see polanon's threat model.
 
 ## Generation quality
 

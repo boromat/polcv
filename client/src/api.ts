@@ -68,6 +68,10 @@ export interface PolanonStatus {
   /** najnowsza wersja na PyPI (null bez sieci) */
   latest?: string | null;
   updateAvailable?: boolean;
+  /** najstarsza wersja polanonu, z którą PolCV maskuje */
+  required?: string;
+  /** zainstalowany polanon jest starszy niż `required`: maskowanie odmawia do aktualizacji */
+  updateRequired?: boolean;
 }
 
 /** Wersja PolCV i najnowsze wydanie na GitHubie; canSelfUpdate = kopia z git clone (aktualizacja przyciskiem). */

@@ -43,6 +43,7 @@ export async function generateCv(
     system: SYSTEM(lang, genderForms(profile.pronouns)),
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nNapisz CV (language="${lang}").`,
     ctx,
+    language: lang,
   });
   return groundCv(content, profile, { lang, confirmed, names: numberedNames(posting), keywords: posting.keywords });
 }
@@ -86,6 +87,7 @@ export async function improveCv(
     system: SYSTEM(lang, genderForms(profile.pronouns)) + IMPROVE_EXTRA(),
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nOBECNE CV:\n${json(current)}\n\nPLAN POPRAWEK (wybrany przez kandydata):\n${json(planForPrompt(plan))}\n\nZwróć listę zmian.`,
     ctx,
+    language: lang,
   });
   const applied = applyEdits(current, edits, allowed, freshId);
   // Liczby z punktów, które kandydat już zaakceptował, są potwierdzone; sprawdzamy tylko teksty, które AI zmieniło.
@@ -116,6 +118,7 @@ export async function syncCv(profile: Profile, posting: JobPosting, current: CvC
     system: SYSTEM(lang, genderForms(profile.pronouns)) + SYNC_EXTRA(),
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nOBECNE CV:\n${json(current)}\n\nNOWE W PROFILU:\n${json(news)}\n\nZwróć CV uzupełnione o trafne nowości z profilu.`,
     ctx,
+    language: lang,
   });
   return groundCv(content, profile, { lang, confirmed: factTexts(current), names: numberedNames(posting), keywords: posting.keywords, current });
 }
@@ -141,6 +144,7 @@ export async function instructCv(profile: Profile, posting: JobPosting, current:
     system: SYSTEM(lang, genderForms(profile.pronouns)) + INSTRUCT_EXTRA(),
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nOBECNE CV:\n${json(current)}\n\nPOLECENIE:\n"""\n${instruction}\n"""`,
     ctx,
+    language: lang,
   });
   return groundCv(content, profile, { lang, confirmed: factTexts(current), names: numberedNames(posting), keywords: posting.keywords, current });
 }
@@ -174,6 +178,7 @@ export async function shortenCv(
     system: SYSTEM(lang, genderForms(profile.pronouns)) + SHORTEN_EXTRA(cut),
     user: `OGŁOSZENIE:\n${json(postingForPrompt(posting))}\n\nPROFIL KANDYDATA:\n${json(profileForPrompt(profile))}\n\nOBECNE CV:\n${json(current)}\n\nSkróć CV, żeby zmieściło się na jednej stronie.`,
     ctx,
+    language: lang,
   });
   return groundCv(content, profile, { lang, confirmed: [...confirmed, ...factTexts(current)], names: numberedNames(posting), keywords: posting.keywords, current });
 }

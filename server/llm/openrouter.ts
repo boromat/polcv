@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { appendUsage, envApiKey, getProfile, getSettings, HttpError, nowIso } from '../storage/store';
-import { maskForAi, profileTerms, TOKENS_NOTE, type ProfileTerm } from '../privacy/polanon';
+import { maskForAi, profileTerms, type ProfileTerm } from '../privacy/polanon';
 import { cleanTail, plainDashes } from './strings';
-import { tr } from '../i18n';
+import { lang, tr, type Lang } from '../i18n';
 import { errorMessage } from '../../shared/errors';
 
 const API = 'https://openrouter.ai/api/v1';
@@ -28,6 +28,11 @@ export interface CallOptions<T> {
   retryTemperature?: number;
   /** Dane do maskowania zawsze, których nie ma w profilu, np. login z GitHuba wpisany przy imporcie projektów. */
   terms?: ProfileTerm[];
+  /**
+   * Język tekstu, który model pisze, np. listu albo CV; wybiera notkę polanonu o tokenach przy maskowaniu.
+   * Po polsku model dopisuje do tokenu osoby przypadek, po angielsku przepisuje token bez zmian. Domyślnie język interfejsu.
+   */
+  language?: Lang;
 }
 
 const DASH_NOTE = `
@@ -197,7 +202,8 @@ export async function callJson<T>(opts: CallOptions<T>): Promise<T> {
   // Do zwracania JSON-a niepotrzebne, więc je wyłączamy; modele, które muszą myśleć, dostają niski poziom (niżej).
   let reasoning: Record<string, unknown> | null = params?.has('reasoning') ? { enabled: false } : null;
 
-  let system = `${opts.system}${masked ? TOKENS_NOTE : ''}${opts.verbatim ? '' : DASH_NOTE}
+  const tokensNote = masked ? `\n\n${masked.notes[opts.language ?? lang()]}` : '';
+  let system = `${opts.system}${tokensNote}${opts.verbatim ? '' : DASH_NOTE}
 
 Zwróć WYŁĄCZNIE jeden obiekt JSON zgodny z podanym schematem, bez komentarzy i bez bloków markdown.`;
   let useSchema = true;
