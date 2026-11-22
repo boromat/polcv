@@ -21,9 +21,23 @@ export function normalize(s: string): string {
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9+#./ ]+/g, ' ')
-    .replace(/(^|\s)[./]+|[./]+(?=\s|$)/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+    .split(' ')
+    .map(trimDotsAndSlashes)
+    .filter(Boolean)
+    .join(' ');
+}
+
+/**
+ * Kropki i ukośniki z brzegów słowa ("koniec.", "./x") odpadają, te w środku ("node.js") zostają.
+ * Pętla zamiast wyrażenia z lookahead: tamto przy długim ciągu kropek bez spacji za nim zaczynało od
+ * każdej kropki od nowa i działało w czasie kwadratowym, a normalize czyta też tekst ogłoszenia z sieci.
+ */
+function trimDotsAndSlashes(word: string): string {
+  let start = 0;
+  let end = word.length;
+  while (start < end && (word[start] === '.' || word[start] === '/')) start++;
+  while (end > start && (word[end - 1] === '.' || word[end - 1] === '/')) end--;
+  return word.slice(start, end);
 }
 
 // Separatory: , ; | ( ) [ ] punktory, nowa linia, myślnik lub ukośnik ze spacjami, dwukropek, koniec zdania przed wielką literą.

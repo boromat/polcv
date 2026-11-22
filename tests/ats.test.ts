@@ -37,6 +37,18 @@ describe('normalizacja i tokeny', () => {
     expect(normalize('Zażółć Gęślą JAŹŃ, C++ i Node.js')).toBe('zazolc gesla jazn c++ i node.js');
   });
 
+  it('zdejmuje kropki i ukośniki z brzegów słów, a w środku je zostawia', () => {
+    expect(normalize('...start .NET end. a/b/ ./x/. node.js')).toBe('start net end a/b x node.js');
+  });
+
+  it('długi ciąg kropek przechodzi w czasie liniowym (CodeQL js/polynomial-redos)', () => {
+    // Tekst ogłoszenia przychodzi z internetu, a wyrażenie z lookahead sprawdzało każdą kropkę od nowa.
+    const word = 'a' + '.'.repeat(50_000) + 'b';
+    const start = performance.now();
+    expect(normalize(word)).toBe(word);
+    expect(performance.now() - start).toBeLessThan(200);
+  });
+
   it.each([
     ['Google Docs, Ads Manager', ['google', 'docs', BREAK, 'ads', 'manager']],
     ['Excel; Word | PowerPoint', ['excel', BREAK, 'word', BREAK, 'powerpoint']],
