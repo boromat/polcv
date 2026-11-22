@@ -6,6 +6,14 @@ All notable changes to PolCV are recorded here. The format follows
 
 ## [Unreleased]
 
+### Security
+
+- **A posting with a long run of dots no longer stalls the app.** `normalize` trimmed dots and
+  slashes at the edges of words with a lookahead that, on a long run of dots with no space after
+  it, started again at every dot and took quadratic time: 50,000 dots took 3.5 seconds, and the
+  text of a posting comes from the internet. The edges are now trimmed with a loop, with the same
+  result. Found by CodeQL (js/polynomial-redos).
+
 ## [1.4.2] - 2026-11-20
 
 ### Security
