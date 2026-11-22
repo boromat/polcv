@@ -6,6 +6,8 @@ All notable changes to PolCV are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.4.3] - 2026-11-22
+
 ### Changed
 
 - **Masking needs polanon 0.4.3 or newer.** PolCV now takes the note about tokens and the last
@@ -422,7 +424,8 @@ All notable changes to PolCV are recorded here. The format follows
 First public release: a CV tailored to one job posting, scored the way an ATS and an AI recruiter
 would, with a career advisor, interview prep, cover letters and optional masking with polanon.
 
-[Unreleased]: https://github.com/boromat/polcv/compare/v1.4.2...HEAD
+[Unreleased]: https://github.com/boromat/polcv/compare/v1.4.3...HEAD
+[1.4.3]: https://github.com/boromat/polcv/compare/v1.4.2...v1.4.3
 [1.4.2]: https://github.com/boromat/polcv/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/boromat/polcv/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/boromat/polcv/compare/v1.3.1...v1.4.0
