@@ -6,6 +6,18 @@ All notable changes to PolCV are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- **A nofluffjobs offer with a choice of contracts is no longer dropped for the one the search
+  results show.** nofluffjobs search results give one contract and pay range per offer, so an
+  offer for "umowa zlecenie or umowa o dzieło" came in as umowa o dzieło alone and was filtered out
+  for someone who wants umowa zlecenie (and as 55 PLN a month, when the hourly rate sat under the
+  other contract). When a nofluffjobs offer is filtered out by contract or pay, the app now reads
+  the offer's own page, which lists every contract and pay range, and checks it again: up to 10
+  offers per role, one page at a time. An offer whose page cannot be read stays filtered out as
+  before. Pay ranges per day or per year are now labelled as such instead of "/ mies.", and
+  umowa o dzieło is named in full instead of "uod".
+
 ## [1.4.3] - 2026-11-22
 
 ### Changed

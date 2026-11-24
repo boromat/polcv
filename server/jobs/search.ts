@@ -58,6 +58,10 @@ export function mapContract(raw: string): string {
 
 const NF_LEVELS: Record<Seniority, string> = { staż: 'trainee,junior', junior: 'trainee,junior', mid: 'junior,mid' };
 const NF_CONTRACT: Record<string, string> = { permanent: 'umowa o pracę', b2b: 'B2B', zlecenie: 'umowa zlecenie', mandate: 'umowa zlecenie', internship: 'staż / praktyki' };
+const NF_PERIOD: Record<string, string> = { Hour: 'godz.', Day: 'dzień', Year: 'rok' };
+const nfContract = (type: string) => NF_CONTRACT[type] ?? mapContract(type);
+const nfSalary = (from: number, to: number, currency: string, period: string | undefined, type: string) =>
+  `${from}-${to} ${currency} / ${NF_PERIOD[period ?? ''] ?? 'mies.'} (${nfContract(type)})`;
 
 /**
  * Oferty z nofluffjobs. Z `near` zostają tylko oferty z biurem w promieniu `km` od punktu
@@ -91,9 +95,9 @@ export function parseNofluff(html: string, near?: { point: Point; km: number }):
       location,
       workModes: remote ? ['zdalna'] : ['stacjonarna / hybrydowa'],
       workTime: '',
-      salary: s?.from ? `${s.from}-${s.to} ${s.currency} / ${s.period === 'Hour' ? 'godz.' : 'mies.'} (${NF_CONTRACT[s.type] ?? s.type})` : '',
+      salary: s?.from ? nfSalary(s.from, s.to, s.currency, s.period, s.type) : '',
       salaryMonthly: s?.to && s.currency === 'PLN' ? toMonthly(s.to, s.period ?? 'Month') : null,
-      contracts: s?.type ? [NF_CONTRACT[s.type] ?? mapContract(s.type)] : [],
+      contracts: s?.type ? [nfContract(s.type)] : [],
       seniority: (p.seniority ?? []).join(' / '),
       skills: (p.tiles?.values ?? []).filter((t: any) => t.type === 'requirement').map((t: any) => t.value).slice(0, 8),
       url,
@@ -105,13 +109,66 @@ export function parseNofluff(html: string, near?: { point: Point; km: number }):
   });
 }
 
-async function nofluffPage(criteria: string, page: number): Promise<string> {
-  const res = await fetch(`https://nofluffjobs.com/pl/?criteria=${encodeURIComponent(criteria)}${page > 1 ? `&page=${page}` : ''}`, {
-    headers: { 'User-Agent': APP_UA, 'Accept-Language': 'pl-PL' },
-    signal: AbortSignal.timeout(20_000),
-  });
+/**
+ * Umowy i kwoty ze strony oferty nofluffjobs. Wyniki wyszukiwania podają tylko jedną z nich (np. samą umowę
+ * o dzieło, gdy pracodawca daje do wyboru zlecenie albo dzieło), strona oferty - wszystkie.
+ * Bez danych o wynagrodzeniu daje null (zostaje to, co było w wynikach).
+ */
+export function parseNofluffPay(html: string): Pick<JobLead, 'contracts' | 'salary' | 'salaryMonthly'> | null {
+  const raw = cheerio.load(html)('#serverApp-state').text();
+  if (!raw) return null;
+  type NfPay = { currency?: string; types?: Record<string, { period?: string; range?: number[] } | null> };
+  let state: Record<string, { essentials?: { originalSalary?: NfPay } } | null>;
+  try {
+    state = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  const pay = Object.values(state ?? {}).find((v) => v?.essentials?.originalSalary?.types)?.essentials?.originalSalary;
+  const types = Object.entries(pay?.types ?? {});
+  if (!types.length) return null;
+  const currency = pay?.currency ?? '';
+  const ranged = types.flatMap(([type, s]) => (s?.range?.length ? [{ type, period: s.period, from: Math.min(...s.range), to: Math.max(...s.range) }] : []));
+  const monthly = currency === 'PLN' ? ranged.map((s) => toMonthly(s.to, s.period ?? 'Month')) : [];
+  return {
+    contracts: [...new Set(types.map(([type]) => nfContract(type)))],
+    salary: ranged.map((s) => nfSalary(s.from, s.to, currency, s.period, s.type)).join('; '),
+    salaryMonthly: monthly.length ? Math.max(...monthly) : null,
+  };
+}
+
+async function nofluffGet(url: string): Promise<string> {
+  const res = await fetch(url, { headers: { 'User-Agent': APP_UA, 'Accept-Language': 'pl-PL' }, signal: AbortSignal.timeout(20_000) });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.text();
+}
+
+const nofluffPage = (criteria: string, page: number) =>
+  nofluffGet(`https://nofluffjobs.com/pl/?criteria=${encodeURIComponent(criteria)}${page > 1 ? `&page=${page}` : ''}`);
+
+/** Adres oferty, który składa parseNofluff - inne (np. /job/job/, zakazane w robots.txt portalu) nie są doczytywane. */
+const NF_JOB_URL = /^https:\/\/nofluffjobs\.com\/pl\/job\/[\w-]+$/;
+/** Ile odrzuconych ofert z nofluffjobs na stanowisko doczytujemy ze strony oferty. */
+const NF_RECHECK_MAX = 10;
+
+/**
+ * Oferty z nofluffjobs odrzucone przez umowę albo kwotę z wyników wyszukiwania: doczytuje ich strony
+ * (po kolei, nie naraz) i sprawdza jeszcze raz ze wszystkimi umowami i kwotami. Oferta, której strony
+ * nie udało się pobrać, zostaje odrzucona jak wcześniej.
+ */
+async function recheckNofluff(leads: JobLead[], screened: Screened, prefs: CareerPrefs, seniority: Seniority): Promise<Screened> {
+  const recheck = screened.excluded
+    .filter((l) => l.portal === 'nofluff' && NF_JOB_URL.test(l.url) && (l.excludedBy.startsWith('umowa') || l.excludedBy === 'za niskie wynagrodzenie'))
+    .slice(0, NF_RECHECK_MAX);
+  const pay = new Map<string, NonNullable<ReturnType<typeof parseNofluffPay>>>();
+  for (const l of recheck) {
+    const found = await nofluffGet(l.url)
+      .then(parseNofluffPay)
+      .catch(() => null);
+    if (found) pay.set(l.url, found);
+  }
+  if (!pay.size) return screened;
+  return screenLeads(leads.map((l) => (pay.has(l.url) ? { ...l, ...pay.get(l.url) } : l)), prefs, seniority);
 }
 
 async function searchNofluff(q: SearchQuery): Promise<JobLead[]> {
@@ -383,5 +440,6 @@ export async function searchRole(role: RoleProposal, prefs: CareerPrefs): Promis
     else failed.add(jobs[i].portal);
   });
   const errors = [...failed].map((p) => tr('{portal}: nie udało się pobrać części wyników.', { portal: p }));
-  return { ...screenLeads(all, prefs, role.seniority), errors, scanned: all.length };
+  const screened = await recheckNofluff(all, screenLeads(all, prefs, role.seniority), prefs, role.seniority);
+  return { ...screened, errors, scanned: all.length };
 }
