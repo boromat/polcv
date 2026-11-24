@@ -6,6 +6,13 @@ All notable changes to PolCV are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **The best matching offers from all roles at the top of Offers.** Above the roles, a card lists
+  the five offers the AI rated highest across every role, among those that meet your preferences
+  and are not weak matches (below 30%). Each shows the role it was found for. An offer found for
+  more than one role, or on two portals, is listed once, with its highest rating.
+
 ### Fixed
 
 - **A nofluffjobs offer with a choice of contracts is no longer dropped for the one the search

@@ -7,11 +7,13 @@ import { Busy, ErrorBox, Field, fmtDate, GoworkLink, scoreTone } from '../compon
 import { useT } from '../i18n';
 import { errorMessage } from '../../../shared/errors';
 import { PORTAL_NAMES, portalLinks } from './portalLinks';
+import { offerKey, topOffers } from './topOffers';
 
 const CONTRACTS = ['umowa o pracę', 'umowa zlecenie', 'B2B', 'staż / praktyki'] as const;
 const RADII = [10, 20, 30, 50, 75, 100];
 const FIT_TONE: Record<RoleProposal['fit'], string> = { wysokie: 'good', średnie: 'accent', ambitne: 'warn' };
 const WEAK_MATCH = 30;
+const TOP_OFFERS = 5;
 const MAX_MESSAGE = 15_000; // tak samo jak na serwerze
 
 type T = ReturnType<typeof useT>['t'];
@@ -236,17 +238,7 @@ function PrefsPanel({ prefs, onSave }: { prefs: CareerPrefs; onSave: (p: CareerP
   );
 }
 
-/** Ta sama oferta mimo innych parametrów w linku (np. śledzących) albo ukośnika na końcu. */
-const offerKey = (url: string) => {
-  try {
-    const u = new URL(url);
-    return (u.host + u.pathname).toLowerCase().replace(/\/+$/, '');
-  } catch {
-    return url.trim().toLowerCase();
-  }
-};
-
-function OfferRow({ lead, onMakeCv, cvAppId }: { lead: JobLead; onMakeCv: (l: JobLead) => void; cvAppId?: string }) {
+function OfferRow({ lead, onMakeCv, cvAppId, role }: { lead: JobLead; onMakeCv: (l: JobLead) => void; cvAppId?: string; role?: string }) {
   const { t } = useT();
   return (
     <div className="offer">
@@ -257,6 +249,7 @@ function OfferRow({ lead, onMakeCv, cvAppId }: { lead: JobLead; onMakeCv: (l: Jo
         <div className="faint">
           {[lead.company, lead.location, lead.workModes.map((m) => t(m)).join(' / '), lead.contracts.map((c) => t(c)).join(', ')].filter(Boolean).join(' · ')}
         </div>
+        {role && <div className="small muted">{t('Stanowisko: {role}', { role })}</div>}
         {lead.company && (
           <div className="small">
             <GoworkLink company={lead.company} className="faint" />
@@ -561,6 +554,7 @@ export function CareerPage() {
 
   if (!career) return <div className="container">{error ? <ErrorBox error={error} /> : t('Ładowanie…')}</div>;
   const roles = career.proposals?.roles ?? [];
+  const top = topOffers(roles, career.offers, TOP_OFFERS, WEAK_MATCH);
 
   return (
     <div className="container wide" style={{ maxWidth: 1240 }}>
@@ -644,6 +638,17 @@ export function CareerPage() {
                 <div className="callout info small">
                   {t('Przy każdym stanowisku są linki do wyszukiwarek portali. Znalezioną ofertę wklej w')} <Link to="/new">{t('Nowe CV')}</Link>.{' '}
                   {t('Automatyczne wyszukiwanie i ocenę ofert ({portals}) możesz włączyć w', { portals: settings?.searchPortals.join(', ') ?? '' })} <Link to="/settings">{t('Ustawieniach')}</Link>.
+                </div>
+              )}
+              {top.length > 0 && (
+                <div className="card stack">
+                  <div className="stack" style={{ gap: 4 }}>
+                    <h2>{t('Najlepiej dopasowane oferty')}</h2>
+                    <p className="faint">{t('Oferty z najwyższą oceną AI ze wszystkich stanowisk, spełniające Twoje preferencje.')}</p>
+                  </div>
+                  {top.map(({ lead, role }) => (
+                    <OfferRow key={lead.id} lead={lead} role={role.title} onMakeCv={makeCv} cvAppId={cvApps.get(offerKey(lead.url))} />
+                  ))}
                 </div>
               )}
               {roles.map((r) => (
